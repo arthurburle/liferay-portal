@@ -32,6 +32,13 @@ public class ObjectActionCrawlerRestController extends BaseRestController {
 
 	public ObjectActionCrawlerRestController(CrawlerExecutor crawlerExecutor) {
 		_crawlerExecutor = crawlerExecutor;
+
+		if (_log.isInfoEnabled()) {
+			String executorClassName = crawlerExecutor.getClass(
+			).getSimpleName();
+
+			_log.info("Active crawler executor: " + executorClassName);
+		}
 	}
 
 	@PostMapping

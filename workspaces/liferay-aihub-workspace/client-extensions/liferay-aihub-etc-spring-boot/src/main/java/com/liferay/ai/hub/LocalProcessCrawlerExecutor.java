@@ -22,11 +22,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
  * @author José Abelenda
  */
+@ConditionalOnProperty(
+	havingValue = "local-process", matchIfMissing = true,
+	name = "liferay.ai.hub.crawler.executor"
+)
 @Service
 public class LocalProcessCrawlerExecutor implements CrawlerExecutor {
 
