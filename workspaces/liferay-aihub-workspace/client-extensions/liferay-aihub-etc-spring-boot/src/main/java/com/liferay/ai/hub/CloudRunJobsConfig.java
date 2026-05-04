@@ -5,6 +5,7 @@
 
 package com.liferay.ai.hub;
 
+import com.google.cloud.run.v2.ExecutionsClient;
 import com.google.cloud.run.v2.JobsClient;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * @author José Abelenda
@@ -20,7 +22,13 @@ import org.springframework.context.annotation.Configuration;
 	havingValue = "cloud-run-jobs", name = "liferay.ai.hub.crawler.executor"
 )
 @Configuration
+@EnableScheduling
 public class CloudRunJobsConfig {
+
+	@Bean(destroyMethod = "close")
+	public ExecutionsClient executionsClient() throws IOException {
+		return ExecutionsClient.create();
+	}
 
 	@Bean(destroyMethod = "close")
 	public JobsClient jobsClient() throws IOException {
