@@ -74,6 +74,19 @@ public class ObjectActionCrawlerRestController extends BaseRestController {
 		String domainUrl = seedURI.getScheme() + "://" + seedURI.getAuthority();
 
 		try {
+			CrawlJobDto activeCrawlJobDto =
+				_crawlJobClient.findActiveByDataSource(
+					triggerObjectExternalReferenceCode);
+
+			if (activeCrawlJobDto != null) {
+				return ResponseEntity.accepted(
+				).body(
+					Map.of(
+						"deduped", "true", "externalReferenceCode",
+						activeCrawlJobDto.getExternalReferenceCode())
+				);
+			}
+
 			CrawlJobDto crawlJobDto = new CrawlJobDto();
 
 			crawlJobDto.setCrawlStatus("QUEUED");
