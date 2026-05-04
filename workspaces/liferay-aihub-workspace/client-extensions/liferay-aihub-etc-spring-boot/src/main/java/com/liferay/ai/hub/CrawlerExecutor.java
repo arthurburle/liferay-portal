@@ -10,6 +10,6 @@ package com.liferay.ai.hub;
  */
 public interface CrawlerExecutor {
 
-	public void execute(CrawlerExecutorInput crawlerExecutorInput);
+	public String execute(CrawlerExecutorInput crawlerExecutorInput);
 
 }

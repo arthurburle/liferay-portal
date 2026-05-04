@@ -43,7 +43,7 @@ public class CloudRunJobsCrawlerExecutor implements CrawlerExecutor {
 	}
 
 	@Override
-	public void execute(CrawlerExecutorInput crawlerExecutorInput) {
+	public String execute(CrawlerExecutorInput crawlerExecutorInput) {
 		String jobPath = JobName.of(
 			_project, _region, _jobName
 		).toString();
@@ -74,16 +74,18 @@ public class CloudRunJobsCrawlerExecutor implements CrawlerExecutor {
 			OperationFuture<Execution, Execution> operationFuture =
 				_jobsClient.runJobAsync(runJobRequest);
 
-			if (_log.isInfoEnabled()) {
-				Execution execution = operationFuture.getMetadata(
-				).get(
-					30, TimeUnit.SECONDS
-				);
+			Execution execution = operationFuture.getMetadata(
+			).get(
+				30, TimeUnit.SECONDS
+			);
 
+			if (_log.isInfoEnabled()) {
 				_log.info(
 					"Cloud Run Job execution dispatched: " +
 						execution.getName());
 			}
+
+			return execution.getName();
 		}
 		catch (Exception exception) {
 			throw new RuntimeException(

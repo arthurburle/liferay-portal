@@ -9,6 +9,8 @@ import com.liferay.client.extension.util.spring.boot3.BaseRestController;
 
 import java.net.URI;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,8 +32,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ObjectActionCrawlerRestController extends BaseRestController {
 
-	public ObjectActionCrawlerRestController(CrawlerExecutor crawlerExecutor) {
+	public ObjectActionCrawlerRestController(
+		CrawlerExecutor crawlerExecutor, CrawlJobClient crawlJobClient) {
+
 		_crawlerExecutor = crawlerExecutor;
+		_crawlJobClient = crawlJobClient;
 
 		if (_log.isInfoEnabled()) {
 			String executorClassName = crawlerExecutor.getClass(
@@ -42,7 +47,7 @@ public class ObjectActionCrawlerRestController extends BaseRestController {
 	}
 
 	@PostMapping
-	public ResponseEntity<String> post(
+	public ResponseEntity<Map<String, String>> post(
 		@AuthenticationPrincipal Jwt jwt, @RequestBody String json) {
 
 		if (_log.isDebugEnabled()) {
@@ -57,6 +62,11 @@ public class ObjectActionCrawlerRestController extends BaseRestController {
 		JSONObject valuesJSONObject = objectEntryJSONObject.getJSONObject(
 			"values");
 
+		String triggerObjectExternalReferenceCode =
+			objectEntryJSONObject.getString("externalReferenceCode");
+
+		String indexName = valuesJSONObject.getString("indexName");
+
 		String seedUrl = valuesJSONObject.getString("url");
 
 		URI seedURI = URI.create(seedUrl);
@@ -64,19 +74,40 @@ public class ObjectActionCrawlerRestController extends BaseRestController {
 		String domainUrl = seedURI.getScheme() + "://" + seedURI.getAuthority();
 
 		try {
-			_crawlerExecutor.execute(
-				new CrawlerExecutorInput(
-					domainUrl, valuesJSONObject.getString("indexName"),
-					seedUrl));
+			CrawlJobDto crawlJobDto = new CrawlJobDto();
 
-			return ResponseEntity.ok(
-			).build();
+			crawlJobDto.setCrawlStatus("QUEUED");
+			crawlJobDto.setDomainUrl(domainUrl);
+			crawlJobDto.setIndexName(indexName);
+			crawlJobDto.setSeedUrl(seedUrl);
+			crawlJobDto.setTriggerObjectExternalReferenceCode(
+				triggerObjectExternalReferenceCode);
+
+			CrawlJobDto createdCrawlJobDto = _crawlJobClient.create(
+				crawlJobDto);
+
+			String executionName = _crawlerExecutor.execute(
+				new CrawlerExecutorInput(domainUrl, indexName, seedUrl));
+
+			_crawlJobClient.updateByExternalReferenceCode(
+				createdCrawlJobDto.getExternalReferenceCode(),
+				Map.of(
+					"crawlStatus", "DISPATCHED", "executionName",
+					executionName));
+
+			return ResponseEntity.accepted(
+			).body(
+				Map.of(
+					"executionName", executionName, "externalReferenceCode",
+					createdCrawlJobDto.getExternalReferenceCode())
+			);
 		}
 		catch (Exception exception) {
-			_log.error("Crawler execution failed", exception);
+			_log.error("Crawler dispatch failed", exception);
 
 			return new ResponseEntity<>(
-				exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+				Map.of("error", String.valueOf(exception.getMessage())),
+				HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -84,5 +115,6 @@ public class ObjectActionCrawlerRestController extends BaseRestController {
 		ObjectActionCrawlerRestController.class);
 
 	private final CrawlerExecutor _crawlerExecutor;
+	private final CrawlJobClient _crawlJobClient;
 
 }

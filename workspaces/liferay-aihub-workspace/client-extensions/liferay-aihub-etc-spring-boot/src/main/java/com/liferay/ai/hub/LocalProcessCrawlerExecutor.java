@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +37,7 @@ import org.springframework.stereotype.Service;
 public class LocalProcessCrawlerExecutor implements CrawlerExecutor {
 
 	@Override
-	public void execute(CrawlerExecutorInput crawlerExecutorInput) {
+	public String execute(CrawlerExecutorInput crawlerExecutorInput) {
 		Path path = null;
 
 		try {
@@ -113,6 +114,8 @@ public class LocalProcessCrawlerExecutor implements CrawlerExecutor {
 				throw new RuntimeException(
 					"Crawler finished with exit code " + exitCode);
 			}
+
+			return "local:" + UUID.randomUUID();
 		}
 		catch (InterruptedException interruptedException) {
 			Thread.currentThread(
