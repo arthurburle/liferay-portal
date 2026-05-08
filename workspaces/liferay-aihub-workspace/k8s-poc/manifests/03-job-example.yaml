@@ -1,11 +1,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: aihub-crawler-smoke-001
+  name: aihub-crawler-learn-001
   namespace: aihub-poc
   labels:
     app: aihub-crawler
     purpose: smoke-test
+    target: learn-liferay
 spec:
   ttlSecondsAfterFinished: 3600
   backoffLimit: 1
@@ -31,11 +32,11 @@ spec:
                 - ALL
           env:
             - name: CRAWLER_DOMAIN_URL
-              value: "https://docs.liferay.com"
+              value: "https://learn.liferay.com"
             - name: CRAWLER_SEED_URL
-              value: "https://docs.liferay.com"
+              value: "https://learn.liferay.com"
             - name: CRAWLER_OUTPUT_INDEX
-              value: "aihub-test"
+              value: "aihub-learn"
             - name: ELASTICSEARCH_HOST
               value: "elasticsearch.aihub-poc.svc.cluster.local"
             - name: ELASTICSEARCH_PORT
