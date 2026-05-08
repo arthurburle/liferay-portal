@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: aihub-crawler-smoke-001
+  namespace: aihub-poc
+  labels:
+    app: aihub-crawler
+    purpose: smoke-test
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: aihub-crawler
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: crawler
+          image: europe-west3-docker.pkg.dev/ai-hub-liferay/ai-hub/aihub-crawler:v1
+          env:
+            - name: CRAWLER_DOMAIN_URL
+              value: "https://docs.liferay.com"
+            - name: CRAWLER_SEED_URL
+              value: "https://docs.liferay.com"
+            - name: CRAWLER_OUTPUT_INDEX
+              value: "aihub-test"
+            - name: ELASTICSEARCH_HOST
+              value: "elasticsearch.aihub-poc.svc.cluster.local"
+            - name: ELASTICSEARCH_PORT
+              value: "9200"
+          resources:
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
