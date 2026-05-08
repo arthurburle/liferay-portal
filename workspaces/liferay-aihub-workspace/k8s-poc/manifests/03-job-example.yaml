@@ -15,9 +15,20 @@ spec:
         app: aihub-crawler
     spec:
       restartPolicy: Never
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: crawler
           image: europe-west3-docker.pkg.dev/ai-hub-liferay/ai-hub/aihub-crawler:v1
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           env:
             - name: CRAWLER_DOMAIN_URL
               value: "https://docs.liferay.com"
