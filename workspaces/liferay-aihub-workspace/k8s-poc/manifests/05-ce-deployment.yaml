@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liferay-aihub-etc-spring-boot
+  namespace: aihub-poc
+  labels:
+    app: liferay-aihub-etc-spring-boot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: liferay-aihub-etc-spring-boot
+  template:
+    metadata:
+      labels:
+        app: liferay-aihub-etc-spring-boot
+    spec:
+      serviceAccountName: aihub-crawler-dispatcher
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ce
+          image: europe-west3-docker.pkg.dev/ai-hub-liferay/ai-hub/aihub-ce:v1
+          ports:
+            - containerPort: 58081
+              name: http
+          env:
+            - name: LIFERAY_AI_HUB_CRAWLER_EXECUTOR
+              value: "kubernetes-jobs"
+            - name: LIFERAY_AI_HUB_CRAWLER_K8S_IMAGE
+              value: "europe-west3-docker.pkg.dev/ai-hub-liferay/ai-hub/aihub-crawler:v1"
+            - name: LIFERAY_AI_HUB_CRAWLER_K8S_NAMESPACE
+              value: "aihub-poc"
+            - name: LIFERAY_AI_HUB_CRAWLER_ELASTICSEARCH_HOST
+              value: "elasticsearch.aihub-poc.svc.cluster.local"
+            - name: LIFERAY_AI_HUB_CRAWLER_ELASTICSEARCH_PORT
+              value: "9200"
+            - name: LIFERAY_AI_HUB_CRAWLER_SMOKE_ENDPOINT_ENABLED
+              value: "true"
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "768Mi"
+            limits:
+              cpu: "500m"
+              memory: "768Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 58081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 58081
+            initialDelaySeconds: 60
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: liferay-aihub-etc-spring-boot
+  namespace: aihub-poc
+spec:
+  selector:
+    app: liferay-aihub-etc-spring-boot
+  ports:
+    - port: 58081
+      targetPort: 58081
+      name: http
+  type: ClusterIP

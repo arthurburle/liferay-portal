@@ -197,16 +197,101 @@ gcloud compute networks subnets delete aihub-poc-subnet --region=europe-west3 --
 gcloud compute networks delete aihub-poc-vpc --project=ai-hub-liferay --quiet
 ```
 
-## Phase 2 — Java integration (next commit)
+## Phase 2 — Java integration (KubernetesJobCrawlerExecutor)
 
-Will add to `liferay-aihub-etc-spring-boot`:
+Phase 2 adds a third `CrawlerExecutor` implementation in `liferay-aihub-etc-spring-boot` (commit `32ff4b8`) plus a smoke-test endpoint that bypasses the headless / OAuth flow so the dispatcher can be exercised end-to-end without a Liferay portal in the cluster.
 
-- `KubernetesJobCrawlerExecutor` implementing the existing `CrawlerExecutor` interface, gated by `@ConditionalOnProperty(name = "liferay.ai.hub.crawler.executor", havingValue = "kubernetes-jobs")`.
-- `KubernetesJobsConfig` providing a `KubernetesClient` bean from `io.fabric8:kubernetes-client`.
-- New properties in `application-default.properties` for the target image, namespace, and Elasticsearch endpoint.
-- The same RBAC manifest already in this directory (`manifests/04-rbac.yaml`) — bind it to the CE pod's ServiceAccount when deploying.
+Components:
 
-The Phase 2 commit will be additive and feature-flagged; the Cloud Run Jobs path stays the default. Toggling `liferay.ai.hub.crawler.executor=kubernetes-jobs` activates the new executor.
+- `KubernetesJobCrawlerExecutor` (`@ConditionalOnProperty(... kubernetes-jobs)`) — builds and submits a `batch/v1.Job` via fabric8 client.
+- `KubernetesJobsConfig` — provides a `KubernetesClient` bean (picks up in-cluster ServiceAccount token automatically).
+- `CrawlerSmokeDispatchRestController` (`@ConditionalOnProperty(... smoke.endpoint.enabled=true)`) — POST `/smoke/dispatch` calls `CrawlerExecutor.execute()` directly.
+- Properties: `liferay.ai.hub.crawler.k8s.image`, `liferay.ai.hub.crawler.k8s.namespace`, `liferay.ai.hub.crawler.smoke.endpoint.enabled`.
+- `/smoke/dispatch` and `/error` added to `liferay.oauth.urls.excludes`.
+
+### 10. Build and push the CE image
+
+The slim CE Dockerfile lives in `client-extensions/liferay-aihub-etc-spring-boot/`. Build for `linux/amd64` (Apple Silicon hosts) without provenance attestation (Cloud Run rejects OCI image index manifests; Autopilot accepts but stays consistent):
+
+```
+cd ~/liferay/projects/liferay-portal/workspaces/liferay-aihub-workspace/client-extensions/liferay-aihub-etc-spring-boot
+```
+
+```
+../../gradlew bootJar
+```
+
+```
+docker buildx build --platform=linux/amd64 --provenance=false --push -t europe-west3-docker.pkg.dev/ai-hub-liferay/ai-hub/aihub-ce:v1 .
+```
+
+### 11. Deploy the CE
+
+```
+cd ~/liferay/projects/liferay-portal/workspaces/liferay-aihub-workspace/k8s-poc
+```
+
+```
+kubectl apply -f manifests/05-ce-deployment.yaml
+```
+
+```
+kubectl -n aihub-poc get pods -l app=liferay-aihub-etc-spring-boot -w
+```
+
+Wait for `Running` and `1/1 Ready` (readiness probe hits `/ready`). The CE pod runs as the SA `aihub-crawler-dispatcher` (already created in Step 6) so it can create Jobs in the namespace.
+
+Sanity check the boot log:
+
+```
+kubectl -n aihub-poc logs -l app=liferay-aihub-etc-spring-boot --tail=50
+```
+
+Expected lines:
+
+- `Active crawler executor: KubernetesJobCrawlerExecutor`
+- `Smoke dispatch endpoint enabled — POC use only, not for production`
+- `Started AIHubSpringBootApplication`
+
+### 12. Trigger a crawl through the CE
+
+Port-forward the Service to your laptop:
+
+```
+kubectl -n aihub-poc port-forward svc/liferay-aihub-etc-spring-boot 58081:58081
+```
+
+In a second terminal:
+
+```
+curl -X POST http://localhost:58081/smoke/dispatch -H 'Content-Type: application/json' -d '{"domainUrl":"https://learn.liferay.com","seedUrl":"https://learn.liferay.com","indexName":"aihub-smoke"}'
+```
+
+Expected response: `{"executionName":"k8s:aihub-crawler-XXXXXXXX"}`.
+
+A new Job appears in the namespace:
+
+```
+kubectl -n aihub-poc get jobs -l app=aihub-crawler
+```
+
+Tail the new Job's logs:
+
+```
+kubectl -n aihub-poc logs -f -l job-name=aihub-crawler-XXXXXXXX
+```
+
+Substitute `XXXXXXXX` with the suffix from the `executionName` returned above.
+
+Validate the index:
+
+```
+kubectl -n aihub-poc exec elasticsearch-0 -- curl -s http://localhost:9200/aihub-smoke/_count
+```
+
+### 13. Cleanup additions for Phase 2
+
+The Phase 1 cleanup (Step 9) deletes the cluster, which removes the CE Deployment, the Service, and any dispatcher-spawned Jobs in one go. No extra steps for Phase 2.
 
 ## What this POC does and does not validate
 
