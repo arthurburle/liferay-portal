@@ -125,13 +125,19 @@ kubectl apply -f manifests/04-rbac.yaml
 kubectl apply -f manifests/03-job-example.yaml
 ```
 
-Watch the Job and the pod it creates:
+Watch the pod the Job creates (`kubectl -w` only accepts one resource type at a time, so watch pods — that is where state changes are visible):
 
 ```
-kubectl -n aihub-poc get jobs,pods -l app=aihub-crawler -w
+kubectl -n aihub-poc get pods -l app=aihub-crawler -w
 ```
 
-Expected sequence: pod becomes `Running` (after ~30s cold start while the image pulls), then `Succeeded` once the crawl finishes.
+Expected sequence: pod transitions `Pending` → `ContainerCreating` → `Running` (after ~30s cold start while the image pulls) → `Completed` once the crawl finishes.
+
+To inspect the parent Job once or twice without watching:
+
+```
+kubectl -n aihub-poc get jobs -l app=aihub-crawler
+```
 
 Tail the crawler logs:
 
