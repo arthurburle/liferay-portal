@@ -10,17 +10,24 @@ The POC stays inside one GCP project (`ai-hub-liferay`, region `europe-west3`) a
 
 ## Cost awareness
 
-GKE Autopilot pricing (May 2026): cluster management fee `$0.10/hour` plus per-pod resource fees (`$0.0445/vCPU-hour` and `$0.0049/GiB-RAM-hour`). The POC pods total roughly 1.5 vCPU and 4 GiB of RAM allocated, so expect about `$0.13/hour` while the cluster is up. Tear it down (Step 8) when you finish to avoid an unnecessary bill.
+GKE Autopilot pricing (May 2026): cluster management fee `$0.10/hour` plus per-pod resource fees (`$0.0445/vCPU-hour` and `$0.0049/GiB-RAM-hour`). The POC pods total roughly 1.5 vCPU and 4 GiB of RAM allocated, so expect about `$0.13/hour` while the cluster is up. Tear it down (Step 9) when you finish to avoid an unnecessary bill.
 
 ## Phase 1 — Cluster, Elasticsearch, manual Job dispatch
+
+Each command below is a single line. Copy-paste them as-is.
 
 ### 1. Pre-conditions
 
 - `gcloud` authenticated and pointing at `ai-hub-liferay`:
-	```bash
-	gcloud auth login
-	gcloud config set project ai-hub-liferay
-	```
+
+```
+gcloud auth login
+```
+
+```
+gcloud config set project ai-hub-liferay
+```
+
 - The crawler image `europe-west3-docker.pkg.dev/ai-hub-liferay/ai-hub/aihub-crawler:v1` exists in Artifact Registry (already pushed for the Cloud Run path).
 - `kubectl` installed locally.
 
@@ -28,47 +35,69 @@ GKE Autopilot pricing (May 2026): cluster management fee `$0.10/hour` plus per-p
 
 Idempotent — does nothing if the API is already on:
 
-```bash
+```
 gcloud services enable container.googleapis.com --project=ai-hub-liferay
 ```
 
-### 3. Create the GKE Autopilot cluster
+### 3. Make sure a VPC network exists
+
+The `ai-hub-liferay` project may not ship with a `default` network (org policy can disable it). Create it if missing:
+
+```
+gcloud compute networks create default --subnet-mode=auto --project=ai-hub-liferay
+```
+
+If org policy rejects this, fall back to a dedicated VPC instead:
+
+```
+gcloud compute networks create aihub-poc-vpc --subnet-mode=custom --project=ai-hub-liferay
+```
+
+```
+gcloud compute networks subnets create aihub-poc-subnet --network=aihub-poc-vpc --region=europe-west3 --range=10.10.0.0/20 --project=ai-hub-liferay
+```
+
+In that case, append `--network=aihub-poc-vpc --subnetwork=aihub-poc-subnet` to the cluster create command in Step 4.
+
+### 4. Create the GKE Autopilot cluster
 
 Provisioning takes about 3–5 minutes:
 
-```bash
-gcloud container clusters create-auto aihub-poc \
-  --region=europe-west3 \
-  --project=ai-hub-liferay
+```
+gcloud container clusters create-auto aihub-poc --region=europe-west3 --project=ai-hub-liferay
 ```
 
 Pull credentials into your local kubeconfig:
 
-```bash
-gcloud container clusters get-credentials aihub-poc \
-  --region=europe-west3 \
-  --project=ai-hub-liferay
+```
+gcloud container clusters get-credentials aihub-poc --region=europe-west3 --project=ai-hub-liferay
 ```
 
 Sanity check:
 
-```bash
+```
 kubectl get nodes
 ```
 
 Expected: at least one node listed in the `Ready` state.
 
-### 4. Apply the namespace and Elasticsearch
+### 5. Apply the namespace and Elasticsearch
 
-```bash
+```
 cd workspaces/liferay-aihub-workspace/k8s-poc
+```
+
+```
 kubectl apply -f manifests/01-namespace.yaml
+```
+
+```
 kubectl apply -f manifests/02-elasticsearch.yaml
 ```
 
 Watch the pod come up (Autopilot may take 1–2 minutes to schedule):
 
-```bash
+```
 kubectl -n aihub-poc get pods -w
 ```
 
@@ -76,30 +105,29 @@ Wait until `elasticsearch-0` is `1/1 Running`.
 
 Confirm the cluster is healthy:
 
-```bash
-kubectl -n aihub-poc exec elasticsearch-0 -- \
-  curl -s http://localhost:9200/_cluster/health | jq
+```
+kubectl -n aihub-poc exec elasticsearch-0 -- curl -s http://localhost:9200/_cluster/health
 ```
 
 Expected: `"status":"green"` (or `"yellow"` is also acceptable for a single-node cluster).
 
-### 5. Apply the RBAC for the future dispatcher
+### 6. Apply the RBAC for the future dispatcher
 
 Phase 2 needs this; apply it now to keep the manifests in one place:
 
-```bash
+```
 kubectl apply -f manifests/04-rbac.yaml
 ```
 
-### 6. Dispatch a Job manually
+### 7. Dispatch a Job manually
 
-```bash
+```
 kubectl apply -f manifests/03-job-example.yaml
 ```
 
 Watch the Job and the pod it creates:
 
-```bash
+```
 kubectl -n aihub-poc get jobs,pods -l app=aihub-crawler -w
 ```
 
@@ -107,49 +135,61 @@ Expected sequence: pod becomes `Running` (after ~30s cold start while the image 
 
 Tail the crawler logs:
 
-```bash
+```
 kubectl -n aihub-poc logs -f -l app=aihub-crawler --tail=100
 ```
 
 You should see the `[YYYY-MM-DDTHH:MM:SS+00:00] Starting crawler` line from the entrypoint, then Open Crawler output, then `Crawler finished with exit code 0`.
 
-### 7. Validate the index
+### 8. Validate the index
 
-Either via `exec` into the ES pod:
+Via `exec` into the ES pod:
 
-```bash
-kubectl -n aihub-poc exec elasticsearch-0 -- \
-  curl -s 'http://localhost:9200/aihub-test/_count'
+```
+kubectl -n aihub-poc exec elasticsearch-0 -- curl -s http://localhost:9200/aihub-test/_count
 ```
 
-Or by port-forwarding the ES Service to your laptop:
+Or by port-forwarding the ES Service to your laptop, then querying from a second terminal:
 
-```bash
-kubectl -n aihub-poc port-forward svc/elasticsearch 9200:9200 &
-curl -s 'http://localhost:9200/aihub-test/_count' | jq
-curl -s 'http://localhost:9200/aihub-test/_search?size=1' | jq
+```
+kubectl -n aihub-poc port-forward svc/elasticsearch 9200:9200
 ```
 
-Expected: `count` is greater than zero. The first hit document should have a `body_content` field with text scraped from `https://docs.liferay.com`.
+```
+curl -s http://localhost:9200/aihub-test/_count
+```
 
-### 8. Cleanup (do this when finished)
+```
+curl -s http://localhost:9200/aihub-test/_search?size=1
+```
+
+Expected: `count` greater than zero. The first hit document should have a `body_content` field with text scraped from `https://docs.liferay.com`.
+
+### 9. Cleanup (do this when finished)
 
 Delete the cluster (this also removes ES, all Jobs, and the namespace):
 
-```bash
-gcloud container clusters delete aihub-poc \
-  --region=europe-west3 \
-  --project=ai-hub-liferay \
-  --quiet
+```
+gcloud container clusters delete aihub-poc --region=europe-west3 --project=ai-hub-liferay --quiet
 ```
 
 Verify the bill stops:
 
-```bash
+```
 gcloud container clusters list --project=ai-hub-liferay
 ```
 
 Expected: empty list (or no row for `aihub-poc`).
+
+If you created the dedicated VPC in Step 3, also remove it:
+
+```
+gcloud compute networks subnets delete aihub-poc-subnet --region=europe-west3 --project=ai-hub-liferay --quiet
+```
+
+```
+gcloud compute networks delete aihub-poc-vpc --project=ai-hub-liferay --quiet
+```
 
 ## Phase 2 — Java integration (next commit)
 
