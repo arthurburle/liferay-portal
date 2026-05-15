@@ -266,7 +266,7 @@ kubectl -n aihub-poc port-forward svc/liferay-aihub-etc-spring-boot 58081:58081
 In a second terminal:
 
 ```
-curl -X POST http://localhost:58081/smoke/dispatch -H 'Content-Type: application/json' -d '{"domainUrl":"https://learn.liferay.com","seedUrl":"https://learn.liferay.com","indexName":"aihub-smoke"}'
+curl -X POST http://localhost:58081/smoke/dispatch -H 'Content-Type: application/json' -d '{"domainUrl":"https://parksaustralia.gov.au","seedUrl":"https://parksaustralia.gov.au","indexName":"aihub-smoke"}'
 ```
 
 Expected response: `{"executionId":"k8s:aihub-crawler-XXXXXXXX"}`.
