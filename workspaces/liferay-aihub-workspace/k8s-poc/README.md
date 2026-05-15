@@ -149,10 +149,12 @@ You should see the `[YYYY-MM-DDTHH:MM:SS+00:00] Starting crawler` line from the 
 
 ### 8. Validate the index
 
+The index name comes from `CRAWLER_OUTPUT_INDEX` in `manifests/03-job-example.yaml`; substitute `<index-name>` with that value in the commands below.
+
 Via `exec` into the ES pod:
 
 ```
-kubectl -n aihub-poc exec elasticsearch-0 -- curl -s http://localhost:9200/aihub-test/_count
+kubectl -n aihub-poc exec elasticsearch-0 -- curl -s http://localhost:9200/<index-name>/_count
 ```
 
 Or by port-forwarding the ES Service to your laptop, then querying from a second terminal:
@@ -162,14 +164,14 @@ kubectl -n aihub-poc port-forward svc/elasticsearch 9200:9200
 ```
 
 ```
-curl -s http://localhost:9200/aihub-test/_count
+curl -s http://localhost:9200/<index-name>/_count
 ```
 
 ```
-curl -s http://localhost:9200/aihub-test/_search?size=1
+curl -s http://localhost:9200/<index-name>/_search?size=1
 ```
 
-Expected: `count` greater than zero. The first hit document should have a `body_content` field with text scraped from `https://docs.liferay.com`.
+Expected: `count` greater than zero. The first hit document should have a `body_content` field with text scraped from the seed URL.
 
 ### 9. Cleanup (do this when finished)
 
