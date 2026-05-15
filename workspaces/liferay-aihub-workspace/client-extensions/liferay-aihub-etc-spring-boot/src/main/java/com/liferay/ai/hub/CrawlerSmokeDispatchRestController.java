@@ -43,14 +43,14 @@ public class CrawlerSmokeDispatchRestController extends BaseRestController {
 	public ResponseEntity<Map<String, String>> post(
 		@RequestBody Map<String, String> body) {
 
-		String executionName = _crawlerExecutor.execute(
+		String executionId = _crawlerExecutor.execute(
 			new CrawlerExecutorInput(
 				body.get("domainUrl"), body.get("indexName"),
 				body.get("seedUrl")));
 
 		return ResponseEntity.accepted(
 		).body(
-			Map.of("executionName", executionName)
+			Map.of("executionId", executionId)
 		);
 	}
 

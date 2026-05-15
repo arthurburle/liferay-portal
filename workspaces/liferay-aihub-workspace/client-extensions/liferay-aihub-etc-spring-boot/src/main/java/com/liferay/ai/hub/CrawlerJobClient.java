@@ -5,6 +5,8 @@
 
 package com.liferay.ai.hub;
 
+import com.liferay.petra.string.StringBundler;
+
 import java.time.Instant;
 
 import java.util.ArrayList;
@@ -21,47 +23,47 @@ import org.springframework.web.client.RestClient;
  * @author José Abelenda
  */
 @Service
-public class CrawlJobClient {
+public class CrawlerJobClient {
 
-	public CrawlJobClient(
+	public CrawlerJobClient(
 		LiferayHeadlessTokenProvider liferayHeadlessTokenProvider,
 		@Value("${liferay.ai.hub.crawler.headless.url}") String baseURL,
-		@Value("${liferay.ai.hub.crawler.headless.crawljobs.path}") String
-			crawlJobsPath) {
+		@Value("${liferay.ai.hub.crawler.headless.crawlerjobs.path}") String
+			crawlerJobsPath) {
 
 		_liferayHeadlessTokenProvider = liferayHeadlessTokenProvider;
 		_baseURL = baseURL;
-		_crawlJobsPath = crawlJobsPath;
+		_crawlerJobsPath = crawlerJobsPath;
 	}
 
-	public CrawlJobDto create(CrawlJobDto crawlJobDto) {
+	public CrawlerJobDto create(Map<String, Object> fields) {
 		return _restClient.post(
 		).uri(
-			_baseURL + _crawlJobsPath
+			_baseURL + _crawlerJobsPath
 		).header(
 			HttpHeaders.AUTHORIZATION, _bearer()
 		).contentType(
 			MediaType.APPLICATION_JSON
 		).body(
-			crawlJobDto
+			fields
 		).retrieve(
 		).body(
-			CrawlJobDto.class
+			CrawlerJobDto.class
 		);
 	}
 
-	public CrawlJobDto findActiveByDataSource(
-		String dataSourceExternalReferenceCode) {
+	public CrawlerJobDto findActiveByContentRetriever(
+		long aiHubContentRetrieverId) {
 
-		String filter = String.format(
-			"triggerObjectExternalReferenceCode eq '%s' and (crawlStatus eq " +
-				"'QUEUED' or crawlStatus eq 'DISPATCHED' or crawlStatus eq " +
-					"'RUNNING')",
-			dataSourceExternalReferenceCode);
+		String filter = StringBundler.concat(
+			"r_contentRetrieverToCrawlerJobs_aiHubContentRetrieverId eq ",
+			aiHubContentRetrieverId,
+			" and (crawlerJobStatus eq 'queued' or crawlerJobStatus eq ",
+			"'dispatched' or crawlerJobStatus eq 'running')");
 
 		Page page = _restClient.get(
 		).uri(
-			_baseURL + _crawlJobsPath + "?filter={filter}&pageSize=1", filter
+			_baseURL + _crawlerJobsPath + "?filter={filter}&pageSize=1", filter
 		).header(
 			HttpHeaders.AUTHORIZATION, _bearer()
 		).retrieve(
@@ -76,15 +78,16 @@ public class CrawlJobClient {
 		return page.items.get(0);
 	}
 
-	public List<CrawlJobDto> findRunningOlderThan(Instant cutoff) {
+	public List<CrawlerJobDto> findRunningOlderThan(Instant cutoff) {
 		String filter = String.format(
-			"(crawlStatus eq 'DISPATCHED' or crawlStatus eq 'RUNNING') and " +
-				"dateModified lt %s",
+			"(crawlerJobStatus eq 'dispatched' or crawlerJobStatus eq " +
+				"'running') and dateModified lt %s",
 			cutoff.toString());
 
 		Page page = _restClient.get(
 		).uri(
-			_baseURL + _crawlJobsPath + "?filter={filter}&pageSize=100", filter
+			_baseURL + _crawlerJobsPath + "?filter={filter}&pageSize=100",
+			filter
 		).header(
 			HttpHeaders.AUTHORIZATION, _bearer()
 		).retrieve(
@@ -99,12 +102,12 @@ public class CrawlJobClient {
 		return page.items;
 	}
 
-	public CrawlJobDto updateByExternalReferenceCode(
+	public CrawlerJobDto updateByExternalReferenceCode(
 		String externalReferenceCode, Map<String, Object> fields) {
 
 		return _restClient.patch(
 		).uri(
-			_baseURL + _crawlJobsPath +
+			_baseURL + _crawlerJobsPath +
 				"/by-external-reference-code/{externalReferenceCode}",
 			externalReferenceCode
 		).header(
@@ -115,7 +118,7 @@ public class CrawlJobClient {
 			fields
 		).retrieve(
 		).body(
-			CrawlJobDto.class
+			CrawlerJobDto.class
 		);
 	}
 
@@ -124,13 +127,13 @@ public class CrawlJobClient {
 	}
 
 	private final String _baseURL;
-	private final String _crawlJobsPath;
+	private final String _crawlerJobsPath;
 	private final LiferayHeadlessTokenProvider _liferayHeadlessTokenProvider;
 	private final RestClient _restClient = RestClient.create();
 
 	private static final class Page {
 
-		public List<CrawlJobDto> items = new ArrayList<>();
+		public List<CrawlerJobDto> items = new ArrayList<>();
 
 	}
 

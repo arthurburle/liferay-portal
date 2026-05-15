@@ -33,10 +33,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class ObjectActionCrawlerRestController extends BaseRestController {
 
 	public ObjectActionCrawlerRestController(
-		CrawlerExecutor crawlerExecutor, CrawlJobClient crawlJobClient) {
+		CrawlerExecutor crawlerExecutor, CrawlerJobClient crawlerJobClient) {
 
 		_crawlerExecutor = crawlerExecutor;
-		_crawlJobClient = crawlJobClient;
+		_crawlerJobClient = crawlerJobClient;
 
 		if (_log.isInfoEnabled()) {
 			String executorClassName = crawlerExecutor.getClass(
@@ -62,57 +62,53 @@ public class ObjectActionCrawlerRestController extends BaseRestController {
 		JSONObject valuesJSONObject = objectEntryJSONObject.getJSONObject(
 			"values");
 
-		String triggerObjectExternalReferenceCode =
-			objectEntryJSONObject.getString("externalReferenceCode");
-
+		long accountEntryId = valuesJSONObject.getLong(
+			"r_accountToAIHubContentRetrievers_accountEntryId");
 		String indexName = valuesJSONObject.getString("indexName");
-
 		String seedUrl = valuesJSONObject.getString("url");
+
+		long aiHubContentRetrieverId = objectEntryJSONObject.getLong("id");
 
 		URI seedURI = URI.create(seedUrl);
 
 		String domainUrl = seedURI.getScheme() + "://" + seedURI.getAuthority();
 
 		try {
-			CrawlJobDto activeCrawlJobDto =
-				_crawlJobClient.findActiveByDataSource(
-					triggerObjectExternalReferenceCode);
+			CrawlerJobDto activeCrawlerJobDto =
+				_crawlerJobClient.findActiveByContentRetriever(
+					aiHubContentRetrieverId);
 
-			if (activeCrawlJobDto != null) {
+			if (activeCrawlerJobDto != null) {
 				return ResponseEntity.accepted(
 				).body(
 					Map.of(
 						"deduped", "true", "externalReferenceCode",
-						activeCrawlJobDto.getExternalReferenceCode())
+						activeCrawlerJobDto.getExternalReferenceCode())
 				);
 			}
 
-			CrawlJobDto crawlJobDto = new CrawlJobDto();
+			CrawlerJobDto createdCrawlerJobDto = _crawlerJobClient.create(
+				Map.of(
+					"crawlerJobStatus", "queued",
+					"r_accountToAIHubCrawlerJobs_accountEntryId",
+					accountEntryId,
+					"r_contentRetrieverToCrawlerJobs_aiHubContentRetrieverId",
+					aiHubContentRetrieverId));
 
-			crawlJobDto.setCrawlStatus("QUEUED");
-			crawlJobDto.setDomainUrl(domainUrl);
-			crawlJobDto.setIndexName(indexName);
-			crawlJobDto.setSeedUrl(seedUrl);
-			crawlJobDto.setTriggerObjectExternalReferenceCode(
-				triggerObjectExternalReferenceCode);
-
-			CrawlJobDto createdCrawlJobDto = _crawlJobClient.create(
-				crawlJobDto);
-
-			String executionName = _crawlerExecutor.execute(
+			String executionId = _crawlerExecutor.execute(
 				new CrawlerExecutorInput(domainUrl, indexName, seedUrl));
 
-			_crawlJobClient.updateByExternalReferenceCode(
-				createdCrawlJobDto.getExternalReferenceCode(),
+			_crawlerJobClient.updateByExternalReferenceCode(
+				createdCrawlerJobDto.getExternalReferenceCode(),
 				Map.of(
-					"crawlStatus", "DISPATCHED", "executionName",
-					executionName));
+					"crawlerJobStatus", "dispatched", "executionId",
+					executionId));
 
 			return ResponseEntity.accepted(
 			).body(
 				Map.of(
-					"executionName", executionName, "externalReferenceCode",
-					createdCrawlJobDto.getExternalReferenceCode())
+					"executionId", executionId, "externalReferenceCode",
+					createdCrawlerJobDto.getExternalReferenceCode())
 			);
 		}
 		catch (Exception exception) {
@@ -128,6 +124,6 @@ public class ObjectActionCrawlerRestController extends BaseRestController {
 		ObjectActionCrawlerRestController.class);
 
 	private final CrawlerExecutor _crawlerExecutor;
-	private final CrawlJobClient _crawlJobClient;
+	private final CrawlerJobClient _crawlerJobClient;
 
 }
