@@ -267,7 +267,7 @@ In a second terminal:
 curl -X POST http://localhost:58081/smoke/dispatch -H 'Content-Type: application/json' -d '{"domainUrl":"https://learn.liferay.com","seedUrl":"https://learn.liferay.com","indexName":"aihub-smoke"}'
 ```
 
-Expected response: `{"executionName":"k8s:aihub-crawler-XXXXXXXX"}`.
+Expected response: `{"executionId":"k8s:aihub-crawler-XXXXXXXX"}`.
 
 A new Job appears in the namespace:
 
@@ -281,7 +281,7 @@ Tail the new Job's logs:
 kubectl -n aihub-poc logs -f -l job-name=aihub-crawler-XXXXXXXX
 ```
 
-Substitute `XXXXXXXX` with the suffix from the `executionName` returned above.
+Substitute `XXXXXXXX` with the suffix from the `executionId` returned above.
 
 Validate the index:
 
@@ -308,7 +308,7 @@ The Phase 1 cleanup (Step 9) deletes the cluster, which removes the CE Deploymen
 - Failure-domain coupling between the crawler and an in-cluster Liferay portal (no Liferay deployed here).
 - Resource quota collision under concurrent crawls (single Job per dispatch).
 - The Java executor flow end-to-end (Phase 2).
-- Direct CrawlJob status reporting from the container (still scoped under LPD-89153).
+- Direct CrawlerJob status reporting from the container (still scoped under LPD-89153).
 
 ## References
 
