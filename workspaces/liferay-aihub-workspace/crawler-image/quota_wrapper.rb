@@ -18,13 +18,17 @@ ES_USE_TLS       = _es_host_raw.start_with?('https://')
 ES_HOST          = _es_host_raw.sub(%r{\Ahttps?://}, '')
 ES_PORT_STR      = ENV.fetch('ELASTICSEARCH_PORT_REAL', '')
 ES_PORT          = ES_PORT_STR.empty? ? nil : Integer(ES_PORT_STR)
-TENANT_ID        = ENV.fetch('TENANT_ID', 'unknown')
+ACCOUNT_ENTRY_ID = ENV.fetch('ACCOUNT_ENTRY_ID', 'unknown')
 WRAPPER_PORT     = Integer(ENV.fetch('WRAPPER_PORT', '9200'))
 CHARS_PER_TOKEN  = Integer(ENV.fetch('CHARS_PER_TOKEN', '4'))
 CHUNK_OVERHEAD   = Float(ENV.fetch('CHUNK_OVERHEAD', '1.4'))
 CRAWLER_LOG_FILE = ENV.fetch('CRAWLER_LOG_FILE', '/tmp/crawl.log')
 DRY_RUN_OUTPUT_DIR = ENV.fetch('DRY_RUN_OUTPUT_DIR', '/tmp/crawled_docs')
 WRAPPER_REPORT_FILE = ENV.fetch('WRAPPER_REPORT_FILE', '/tmp/wrapper-report.json')
+# Kubelet copies this file into status.containerStatuses[].state.terminated.message,
+# letting an orchestrator read the report from the Pod object without streaming logs.
+# Kubernetes truncates the message at 4096 bytes.
+TERMINATION_LOG_FILE = ENV.fetch('TERMINATION_LOG_FILE', '/dev/termination-log')
 
 EXCLUDED_HEADERS = %w[host content-length transfer-encoding connection].freeze
 
@@ -62,7 +66,8 @@ end
 
 def reserve_quota(batch_tokens)
   $counter_mutex.synchronize do
-    if $consumed_tokens + batch_tokens > QUOTA
+    # QUOTA nil => unlimited: count consumption but never reject.
+    if QUOTA && $consumed_tokens + batch_tokens > QUOTA
       $rejected_batches += 1
       return false
     end
@@ -178,14 +183,14 @@ class QuotaProxy < WEBrick::HTTPServlet::AbstractServlet
     batch_tokens, batch_docs = parse_bulk(parse_body)
     unless reserve_quota(batch_tokens)
       LOG.warn(
-        "QUOTA_EXHAUSTED tenant=#{TENANT_ID} consumed=#{$consumed_tokens} " \
+        "QUOTA_EXHAUSTED account_entry_id=#{ACCOUNT_ENTRY_ID} consumed=#{$consumed_tokens} " \
         "attempted=#{batch_tokens} quota=#{QUOTA}"
       )
       res.status = 429
       res['Content-Type'] = 'application/json'
       res.body = JSON.dump(
-        error: 'tenant quota exceeded',
-        tenant_id: TENANT_ID,
+        error: 'account quota exceeded',
+        account_entry_id: ACCOUNT_ENTRY_ID,
         consumed_tokens: $consumed_tokens,
         quota_tokens: QUOTA,
       )
@@ -200,8 +205,8 @@ class QuotaProxy < WEBrick::HTTPServlet::AbstractServlet
         $docs_forwarded += batch_docs
       end
       LOG.info(
-        "FORWARDED tenant=#{TENANT_ID} batch_tokens=#{batch_tokens} " \
-        "batch_docs=#{batch_docs} consumed=#{$consumed_tokens}/#{QUOTA}"
+        "FORWARDED account_entry_id=#{ACCOUNT_ENTRY_ID} batch_tokens=#{batch_tokens} " \
+        "batch_docs=#{batch_docs} consumed=#{$consumed_tokens} quota=#{QUOTA || 'unlimited'}"
       )
     else
       refund_quota(batch_tokens)
@@ -246,27 +251,36 @@ class QuotaProxy < WEBrick::HTTPServlet::AbstractServlet
   end
 end
 
+def write_termination_message(json)
+  File.write(TERMINATION_LOG_FILE, json)
+rescue StandardError => e
+  LOG.warn("could not write termination message to #{TERMINATION_LOG_FILE}: #{e.class}: #{e.message}")
+end
+
 def emit_final_report
+  tokens = { consumed: $consumed_tokens }
+  unless QUOTA.nil?
+    tokens[:quota]     = QUOTA
+    tokens[:remaining] = QUOTA - $consumed_tokens
+  end
+  tokens[:bulks_forwarded]  = $bulks_forwarded
+  tokens[:bulks_rejected]   = $rejected_batches
+  tokens[:docs_forwarded]   = $docs_forwarded
+  tokens[:duration_seconds] = (Time.now - $start_time).round
+
   report = {
     event:     'crawler_final_report',
     mode:      'server',
-    tenant_id: TENANT_ID,
+    account_entry_id: ACCOUNT_ENTRY_ID,
     timestamp: Time.now.utc.iso8601,
-    tokens: {
-      consumed:         $consumed_tokens,
-      quota:            QUOTA,
-      remaining:        QUOTA.nil? ? nil : (QUOTA - $consumed_tokens),
-      bulks_forwarded:  $bulks_forwarded,
-      bulks_rejected:   $rejected_batches,
-      docs_forwarded:   $docs_forwarded,
-      duration_seconds: (Time.now - $start_time).round,
-    },
-    crawler: parse_crawler_log,
+    tokens:    tokens,
+    crawler:   parse_crawler_log,
   }
   json = JSON.dump(report)
   $stdout.puts json
   $stdout.flush
   File.write(WRAPPER_REPORT_FILE, json) rescue nil
+  write_termination_message(json)
 end
 
 def measure_output_dir
@@ -286,17 +300,19 @@ def emit_post_process_report
   bytes, docs_count = measure_output_dir
   estimated_tokens = (bytes.to_f / CHARS_PER_TOKEN * CHUNK_OVERHEAD).to_i
 
+  tokens = { estimated_consumed: estimated_tokens }
+  unless QUOTA.nil?
+    tokens[:quota]              = QUOTA
+    tokens[:remaining]          = QUOTA - estimated_tokens
+    tokens[:would_exceed_quota] = estimated_tokens > QUOTA
+  end
+
   report = {
     event:     'crawler_final_report',
     mode:      'post_process',
-    tenant_id: TENANT_ID,
+    account_entry_id: ACCOUNT_ENTRY_ID,
     timestamp: Time.now.utc.iso8601,
-    tokens: {
-      estimated_consumed: estimated_tokens,
-      quota:              QUOTA,
-      remaining:          QUOTA.nil? ? nil : (QUOTA - estimated_tokens),
-      would_exceed_quota: QUOTA.nil? ? nil : (estimated_tokens > QUOTA),
-    },
+    tokens:    tokens,
     output: {
       docs_written:  docs_count,
       bytes_written: bytes,
@@ -304,8 +320,10 @@ def emit_post_process_report
     },
     crawler: crawler_stats,
   }
-  $stdout.puts JSON.dump(report)
+  json = JSON.dump(report)
+  $stdout.puts json
   $stdout.flush
+  write_termination_message(json)
   report[:tokens][:would_exceed_quota] == true
 end
 
@@ -313,12 +331,11 @@ if ARGV.include?('--post-process')
   exit(emit_post_process_report ? 2 : 0)
 end
 
-abort 'TENANT_AVAILABLE_QUOTA_TOKENS is required in server mode' if QUOTA.nil?
 abort 'ELASTICSEARCH_HOST_REAL and ELASTICSEARCH_PORT_REAL are required in server mode' if ES_HOST.empty? || ES_PORT.nil?
 
 LOG.info(
-  "starting wrapper port=#{WRAPPER_PORT} tenant=#{TENANT_ID} quota=#{QUOTA} " \
-  "es_real=#{ES_HOST}:#{ES_PORT}"
+  "starting wrapper port=#{WRAPPER_PORT} account_entry_id=#{ACCOUNT_ENTRY_ID} " \
+  "quota=#{QUOTA || 'unlimited'} es_real=#{ES_HOST}:#{ES_PORT}"
 )
 
 server = WEBrick::HTTPServer.new(

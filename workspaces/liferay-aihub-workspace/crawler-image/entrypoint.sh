@@ -2,7 +2,7 @@
 set -uo pipefail
 # See README.md for env vars, modes, exit codes, and report format.
 
-: "${CRAWLER_DRY_RUN:=true}"
+: "${CRAWLER_DRY_RUN:=false}"
 : "${CRAWLER_DOMAIN_URL:?missing CRAWLER_DOMAIN_URL}"
 : "${CRAWLER_SEED_URL:?missing CRAWLER_SEED_URL}"
 : "${CRAWLER_OUTPUT_INDEX:?missing CRAWLER_OUTPUT_INDEX}"
@@ -10,53 +10,19 @@ set -uo pipefail
 if [[ "${CRAWLER_DRY_RUN}" != "true" ]]; then
 	: "${ELASTICSEARCH_HOST:?missing ELASTICSEARCH_HOST}"
 	: "${ELASTICSEARCH_PORT:?missing ELASTICSEARCH_PORT}"
-	: "${TENANT_AVAILABLE_QUOTA_TOKENS:?missing TENANT_AVAILABLE_QUOTA_TOKENS}"
 fi
-: "${TENANT_ID:=unknown}"
+: "${ACCOUNT_ENTRY_ID:=unknown}"
+# Optional: when unset the wrapper runs unlimited (counts tokens, never rejects).
+: "${TENANT_AVAILABLE_QUOTA_TOKENS:=}"
 
 log() {
 	echo "[$(date -Iseconds)] $*"
 }
 
-if [[ "${CRAWLER_DRY_RUN}" == "true" ]]; then
-	log "DRY RUN: crawler writes to disk; wrapper not started"
-
-	cat > /tmp/crawl.yml <<EOF
-domains:
-    -   url: "${CRAWLER_DOMAIN_URL}"
-        seed_urls:
-            -   "${CRAWLER_SEED_URL}"
-
-output_sink: file
-output_dir: /tmp/crawled_docs
-EOF
-else
-	log "Starting quota wrapper (tenant=${TENANT_ID}, available_quota=${TENANT_AVAILABLE_QUOTA_TOKENS})"
-	ELASTICSEARCH_HOST_REAL="${ELASTICSEARCH_HOST}" \
-	ELASTICSEARCH_PORT_REAL="${ELASTICSEARCH_PORT}" \
-	TENANT_AVAILABLE_QUOTA_TOKENS="${TENANT_AVAILABLE_QUOTA_TOKENS}" \
-	TENANT_ID="${TENANT_ID}" \
-	ruby /opt/liferay/quota_wrapper.rb &
-	WRAPPER_PID=$!
-
-	# Safety net: stop the wrapper if the script exits unexpectedly.
-	trap 'kill -TERM ${WRAPPER_PID} 2>/dev/null; wait ${WRAPPER_PID} 2>/dev/null' EXIT
-
-	for i in $(seq 1 30); do
-		if (echo > /dev/tcp/127.0.0.1/9200) 2>/dev/null; then
-			log "Wrapper ready"
-			break
-		fi
-		if [ "$i" -eq 30 ]; then
-			log "Wrapper failed to start within 15s"
-			exit 1
-		fi
-		sleep 0.5
-	done
-
-	cat > /tmp/crawl.yml <<EOF
-domains:
-    -   crawl_rules:
+# Shared crawl_rules block used by both modes so dry-run estimates and full-mode
+# crawls visit the same URL set. Quoted heredoc — no shell expansion inside.
+CRAWL_RULES_YAML=$(cat <<'EOF'
+        crawl_rules:
             -   pattern: "[?&]sort="
                 policy: deny
                 type: regex
@@ -105,9 +71,52 @@ domains:
             -   pattern: orderBy
                 policy: deny
                 type: contains
+EOF
+)
+
+if [[ "${CRAWLER_DRY_RUN}" == "true" ]]; then
+	log "DRY RUN: crawler writes to disk; wrapper not started"
+
+	cat > /tmp/crawl.yml <<EOF
+domains:
     -   url: "${CRAWLER_DOMAIN_URL}"
         seed_urls:
             -   "${CRAWLER_SEED_URL}"
+${CRAWL_RULES_YAML}
+
+output_sink: file
+output_dir: /tmp/crawled_docs
+EOF
+else
+	log "Starting quota wrapper (account_entry_id=${ACCOUNT_ENTRY_ID}, available_quota=${TENANT_AVAILABLE_QUOTA_TOKENS:-unlimited})"
+	ELASTICSEARCH_HOST_REAL="${ELASTICSEARCH_HOST}" \
+	ELASTICSEARCH_PORT_REAL="${ELASTICSEARCH_PORT}" \
+	TENANT_AVAILABLE_QUOTA_TOKENS="${TENANT_AVAILABLE_QUOTA_TOKENS}" \
+	ACCOUNT_ENTRY_ID="${ACCOUNT_ENTRY_ID}" \
+	ruby /opt/liferay/quota_wrapper.rb &
+	WRAPPER_PID=$!
+
+	# Safety net: stop the wrapper if the script exits unexpectedly.
+	trap 'kill -TERM ${WRAPPER_PID} 2>/dev/null; wait ${WRAPPER_PID} 2>/dev/null' EXIT
+
+	for i in $(seq 1 30); do
+		if (echo > /dev/tcp/127.0.0.1/9200) 2>/dev/null; then
+			log "Wrapper ready"
+			break
+		fi
+		if [ "$i" -eq 30 ]; then
+			log "Wrapper failed to start within 15s"
+			exit 1
+		fi
+		sleep 0.5
+	done
+
+	cat > /tmp/crawl.yml <<EOF
+domains:
+    -   url: "${CRAWLER_DOMAIN_URL}"
+        seed_urls:
+            -   "${CRAWLER_SEED_URL}"
+${CRAWL_RULES_YAML}
 
 output_index: "${CRAWLER_OUTPUT_INDEX}"
 output_sink: elasticsearch
@@ -132,7 +141,7 @@ log "Crawler finished with exit code ${exit_code}"
 
 if [[ "${CRAWLER_DRY_RUN}" == "true" ]]; then
 	log "Running post-process to estimate token consumption"
-	TENANT_ID="${TENANT_ID}" \
+	ACCOUNT_ENTRY_ID="${ACCOUNT_ENTRY_ID}" \
 	TENANT_AVAILABLE_QUOTA_TOKENS="${TENANT_AVAILABLE_QUOTA_TOKENS:-}" \
 	ruby /opt/liferay/quota_wrapper.rb --post-process
 	post_process_exit=$?

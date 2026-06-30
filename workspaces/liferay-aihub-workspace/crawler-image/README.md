@@ -10,7 +10,7 @@ land in an Elasticsearch index mapped with `semantic_text`.
 The Elastic open crawler writes documents directly to Elasticsearch via the
 `_bulk` API. When the target index has a `semantic_text` field bound to a Vertex
 AI inference endpoint, ES synchronously calls Vertex to embed each chunk - so
-the crawl directly consumes the tenant's Vertex token budget, with no
+the crawl directly consumes the account's Vertex token budget, with no
 opportunity for the application layer to gate it. This image inserts a wrapper
 between the crawler and ES that counts the bulk payloads and rejects with HTTP
 429 once the budget is exhausted.
@@ -50,16 +50,20 @@ between the crawler and ES that counts the bulk payloads and rejects with HTTP
 4. Atomic check `consumed + batch_tokens ≤ quota`:
    - **Fits** → reserve the tokens, forward to real ES. On 2xx response,
      increment counters. On non-2xx, refund.
-   - **Exceeds** → respond 429 `tenant quota exceeded`, **send SIGTERM to the
+   - **Exceeds** → respond 429 `account quota exceeded`, **send SIGTERM to the
      `bin/crawler crawl` process** so the Pod stops crawling pages that can't
      be indexed.
+
+When `TENANT_AVAILABLE_QUOTA_TOKENS` is unset, the wrapper runs in unlimited
+mode: it still counts and emits the consumed total in the final report, but
+never rejects a batch.
 
 ## Modes
 
 | Mode | When | What runs | Output |
 |------|------|-----------|--------|
-| **Full** | `CRAWLER_DRY_RUN=false` | Wrapper runs as HTTP server. Crawler writes to ES via the wrapper. | Per-batch FORWARDED / QUOTA_EXHAUSTED logs + final report. |
-| **Dry-run** | `CRAWLER_DRY_RUN=true` *(default)* | Crawler writes to `/tmp/crawled_docs` (file sink). Wrapper is **not** started during the crawl; after the crawler finishes, the wrapper runs once with `--post-process` to inspect the output directory. | A final report with `estimated_consumed` and `would_exceed_quota`. |
+| **Full** | `CRAWLER_DRY_RUN=false` *(default)* | Wrapper runs as HTTP server. Crawler writes to ES via the wrapper. | Per-batch FORWARDED / QUOTA_EXHAUSTED logs + final report. |
+| **Dry-run** | `CRAWLER_DRY_RUN=true` | Crawler writes to `/tmp/crawled_docs` (file sink). Wrapper is **not** started during the crawl; after the crawler finishes, the wrapper runs once with `--post-process` to inspect the output directory. | A final report with `estimated_consumed` (and `would_exceed_quota` when a quota is configured). |
 
 ## Environment variables
 
@@ -71,26 +75,27 @@ between the crawler and ES that counts the bulk payloads and rejects with HTTP
 | `CRAWLER_SEED_URL` | Starting URL. |
 | `CRAWLER_OUTPUT_INDEX` | Target index. In full mode the crawler writes here; in dry-run it's informational. |
 
-### Required when `CRAWLER_DRY_RUN=false`
+### Required in full mode (skip only if `CRAWLER_DRY_RUN=true`)
 
 | Variable | Description |
 |---|---|
 | `ELASTICSEARCH_HOST` | ES hostname; accepts plain hostname or `http(s)://hostname`. |
 | `ELASTICSEARCH_PORT` | ES port (typically 9200). |
-| `TENANT_AVAILABLE_QUOTA_TOKENS` | Tokens this crawl may consume. **Computed by the caller** as `tenant_quota_limit - tenant_quota_used` before the Job is created. The wrapper has no view of current usage and trusts this value. |
 
 ### Optional
 
 | Variable | Default | Description |
 |---|---|---|
-| `CRAWLER_DRY_RUN` | `true` | Set to `false` for full ES integration. |
-| `TENANT_ID` | `unknown` | Echoed in logs and the final report. |
+| `CRAWLER_DRY_RUN` | `false` | Set to `true` to skip the wrapper and write crawled docs to a local directory (estimation mode). |
+| `TENANT_AVAILABLE_QUOTA_TOKENS` | *(empty)* | Tokens this crawl may consume. **Computed by the caller** as `account_quota_limit - account_quota_used` before the Job is created. When empty, the wrapper runs in unlimited mode — counts consumption but never rejects. |
+| `ACCOUNT_ENTRY_ID` | `unknown` | Echoed in logs and in the `account_entry_id` field of the final report. |
 | `CHARS_PER_TOKEN` | `4` | Conversion factor for English. Increase for multi-byte / non-Latin scripts. |
 | `CHUNK_OVERHEAD` | `1.4` | Multiplier for chunk overlap in `semantic_text` chunking. |
 | `WRAPPER_PORT` | `9200` | Port the wrapper listens on (container-local). |
 | `CRAWLER_LOG_FILE` | `/tmp/crawl.log` | File the entrypoint tees crawler output to. |
 | `DRY_RUN_OUTPUT_DIR` | `/tmp/crawled_docs` | Where the crawler writes files in dry-run. |
 | `WRAPPER_REPORT_FILE` | `/tmp/wrapper-report.json` | The wrapper persists its final report here for the entrypoint to read. |
+| `TERMINATION_LOG_FILE` | `/dev/termination-log` | The wrapper also writes the final report here. Kubelet copies the content into `status.containerStatuses[].state.terminated.message` (truncated at 4096 bytes), letting orchestrators read the report directly from the Pod object without streaming logs. |
 
 ## Exit codes
 
@@ -108,17 +113,18 @@ just re-run the crawl and re-bill Vertex.
 Both modes emit one **single-line JSON** to stdout, parsed automatically into
 `jsonPayload` by Cloud Logging. The same JSON is written to
 `/tmp/wrapper-report.json` so the entrypoint can read it after signaling the
-wrapper.
+wrapper, and to `/dev/termination-log` so Kubelet surfaces it on the Pod
+object.
 
 Identify the line by `event == "crawler_final_report"`.
 
-### Full mode — success
+### Full mode — success (quota configured)
 
 ```json
 {
   "event": "crawler_final_report",
   "mode": "server",
-  "tenant_id": "tenant-abc",
+  "account_entry_id": "account-abc",
   "timestamp": "2026-05-22T20:59:27Z",
   "tokens": {
     "consumed": 926693,
@@ -147,10 +153,27 @@ Identify the line by `event == "crawler_final_report"`.
 }
 ```
 
+### Full mode — unlimited (no quota configured)
+
+When `TENANT_AVAILABLE_QUOTA_TOKENS` is unset, `quota` and `remaining` are
+omitted from `tokens`; everything else stays the same.
+
+```json
+{
+  "tokens": {
+    "consumed": 926693,
+    "bulks_forwarded": 4,
+    "bulks_rejected": 0,
+    "docs_forwarded": 391,
+    "duration_seconds": 183
+  }
+}
+```
+
 ### Full mode — quota exhausted
 
-Same shape, with `bulks_rejected > 0` and `docs_forwarded < pages_visited`.
-The Pod exits with code 2.
+Same shape as success, with `bulks_rejected > 0` and `docs_forwarded <
+pages_visited`. The Pod exits with code 2.
 
 ```json
 {
@@ -172,7 +195,7 @@ The Pod exits with code 2.
 {
   "event": "crawler_final_report",
   "mode": "post_process",
-  "tenant_id": "tenant-abc",
+  "account_entry_id": "account-abc",
   "timestamp": "2026-05-22T15:33:09Z",
   "tokens": {
     "estimated_consumed": 6019144,
@@ -194,20 +217,24 @@ The Pod exits with code 2.
 }
 ```
 
-Negative `remaining` is the deficit; positive is the headroom.
+Negative `remaining` is the deficit; positive is the headroom. When
+`TENANT_AVAILABLE_QUOTA_TOKENS` is unset, `quota`, `remaining`, and
+`would_exceed_quota` are omitted — only `estimated_consumed` is reported.
 
 ## Consumer pattern (Spring Boot dispatcher)
 
 After the Pod terminates:
 
-1. Read the Pod logs (or query Cloud Logging on `jsonPayload.event`).
+1. Read the Pod logs (or query Cloud Logging on `jsonPayload.event`), or read
+   `status.containerStatuses[0].state.terminated.message` from the Pod object.
 2. Find the line where `event == "crawler_final_report"`.
 3. Branch on `mode`:
-   - **`server`**: charge `tokens.consumed` to the tenant's quota in CloudSQL.
+   - **`server`**: charge `tokens.consumed` to the account's quota in CloudSQL.
      If the Pod exited 2 (`tokens.bulks_rejected > 0`), surface "crawl
      interrupted by quota" to the admin.
    - **`post_process`**: no real Vertex consumption. If `would_exceed_quota`
-     is true, surface it without debiting.
+     is true (present only when a quota was configured), surface it without
+     debiting.
 
 ## Required ES setup
 
@@ -267,8 +294,11 @@ spec:
             - {name: ELASTICSEARCH_HOST,            value: "http://search-es-http.<ns>.svc.cluster.local"}
             - {name: ELASTICSEARCH_PORT,            value: "9200"}
             - {name: TENANT_AVAILABLE_QUOTA_TOKENS, value: "1000000"}
-            - {name: TENANT_ID,                     value: "tenant-abc"}
+            - {name: ACCOUNT_ENTRY_ID,              value: "account-abc"}
 ```
+
+Omit `TENANT_AVAILABLE_QUOTA_TOKENS` (or set it to an empty string) to run the
+crawl in unlimited mode.
 
 ## Behavioral notes
 
@@ -320,12 +350,13 @@ docker run --rm \
   -e ELASTICSEARCH_HOST=localhost \
   -e ELASTICSEARCH_PORT=9201 \
   -e TENANT_AVAILABLE_QUOTA_TOKENS=1000000 \
-  -e TENANT_ID=test \
+  -e ACCOUNT_ENTRY_ID=test \
   aihub-crawler:local
 
 # Dry-run (no ES needed)
 docker run --rm \
   --user 1000 \
+  -e CRAWLER_DRY_RUN=true \
   -e CRAWLER_DOMAIN_URL=https://parksaustralia.gov.au \
   -e CRAWLER_SEED_URL=https://parksaustralia.gov.au \
   -e CRAWLER_OUTPUT_INDEX=crawler-test \
