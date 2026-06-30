@@ -56,6 +56,55 @@ else
 
 	cat > /tmp/crawl.yml <<EOF
 domains:
+    -   crawl_rules:
+            -   pattern: "[?&]sort="
+                policy: deny
+                type: regex
+            -   pattern: "[?&]order(by)?="
+                policy: deny
+                type: regex
+            -   pattern: "[?&](filter|facet|tag)="
+                policy: deny
+                type: regex
+            -   pattern: /calendar/
+                policy: deny
+                type: begins
+            -   pattern: /c/
+                policy: deny
+                type: begins
+            -   pattern: /c/portal/
+                policy: deny
+                type: contains
+            -   pattern: /o/
+                policy: deny
+                type: begins
+            -   pattern: /combo
+                policy: deny
+                type: begins
+            -   pattern: p_p_id
+                policy: deny
+                type: contains
+            -   pattern: p_auth
+                policy: deny
+                type: contains
+            -   pattern: p_p_lifecycle
+                policy: deny
+                type: contains
+            -   pattern: backURL
+                policy: deny
+                type: contains
+            -   pattern: "redirect="
+                policy: deny
+                type: contains
+            -   pattern: _cur
+                policy: deny
+                type: contains
+            -   pattern: _delta
+                policy: deny
+                type: contains
+            -   pattern: orderBy
+                policy: deny
+                type: contains
     -   url: "${CRAWLER_DOMAIN_URL}"
         seed_urls:
             -   "${CRAWLER_SEED_URL}"
