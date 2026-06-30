@@ -13,15 +13,11 @@ import com.liferay.commerce.product.model.impl.CPInstanceUnitOfMeasureModelImpl;
 import com.liferay.commerce.product.service.persistence.CPInstanceUnitOfMeasurePersistence;
 import com.liferay.commerce.product.service.persistence.CPInstanceUnitOfMeasureUtil;
 import com.liferay.commerce.product.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -35,10 +31,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -54,7 +47,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,7 +70,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CPInstanceUnitOfMeasurePersistence.class)
 public class CPInstanceUnitOfMeasurePersistenceImpl
-	extends BasePersistenceImpl<CPInstanceUnitOfMeasure>
+	extends BasePersistenceImpl
+		<CPInstanceUnitOfMeasure, NoSuchCPInstanceUnitOfMeasureException>
 	implements CPInstanceUnitOfMeasurePersistence {
 
 	/*
@@ -95,9 +88,6 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -175,14 +165,9 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		OrderByComparator<CPInstanceUnitOfMeasure> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				finderCache, new Object[] {uuid}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			finderCache, new Object[] {uuid}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -246,13 +231,8 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				finderCache, new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			finderCache, new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByUuid_C;
@@ -340,14 +320,9 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		OrderByComparator<CPInstanceUnitOfMeasure> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				finderCache, new Object[] {uuid, companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			finderCache, new Object[] {uuid, companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -415,13 +390,8 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				finderCache, new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			finderCache, new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByCPInstanceId;
@@ -503,14 +473,9 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		OrderByComparator<CPInstanceUnitOfMeasure> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByCPInstanceId.find(
-				finderCache, new Object[] {CPInstanceId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByCPInstanceId.find(
+			finderCache, new Object[] {CPInstanceId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -574,13 +539,8 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	 */
 	@Override
 	public int countByCPInstanceId(long CPInstanceId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByCPInstanceId.count(
-				finderCache, new Object[] {CPInstanceId});
-		}
+		return _collectionPersistenceFinderByCPInstanceId.count(
+			finderCache, new Object[] {CPInstanceId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_S;
@@ -665,14 +625,9 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		OrderByComparator<CPInstanceUnitOfMeasure> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByC_S.find(
-				finderCache, new Object[] {companyId, sku}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_S.find(
+			finderCache, new Object[] {companyId, sku}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -740,13 +695,8 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	 */
 	@Override
 	public int countByC_S(long companyId, String sku) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByC_S.count(
-				finderCache, new Object[] {companyId, sku});
-		}
+		return _collectionPersistenceFinderByC_S.count(
+			finderCache, new Object[] {companyId, sku});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_A;
@@ -834,14 +784,9 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		OrderByComparator<CPInstanceUnitOfMeasure> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByC_A.find(
-				finderCache, new Object[] {CPInstanceId, active}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_A.find(
+			finderCache, new Object[] {CPInstanceId, active}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -910,13 +855,8 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	 */
 	@Override
 	public int countByC_A(long CPInstanceId, boolean active) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByC_A.count(
-				finderCache, new Object[] {CPInstanceId, active});
-		}
+		return _collectionPersistenceFinderByC_A.count(
+			finderCache, new Object[] {CPInstanceId, active});
 	}
 
 	private FinderPath _finderPathFetchByC_K;
@@ -977,13 +917,8 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	public CPInstanceUnitOfMeasure fetchByC_K(
 		long CPInstanceId, String key, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _uniquePersistenceFinderByC_K.fetch(
-				finderCache, new Object[] {CPInstanceId, key}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByC_K.fetch(
+			finderCache, new Object[] {CPInstanceId, key}, useFinderCache);
 	}
 
 	/**
@@ -1101,14 +1036,9 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		OrderByComparator<CPInstanceUnitOfMeasure> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByC_P.find(
-				finderCache, new Object[] {CPInstanceId, primary}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_P.find(
+			finderCache, new Object[] {CPInstanceId, primary}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1178,13 +1108,8 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	 */
 	@Override
 	public int countByC_P(long CPInstanceId, boolean primary) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByC_P.count(
-				finderCache, new Object[] {CPInstanceId, primary});
-		}
+		return _collectionPersistenceFinderByC_P.count(
+			finderCache, new Object[] {CPInstanceId, primary});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_K_S;
@@ -1276,14 +1201,9 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		OrderByComparator<CPInstanceUnitOfMeasure> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByC_K_S.find(
-				finderCache, new Object[] {companyId, key, sku}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_K_S.find(
+			finderCache, new Object[] {companyId, key, sku}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1355,13 +1275,8 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	 */
 	@Override
 	public int countByC_K_S(long companyId, String key, String sku) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			return _collectionPersistenceFinderByC_K_S.count(
-				finderCache, new Object[] {companyId, key, sku});
-		}
+		return _collectionPersistenceFinderByC_K_S.count(
+			finderCache, new Object[] {companyId, key, sku});
 	}
 
 	public CPInstanceUnitOfMeasurePersistenceImpl() {
@@ -1382,134 +1297,6 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(CPInstanceUnitOfMeasureTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the cp instance unit of measure in the entity cache if it is enabled.
-	 *
-	 * @param cpInstanceUnitOfMeasure the cp instance unit of measure
-	 */
-	@Override
-	public void cacheResult(CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					cpInstanceUnitOfMeasure.getCtCollectionId())) {
-
-			entityCache.putResult(
-				CPInstanceUnitOfMeasureImpl.class,
-				cpInstanceUnitOfMeasure.getPrimaryKey(),
-				cpInstanceUnitOfMeasure);
-
-			finderCache.putResult(
-				_finderPathFetchByC_K,
-				new Object[] {
-					cpInstanceUnitOfMeasure.getCPInstanceId(),
-					cpInstanceUnitOfMeasure.getKey()
-				},
-				cpInstanceUnitOfMeasure);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the cp instance unit of measures in the entity cache if it is enabled.
-	 *
-	 * @param cpInstanceUnitOfMeasures the cp instance unit of measures
-	 */
-	@Override
-	public void cacheResult(
-		List<CPInstanceUnitOfMeasure> cpInstanceUnitOfMeasures) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (cpInstanceUnitOfMeasures.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure :
-				cpInstanceUnitOfMeasures) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						cpInstanceUnitOfMeasure.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						CPInstanceUnitOfMeasureImpl.class,
-						cpInstanceUnitOfMeasure.getPrimaryKey()) == null) {
-
-					cacheResult(cpInstanceUnitOfMeasure);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all cp instance unit of measures.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CPInstanceUnitOfMeasureImpl.class);
-
-		finderCache.clearCache(CPInstanceUnitOfMeasureImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the cp instance unit of measure.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure) {
-		entityCache.removeResult(
-			CPInstanceUnitOfMeasureImpl.class, cpInstanceUnitOfMeasure);
-	}
-
-	@Override
-	public void clearCache(
-		List<CPInstanceUnitOfMeasure> cpInstanceUnitOfMeasures) {
-
-		for (CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure :
-				cpInstanceUnitOfMeasures) {
-
-			entityCache.removeResult(
-				CPInstanceUnitOfMeasureImpl.class, cpInstanceUnitOfMeasure);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CPInstanceUnitOfMeasureImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CPInstanceUnitOfMeasureImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CPInstanceUnitOfMeasureModelImpl cpInstanceUnitOfMeasureModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					cpInstanceUnitOfMeasureModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				cpInstanceUnitOfMeasureModelImpl.getCPInstanceId(),
-				cpInstanceUnitOfMeasureModelImpl.getKey()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByC_K, args, cpInstanceUnitOfMeasureModelImpl);
-		}
 	}
 
 	/**
@@ -1547,48 +1334,6 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		throws NoSuchCPInstanceUnitOfMeasureException {
 
 		return remove((Serializable)CPInstanceUnitOfMeasureId);
-	}
-
-	/**
-	 * Removes the cp instance unit of measure with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the cp instance unit of measure
-	 * @return the cp instance unit of measure that was removed
-	 * @throws NoSuchCPInstanceUnitOfMeasureException if a cp instance unit of measure with the primary key could not be found
-	 */
-	@Override
-	public CPInstanceUnitOfMeasure remove(Serializable primaryKey)
-		throws NoSuchCPInstanceUnitOfMeasureException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
-				(CPInstanceUnitOfMeasure)session.get(
-					CPInstanceUnitOfMeasureImpl.class, primaryKey);
-
-			if (cpInstanceUnitOfMeasure == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchCPInstanceUnitOfMeasureException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(cpInstanceUnitOfMeasure);
-		}
-		catch (NoSuchCPInstanceUnitOfMeasureException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1712,43 +1457,13 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CPInstanceUnitOfMeasureImpl.class, cpInstanceUnitOfMeasureModelImpl,
-			false, true);
-
-		cacheUniqueFindersCache(cpInstanceUnitOfMeasureModelImpl);
+		cacheUniqueFindersResult(cpInstanceUnitOfMeasure, false);
 
 		if (isNew) {
 			cpInstanceUnitOfMeasure.setNew(false);
 		}
 
 		cpInstanceUnitOfMeasure.resetOriginalValues();
-
-		return cpInstanceUnitOfMeasure;
-	}
-
-	/**
-	 * Returns the cp instance unit of measure with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the cp instance unit of measure
-	 * @return the cp instance unit of measure
-	 * @throws NoSuchCPInstanceUnitOfMeasureException if a cp instance unit of measure with the primary key could not be found
-	 */
-	@Override
-	public CPInstanceUnitOfMeasure findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchCPInstanceUnitOfMeasureException {
-
-		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure = fetchByPrimaryKey(
-			primaryKey);
-
-		if (cpInstanceUnitOfMeasure == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchCPInstanceUnitOfMeasureException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return cpInstanceUnitOfMeasure;
 	}
@@ -1768,53 +1483,9 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		return findByPrimaryKey((Serializable)CPInstanceUnitOfMeasureId);
 	}
 
-	/**
-	 * Returns the cp instance unit of measure with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the cp instance unit of measure
-	 * @return the cp instance unit of measure, or <code>null</code> if a cp instance unit of measure with the primary key could not be found
-	 */
 	@Override
-	public CPInstanceUnitOfMeasure fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				CPInstanceUnitOfMeasure.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
-			(CPInstanceUnitOfMeasure)entityCache.getResult(
-				CPInstanceUnitOfMeasureImpl.class, primaryKey);
-
-		if (cpInstanceUnitOfMeasure != null) {
-			return cpInstanceUnitOfMeasure;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			cpInstanceUnitOfMeasure = (CPInstanceUnitOfMeasure)session.get(
-				CPInstanceUnitOfMeasureImpl.class, primaryKey);
-
-			if (cpInstanceUnitOfMeasure != null) {
-				cacheResult(cpInstanceUnitOfMeasure);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return cpInstanceUnitOfMeasure;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -1828,330 +1499,6 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		long CPInstanceUnitOfMeasureId) {
 
 		return fetchByPrimaryKey((Serializable)CPInstanceUnitOfMeasureId);
-	}
-
-	@Override
-	public Map<Serializable, CPInstanceUnitOfMeasure> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(
-				CPInstanceUnitOfMeasure.class)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, CPInstanceUnitOfMeasure> map =
-			new HashMap<Serializable, CPInstanceUnitOfMeasure>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure = fetchByPrimaryKey(
-				primaryKey);
-
-			if (cpInstanceUnitOfMeasure != null) {
-				map.put(primaryKey, cpInstanceUnitOfMeasure);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						CPInstanceUnitOfMeasure.class, primaryKey)) {
-
-				CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
-					(CPInstanceUnitOfMeasure)entityCache.getResult(
-						CPInstanceUnitOfMeasureImpl.class, primaryKey);
-
-				if (cpInstanceUnitOfMeasure == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, cpInstanceUnitOfMeasure);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure :
-					(List<CPInstanceUnitOfMeasure>)query.list()) {
-
-				map.put(
-					cpInstanceUnitOfMeasure.getPrimaryKeyObj(),
-					cpInstanceUnitOfMeasure);
-
-				cacheResult(cpInstanceUnitOfMeasure);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the cp instance unit of measures.
-	 *
-	 * @return the cp instance unit of measures
-	 */
-	@Override
-	public List<CPInstanceUnitOfMeasure> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the cp instance unit of measures.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPInstanceUnitOfMeasureModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp instance unit of measures
-	 * @param end the upper bound of the range of cp instance unit of measures (not inclusive)
-	 * @return the range of cp instance unit of measures
-	 */
-	@Override
-	public List<CPInstanceUnitOfMeasure> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp instance unit of measures.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPInstanceUnitOfMeasureModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp instance unit of measures
-	 * @param end the upper bound of the range of cp instance unit of measures (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cp instance unit of measures
-	 */
-	@Override
-	public List<CPInstanceUnitOfMeasure> findAll(
-		int start, int end,
-		OrderByComparator<CPInstanceUnitOfMeasure> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp instance unit of measures.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPInstanceUnitOfMeasureModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp instance unit of measures
-	 * @param end the upper bound of the range of cp instance unit of measures (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cp instance unit of measures
-	 */
-	@Override
-	public List<CPInstanceUnitOfMeasure> findAll(
-		int start, int end,
-		OrderByComparator<CPInstanceUnitOfMeasure> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<CPInstanceUnitOfMeasure> list = null;
-
-			if (useFinderCache) {
-				list = (List<CPInstanceUnitOfMeasure>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_CPINSTANCEUNITOFMEASURE);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_CPINSTANCEUNITOFMEASURE;
-
-					sql = sql.concat(
-						CPInstanceUnitOfMeasureModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<CPInstanceUnitOfMeasure>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the cp instance unit of measures from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure : findAll()) {
-			remove(cpInstanceUnitOfMeasure);
-		}
-	}
-
-	/**
-	 * Returns the number of cp instance unit of measures.
-	 *
-	 * @return the number of cp instance unit of measures
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPInstanceUnitOfMeasure.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_CPINSTANCEUNITOFMEASURE);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -2255,21 +1602,6 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -2280,13 +1612,13 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
@@ -2294,7 +1626,7 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 			_SQL_SELECT_CPINSTANCEUNITOFMEASURE_WHERE,
 			_SQL_COUNT_CPINSTANCEUNITOFMEASURE_WHERE,
 			CPInstanceUnitOfMeasureModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "uuid", FinderColumn.Type.STRING,
 				"=", true, true, CPInstanceUnitOfMeasure::getUuid));
@@ -2311,12 +1643,12 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -2326,10 +1658,10 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 				_SQL_SELECT_CPINSTANCEUNITOFMEASURE_WHERE,
 				_SQL_COUNT_CPINSTANCEUNITOFMEASURE_WHERE,
 				CPInstanceUnitOfMeasureModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"cpInstanceUnitOfMeasure.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					CPInstanceUnitOfMeasure::getUuid),
 				new FinderColumn<>(
 					"cpInstanceUnitOfMeasure.", "companyId",
@@ -2362,7 +1694,7 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 				_SQL_SELECT_CPINSTANCEUNITOFMEASURE_WHERE,
 				_SQL_COUNT_CPINSTANCEUNITOFMEASURE_WHERE,
 				CPInstanceUnitOfMeasureModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"cpInstanceUnitOfMeasure.", "CPInstanceId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2380,12 +1712,12 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 		_finderPathWithoutPaginationFindByC_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC_S",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "sku"}, true);
+			new String[] {"companyId", "sku"}, 0, 2, true, null);
 
 		_finderPathCountByC_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_S",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "sku"}, false);
+			new String[] {"companyId", "sku"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByC_S = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_S,
@@ -2393,10 +1725,10 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 			_SQL_SELECT_CPINSTANCEUNITOFMEASURE_WHERE,
 			_SQL_COUNT_CPINSTANCEUNITOFMEASURE_WHERE,
 			CPInstanceUnitOfMeasureModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "companyId", FinderColumn.Type.LONG,
-				"=", true, false, CPInstanceUnitOfMeasure::getCompanyId),
+				"=", true, true, CPInstanceUnitOfMeasure::getCompanyId),
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "sku", FinderColumn.Type.STRING,
 				"=", true, true, CPInstanceUnitOfMeasure::getSku));
@@ -2426,26 +1758,28 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 			_SQL_SELECT_CPINSTANCEUNITOFMEASURE_WHERE,
 			_SQL_COUNT_CPINSTANCEUNITOFMEASURE_WHERE,
 			CPInstanceUnitOfMeasureModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "CPInstanceId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CPInstanceUnitOfMeasure::getCPInstanceId),
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "active", FinderColumn.Type.BOOLEAN,
 				"=", true, true, CPInstanceUnitOfMeasure::isActive));
 
-		_finderPathFetchByC_K = new FinderPath(
+		_finderPathFetchByC_K = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_K",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"CPInstanceId", "key_"}, true);
+			new String[] {"CPInstanceId", "key_"}, 0, 2, false,
+			CPInstanceUnitOfMeasure::getCPInstanceId,
+			convertNullFunction(CPInstanceUnitOfMeasure::getKey));
 
 		_uniquePersistenceFinderByC_K = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByC_K,
-			_SQL_SELECT_CPINSTANCEUNITOFMEASURE_WHERE,
+			_SQL_SELECT_CPINSTANCEUNITOFMEASURE_WHERE, "",
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "CPInstanceId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CPInstanceUnitOfMeasure::getCPInstanceId),
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "key", FinderColumn.Type.STRING,
@@ -2476,10 +1810,10 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 			_SQL_SELECT_CPINSTANCEUNITOFMEASURE_WHERE,
 			_SQL_COUNT_CPINSTANCEUNITOFMEASURE_WHERE,
 			CPInstanceUnitOfMeasureModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "CPInstanceId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CPInstanceUnitOfMeasure::getCPInstanceId),
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "primary",
@@ -2501,7 +1835,7 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "key_", "sku"}, true);
+			new String[] {"companyId", "key_", "sku"}, 0, 6, true, null);
 
 		_finderPathCountByC_K_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_K_S",
@@ -2509,7 +1843,7 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "key_", "sku"}, false);
+			new String[] {"companyId", "key_", "sku"}, 0, 6, false, null);
 
 		_collectionPersistenceFinderByC_K_S = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_K_S,
@@ -2517,13 +1851,13 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 			_SQL_SELECT_CPINSTANCEUNITOFMEASURE_WHERE,
 			_SQL_COUNT_CPINSTANCEUNITOFMEASURE_WHERE,
 			CPInstanceUnitOfMeasureModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "companyId", FinderColumn.Type.LONG,
-				"=", true, false, CPInstanceUnitOfMeasure::getCompanyId),
+				"=", true, true, CPInstanceUnitOfMeasure::getCompanyId),
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "key", FinderColumn.Type.STRING,
-				"=", true, false, CPInstanceUnitOfMeasure::getKey),
+				"=", true, true, CPInstanceUnitOfMeasure::getKey),
 			new FinderColumn<>(
 				"cpInstanceUnitOfMeasure.", "sku", FinderColumn.Type.STRING,
 				"=", true, true, CPInstanceUnitOfMeasure::getSku));
@@ -2573,23 +1907,17 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CPInstanceUnitOfMeasureModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_CPINSTANCEUNITOFMEASURE =
 		"SELECT cpInstanceUnitOfMeasure FROM CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure";
 
 	private static final String _SQL_SELECT_CPINSTANCEUNITOFMEASURE_WHERE =
 		"SELECT cpInstanceUnitOfMeasure FROM CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure WHERE ";
 
-	private static final String _SQL_COUNT_CPINSTANCEUNITOFMEASURE =
-		"SELECT COUNT(cpInstanceUnitOfMeasure) FROM CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure";
-
 	private static final String _SQL_COUNT_CPINSTANCEUNITOFMEASURE_WHERE =
 		"SELECT COUNT(cpInstanceUnitOfMeasure) FROM CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"cpInstanceUnitOfMeasure.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CPInstanceUnitOfMeasure exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CPInstanceUnitOfMeasure exists with the key {";
@@ -2609,4 +1937,4 @@ public class CPInstanceUnitOfMeasurePersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:717673906
+// LIFERAY-SERVICE-BUILDER-HASH:-1419298361

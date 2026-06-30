@@ -1298,21 +1298,6 @@ public interface CommercePriceModifierPersistence
 	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
-	 * Caches the commerce price modifier in the entity cache if it is enabled.
-	 *
-	 * @param commercePriceModifier the commerce price modifier
-	 */
-	public void cacheResult(CommercePriceModifier commercePriceModifier);
-
-	/**
-	 * Caches the commerce price modifiers in the entity cache if it is enabled.
-	 *
-	 * @param commercePriceModifiers the commerce price modifiers
-	 */
-	public void cacheResult(
-		java.util.List<CommercePriceModifier> commercePriceModifiers);
-
-	/**
 	 * Creates a new commerce price modifier with the primary key. Does not add the commerce price modifier to the database.
 	 *
 	 * @param commercePriceModifierId the primary key for the new commerce price modifier
@@ -1352,73 +1337,5 @@ public interface CommercePriceModifierPersistence
 	public CommercePriceModifier fetchByPrimaryKey(
 		long commercePriceModifierId);
 
-	/**
-	 * Returns all the commerce price modifiers.
-	 *
-	 * @return the commerce price modifiers
-	 */
-	public java.util.List<CommercePriceModifier> findAll();
-
-	/**
-	 * Returns a range of all the commerce price modifiers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.pricing.model.impl.CommercePriceModifierModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce price modifiers
-	 * @param end the upper bound of the range of commerce price modifiers (not inclusive)
-	 * @return the range of commerce price modifiers
-	 */
-	public java.util.List<CommercePriceModifier> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce price modifiers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.pricing.model.impl.CommercePriceModifierModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce price modifiers
-	 * @param end the upper bound of the range of commerce price modifiers (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce price modifiers
-	 */
-	public java.util.List<CommercePriceModifier> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CommercePriceModifier>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce price modifiers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.pricing.model.impl.CommercePriceModifierModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce price modifiers
-	 * @param end the upper bound of the range of commerce price modifiers (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce price modifiers
-	 */
-	public java.util.List<CommercePriceModifier> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CommercePriceModifier>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce price modifiers from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce price modifiers.
-	 *
-	 * @return the number of commerce price modifiers
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1865295081
+// LIFERAY-SERVICE-BUILDER-HASH:1331422733

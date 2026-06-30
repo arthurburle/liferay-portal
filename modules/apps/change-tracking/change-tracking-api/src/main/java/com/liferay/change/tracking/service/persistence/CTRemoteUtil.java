@@ -36,6 +36,20 @@ public class CTRemoteUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<CTRemote> ctRemotes) {
+		getPersistence().cacheResult(ctRemotes);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CTRemote ctRemote) {
+		getPersistence().cacheResult(ctRemote);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -290,24 +304,6 @@ public class CTRemoteUtil {
 	}
 
 	/**
-	 * Caches the ct remote in the entity cache if it is enabled.
-	 *
-	 * @param ctRemote the ct remote
-	 */
-	public static void cacheResult(CTRemote ctRemote) {
-		getPersistence().cacheResult(ctRemote);
-	}
-
-	/**
-	 * Caches the ct remotes in the entity cache if it is enabled.
-	 *
-	 * @param ctRemotes the ct remotes
-	 */
-	public static void cacheResult(List<CTRemote> ctRemotes) {
-		getPersistence().cacheResult(ctRemotes);
-	}
-
-	/**
 	 * Creates a new ct remote with the primary key. Does not add the ct remote to the database.
 	 *
 	 * @param ctRemoteId the primary key for the new ct remote
@@ -357,85 +353,6 @@ public class CTRemoteUtil {
 		return getPersistence().fetchByPrimaryKey(ctRemoteId);
 	}
 
-	/**
-	 * Returns all the ct remotes.
-	 *
-	 * @return the ct remotes
-	 */
-	public static List<CTRemote> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the ct remotes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.change.tracking.model.impl.CTRemoteModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ct remotes
-	 * @param end the upper bound of the range of ct remotes (not inclusive)
-	 * @return the range of ct remotes
-	 */
-	public static List<CTRemote> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the ct remotes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.change.tracking.model.impl.CTRemoteModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ct remotes
-	 * @param end the upper bound of the range of ct remotes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ct remotes
-	 */
-	public static List<CTRemote> findAll(
-		int start, int end, OrderByComparator<CTRemote> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the ct remotes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.change.tracking.model.impl.CTRemoteModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ct remotes
-	 * @param end the upper bound of the range of ct remotes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ct remotes
-	 */
-	public static List<CTRemote> findAll(
-		int start, int end, OrderByComparator<CTRemote> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the ct remotes from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of ct remotes.
-	 *
-	 * @return the number of ct remotes
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CTRemotePersistence getPersistence() {
 		return _persistence;
 	}
@@ -447,4 +364,4 @@ public class CTRemoteUtil {
 	private static volatile CTRemotePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1851269475
+// LIFERAY-SERVICE-BUILDER-HASH:-324688754

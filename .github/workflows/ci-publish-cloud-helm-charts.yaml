@@ -4,6 +4,8 @@ defaults:
 jobs:
     delete-packages-pr:
         if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal'
+        permissions:
+            packages: write
         runs-on: ubuntu-latest
         steps:
             -   env:
@@ -16,18 +18,24 @@ jobs:
                     set -o nounset
                     set -o pipefail
 
-                    PACKAGE_ENC=$(jq --arg p "${PACKAGE}" --null-input --raw-output '$p|@uri')
+                    function main {
+                        local package_enc
 
-                    if gh api "/orgs/${ORG}/packages/container/${PACKAGE_ENC}" > /dev/null 2>&1
-                    then
-                        echo "Deleting package ${PACKAGE} from ${ORG}."
+                        package_enc=$(jq --arg p "${PACKAGE}" --null-input --raw-output '$p|@uri')
 
-                        gh api \
-                            --method DELETE \
-                            "/orgs/${ORG}/packages/container/${PACKAGE_ENC}"
-                    else
-                        echo "No package ${PACKAGE} was found under ${ORG}."
-                    fi
+                        if gh api "/orgs/${ORG}/packages/container/${package_enc}" > /dev/null 2>&1
+                        then
+                            echo "Deleting package ${PACKAGE} from ${ORG}."
+
+                            gh api \
+                                --method DELETE \
+                                "/orgs/${ORG}/packages/container/${package_enc}"
+                        else
+                            echo "No package ${PACKAGE} was found under ${ORG}."
+                        fi
+                    }
+
+                    main "${@}"
         strategy:
             matrix:
                 chart:
@@ -54,20 +62,24 @@ jobs:
                     set -o nounset
                     set -o pipefail
 
-                    PATTERN="0\\.0\\.0-pr-${PR_NUMBER}-"
+                    function main {
+                        local pattern="-pr-${PR_NUMBER}-g[0-9a-f]+$"
 
-                    local tags
+                        local tags
 
-                    tags=$(gh release list --limit 1000 --json tagName \ --jq ".[] | select(.tagName | test(\"${PATTERN}\")) | .tagName")
+                        tags=$(gh release list --limit 1000 --json tagName --jq ".[] | select(.tagName | test(\"${pattern}\")) | .tagName")
 
-                    echo "${tags}" | while read -r tag
-                    do
-                        [ -z "${tag}" ] && continue
+                        echo "${tags}" | while read -r tag
+                        do
+                            [ -z "${tag}" ] && continue
 
-                        echo "Deleting release ${tag}."
+                            echo "Deleting release ${tag}."
 
-                        gh release delete --cleanup-tag --yes "${tag}"
-                    done
+                            gh release delete --cleanup-tag --yes "${tag}"
+                        done
+                    }
+
+                    main "${@}"
             -   name: Checkout gh-pages
                 uses: actions/checkout@v4
                 with:
@@ -79,38 +91,44 @@ jobs:
                     set -o nounset
                     set -o pipefail
 
-                    if [ ! -f index.yaml ]
-                    then
-                        echo "Nothing to prune on gh-pages."
+                    function main {
+                        if [ ! -f index.yaml ]
+                        then
+                            echo "Nothing to prune on gh-pages."
 
-                        exit 0
-                    fi
+                            exit 0
+                        fi
 
-                    PATTERN="^0\\.0\\.0-pr-${PR_NUMBER}-"
+                        local pattern="-pr-${PR_NUMBER}-g[0-9a-f]+$"
 
-                    yq --inplace \
-                        ".entries |= with_entries(.value |= map(select(.version | test(\"${PATTERN}\") | not)))" \
-                        index.yaml
+                        yq --inplace \
+                            ".entries |= with_entries(.value |= map(select(.version | test(\"${pattern}\") | not)))" \
+                            index.yaml
 
-                    git config user.email "github-actions[bot]@users.noreply.github.com"
-                    git config user.name "github-actions[bot]"
+                        git config user.email "github-actions[bot]@users.noreply.github.com"
+                        git config user.name "github-actions[bot]"
 
-                    if ! git diff --quiet index.yaml
-                    then
-                        git add index.yaml
+                        if ! git diff --quiet index.yaml
+                        then
+                            git add index.yaml
 
-                        git commit --message "Remove preview entries for closed PR #${PR_NUMBER}."
+                            git commit --message "Remove preview entries for closed PR #${PR_NUMBER}."
 
-                        git push
-                    else
-                        echo "No preview entries were found for PR #${PR_NUMBER}."
-                    fi
+                            git push
+                        else
+                            echo "No preview entries were found for PR #${PR_NUMBER}."
+                        fi
+                    }
+
+                    main "${@}"
     publish-aws:
         if: |
             (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
             (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
         needs: publish-default
-        secrets: inherit
+        secrets:
+            project_id: ${{secrets.GCP_PROJECT_ID_LIFERAY}}
+            workload_identity_provider: ${{secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_LIFERAY}}
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
             chart_name: liferay-aws
@@ -121,7 +139,9 @@ jobs:
         if: |
             (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
             (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
-        secrets: inherit
+        secrets:
+            project_id: ${{secrets.GCP_PROJECT_ID_EXTERNAL}}
+            workload_identity_provider: ${{secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_EXTERNAL}}
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
             chart_name: liferay-aws-infrastructure
@@ -132,7 +152,9 @@ jobs:
         if: |
             (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
             (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
-        secrets: inherit
+        secrets:
+            project_id: ${{secrets.GCP_PROJECT_ID_EXTERNAL}}
+            workload_identity_provider: ${{secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_EXTERNAL}}
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
             chart_name: liferay-aws-infrastructure-provider
@@ -144,6 +166,9 @@ jobs:
             ECR_REGISTRY: 709825985650.dkr.ecr.us-east-1.amazonaws.com
         if: github.event_name == 'push' && github.repository == 'liferay/liferay-portal'
         needs: publish-aws
+        permissions:
+            contents: read
+            id-token: write
         runs-on: ubuntu-latest
         steps:
             -   name: Configure AWS credentials
@@ -154,6 +179,10 @@ jobs:
                     role-to-assume: arn:aws:iam::831926597587:role/GitHubActionsRole
             -   name: Log in to ECR
                 run: |
+                    set -o errexit
+                    set -o nounset
+                    set -o pipefail
+
                     aws ecr get-login-password --region us-east-1 \
                         | helm registry login "${ECR_REGISTRY}" \
                             --password-stdin \
@@ -169,51 +198,67 @@ jobs:
                 name: Verify Helm chart version
                 run: |
                     set -o errexit
+                    set -o nounset
+                    set -o pipefail
 
-                    CHART_VERSION=$(cat ./Chart.yaml | yq .version)
+                    function main {
+                        CHART_VERSION=$(cat ./Chart.yaml | yq .version)
 
-                    echo "Verifying Helm chart version ${CHART_VERSION}."
+                        echo "Verifying Helm chart version ${CHART_VERSION}."
 
-                    if ! helm show readme "oci://${ECR_REGISTRY}/liferay/liferay-aws-marketplace:${CHART_VERSION}" >/dev/null 2>&1
-                    then
-                        echo "Verified Helm Chart version ${CHART_VERSION}."
+                        if ! helm show readme "oci://${ECR_REGISTRY}/liferay/liferay-aws-marketplace:${CHART_VERSION}" >/dev/null 2>&1
+                        then
+                            echo "Verified Helm Chart version ${CHART_VERSION}."
 
-                        echo "CHART_VERSION=${CHART_VERSION}" >> ${GITHUB_ENV}
+                            echo "CHART_VERSION=${CHART_VERSION}" >> ${GITHUB_ENV}
 
-                        echo "should_publish=true" >> ${GITHUB_OUTPUT}
-                    else
-                        echo "Chart version ${CHART_VERSION} already exists."
-                    fi
+                            echo "should_publish=true" >> ${GITHUB_OUTPUT}
+                        else
+                            echo "Chart liferay-aws-marketplace@${CHART_VERSION} already exists."
+
+                            echo "liferay-aws-marketplace: \`${CHART_VERSION}\` already published." >> ${GITHUB_STEP_SUMMARY}
+                        fi
+                    }
+
+                    main "${@}"
                 working-directory: ./cloud/helm/aws-marketplace
             -   if: ${{steps.verify_version.outputs.should_publish == 'true'}}
                 name: Package and push Helm chart
                 run: |
                     set -o errexit
+                    set -o nounset
+                    set -o pipefail
 
-                    DIST_DIR="${{runner.temp}}/aws-marketplace/dist"
+                    function main {
+                        local dist_dir="${{runner.temp}}/aws-marketplace/dist"
 
-                    rm -fr "${DIST_DIR}"
+                        rm -fr "${dist_dir}"
 
-                    mkdir --parents "${DIST_DIR}"
+                        mkdir --parents "${dist_dir}"
 
-                    helm dependency update
+                        helm dependency update
 
-                    helm package . \
-                        --destination "${DIST_DIR}" \
-                        --version "${CHART_VERSION}"
+                        helm package . \
+                            --destination "${dist_dir}" \
+                            --version "${CHART_VERSION}"
 
-                    for file_name in "${DIST_DIR}"/*.tgz
-                    do
-                        echo "Pushing ${file_name}."
+                        for file_name in "${dist_dir}"/*.tgz
+                        do
+                            echo "Pushing ${file_name}."
 
-                        helm push "${file_name}" "oci://${ECR_REGISTRY}/liferay"
-                    done
+                            helm push "${file_name}" "oci://${ECR_REGISTRY}/liferay"
+                        done
+                    }
+
+                    main "${@}"
                 working-directory: ./cloud/helm/aws-marketplace
     publish-default:
         if: |
             (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
             (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
-        secrets: inherit
+        secrets:
+            project_id: ${{secrets.GCP_PROJECT_ID_LIFERAY}}
+            workload_identity_provider: ${{secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_LIFERAY}}
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
             chart_name: liferay-default
@@ -225,7 +270,9 @@ jobs:
             (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
             (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
         needs: publish-default
-        secrets: inherit
+        secrets:
+            project_id: ${{secrets.GCP_PROJECT_ID_LIFERAY}}
+            workload_identity_provider: ${{secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_LIFERAY}}
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
             chart_name: liferay-gcp
@@ -236,7 +283,9 @@ jobs:
         if: |
             (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
             (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
-        secrets: inherit
+        secrets:
+            project_id: ${{secrets.GCP_PROJECT_ID_EXTERNAL}}
+            workload_identity_provider: ${{secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_EXTERNAL}}
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
             chart_name: liferay-gcp-infrastructure
@@ -247,7 +296,9 @@ jobs:
         if: |
             (github.event_name == 'push' && github.repository == 'liferay/liferay-portal') ||
             (github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == 'cloudnative-team/liferay-portal' && github.event_name == 'pull_request' && github.repository == 'cloudnative-team/liferay-portal')
-        secrets: inherit
+        secrets:
+            project_id: ${{secrets.GCP_PROJECT_ID_EXTERNAL}}
+            workload_identity_provider: ${{secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_EXTERNAL}}
         uses: ./.github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
         with:
             chart_name: liferay-gcp-infrastructure-provider
@@ -275,13 +326,16 @@ jobs:
                 uses: actions/checkout@v4
                 with:
                     fetch-depth: 1
-                    spare-checkout-code-mode: true
                     sparse-checkout: |
                         cloud/helm
             -   name: Configure Git
                 run: |
-                    git config user.name "$GITHUB_ACTOR"
-                    git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+                    set -o errexit
+                    set -o nounset
+                    set -o pipefail
+
+                    git config user.name "${GITHUB_ACTOR}"
+                    git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
             -   name: Install Helm
                 uses: azure/setup-helm@v4
             -   name: Run chart-releaser
@@ -310,6 +364,6 @@ on:
             -   .github/workflows/ci-reusable-publish-helm-chart-to-gar.yaml
             -   cloud/helm/**
 permissions:
-    contents: write
+    contents: read
     id-token: write
     packages: write

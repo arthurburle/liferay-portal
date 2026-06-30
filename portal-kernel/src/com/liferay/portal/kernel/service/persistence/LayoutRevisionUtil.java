@@ -36,6 +36,20 @@ public class LayoutRevisionUtil {
 	 */
 
 	/**
+	 * @see BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<LayoutRevision> layoutRevisions) {
+		getPersistence().cacheResult(layoutRevisions);
+	}
+
+	/**
+	 * @see BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(LayoutRevision layoutRevision) {
+		getPersistence().cacheResult(layoutRevision);
+	}
+
+	/**
 	 * @see BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1898,24 +1912,6 @@ public class LayoutRevisionUtil {
 	}
 
 	/**
-	 * Caches the layout revision in the entity cache if it is enabled.
-	 *
-	 * @param layoutRevision the layout revision
-	 */
-	public static void cacheResult(LayoutRevision layoutRevision) {
-		getPersistence().cacheResult(layoutRevision);
-	}
-
-	/**
-	 * Caches the layout revisions in the entity cache if it is enabled.
-	 *
-	 * @param layoutRevisions the layout revisions
-	 */
-	public static void cacheResult(List<LayoutRevision> layoutRevisions) {
-		getPersistence().cacheResult(layoutRevisions);
-	}
-
-	/**
 	 * Creates a new layout revision with the primary key. Does not add the layout revision to the database.
 	 *
 	 * @param layoutRevisionId the primary key for the new layout revision
@@ -1967,86 +1963,6 @@ public class LayoutRevisionUtil {
 		return getPersistence().fetchByPrimaryKey(layoutRevisionId);
 	}
 
-	/**
-	 * Returns all the layout revisions.
-	 *
-	 * @return the layout revisions
-	 */
-	public static List<LayoutRevision> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the layout revisions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.LayoutRevisionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout revisions
-	 * @param end the upper bound of the range of layout revisions (not inclusive)
-	 * @return the range of layout revisions
-	 */
-	public static List<LayoutRevision> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the layout revisions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.LayoutRevisionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout revisions
-	 * @param end the upper bound of the range of layout revisions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of layout revisions
-	 */
-	public static List<LayoutRevision> findAll(
-		int start, int end,
-		OrderByComparator<LayoutRevision> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the layout revisions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.LayoutRevisionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout revisions
-	 * @param end the upper bound of the range of layout revisions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of layout revisions
-	 */
-	public static List<LayoutRevision> findAll(
-		int start, int end, OrderByComparator<LayoutRevision> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the layout revisions from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of layout revisions.
-	 *
-	 * @return the number of layout revisions
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static LayoutRevisionPersistence getPersistence() {
 		return _persistence;
 	}
@@ -2058,4 +1974,4 @@ public class LayoutRevisionUtil {
 	private static volatile LayoutRevisionPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1442620602
+// LIFERAY-SERVICE-BUILDER-HASH:-1586643900

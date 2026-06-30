@@ -37,6 +37,20 @@ public class PatcherBuildUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<PatcherBuild> patcherBuilds) {
+		getPersistence().cacheResult(patcherBuilds);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(PatcherBuild patcherBuild) {
+		getPersistence().cacheResult(patcherBuild);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -3287,24 +3301,6 @@ public class PatcherBuildUtil {
 	}
 
 	/**
-	 * Caches the patcher build in the entity cache if it is enabled.
-	 *
-	 * @param patcherBuild the patcher build
-	 */
-	public static void cacheResult(PatcherBuild patcherBuild) {
-		getPersistence().cacheResult(patcherBuild);
-	}
-
-	/**
-	 * Caches the patcher builds in the entity cache if it is enabled.
-	 *
-	 * @param patcherBuilds the patcher builds
-	 */
-	public static void cacheResult(List<PatcherBuild> patcherBuilds) {
-		getPersistence().cacheResult(patcherBuilds);
-	}
-
-	/**
 	 * Creates a new patcher build with the primary key. Does not add the patcher build to the database.
 	 *
 	 * @param patcherBuildId the primary key for the new patcher build
@@ -3352,85 +3348,6 @@ public class PatcherBuildUtil {
 	 */
 	public static PatcherBuild fetchByPrimaryKey(long patcherBuildId) {
 		return getPersistence().fetchByPrimaryKey(patcherBuildId);
-	}
-
-	/**
-	 * Returns all the patcher builds.
-	 *
-	 * @return the patcher builds
-	 */
-	public static List<PatcherBuild> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the patcher builds.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.patcher.model.impl.PatcherBuildModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of patcher builds
-	 * @param end the upper bound of the range of patcher builds (not inclusive)
-	 * @return the range of patcher builds
-	 */
-	public static List<PatcherBuild> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the patcher builds.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.patcher.model.impl.PatcherBuildModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of patcher builds
-	 * @param end the upper bound of the range of patcher builds (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of patcher builds
-	 */
-	public static List<PatcherBuild> findAll(
-		int start, int end, OrderByComparator<PatcherBuild> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the patcher builds.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.patcher.model.impl.PatcherBuildModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of patcher builds
-	 * @param end the upper bound of the range of patcher builds (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of patcher builds
-	 */
-	public static List<PatcherBuild> findAll(
-		int start, int end, OrderByComparator<PatcherBuild> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the patcher builds from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of patcher builds.
-	 *
-	 * @return the number of patcher builds
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
 	}
 
 	/**
@@ -3879,4 +3796,4 @@ public class PatcherBuildUtil {
 	private static volatile PatcherBuildPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-665369265
+// LIFERAY-SERVICE-BUILDER-HASH:1695595234

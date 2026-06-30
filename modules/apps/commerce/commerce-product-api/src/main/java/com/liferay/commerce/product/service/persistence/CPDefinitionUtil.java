@@ -37,6 +37,20 @@ public class CPDefinitionUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<CPDefinition> cpDefinitions) {
+		getPersistence().cacheResult(cpDefinitions);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CPDefinition cpDefinition) {
+		getPersistence().cacheResult(cpDefinition);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1707,24 +1721,6 @@ public class CPDefinitionUtil {
 	}
 
 	/**
-	 * Caches the cp definition in the entity cache if it is enabled.
-	 *
-	 * @param cpDefinition the cp definition
-	 */
-	public static void cacheResult(CPDefinition cpDefinition) {
-		getPersistence().cacheResult(cpDefinition);
-	}
-
-	/**
-	 * Caches the cp definitions in the entity cache if it is enabled.
-	 *
-	 * @param cpDefinitions the cp definitions
-	 */
-	public static void cacheResult(List<CPDefinition> cpDefinitions) {
-		getPersistence().cacheResult(cpDefinitions);
-	}
-
-	/**
 	 * Creates a new cp definition with the primary key. Does not add the cp definition to the database.
 	 *
 	 * @param CPDefinitionId the primary key for the new cp definition
@@ -1776,85 +1772,6 @@ public class CPDefinitionUtil {
 		return getPersistence().fetchByPrimaryKey(CPDefinitionId);
 	}
 
-	/**
-	 * Returns all the cp definitions.
-	 *
-	 * @return the cp definitions
-	 */
-	public static List<CPDefinition> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the cp definitions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPDefinitionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definitions
-	 * @param end the upper bound of the range of cp definitions (not inclusive)
-	 * @return the range of cp definitions
-	 */
-	public static List<CPDefinition> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp definitions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPDefinitionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definitions
-	 * @param end the upper bound of the range of cp definitions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cp definitions
-	 */
-	public static List<CPDefinition> findAll(
-		int start, int end, OrderByComparator<CPDefinition> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp definitions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPDefinitionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definitions
-	 * @param end the upper bound of the range of cp definitions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cp definitions
-	 */
-	public static List<CPDefinition> findAll(
-		int start, int end, OrderByComparator<CPDefinition> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the cp definitions from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of cp definitions.
-	 *
-	 * @return the number of cp definitions
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CPDefinitionPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1866,4 +1783,4 @@ public class CPDefinitionUtil {
 	private static volatile CPDefinitionPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:222263798
+// LIFERAY-SERVICE-BUILDER-HASH:648562196

@@ -5,6 +5,7 @@
 
 package com.liferay.portal.util;
 
+import com.liferay.layout.utility.page.kernel.StatusLayoutUtilityPageEntryRequestContributorRegistryUtil;
 import com.liferay.petra.io.BigEndianCodec;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
@@ -21,7 +22,10 @@ import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.DummyHttpServletResponse;
 import com.liferay.portal.kernel.servlet.DynamicServletRequest;
 import com.liferay.portal.kernel.servlet.PersistentHttpServletRequestWrapper;
+import com.liferay.portal.kernel.servlet.PortalSessionThreadLocal;
+import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.TestInfo;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.upgrade.MockPortletPreferences;
@@ -80,6 +84,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
 
 /**
  * @author Miguel Pastor
@@ -810,6 +816,52 @@ public class PortalImplUnitTest {
 				HttpComponentsUtil.class.getName(), LoggerTestUtil.OFF)) {
 
 			Assert.assertFalse(_portalImpl.isValidResourceId("%view.jsp"));
+		}
+	}
+
+	@Test
+	@TestInfo("LPD-85590")
+	public void testSendErrorPassesExceptionViaRequestAttributeAndSessionErrors()
+		throws Exception {
+
+		MockHttpServletRequest mockHttpServletRequest =
+			new MockHttpServletRequest();
+
+		MockHttpSession mockHttpSession = new MockHttpSession();
+
+		mockHttpServletRequest.setSession(mockHttpSession);
+
+		Exception exception = new Exception();
+
+		try (MockedStatic<PortalSessionThreadLocal>
+				portalSessionThreadLocalMockedStatic = Mockito.mockStatic(
+					PortalSessionThreadLocal.class);
+			MockedStatic<SessionErrors> sessionErrorsMockedStatic =
+				Mockito.mockStatic(SessionErrors.class);
+			MockedStatic
+				<StatusLayoutUtilityPageEntryRequestContributorRegistryUtil>
+					statusLayoutUtilityPageEntryRequestContributorRegistryUtilMockedStatic =
+						Mockito.mockStatic(
+							StatusLayoutUtilityPageEntryRequestContributorRegistryUtil.class)) {
+
+			portalSessionThreadLocalMockedStatic.when(
+				PortalSessionThreadLocal::getHttpSession
+			).thenReturn(
+				mockHttpSession
+			);
+
+			_portalImpl.sendError(
+				0, exception, mockHttpServletRequest,
+				new MockHttpServletResponse());
+
+			Assert.assertSame(
+				exception,
+				mockHttpServletRequest.getAttribute(
+					WebKeys.PORTAL_STATUS_EXCEPTION));
+
+			sessionErrorsMockedStatic.verify(
+				() -> SessionErrors.add(
+					mockHttpSession, Exception.class, exception));
 		}
 	}
 

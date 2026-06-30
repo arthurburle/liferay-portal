@@ -85,21 +85,6 @@ public interface FriendlyURLEntryMappingPersistence
 	public int countByC_C(long classNameId, long classPK);
 
 	/**
-	 * Caches the friendly url entry mapping in the entity cache if it is enabled.
-	 *
-	 * @param friendlyURLEntryMapping the friendly url entry mapping
-	 */
-	public void cacheResult(FriendlyURLEntryMapping friendlyURLEntryMapping);
-
-	/**
-	 * Caches the friendly url entry mappings in the entity cache if it is enabled.
-	 *
-	 * @param friendlyURLEntryMappings the friendly url entry mappings
-	 */
-	public void cacheResult(
-		java.util.List<FriendlyURLEntryMapping> friendlyURLEntryMappings);
-
-	/**
 	 * Creates a new friendly url entry mapping with the primary key. Does not add the friendly url entry mapping to the database.
 	 *
 	 * @param friendlyURLEntryMappingId the primary key for the new friendly url entry mapping
@@ -140,73 +125,5 @@ public interface FriendlyURLEntryMappingPersistence
 	public FriendlyURLEntryMapping fetchByPrimaryKey(
 		long friendlyURLEntryMappingId);
 
-	/**
-	 * Returns all the friendly url entry mappings.
-	 *
-	 * @return the friendly url entry mappings
-	 */
-	public java.util.List<FriendlyURLEntryMapping> findAll();
-
-	/**
-	 * Returns a range of all the friendly url entry mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.friendly.url.model.impl.FriendlyURLEntryMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of friendly url entry mappings
-	 * @param end the upper bound of the range of friendly url entry mappings (not inclusive)
-	 * @return the range of friendly url entry mappings
-	 */
-	public java.util.List<FriendlyURLEntryMapping> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the friendly url entry mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.friendly.url.model.impl.FriendlyURLEntryMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of friendly url entry mappings
-	 * @param end the upper bound of the range of friendly url entry mappings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of friendly url entry mappings
-	 */
-	public java.util.List<FriendlyURLEntryMapping> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<FriendlyURLEntryMapping> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the friendly url entry mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.friendly.url.model.impl.FriendlyURLEntryMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of friendly url entry mappings
-	 * @param end the upper bound of the range of friendly url entry mappings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of friendly url entry mappings
-	 */
-	public java.util.List<FriendlyURLEntryMapping> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<FriendlyURLEntryMapping> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the friendly url entry mappings from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of friendly url entry mappings.
-	 *
-	 * @return the number of friendly url entry mappings
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1673673076
+// LIFERAY-SERVICE-BUILDER-HASH:1969617901

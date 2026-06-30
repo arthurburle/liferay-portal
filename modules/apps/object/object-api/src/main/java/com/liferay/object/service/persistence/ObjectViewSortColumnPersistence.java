@@ -460,21 +460,6 @@ public interface ObjectViewSortColumnPersistence
 	public int countByOVI_OFN(long objectViewId, String objectFieldName);
 
 	/**
-	 * Caches the object view sort column in the entity cache if it is enabled.
-	 *
-	 * @param objectViewSortColumn the object view sort column
-	 */
-	public void cacheResult(ObjectViewSortColumn objectViewSortColumn);
-
-	/**
-	 * Caches the object view sort columns in the entity cache if it is enabled.
-	 *
-	 * @param objectViewSortColumns the object view sort columns
-	 */
-	public void cacheResult(
-		java.util.List<ObjectViewSortColumn> objectViewSortColumns);
-
-	/**
 	 * Creates a new object view sort column with the primary key. Does not add the object view sort column to the database.
 	 *
 	 * @param objectViewSortColumnId the primary key for the new object view sort column
@@ -513,73 +498,5 @@ public interface ObjectViewSortColumnPersistence
 	 */
 	public ObjectViewSortColumn fetchByPrimaryKey(long objectViewSortColumnId);
 
-	/**
-	 * Returns all the object view sort columns.
-	 *
-	 * @return the object view sort columns
-	 */
-	public java.util.List<ObjectViewSortColumn> findAll();
-
-	/**
-	 * Returns a range of all the object view sort columns.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectViewSortColumnModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object view sort columns
-	 * @param end the upper bound of the range of object view sort columns (not inclusive)
-	 * @return the range of object view sort columns
-	 */
-	public java.util.List<ObjectViewSortColumn> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the object view sort columns.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectViewSortColumnModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object view sort columns
-	 * @param end the upper bound of the range of object view sort columns (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object view sort columns
-	 */
-	public java.util.List<ObjectViewSortColumn> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ObjectViewSortColumn>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the object view sort columns.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectViewSortColumnModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object view sort columns
-	 * @param end the upper bound of the range of object view sort columns (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object view sort columns
-	 */
-	public java.util.List<ObjectViewSortColumn> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ObjectViewSortColumn>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the object view sort columns from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of object view sort columns.
-	 *
-	 * @return the number of object view sort columns
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1750882837
+// LIFERAY-SERVICE-BUILDER-HASH:1791402213

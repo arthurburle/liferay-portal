@@ -5,12 +5,10 @@
 
 package com.liferay.saml.persistence.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -23,10 +21,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.saml.persistence.exception.NoSuchSpSessionException;
@@ -67,7 +62,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = SamlSpSessionPersistence.class)
 public class SamlSpSessionPersistenceImpl
-	extends BasePersistenceImpl<SamlSpSession>
+	extends BasePersistenceImpl<SamlSpSession, NoSuchSpSessionException>
 	implements SamlSpSessionPersistence {
 
 	/*
@@ -84,9 +79,6 @@ public class SamlSpSessionPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindBySamlPeerBindingId;
 	private FinderPath _finderPathWithoutPaginationFindBySamlPeerBindingId;
 	private FinderPath _finderPathCountBySamlPeerBindingId;
@@ -586,108 +578,6 @@ public class SamlSpSessionPersistenceImpl
 	}
 
 	/**
-	 * Caches the saml sp session in the entity cache if it is enabled.
-	 *
-	 * @param samlSpSession the saml sp session
-	 */
-	@Override
-	public void cacheResult(SamlSpSession samlSpSession) {
-		entityCache.putResult(
-			SamlSpSessionImpl.class, samlSpSession.getPrimaryKey(),
-			samlSpSession);
-
-		finderCache.putResult(
-			_finderPathFetchByJSessionId,
-			new Object[] {samlSpSession.getJSessionId()}, samlSpSession);
-
-		finderCache.putResult(
-			_finderPathFetchBySamlSpSessionKey,
-			new Object[] {samlSpSession.getSamlSpSessionKey()}, samlSpSession);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the saml sp sessions in the entity cache if it is enabled.
-	 *
-	 * @param samlSpSessions the saml sp sessions
-	 */
-	@Override
-	public void cacheResult(List<SamlSpSession> samlSpSessions) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (samlSpSessions.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (SamlSpSession samlSpSession : samlSpSessions) {
-			if (entityCache.getResult(
-					SamlSpSessionImpl.class, samlSpSession.getPrimaryKey()) ==
-						null) {
-
-				cacheResult(samlSpSession);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all saml sp sessions.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(SamlSpSessionImpl.class);
-
-		finderCache.clearCache(SamlSpSessionImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the saml sp session.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(SamlSpSession samlSpSession) {
-		entityCache.removeResult(SamlSpSessionImpl.class, samlSpSession);
-	}
-
-	@Override
-	public void clearCache(List<SamlSpSession> samlSpSessions) {
-		for (SamlSpSession samlSpSession : samlSpSessions) {
-			entityCache.removeResult(SamlSpSessionImpl.class, samlSpSession);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(SamlSpSessionImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(SamlSpSessionImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		SamlSpSessionModelImpl samlSpSessionModelImpl) {
-
-		Object[] args = new Object[] {samlSpSessionModelImpl.getJSessionId()};
-
-		finderCache.putResult(
-			_finderPathFetchByJSessionId, args, samlSpSessionModelImpl);
-
-		args = new Object[] {samlSpSessionModelImpl.getSamlSpSessionKey()};
-
-		finderCache.putResult(
-			_finderPathFetchBySamlSpSessionKey, args, samlSpSessionModelImpl);
-	}
-
-	/**
 	 * Creates a new saml sp session with the primary key. Does not add the saml sp session to the database.
 	 *
 	 * @param samlSpSessionId the primary key for the new saml sp session
@@ -717,47 +607,6 @@ public class SamlSpSessionPersistenceImpl
 		throws NoSuchSpSessionException {
 
 		return remove((Serializable)samlSpSessionId);
-	}
-
-	/**
-	 * Removes the saml sp session with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the saml sp session
-	 * @return the saml sp session that was removed
-	 * @throws NoSuchSpSessionException if a saml sp session with the primary key could not be found
-	 */
-	@Override
-	public SamlSpSession remove(Serializable primaryKey)
-		throws NoSuchSpSessionException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SamlSpSession samlSpSession = (SamlSpSession)session.get(
-				SamlSpSessionImpl.class, primaryKey);
-
-			if (samlSpSession == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchSpSessionException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(samlSpSession);
-		}
-		catch (NoSuchSpSessionException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -857,41 +706,13 @@ public class SamlSpSessionPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			SamlSpSessionImpl.class, samlSpSessionModelImpl, false, true);
-
-		cacheUniqueFindersCache(samlSpSessionModelImpl);
+		cacheUniqueFindersResult(samlSpSession, false);
 
 		if (isNew) {
 			samlSpSession.setNew(false);
 		}
 
 		samlSpSession.resetOriginalValues();
-
-		return samlSpSession;
-	}
-
-	/**
-	 * Returns the saml sp session with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the saml sp session
-	 * @return the saml sp session
-	 * @throws NoSuchSpSessionException if a saml sp session with the primary key could not be found
-	 */
-	@Override
-	public SamlSpSession findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchSpSessionException {
-
-		SamlSpSession samlSpSession = fetchByPrimaryKey(primaryKey);
-
-		if (samlSpSession == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchSpSessionException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return samlSpSession;
 	}
@@ -919,186 +740,6 @@ public class SamlSpSessionPersistenceImpl
 	@Override
 	public SamlSpSession fetchByPrimaryKey(long samlSpSessionId) {
 		return fetchByPrimaryKey((Serializable)samlSpSessionId);
-	}
-
-	/**
-	 * Returns all the saml sp sessions.
-	 *
-	 * @return the saml sp sessions
-	 */
-	@Override
-	public List<SamlSpSession> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the saml sp sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SamlSpSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml sp sessions
-	 * @param end the upper bound of the range of saml sp sessions (not inclusive)
-	 * @return the range of saml sp sessions
-	 */
-	@Override
-	public List<SamlSpSession> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the saml sp sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SamlSpSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml sp sessions
-	 * @param end the upper bound of the range of saml sp sessions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of saml sp sessions
-	 */
-	@Override
-	public List<SamlSpSession> findAll(
-		int start, int end,
-		OrderByComparator<SamlSpSession> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the saml sp sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SamlSpSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml sp sessions
-	 * @param end the upper bound of the range of saml sp sessions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of saml sp sessions
-	 */
-	@Override
-	public List<SamlSpSession> findAll(
-		int start, int end, OrderByComparator<SamlSpSession> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<SamlSpSession> list = null;
-
-		if (useFinderCache) {
-			list = (List<SamlSpSession>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_SAMLSPSESSION);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_SAMLSPSESSION;
-
-				sql = sql.concat(SamlSpSessionModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<SamlSpSession>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the saml sp sessions from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (SamlSpSession samlSpSession : findAll()) {
-			remove(samlSpSession);
-		}
-	}
-
-	/**
-	 * Returns the number of saml sp sessions.
-	 *
-	 * @return the number of saml sp sessions
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_SAMLSPSESSION);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -1131,21 +772,6 @@ public class SamlSpSessionPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindBySamlPeerBindingId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findBySamlPeerBindingId",
 			new String[] {
@@ -1170,32 +796,34 @@ public class SamlSpSessionPersistenceImpl
 				_finderPathWithoutPaginationFindBySamlPeerBindingId,
 				_finderPathCountBySamlPeerBindingId,
 				_SQL_SELECT_SAMLSPSESSION_WHERE, _SQL_COUNT_SAMLSPSESSION_WHERE,
-				SamlSpSessionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				SamlSpSessionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"samlSpSession.", "samlPeerBindingId",
 					FinderColumn.Type.LONG, "=", true, true,
 					SamlSpSession::getSamlPeerBindingId));
 
-		_finderPathFetchByJSessionId = new FinderPath(
+		_finderPathFetchByJSessionId = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByJSessionId",
 			new String[] {String.class.getName()}, new String[] {"jSessionId"},
-			true);
+			0, 1, false, convertNullFunction(SamlSpSession::getJSessionId));
 
 		_uniquePersistenceFinderByJSessionId = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByJSessionId, _SQL_SELECT_SAMLSPSESSION_WHERE,
+			"",
 			new FinderColumn<>(
 				"samlSpSession.", "jSessionId", FinderColumn.Type.STRING, "=",
 				true, true, SamlSpSession::getJSessionId));
 
-		_finderPathFetchBySamlSpSessionKey = new FinderPath(
+		_finderPathFetchBySamlSpSessionKey = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchBySamlSpSessionKey",
 			new String[] {String.class.getName()},
-			new String[] {"samlSpSessionKey"}, true);
+			new String[] {"samlSpSessionKey"}, 0, 1, false,
+			convertNullFunction(SamlSpSession::getSamlSpSessionKey));
 
 		_uniquePersistenceFinderBySamlSpSessionKey =
 			new UniquePersistenceFinder<>(
 				this, _finderPathFetchBySamlSpSessionKey,
-				_SQL_SELECT_SAMLSPSESSION_WHERE,
+				_SQL_SELECT_SAMLSPSESSION_WHERE, "",
 				new FinderColumn<>(
 					"samlSpSession.", "samlSpSessionKey",
 					FinderColumn.Type.STRING, "=", true, true,
@@ -1213,21 +841,21 @@ public class SamlSpSessionPersistenceImpl
 		_finderPathWithoutPaginationFindByC_SI = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC_SI",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "sessionIndex"}, true);
+			new String[] {"companyId", "sessionIndex"}, 0, 2, true, null);
 
 		_finderPathCountByC_SI = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_SI",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "sessionIndex"}, false);
+			new String[] {"companyId", "sessionIndex"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByC_SI = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_SI,
 			_finderPathWithoutPaginationFindByC_SI, _finderPathCountByC_SI,
 			_SQL_SELECT_SAMLSPSESSION_WHERE, _SQL_COUNT_SAMLSPSESSION_WHERE,
-			SamlSpSessionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			SamlSpSessionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"samlSpSession.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, SamlSpSession::getCompanyId),
+				true, true, SamlSpSession::getCompanyId),
 			new FinderColumn<>(
 				"samlSpSession.", "sessionIndex", FinderColumn.Type.STRING, "=",
 				true, true, SamlSpSession::getSessionIndex));
@@ -1274,22 +902,17 @@ public class SamlSpSessionPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		SamlSpSessionModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_SAMLSPSESSION =
 		"SELECT samlSpSession FROM SamlSpSession samlSpSession";
 
 	private static final String _SQL_SELECT_SAMLSPSESSION_WHERE =
 		"SELECT samlSpSession FROM SamlSpSession samlSpSession WHERE ";
 
-	private static final String _SQL_COUNT_SAMLSPSESSION =
-		"SELECT COUNT(samlSpSession) FROM SamlSpSession samlSpSession";
-
 	private static final String _SQL_COUNT_SAMLSPSESSION_WHERE =
 		"SELECT COUNT(samlSpSession) FROM SamlSpSession samlSpSession WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "samlSpSession.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No SamlSpSession exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No SamlSpSession exists with the key {";
@@ -1306,4 +929,4 @@ public class SamlSpSessionPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1000020556
+// LIFERAY-SERVICE-BUILDER-HASH:1952734982

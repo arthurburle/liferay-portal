@@ -434,12 +434,7 @@ public class EmailNotificationTypeTest extends BaseNotificationTypeTest {
 
 		objectActionLocalService.deleteObjectAction(objectAction);
 
-		_commerceOrderLocalService.deleteCommerceOrder(
-			commerceOrder.getCommerceOrderId());
-
-		_accountEntryLocalService.deleteAccountEntry(
-			_accountEntryLocalService.fetchPersonAccountEntry(
-				TestPropsValues.getUserId()));
+		_deleteCommerceOrder(commerceOrder.getCommerceOrderId());
 	}
 
 	@Test
@@ -536,8 +531,8 @@ public class EmailNotificationTypeTest extends BaseNotificationTypeTest {
 			_assertNotificationQueueEntryBody(objectFieldValue);
 		}
 		finally {
-			_commerceOrderLocalService.deleteCommerceOrder(
-				commerceOrder.getCommerceOrderId());
+			_deleteCommerceOrder(commerceOrder.getCommerceOrderId());
+
 			objectActionLocalService.deleteObjectAction(objectAction);
 			objectFieldLocalService.deleteObjectField(objectField);
 		}
@@ -1650,6 +1645,39 @@ public class EmailNotificationTypeTest extends BaseNotificationTypeTest {
 			listTypeDefinition);
 	}
 
+	@Test
+	public void testSendNotificationWithStandaloneObjectAction()
+		throws Exception {
+
+		String body = RandomTestUtil.randomString();
+
+		ObjectAction objectAction = _addNotificationTemplateObjectAction(
+			body, NotificationTemplateConstants.EDITOR_TYPE_RICH_TEXT,
+			ObjectActionTriggerConstants.KEY_STANDALONE, childObjectDefinition);
+
+		ObjectEntry objectEntry = objectEntryManager.addObjectEntry(
+			dtoConverterContext, childObjectDefinition,
+			new ObjectEntry() {
+				{
+					properties = HashMapBuilder.putAll(
+						childObjectEntryValues
+					).build();
+				}
+			},
+			group.getGroupKey());
+
+		DefaultObjectEntryManager defaultObjectEntryManager =
+			(DefaultObjectEntryManager)objectEntryManager;
+
+		defaultObjectEntryManager.executeObjectAction(
+			dtoConverterContext, objectAction.getName(), childObjectDefinition,
+			objectEntry.getId());
+
+		_assertNotificationQueueEntryBody(body);
+
+		objectActionLocalService.deleteObjectAction(objectAction);
+	}
+
 	private static void _pushServiceContext() throws Exception {
 		HttpServletRequest httpServletRequest = new MockHttpServletRequest(
 			null, StringPool.BLANK, RandomTestUtil.randomString());
@@ -2063,6 +2091,14 @@ public class EmailNotificationTypeTest extends BaseNotificationTypeTest {
 				ObjectActionThreadLocal.class, "_objectEntryIdsMap");
 
 		threadLocal.set(new HashMap<>());
+	}
+
+	private void _deleteCommerceOrder(long commerceOrderId) throws Exception {
+		_commerceOrderLocalService.deleteCommerceOrder(commerceOrderId);
+
+		_accountEntryLocalService.deleteAccountEntry(
+			_accountEntryLocalService.fetchPersonAccountEntry(
+				TestPropsValues.getUserId()));
 	}
 
 	private String _formatDate(Date date) {

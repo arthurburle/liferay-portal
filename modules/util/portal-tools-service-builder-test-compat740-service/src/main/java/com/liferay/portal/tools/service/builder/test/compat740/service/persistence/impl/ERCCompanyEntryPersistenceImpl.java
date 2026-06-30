@@ -5,12 +5,10 @@
 
 package com.liferay.portal.tools.service.builder.test.compat740.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -29,8 +27,6 @@ import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinde
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -74,7 +70,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ERCCompanyEntryPersistence.class)
 public class ERCCompanyEntryPersistenceImpl
-	extends BasePersistenceImpl<ERCCompanyEntry>
+	extends BasePersistenceImpl<ERCCompanyEntry, NoSuchERCCompanyEntryException>
 	implements ERCCompanyEntryPersistence {
 
 	/*
@@ -91,9 +87,6 @@ public class ERCCompanyEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -508,108 +501,6 @@ public class ERCCompanyEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the erc company entry in the entity cache if it is enabled.
-	 *
-	 * @param ercCompanyEntry the erc company entry
-	 */
-	@Override
-	public void cacheResult(ERCCompanyEntry ercCompanyEntry) {
-		entityCache.putResult(
-			ERCCompanyEntryImpl.class, ercCompanyEntry.getPrimaryKey(),
-			ercCompanyEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C,
-			new Object[] {
-				ercCompanyEntry.getExternalReferenceCode(),
-				ercCompanyEntry.getCompanyId()
-			},
-			ercCompanyEntry);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the erc company entries in the entity cache if it is enabled.
-	 *
-	 * @param ercCompanyEntries the erc company entries
-	 */
-	@Override
-	public void cacheResult(List<ERCCompanyEntry> ercCompanyEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (ercCompanyEntries.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ERCCompanyEntry ercCompanyEntry : ercCompanyEntries) {
-			if (entityCache.getResult(
-					ERCCompanyEntryImpl.class,
-					ercCompanyEntry.getPrimaryKey()) == null) {
-
-				cacheResult(ercCompanyEntry);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all erc company entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ERCCompanyEntryImpl.class);
-
-		finderCache.clearCache(ERCCompanyEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the erc company entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ERCCompanyEntry ercCompanyEntry) {
-		entityCache.removeResult(ERCCompanyEntryImpl.class, ercCompanyEntry);
-	}
-
-	@Override
-	public void clearCache(List<ERCCompanyEntry> ercCompanyEntries) {
-		for (ERCCompanyEntry ercCompanyEntry : ercCompanyEntries) {
-			entityCache.removeResult(
-				ERCCompanyEntryImpl.class, ercCompanyEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ERCCompanyEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(ERCCompanyEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		ERCCompanyEntryModelImpl ercCompanyEntryModelImpl) {
-
-		Object[] args = new Object[] {
-			ercCompanyEntryModelImpl.getExternalReferenceCode(),
-			ercCompanyEntryModelImpl.getCompanyId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C, args, ercCompanyEntryModelImpl);
-	}
-
-	/**
 	 * Creates a new erc company entry with the primary key. Does not add the erc company entry to the database.
 	 *
 	 * @param ercCompanyEntryId the primary key for the new erc company entry
@@ -643,47 +534,6 @@ public class ERCCompanyEntryPersistenceImpl
 		throws NoSuchERCCompanyEntryException {
 
 		return remove((Serializable)ercCompanyEntryId);
-	}
-
-	/**
-	 * Removes the erc company entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the erc company entry
-	 * @return the erc company entry that was removed
-	 * @throws NoSuchERCCompanyEntryException if a erc company entry with the primary key could not be found
-	 */
-	@Override
-	public ERCCompanyEntry remove(Serializable primaryKey)
-		throws NoSuchERCCompanyEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ERCCompanyEntry ercCompanyEntry = (ERCCompanyEntry)session.get(
-				ERCCompanyEntryImpl.class, primaryKey);
-
-			if (ercCompanyEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchERCCompanyEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(ercCompanyEntry);
-		}
-		catch (NoSuchERCCompanyEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -832,41 +682,13 @@ public class ERCCompanyEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ERCCompanyEntryImpl.class, ercCompanyEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(ercCompanyEntryModelImpl);
+		cacheUniqueFindersResult(ercCompanyEntry, false);
 
 		if (isNew) {
 			ercCompanyEntry.setNew(false);
 		}
 
 		ercCompanyEntry.resetOriginalValues();
-
-		return ercCompanyEntry;
-	}
-
-	/**
-	 * Returns the erc company entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the erc company entry
-	 * @return the erc company entry
-	 * @throws NoSuchERCCompanyEntryException if a erc company entry with the primary key could not be found
-	 */
-	@Override
-	public ERCCompanyEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchERCCompanyEntryException {
-
-		ERCCompanyEntry ercCompanyEntry = fetchByPrimaryKey(primaryKey);
-
-		if (ercCompanyEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchERCCompanyEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return ercCompanyEntry;
 	}
@@ -894,187 +716,6 @@ public class ERCCompanyEntryPersistenceImpl
 	@Override
 	public ERCCompanyEntry fetchByPrimaryKey(long ercCompanyEntryId) {
 		return fetchByPrimaryKey((Serializable)ercCompanyEntryId);
-	}
-
-	/**
-	 * Returns all the erc company entries.
-	 *
-	 * @return the erc company entries
-	 */
-	@Override
-	public List<ERCCompanyEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the erc company entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ERCCompanyEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc company entries
-	 * @param end the upper bound of the range of erc company entries (not inclusive)
-	 * @return the range of erc company entries
-	 */
-	@Override
-	public List<ERCCompanyEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the erc company entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ERCCompanyEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc company entries
-	 * @param end the upper bound of the range of erc company entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of erc company entries
-	 */
-	@Override
-	public List<ERCCompanyEntry> findAll(
-		int start, int end,
-		OrderByComparator<ERCCompanyEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the erc company entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ERCCompanyEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc company entries
-	 * @param end the upper bound of the range of erc company entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of erc company entries
-	 */
-	@Override
-	public List<ERCCompanyEntry> findAll(
-		int start, int end,
-		OrderByComparator<ERCCompanyEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ERCCompanyEntry> list = null;
-
-		if (useFinderCache) {
-			list = (List<ERCCompanyEntry>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_ERCCOMPANYENTRY);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_ERCCOMPANYENTRY;
-
-				sql = sql.concat(ERCCompanyEntryModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ERCCompanyEntry>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the erc company entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ERCCompanyEntry ercCompanyEntry : findAll()) {
-			remove(ercCompanyEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of erc company entries.
-	 *
-	 * @return the number of erc company entries
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_ERCCOMPANYENTRY);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -1107,21 +748,6 @@ public class ERCCompanyEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1132,19 +758,19 @@ public class ERCCompanyEntryPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_ERCCOMPANYENTRY_WHERE, _SQL_COUNT_ERCCOMPANYENTRY_WHERE,
-			ERCCompanyEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ERCCompanyEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ercCompanyEntry.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, ERCCompanyEntry::getUuid));
@@ -1161,12 +787,12 @@ public class ERCCompanyEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1174,24 +800,28 @@ public class ERCCompanyEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_ERCCOMPANYENTRY_WHERE,
 				_SQL_COUNT_ERCCOMPANYENTRY_WHERE,
-				ERCCompanyEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ERCCompanyEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"ercCompanyEntry.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, ERCCompanyEntry::getUuid),
+					true, true, ERCCompanyEntry::getUuid),
 				new FinderColumn<>(
 					"ercCompanyEntry.", "companyId", FinderColumn.Type.LONG,
 					"=", true, true, ERCCompanyEntry::getCompanyId));
 
-		_finderPathFetchByERC_C = new FinderPath(
+		_finderPathFetchByERC_C = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"externalReferenceCode", "companyId"}, true);
+			new String[] {"externalReferenceCode", "companyId"}, 0, 1, false,
+			convertNullFunction(ERCCompanyEntry::getExternalReferenceCode),
+			ERCCompanyEntry::getCompanyId);
 
 		_uniquePersistenceFinderByERC_C = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByERC_C, _SQL_SELECT_ERCCOMPANYENTRY_WHERE,
+			"",
 			new FinderColumn<>(
 				"ercCompanyEntry.", "externalReferenceCode",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				ERCCompanyEntry::getExternalReferenceCode),
 			new FinderColumn<>(
 				"ercCompanyEntry.", "companyId", FinderColumn.Type.LONG, "=",
@@ -1239,22 +869,17 @@ public class ERCCompanyEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ERCCompanyEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_ERCCOMPANYENTRY =
 		"SELECT ercCompanyEntry FROM ERCCompanyEntry ercCompanyEntry";
 
 	private static final String _SQL_SELECT_ERCCOMPANYENTRY_WHERE =
 		"SELECT ercCompanyEntry FROM ERCCompanyEntry ercCompanyEntry WHERE ";
 
-	private static final String _SQL_COUNT_ERCCOMPANYENTRY =
-		"SELECT COUNT(ercCompanyEntry) FROM ERCCompanyEntry ercCompanyEntry";
-
 	private static final String _SQL_COUNT_ERCCOMPANYENTRY_WHERE =
 		"SELECT COUNT(ercCompanyEntry) FROM ERCCompanyEntry ercCompanyEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "ercCompanyEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ERCCompanyEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ERCCompanyEntry exists with the key {";
@@ -1271,4 +896,4 @@ public class ERCCompanyEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:798526766
+// LIFERAY-SERVICE-BUILDER-HASH:2104461874

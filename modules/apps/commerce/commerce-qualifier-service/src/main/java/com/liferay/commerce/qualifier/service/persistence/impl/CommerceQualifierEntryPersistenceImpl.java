@@ -13,12 +13,10 @@ import com.liferay.commerce.qualifier.model.impl.CommerceQualifierEntryModelImpl
 import com.liferay.commerce.qualifier.service.persistence.CommerceQualifierEntryPersistence;
 import com.liferay.commerce.qualifier.service.persistence.CommerceQualifierEntryUtil;
 import com.liferay.commerce.qualifier.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -31,10 +29,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 
@@ -67,7 +62,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CommerceQualifierEntryPersistence.class)
 public class CommerceQualifierEntryPersistenceImpl
-	extends BasePersistenceImpl<CommerceQualifierEntry>
+	extends BasePersistenceImpl
+		<CommerceQualifierEntry, NoSuchCommerceQualifierEntryException>
 	implements CommerceQualifierEntryPersistence {
 
 	/*
@@ -84,9 +80,6 @@ public class CommerceQualifierEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByS_S;
 	private FinderPath _finderPathWithoutPaginationFindByS_S;
 	private FinderPath _finderPathCountByS_S;
@@ -936,122 +929,6 @@ public class CommerceQualifierEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the commerce qualifier entry in the entity cache if it is enabled.
-	 *
-	 * @param commerceQualifierEntry the commerce qualifier entry
-	 */
-	@Override
-	public void cacheResult(CommerceQualifierEntry commerceQualifierEntry) {
-		entityCache.putResult(
-			CommerceQualifierEntryImpl.class,
-			commerceQualifierEntry.getPrimaryKey(), commerceQualifierEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByS_S_T_T,
-			new Object[] {
-				commerceQualifierEntry.getSourceClassNameId(),
-				commerceQualifierEntry.getSourceClassPK(),
-				commerceQualifierEntry.getTargetClassNameId(),
-				commerceQualifierEntry.getTargetClassPK()
-			},
-			commerceQualifierEntry);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the commerce qualifier entries in the entity cache if it is enabled.
-	 *
-	 * @param commerceQualifierEntries the commerce qualifier entries
-	 */
-	@Override
-	public void cacheResult(
-		List<CommerceQualifierEntry> commerceQualifierEntries) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (commerceQualifierEntries.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CommerceQualifierEntry commerceQualifierEntry :
-				commerceQualifierEntries) {
-
-			if (entityCache.getResult(
-					CommerceQualifierEntryImpl.class,
-					commerceQualifierEntry.getPrimaryKey()) == null) {
-
-				cacheResult(commerceQualifierEntry);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all commerce qualifier entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CommerceQualifierEntryImpl.class);
-
-		finderCache.clearCache(CommerceQualifierEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the commerce qualifier entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(CommerceQualifierEntry commerceQualifierEntry) {
-		entityCache.removeResult(
-			CommerceQualifierEntryImpl.class, commerceQualifierEntry);
-	}
-
-	@Override
-	public void clearCache(
-		List<CommerceQualifierEntry> commerceQualifierEntries) {
-
-		for (CommerceQualifierEntry commerceQualifierEntry :
-				commerceQualifierEntries) {
-
-			entityCache.removeResult(
-				CommerceQualifierEntryImpl.class, commerceQualifierEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CommerceQualifierEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CommerceQualifierEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CommerceQualifierEntryModelImpl commerceQualifierEntryModelImpl) {
-
-		Object[] args = new Object[] {
-			commerceQualifierEntryModelImpl.getSourceClassNameId(),
-			commerceQualifierEntryModelImpl.getSourceClassPK(),
-			commerceQualifierEntryModelImpl.getTargetClassNameId(),
-			commerceQualifierEntryModelImpl.getTargetClassPK()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByS_S_T_T, args, commerceQualifierEntryModelImpl);
-	}
-
-	/**
 	 * Creates a new commerce qualifier entry with the primary key. Does not add the commerce qualifier entry to the database.
 	 *
 	 * @param commerceQualifierEntryId the primary key for the new commerce qualifier entry
@@ -1082,48 +959,6 @@ public class CommerceQualifierEntryPersistenceImpl
 		throws NoSuchCommerceQualifierEntryException {
 
 		return remove((Serializable)commerceQualifierEntryId);
-	}
-
-	/**
-	 * Removes the commerce qualifier entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the commerce qualifier entry
-	 * @return the commerce qualifier entry that was removed
-	 * @throws NoSuchCommerceQualifierEntryException if a commerce qualifier entry with the primary key could not be found
-	 */
-	@Override
-	public CommerceQualifierEntry remove(Serializable primaryKey)
-		throws NoSuchCommerceQualifierEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CommerceQualifierEntry commerceQualifierEntry =
-				(CommerceQualifierEntry)session.get(
-					CommerceQualifierEntryImpl.class, primaryKey);
-
-			if (commerceQualifierEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchCommerceQualifierEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(commerceQualifierEntry);
-		}
-		catch (NoSuchCommerceQualifierEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1232,43 +1067,13 @@ public class CommerceQualifierEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CommerceQualifierEntryImpl.class, commerceQualifierEntryModelImpl,
-			false, true);
-
-		cacheUniqueFindersCache(commerceQualifierEntryModelImpl);
+		cacheUniqueFindersResult(commerceQualifierEntry, false);
 
 		if (isNew) {
 			commerceQualifierEntry.setNew(false);
 		}
 
 		commerceQualifierEntry.resetOriginalValues();
-
-		return commerceQualifierEntry;
-	}
-
-	/**
-	 * Returns the commerce qualifier entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the commerce qualifier entry
-	 * @return the commerce qualifier entry
-	 * @throws NoSuchCommerceQualifierEntryException if a commerce qualifier entry with the primary key could not be found
-	 */
-	@Override
-	public CommerceQualifierEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchCommerceQualifierEntryException {
-
-		CommerceQualifierEntry commerceQualifierEntry = fetchByPrimaryKey(
-			primaryKey);
-
-		if (commerceQualifierEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchCommerceQualifierEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return commerceQualifierEntry;
 	}
@@ -1301,188 +1106,6 @@ public class CommerceQualifierEntryPersistenceImpl
 		return fetchByPrimaryKey((Serializable)commerceQualifierEntryId);
 	}
 
-	/**
-	 * Returns all the commerce qualifier entries.
-	 *
-	 * @return the commerce qualifier entries
-	 */
-	@Override
-	public List<CommerceQualifierEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the commerce qualifier entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceQualifierEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce qualifier entries
-	 * @param end the upper bound of the range of commerce qualifier entries (not inclusive)
-	 * @return the range of commerce qualifier entries
-	 */
-	@Override
-	public List<CommerceQualifierEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce qualifier entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceQualifierEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce qualifier entries
-	 * @param end the upper bound of the range of commerce qualifier entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce qualifier entries
-	 */
-	@Override
-	public List<CommerceQualifierEntry> findAll(
-		int start, int end,
-		OrderByComparator<CommerceQualifierEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce qualifier entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceQualifierEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce qualifier entries
-	 * @param end the upper bound of the range of commerce qualifier entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce qualifier entries
-	 */
-	@Override
-	public List<CommerceQualifierEntry> findAll(
-		int start, int end,
-		OrderByComparator<CommerceQualifierEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<CommerceQualifierEntry> list = null;
-
-		if (useFinderCache) {
-			list = (List<CommerceQualifierEntry>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_COMMERCEQUALIFIERENTRY);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_COMMERCEQUALIFIERENTRY;
-
-				sql = sql.concat(CommerceQualifierEntryModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<CommerceQualifierEntry>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the commerce qualifier entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CommerceQualifierEntry commerceQualifierEntry : findAll()) {
-			remove(commerceQualifierEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of commerce qualifier entries.
-	 *
-	 * @return the number of commerce qualifier entries
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_COMMERCEQUALIFIERENTRY);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	public Set<String> getBadColumnNames() {
 		return _badColumnNames;
@@ -1513,21 +1136,6 @@ public class CommerceQualifierEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByS_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByS_S",
 			new String[] {
@@ -1552,11 +1160,11 @@ public class CommerceQualifierEntryPersistenceImpl
 			_finderPathWithoutPaginationFindByS_S, _finderPathCountByS_S,
 			_SQL_SELECT_COMMERCEQUALIFIERENTRY_WHERE,
 			_SQL_COUNT_COMMERCEQUALIFIERENTRY_WHERE,
-			CommerceQualifierEntryModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			CommerceQualifierEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "sourceClassNameId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceQualifierEntry::getSourceClassNameId),
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "sourceClassPK",
@@ -1587,11 +1195,11 @@ public class CommerceQualifierEntryPersistenceImpl
 			_finderPathWithoutPaginationFindByT_T, _finderPathCountByT_T,
 			_SQL_SELECT_COMMERCEQUALIFIERENTRY_WHERE,
 			_SQL_COUNT_COMMERCEQUALIFIERENTRY_WHERE,
-			CommerceQualifierEntryModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			CommerceQualifierEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "targetClassNameId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceQualifierEntry::getTargetClassNameId),
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "targetClassPK",
@@ -1635,15 +1243,15 @@ public class CommerceQualifierEntryPersistenceImpl
 			_finderPathWithoutPaginationFindByS_S_T, _finderPathCountByS_S_T,
 			_SQL_SELECT_COMMERCEQUALIFIERENTRY_WHERE,
 			_SQL_COUNT_COMMERCEQUALIFIERENTRY_WHERE,
-			CommerceQualifierEntryModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			CommerceQualifierEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "sourceClassNameId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceQualifierEntry::getSourceClassNameId),
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "sourceClassPK",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceQualifierEntry::getSourceClassPK),
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "targetClassNameId",
@@ -1687,22 +1295,22 @@ public class CommerceQualifierEntryPersistenceImpl
 			_finderPathWithoutPaginationFindByS_T_T, _finderPathCountByS_T_T,
 			_SQL_SELECT_COMMERCEQUALIFIERENTRY_WHERE,
 			_SQL_COUNT_COMMERCEQUALIFIERENTRY_WHERE,
-			CommerceQualifierEntryModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			CommerceQualifierEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "sourceClassNameId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceQualifierEntry::getSourceClassNameId),
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "targetClassNameId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceQualifierEntry::getTargetClassNameId),
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "targetClassPK",
 				FinderColumn.Type.LONG, "=", true, true,
 				CommerceQualifierEntry::getTargetClassPK));
 
-		_finderPathFetchByS_S_T_T = new FinderPath(
+		_finderPathFetchByS_S_T_T = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByS_S_T_T",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
@@ -1712,22 +1320,25 @@ public class CommerceQualifierEntryPersistenceImpl
 				"sourceClassNameId", "sourceClassPK", "targetClassNameId",
 				"targetClassPK"
 			},
-			true);
+			0, 0, false, CommerceQualifierEntry::getSourceClassNameId,
+			CommerceQualifierEntry::getSourceClassPK,
+			CommerceQualifierEntry::getTargetClassNameId,
+			CommerceQualifierEntry::getTargetClassPK);
 
 		_uniquePersistenceFinderByS_S_T_T = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByS_S_T_T,
-			_SQL_SELECT_COMMERCEQUALIFIERENTRY_WHERE,
+			_SQL_SELECT_COMMERCEQUALIFIERENTRY_WHERE, "",
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "sourceClassNameId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceQualifierEntry::getSourceClassNameId),
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "sourceClassPK",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceQualifierEntry::getSourceClassPK),
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "targetClassNameId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceQualifierEntry::getTargetClassNameId),
 			new FinderColumn<>(
 				"commerceQualifierEntry.", "targetClassPK",
@@ -1776,23 +1387,17 @@ public class CommerceQualifierEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CommerceQualifierEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_COMMERCEQUALIFIERENTRY =
 		"SELECT commerceQualifierEntry FROM CommerceQualifierEntry commerceQualifierEntry";
 
 	private static final String _SQL_SELECT_COMMERCEQUALIFIERENTRY_WHERE =
 		"SELECT commerceQualifierEntry FROM CommerceQualifierEntry commerceQualifierEntry WHERE ";
 
-	private static final String _SQL_COUNT_COMMERCEQUALIFIERENTRY =
-		"SELECT COUNT(commerceQualifierEntry) FROM CommerceQualifierEntry commerceQualifierEntry";
-
 	private static final String _SQL_COUNT_COMMERCEQUALIFIERENTRY_WHERE =
 		"SELECT COUNT(commerceQualifierEntry) FROM CommerceQualifierEntry commerceQualifierEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"commerceQualifierEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CommerceQualifierEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CommerceQualifierEntry exists with the key {";
@@ -1812,4 +1417,4 @@ public class CommerceQualifierEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2014976332
+// LIFERAY-SERVICE-BUILDER-HASH:202480348

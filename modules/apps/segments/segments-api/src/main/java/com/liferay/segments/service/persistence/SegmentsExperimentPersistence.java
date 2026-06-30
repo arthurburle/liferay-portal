@@ -664,21 +664,6 @@ public interface SegmentsExperimentPersistence
 	public int countByG_S_P(long groupId, long segmentsExperienceId, long plid);
 
 	/**
-	 * Caches the segments experiment in the entity cache if it is enabled.
-	 *
-	 * @param segmentsExperiment the segments experiment
-	 */
-	public void cacheResult(SegmentsExperiment segmentsExperiment);
-
-	/**
-	 * Caches the segments experiments in the entity cache if it is enabled.
-	 *
-	 * @param segmentsExperiments the segments experiments
-	 */
-	public void cacheResult(
-		java.util.List<SegmentsExperiment> segmentsExperiments);
-
-	/**
 	 * Creates a new segments experiment with the primary key. Does not add the segments experiment to the database.
 	 *
 	 * @param segmentsExperimentId the primary key for the new segments experiment
@@ -716,73 +701,5 @@ public interface SegmentsExperimentPersistence
 	 */
 	public SegmentsExperiment fetchByPrimaryKey(long segmentsExperimentId);
 
-	/**
-	 * Returns all the segments experiments.
-	 *
-	 * @return the segments experiments
-	 */
-	public java.util.List<SegmentsExperiment> findAll();
-
-	/**
-	 * Returns a range of all the segments experiments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.segments.model.impl.SegmentsExperimentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of segments experiments
-	 * @param end the upper bound of the range of segments experiments (not inclusive)
-	 * @return the range of segments experiments
-	 */
-	public java.util.List<SegmentsExperiment> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the segments experiments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.segments.model.impl.SegmentsExperimentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of segments experiments
-	 * @param end the upper bound of the range of segments experiments (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of segments experiments
-	 */
-	public java.util.List<SegmentsExperiment> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SegmentsExperiment>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the segments experiments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.segments.model.impl.SegmentsExperimentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of segments experiments
-	 * @param end the upper bound of the range of segments experiments (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of segments experiments
-	 */
-	public java.util.List<SegmentsExperiment> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SegmentsExperiment>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the segments experiments from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of segments experiments.
-	 *
-	 * @return the number of segments experiments
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1589693157
+// LIFERAY-SERVICE-BUILDER-HASH:-1078096820

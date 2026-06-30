@@ -36,6 +36,20 @@ public class ObjectViewColumnUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<ObjectViewColumn> objectViewColumns) {
+		getPersistence().cacheResult(objectViewColumns);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(ObjectViewColumn objectViewColumn) {
+		getPersistence().cacheResult(objectViewColumn);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -624,24 +638,6 @@ public class ObjectViewColumnUtil {
 	}
 
 	/**
-	 * Caches the object view column in the entity cache if it is enabled.
-	 *
-	 * @param objectViewColumn the object view column
-	 */
-	public static void cacheResult(ObjectViewColumn objectViewColumn) {
-		getPersistence().cacheResult(objectViewColumn);
-	}
-
-	/**
-	 * Caches the object view columns in the entity cache if it is enabled.
-	 *
-	 * @param objectViewColumns the object view columns
-	 */
-	public static void cacheResult(List<ObjectViewColumn> objectViewColumns) {
-		getPersistence().cacheResult(objectViewColumns);
-	}
-
-	/**
 	 * Creates a new object view column with the primary key. Does not add the object view column to the database.
 	 *
 	 * @param objectViewColumnId the primary key for the new object view column
@@ -693,87 +689,6 @@ public class ObjectViewColumnUtil {
 		return getPersistence().fetchByPrimaryKey(objectViewColumnId);
 	}
 
-	/**
-	 * Returns all the object view columns.
-	 *
-	 * @return the object view columns
-	 */
-	public static List<ObjectViewColumn> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the object view columns.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectViewColumnModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object view columns
-	 * @param end the upper bound of the range of object view columns (not inclusive)
-	 * @return the range of object view columns
-	 */
-	public static List<ObjectViewColumn> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the object view columns.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectViewColumnModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object view columns
-	 * @param end the upper bound of the range of object view columns (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object view columns
-	 */
-	public static List<ObjectViewColumn> findAll(
-		int start, int end,
-		OrderByComparator<ObjectViewColumn> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the object view columns.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectViewColumnModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object view columns
-	 * @param end the upper bound of the range of object view columns (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object view columns
-	 */
-	public static List<ObjectViewColumn> findAll(
-		int start, int end,
-		OrderByComparator<ObjectViewColumn> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the object view columns from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of object view columns.
-	 *
-	 * @return the number of object view columns
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static ObjectViewColumnPersistence getPersistence() {
 		return _persistence;
 	}
@@ -785,4 +700,4 @@ public class ObjectViewColumnUtil {
 	private static volatile ObjectViewColumnPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:585887155
+// LIFERAY-SERVICE-BUILDER-HASH:745569686

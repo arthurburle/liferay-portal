@@ -686,20 +686,6 @@ public interface ChangesetEntryPersistence
 		long changesetCollectionId, long classNameId, long classPK);
 
 	/**
-	 * Caches the changeset entry in the entity cache if it is enabled.
-	 *
-	 * @param changesetEntry the changeset entry
-	 */
-	public void cacheResult(ChangesetEntry changesetEntry);
-
-	/**
-	 * Caches the changeset entries in the entity cache if it is enabled.
-	 *
-	 * @param changesetEntries the changeset entries
-	 */
-	public void cacheResult(java.util.List<ChangesetEntry> changesetEntries);
-
-	/**
 	 * Creates a new changeset entry with the primary key. Does not add the changeset entry to the database.
 	 *
 	 * @param changesetEntryId the primary key for the new changeset entry
@@ -737,73 +723,5 @@ public interface ChangesetEntryPersistence
 	 */
 	public ChangesetEntry fetchByPrimaryKey(long changesetEntryId);
 
-	/**
-	 * Returns all the changeset entries.
-	 *
-	 * @return the changeset entries
-	 */
-	public java.util.List<ChangesetEntry> findAll();
-
-	/**
-	 * Returns a range of all the changeset entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.changeset.model.impl.ChangesetEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of changeset entries
-	 * @param end the upper bound of the range of changeset entries (not inclusive)
-	 * @return the range of changeset entries
-	 */
-	public java.util.List<ChangesetEntry> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the changeset entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.changeset.model.impl.ChangesetEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of changeset entries
-	 * @param end the upper bound of the range of changeset entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of changeset entries
-	 */
-	public java.util.List<ChangesetEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ChangesetEntry>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the changeset entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.changeset.model.impl.ChangesetEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of changeset entries
-	 * @param end the upper bound of the range of changeset entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of changeset entries
-	 */
-	public java.util.List<ChangesetEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ChangesetEntry>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the changeset entries from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of changeset entries.
-	 *
-	 * @return the number of changeset entries
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1213927309
+// LIFERAY-SERVICE-BUILDER-HASH:-1766055619

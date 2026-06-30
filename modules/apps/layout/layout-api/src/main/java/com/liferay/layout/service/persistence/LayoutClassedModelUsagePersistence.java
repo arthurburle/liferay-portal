@@ -1332,21 +1332,6 @@ public interface LayoutClassedModelUsagePersistence
 		long classPK, String containerKey, long containerType, long plid);
 
 	/**
-	 * Caches the layout classed model usage in the entity cache if it is enabled.
-	 *
-	 * @param layoutClassedModelUsage the layout classed model usage
-	 */
-	public void cacheResult(LayoutClassedModelUsage layoutClassedModelUsage);
-
-	/**
-	 * Caches the layout classed model usages in the entity cache if it is enabled.
-	 *
-	 * @param layoutClassedModelUsages the layout classed model usages
-	 */
-	public void cacheResult(
-		java.util.List<LayoutClassedModelUsage> layoutClassedModelUsages);
-
-	/**
 	 * Creates a new layout classed model usage with the primary key. Does not add the layout classed model usage to the database.
 	 *
 	 * @param layoutClassedModelUsageId the primary key for the new layout classed model usage
@@ -1387,73 +1372,5 @@ public interface LayoutClassedModelUsagePersistence
 	public LayoutClassedModelUsage fetchByPrimaryKey(
 		long layoutClassedModelUsageId);
 
-	/**
-	 * Returns all the layout classed model usages.
-	 *
-	 * @return the layout classed model usages
-	 */
-	public java.util.List<LayoutClassedModelUsage> findAll();
-
-	/**
-	 * Returns a range of all the layout classed model usages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.model.impl.LayoutClassedModelUsageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout classed model usages
-	 * @param end the upper bound of the range of layout classed model usages (not inclusive)
-	 * @return the range of layout classed model usages
-	 */
-	public java.util.List<LayoutClassedModelUsage> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the layout classed model usages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.model.impl.LayoutClassedModelUsageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout classed model usages
-	 * @param end the upper bound of the range of layout classed model usages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of layout classed model usages
-	 */
-	public java.util.List<LayoutClassedModelUsage> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<LayoutClassedModelUsage> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the layout classed model usages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.model.impl.LayoutClassedModelUsageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout classed model usages
-	 * @param end the upper bound of the range of layout classed model usages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of layout classed model usages
-	 */
-	public java.util.List<LayoutClassedModelUsage> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<LayoutClassedModelUsage> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the layout classed model usages from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of layout classed model usages.
-	 *
-	 * @return the number of layout classed model usages
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:426175784
+// LIFERAY-SERVICE-BUILDER-HASH:1030232679

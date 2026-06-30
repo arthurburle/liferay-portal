@@ -14,12 +14,10 @@ import com.liferay.commerce.inventory.model.impl.CommerceInventoryReplenishmentI
 import com.liferay.commerce.inventory.service.persistence.CommerceInventoryReplenishmentItemPersistence;
 import com.liferay.commerce.inventory.service.persistence.CommerceInventoryReplenishmentItemUtil;
 import com.liferay.commerce.inventory.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -40,8 +38,6 @@ import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinde
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -77,7 +73,9 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CommerceInventoryReplenishmentItemPersistence.class)
 public class CommerceInventoryReplenishmentItemPersistenceImpl
-	extends BasePersistenceImpl<CommerceInventoryReplenishmentItem>
+	extends BasePersistenceImpl
+		<CommerceInventoryReplenishmentItem,
+		 NoSuchInventoryReplenishmentItemException>
 	implements CommerceInventoryReplenishmentItemPersistence {
 
 	/*
@@ -94,9 +92,6 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -1368,133 +1363,6 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 	}
 
 	/**
-	 * Caches the commerce inventory replenishment item in the entity cache if it is enabled.
-	 *
-	 * @param commerceInventoryReplenishmentItem the commerce inventory replenishment item
-	 */
-	@Override
-	public void cacheResult(
-		CommerceInventoryReplenishmentItem commerceInventoryReplenishmentItem) {
-
-		entityCache.putResult(
-			CommerceInventoryReplenishmentItemImpl.class,
-			commerceInventoryReplenishmentItem.getPrimaryKey(),
-			commerceInventoryReplenishmentItem);
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C,
-			new Object[] {
-				commerceInventoryReplenishmentItem.getExternalReferenceCode(),
-				commerceInventoryReplenishmentItem.getCompanyId()
-			},
-			commerceInventoryReplenishmentItem);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the commerce inventory replenishment items in the entity cache if it is enabled.
-	 *
-	 * @param commerceInventoryReplenishmentItems the commerce inventory replenishment items
-	 */
-	@Override
-	public void cacheResult(
-		List<CommerceInventoryReplenishmentItem>
-			commerceInventoryReplenishmentItems) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (commerceInventoryReplenishmentItems.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CommerceInventoryReplenishmentItem
-				commerceInventoryReplenishmentItem :
-					commerceInventoryReplenishmentItems) {
-
-			if (entityCache.getResult(
-					CommerceInventoryReplenishmentItemImpl.class,
-					commerceInventoryReplenishmentItem.getPrimaryKey()) ==
-						null) {
-
-				cacheResult(commerceInventoryReplenishmentItem);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all commerce inventory replenishment items.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CommerceInventoryReplenishmentItemImpl.class);
-
-		finderCache.clearCache(CommerceInventoryReplenishmentItemImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the commerce inventory replenishment item.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(
-		CommerceInventoryReplenishmentItem commerceInventoryReplenishmentItem) {
-
-		entityCache.removeResult(
-			CommerceInventoryReplenishmentItemImpl.class,
-			commerceInventoryReplenishmentItem);
-	}
-
-	@Override
-	public void clearCache(
-		List<CommerceInventoryReplenishmentItem>
-			commerceInventoryReplenishmentItems) {
-
-		for (CommerceInventoryReplenishmentItem
-				commerceInventoryReplenishmentItem :
-					commerceInventoryReplenishmentItems) {
-
-			entityCache.removeResult(
-				CommerceInventoryReplenishmentItemImpl.class,
-				commerceInventoryReplenishmentItem);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CommerceInventoryReplenishmentItemImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CommerceInventoryReplenishmentItemImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CommerceInventoryReplenishmentItemModelImpl
-			commerceInventoryReplenishmentItemModelImpl) {
-
-		Object[] args = new Object[] {
-			commerceInventoryReplenishmentItemModelImpl.
-				getExternalReferenceCode(),
-			commerceInventoryReplenishmentItemModelImpl.getCompanyId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C, args,
-			commerceInventoryReplenishmentItemModelImpl);
-	}
-
-	/**
 	 * Creates a new commerce inventory replenishment item with the primary key. Does not add the commerce inventory replenishment item to the database.
 	 *
 	 * @param commerceInventoryReplenishmentItemId the primary key for the new commerce inventory replenishment item
@@ -1534,52 +1402,6 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 		throws NoSuchInventoryReplenishmentItemException {
 
 		return remove((Serializable)commerceInventoryReplenishmentItemId);
-	}
-
-	/**
-	 * Removes the commerce inventory replenishment item with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the commerce inventory replenishment item
-	 * @return the commerce inventory replenishment item that was removed
-	 * @throws NoSuchInventoryReplenishmentItemException if a commerce inventory replenishment item with the primary key could not be found
-	 */
-	@Override
-	public CommerceInventoryReplenishmentItem remove(Serializable primaryKey)
-		throws NoSuchInventoryReplenishmentItemException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CommerceInventoryReplenishmentItem
-				commerceInventoryReplenishmentItem =
-					(CommerceInventoryReplenishmentItem)session.get(
-						CommerceInventoryReplenishmentItemImpl.class,
-						primaryKey);
-
-			if (commerceInventoryReplenishmentItem == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchInventoryReplenishmentItemException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(commerceInventoryReplenishmentItem);
-		}
-		catch (NoSuchInventoryReplenishmentItemException
-					noSuchEntityException) {
-
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1784,44 +1606,13 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CommerceInventoryReplenishmentItemImpl.class,
-			commerceInventoryReplenishmentItemModelImpl, false, true);
-
-		cacheUniqueFindersCache(commerceInventoryReplenishmentItemModelImpl);
+		cacheUniqueFindersResult(commerceInventoryReplenishmentItem, false);
 
 		if (isNew) {
 			commerceInventoryReplenishmentItem.setNew(false);
 		}
 
 		commerceInventoryReplenishmentItem.resetOriginalValues();
-
-		return commerceInventoryReplenishmentItem;
-	}
-
-	/**
-	 * Returns the commerce inventory replenishment item with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the commerce inventory replenishment item
-	 * @return the commerce inventory replenishment item
-	 * @throws NoSuchInventoryReplenishmentItemException if a commerce inventory replenishment item with the primary key could not be found
-	 */
-	@Override
-	public CommerceInventoryReplenishmentItem findByPrimaryKey(
-			Serializable primaryKey)
-		throws NoSuchInventoryReplenishmentItemException {
-
-		CommerceInventoryReplenishmentItem commerceInventoryReplenishmentItem =
-			fetchByPrimaryKey(primaryKey);
-
-		if (commerceInventoryReplenishmentItem == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchInventoryReplenishmentItemException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return commerceInventoryReplenishmentItem;
 	}
@@ -1856,195 +1647,6 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 			(Serializable)commerceInventoryReplenishmentItemId);
 	}
 
-	/**
-	 * Returns all the commerce inventory replenishment items.
-	 *
-	 * @return the commerce inventory replenishment items
-	 */
-	@Override
-	public List<CommerceInventoryReplenishmentItem> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the commerce inventory replenishment items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceInventoryReplenishmentItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory replenishment items
-	 * @param end the upper bound of the range of commerce inventory replenishment items (not inclusive)
-	 * @return the range of commerce inventory replenishment items
-	 */
-	@Override
-	public List<CommerceInventoryReplenishmentItem> findAll(
-		int start, int end) {
-
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce inventory replenishment items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceInventoryReplenishmentItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory replenishment items
-	 * @param end the upper bound of the range of commerce inventory replenishment items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce inventory replenishment items
-	 */
-	@Override
-	public List<CommerceInventoryReplenishmentItem> findAll(
-		int start, int end,
-		OrderByComparator<CommerceInventoryReplenishmentItem>
-			orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce inventory replenishment items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceInventoryReplenishmentItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory replenishment items
-	 * @param end the upper bound of the range of commerce inventory replenishment items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce inventory replenishment items
-	 */
-	@Override
-	public List<CommerceInventoryReplenishmentItem> findAll(
-		int start, int end,
-		OrderByComparator<CommerceInventoryReplenishmentItem> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<CommerceInventoryReplenishmentItem> list = null;
-
-		if (useFinderCache) {
-			list =
-				(List<CommerceInventoryReplenishmentItem>)finderCache.getResult(
-					finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM;
-
-				sql = sql.concat(
-					CommerceInventoryReplenishmentItemModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<CommerceInventoryReplenishmentItem>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the commerce inventory replenishment items from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CommerceInventoryReplenishmentItem
-				commerceInventoryReplenishmentItem : findAll()) {
-
-			remove(commerceInventoryReplenishmentItem);
-		}
-	}
-
-	/**
-	 * Returns the number of commerce inventory replenishment items.
-	 *
-	 * @return the number of commerce inventory replenishment items
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_COMMERCEINVENTORYREPLENISHMENTITEM);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	public Set<String> getBadColumnNames() {
 		return _badColumnNames;
@@ -2075,21 +1677,6 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -2100,13 +1687,13 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
@@ -2114,7 +1701,7 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 			_SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 			_SQL_COUNT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 			CommerceInventoryReplenishmentItemModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commerceInventoryReplenishmentItem.", "uuid",
 				FinderColumn.Type.STRING, "=", true, true,
@@ -2132,12 +1719,12 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -2147,10 +1734,10 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 				_SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 				_SQL_COUNT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 				CommerceInventoryReplenishmentItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"commerceInventoryReplenishmentItem.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					CommerceInventoryReplenishmentItem::getUuid),
 				new FinderColumn<>(
 					"commerceInventoryReplenishmentItem.", "companyId",
@@ -2189,7 +1776,7 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 				_SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 				_SQL_COUNT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 				CommerceInventoryReplenishmentItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"commerceInventoryReplenishmentItem.",
 					"commerceInventoryWarehouseId", FinderColumn.Type.LONG, "=",
@@ -2223,7 +1810,7 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 				_SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 				_SQL_COUNT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 				CommerceInventoryReplenishmentItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"commerceInventoryReplenishmentItem.", "availabilityDate",
 					FinderColumn.Type.DATE, "=", true, true,
@@ -2239,11 +1826,13 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 
 		_finderPathWithoutPaginationFindBySku = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findBySku",
-			new String[] {String.class.getName()}, new String[] {"sku"}, true);
+			new String[] {String.class.getName()}, new String[] {"sku"}, 0, 1,
+			true, null);
 
 		_finderPathCountBySku = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countBySku",
-			new String[] {String.class.getName()}, new String[] {"sku"}, false);
+			new String[] {String.class.getName()}, new String[] {"sku"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderBySku = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindBySku,
@@ -2251,7 +1840,7 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 			_SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 			_SQL_COUNT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 			CommerceInventoryReplenishmentItemModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commerceInventoryReplenishmentItem.", "sku",
 				FinderColumn.Type.STRING, "=", true, true,
@@ -2272,7 +1861,8 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "sku", "unitOfMeasureKey"}, true);
+			new String[] {"companyId", "sku", "unitOfMeasureKey"}, 0, 6, true,
+			null);
 
 		_finderPathCountByC_S_U = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_S_U",
@@ -2280,7 +1870,8 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "sku", "unitOfMeasureKey"}, false);
+			new String[] {"companyId", "sku", "unitOfMeasureKey"}, 0, 6, false,
+			null);
 
 		_collectionPersistenceFinderByC_S_U = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_S_U,
@@ -2288,14 +1879,14 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 			_SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 			_SQL_COUNT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 			CommerceInventoryReplenishmentItemModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commerceInventoryReplenishmentItem.", "companyId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceInventoryReplenishmentItem::getCompanyId),
 			new FinderColumn<>(
 				"commerceInventoryReplenishmentItem.", "sku",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				CommerceInventoryReplenishmentItem::getSku),
 			new FinderColumn<>(
 				"commerceInventoryReplenishmentItem.", "unitOfMeasureKey",
@@ -2317,7 +1908,8 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 				Date.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"availabilityDate", "sku", "unitOfMeasureKey"}, true);
+			new String[] {"availabilityDate", "sku", "unitOfMeasureKey"}, 0, 6,
+			true, null);
 
 		_finderPathCountByAD_S_U = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByAD_S_U",
@@ -2325,8 +1917,8 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 				Date.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"availabilityDate", "sku", "unitOfMeasureKey"},
-			false);
+			new String[] {"availabilityDate", "sku", "unitOfMeasureKey"}, 0, 6,
+			false, null);
 
 		_collectionPersistenceFinderByAD_S_U =
 			new CollectionPersistenceFinder<>(
@@ -2336,31 +1928,34 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 				_SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 				_SQL_COUNT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
 				CommerceInventoryReplenishmentItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"commerceInventoryReplenishmentItem.", "availabilityDate",
-					FinderColumn.Type.DATE, "=", true, false,
+					FinderColumn.Type.DATE, "=", true, true,
 					CommerceInventoryReplenishmentItem::getAvailabilityDate),
 				new FinderColumn<>(
 					"commerceInventoryReplenishmentItem.", "sku",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					CommerceInventoryReplenishmentItem::getSku),
 				new FinderColumn<>(
 					"commerceInventoryReplenishmentItem.", "unitOfMeasureKey",
 					FinderColumn.Type.STRING, "=", true, true,
 					CommerceInventoryReplenishmentItem::getUnitOfMeasureKey));
 
-		_finderPathFetchByERC_C = new FinderPath(
+		_finderPathFetchByERC_C = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"externalReferenceCode", "companyId"}, true);
+			new String[] {"externalReferenceCode", "companyId"}, 0, 1, false,
+			convertNullFunction(
+				CommerceInventoryReplenishmentItem::getExternalReferenceCode),
+			CommerceInventoryReplenishmentItem::getCompanyId);
 
 		_uniquePersistenceFinderByERC_C = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByERC_C,
-			_SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE,
+			_SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE, "",
 			new FinderColumn<>(
 				"commerceInventoryReplenishmentItem.", "externalReferenceCode",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				CommerceInventoryReplenishmentItem::getExternalReferenceCode),
 			new FinderColumn<>(
 				"commerceInventoryReplenishmentItem.", "companyId",
@@ -2410,6 +2005,9 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CommerceInventoryReplenishmentItemModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM =
 		"SELECT commerceInventoryReplenishmentItem FROM CommerceInventoryReplenishmentItem commerceInventoryReplenishmentItem";
 
@@ -2417,18 +2015,9 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 		_SQL_SELECT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE =
 			"SELECT commerceInventoryReplenishmentItem FROM CommerceInventoryReplenishmentItem commerceInventoryReplenishmentItem WHERE ";
 
-	private static final String _SQL_COUNT_COMMERCEINVENTORYREPLENISHMENTITEM =
-		"SELECT COUNT(commerceInventoryReplenishmentItem) FROM CommerceInventoryReplenishmentItem commerceInventoryReplenishmentItem";
-
 	private static final String
 		_SQL_COUNT_COMMERCEINVENTORYREPLENISHMENTITEM_WHERE =
 			"SELECT COUNT(commerceInventoryReplenishmentItem) FROM CommerceInventoryReplenishmentItem commerceInventoryReplenishmentItem WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"commerceInventoryReplenishmentItem.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CommerceInventoryReplenishmentItem exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CommerceInventoryReplenishmentItem exists with the key {";
@@ -2445,4 +2034,4 @@ public class CommerceInventoryReplenishmentItemPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2058226820
+// LIFERAY-SERVICE-BUILDER-HASH:-733587737

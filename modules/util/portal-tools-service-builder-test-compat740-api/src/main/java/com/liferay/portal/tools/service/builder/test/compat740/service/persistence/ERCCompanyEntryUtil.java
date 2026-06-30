@@ -36,6 +36,20 @@ public class ERCCompanyEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<ERCCompanyEntry> ercCompanyEntries) {
+		getPersistence().cacheResult(ercCompanyEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(ERCCompanyEntry ercCompanyEntry) {
+		getPersistence().cacheResult(ercCompanyEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -436,24 +450,6 @@ public class ERCCompanyEntryUtil {
 	}
 
 	/**
-	 * Caches the erc company entry in the entity cache if it is enabled.
-	 *
-	 * @param ercCompanyEntry the erc company entry
-	 */
-	public static void cacheResult(ERCCompanyEntry ercCompanyEntry) {
-		getPersistence().cacheResult(ercCompanyEntry);
-	}
-
-	/**
-	 * Caches the erc company entries in the entity cache if it is enabled.
-	 *
-	 * @param ercCompanyEntries the erc company entries
-	 */
-	public static void cacheResult(List<ERCCompanyEntry> ercCompanyEntries) {
-		getPersistence().cacheResult(ercCompanyEntries);
-	}
-
-	/**
 	 * Creates a new erc company entry with the primary key. Does not add the erc company entry to the database.
 	 *
 	 * @param ercCompanyEntryId the primary key for the new erc company entry
@@ -505,87 +501,6 @@ public class ERCCompanyEntryUtil {
 		return getPersistence().fetchByPrimaryKey(ercCompanyEntryId);
 	}
 
-	/**
-	 * Returns all the erc company entries.
-	 *
-	 * @return the erc company entries
-	 */
-	public static List<ERCCompanyEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the erc company entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.ERCCompanyEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc company entries
-	 * @param end the upper bound of the range of erc company entries (not inclusive)
-	 * @return the range of erc company entries
-	 */
-	public static List<ERCCompanyEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the erc company entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.ERCCompanyEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc company entries
-	 * @param end the upper bound of the range of erc company entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of erc company entries
-	 */
-	public static List<ERCCompanyEntry> findAll(
-		int start, int end,
-		OrderByComparator<ERCCompanyEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the erc company entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.ERCCompanyEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc company entries
-	 * @param end the upper bound of the range of erc company entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of erc company entries
-	 */
-	public static List<ERCCompanyEntry> findAll(
-		int start, int end,
-		OrderByComparator<ERCCompanyEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the erc company entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of erc company entries.
-	 *
-	 * @return the number of erc company entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static ERCCompanyEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -597,4 +512,4 @@ public class ERCCompanyEntryUtil {
 	private static volatile ERCCompanyEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-138103461
+// LIFERAY-SERVICE-BUILDER-HASH:-1679771571

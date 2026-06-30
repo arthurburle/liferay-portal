@@ -36,6 +36,22 @@ public class CountryLocalizationUtil {
 	 */
 
 	/**
+	 * @see BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CountryLocalization> countryLocalizations) {
+
+		getPersistence().cacheResult(countryLocalizations);
+	}
+
+	/**
+	 * @see BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CountryLocalization countryLocalization) {
+		getPersistence().cacheResult(countryLocalization);
+	}
+
+	/**
 	 * @see BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -314,26 +330,6 @@ public class CountryLocalizationUtil {
 	}
 
 	/**
-	 * Caches the country localization in the entity cache if it is enabled.
-	 *
-	 * @param countryLocalization the country localization
-	 */
-	public static void cacheResult(CountryLocalization countryLocalization) {
-		getPersistence().cacheResult(countryLocalization);
-	}
-
-	/**
-	 * Caches the country localizations in the entity cache if it is enabled.
-	 *
-	 * @param countryLocalizations the country localizations
-	 */
-	public static void cacheResult(
-		List<CountryLocalization> countryLocalizations) {
-
-		getPersistence().cacheResult(countryLocalizations);
-	}
-
-	/**
 	 * Creates a new country localization with the primary key. Does not add the country localization to the database.
 	 *
 	 * @param countryLocalizationId the primary key for the new country localization
@@ -390,87 +386,6 @@ public class CountryLocalizationUtil {
 		return getPersistence().fetchByPrimaryKey(countryLocalizationId);
 	}
 
-	/**
-	 * Returns all the country localizations.
-	 *
-	 * @return the country localizations
-	 */
-	public static List<CountryLocalization> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the country localizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.CountryLocalizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of country localizations
-	 * @param end the upper bound of the range of country localizations (not inclusive)
-	 * @return the range of country localizations
-	 */
-	public static List<CountryLocalization> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the country localizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.CountryLocalizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of country localizations
-	 * @param end the upper bound of the range of country localizations (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of country localizations
-	 */
-	public static List<CountryLocalization> findAll(
-		int start, int end,
-		OrderByComparator<CountryLocalization> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the country localizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.CountryLocalizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of country localizations
-	 * @param end the upper bound of the range of country localizations (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of country localizations
-	 */
-	public static List<CountryLocalization> findAll(
-		int start, int end,
-		OrderByComparator<CountryLocalization> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the country localizations from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of country localizations.
-	 *
-	 * @return the number of country localizations
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CountryLocalizationPersistence getPersistence() {
 		return _persistence;
 	}
@@ -484,4 +399,4 @@ public class CountryLocalizationUtil {
 	private static volatile CountryLocalizationPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1630739047
+// LIFERAY-SERVICE-BUILDER-HASH:-362083897

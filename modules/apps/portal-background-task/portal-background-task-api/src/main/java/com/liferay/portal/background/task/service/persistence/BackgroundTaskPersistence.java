@@ -1799,20 +1799,6 @@ public interface BackgroundTaskPersistence
 		boolean completed);
 
 	/**
-	 * Caches the background task in the entity cache if it is enabled.
-	 *
-	 * @param backgroundTask the background task
-	 */
-	public void cacheResult(BackgroundTask backgroundTask);
-
-	/**
-	 * Caches the background tasks in the entity cache if it is enabled.
-	 *
-	 * @param backgroundTasks the background tasks
-	 */
-	public void cacheResult(java.util.List<BackgroundTask> backgroundTasks);
-
-	/**
 	 * Creates a new background task with the primary key. Does not add the background task to the database.
 	 *
 	 * @param backgroundTaskId the primary key for the new background task
@@ -1850,73 +1836,5 @@ public interface BackgroundTaskPersistence
 	 */
 	public BackgroundTask fetchByPrimaryKey(long backgroundTaskId);
 
-	/**
-	 * Returns all the background tasks.
-	 *
-	 * @return the background tasks
-	 */
-	public java.util.List<BackgroundTask> findAll();
-
-	/**
-	 * Returns a range of all the background tasks.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.background.task.model.impl.BackgroundTaskModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of background tasks
-	 * @param end the upper bound of the range of background tasks (not inclusive)
-	 * @return the range of background tasks
-	 */
-	public java.util.List<BackgroundTask> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the background tasks.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.background.task.model.impl.BackgroundTaskModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of background tasks
-	 * @param end the upper bound of the range of background tasks (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of background tasks
-	 */
-	public java.util.List<BackgroundTask> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<BackgroundTask>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the background tasks.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.background.task.model.impl.BackgroundTaskModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of background tasks
-	 * @param end the upper bound of the range of background tasks (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of background tasks
-	 */
-	public java.util.List<BackgroundTask> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<BackgroundTask>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the background tasks from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of background tasks.
-	 *
-	 * @return the number of background tasks
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:968251544
+// LIFERAY-SERVICE-BUILDER-HASH:-1382702280

@@ -13,12 +13,10 @@ import com.liferay.commerce.product.type.virtual.model.impl.CPDVirtualSettingFil
 import com.liferay.commerce.product.type.virtual.service.persistence.CPDVirtualSettingFileEntryPersistence;
 import com.liferay.commerce.product.type.virtual.service.persistence.CPDVirtualSettingFileEntryUtil;
 import com.liferay.commerce.product.type.virtual.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -31,10 +29,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -69,7 +64,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CPDVirtualSettingFileEntryPersistence.class)
 public class CPDVirtualSettingFileEntryPersistenceImpl
-	extends BasePersistenceImpl<CPDVirtualSettingFileEntry>
+	extends BasePersistenceImpl
+		<CPDVirtualSettingFileEntry, NoSuchCPDVirtualSettingFileEntryException>
 	implements CPDVirtualSettingFileEntryPersistence {
 
 	/*
@@ -86,9 +82,6 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -821,126 +814,6 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the cpd virtual setting file entry in the entity cache if it is enabled.
-	 *
-	 * @param cpdVirtualSettingFileEntry the cpd virtual setting file entry
-	 */
-	@Override
-	public void cacheResult(
-		CPDVirtualSettingFileEntry cpdVirtualSettingFileEntry) {
-
-		entityCache.putResult(
-			CPDVirtualSettingFileEntryImpl.class,
-			cpdVirtualSettingFileEntry.getPrimaryKey(),
-			cpdVirtualSettingFileEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G,
-			new Object[] {
-				cpdVirtualSettingFileEntry.getUuid(),
-				cpdVirtualSettingFileEntry.getGroupId()
-			},
-			cpdVirtualSettingFileEntry);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the cpd virtual setting file entries in the entity cache if it is enabled.
-	 *
-	 * @param cpdVirtualSettingFileEntries the cpd virtual setting file entries
-	 */
-	@Override
-	public void cacheResult(
-		List<CPDVirtualSettingFileEntry> cpdVirtualSettingFileEntries) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (cpdVirtualSettingFileEntries.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CPDVirtualSettingFileEntry cpdVirtualSettingFileEntry :
-				cpdVirtualSettingFileEntries) {
-
-			if (entityCache.getResult(
-					CPDVirtualSettingFileEntryImpl.class,
-					cpdVirtualSettingFileEntry.getPrimaryKey()) == null) {
-
-				cacheResult(cpdVirtualSettingFileEntry);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all cpd virtual setting file entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CPDVirtualSettingFileEntryImpl.class);
-
-		finderCache.clearCache(CPDVirtualSettingFileEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the cpd virtual setting file entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(
-		CPDVirtualSettingFileEntry cpdVirtualSettingFileEntry) {
-
-		entityCache.removeResult(
-			CPDVirtualSettingFileEntryImpl.class, cpdVirtualSettingFileEntry);
-	}
-
-	@Override
-	public void clearCache(
-		List<CPDVirtualSettingFileEntry> cpdVirtualSettingFileEntries) {
-
-		for (CPDVirtualSettingFileEntry cpdVirtualSettingFileEntry :
-				cpdVirtualSettingFileEntries) {
-
-			entityCache.removeResult(
-				CPDVirtualSettingFileEntryImpl.class,
-				cpdVirtualSettingFileEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CPDVirtualSettingFileEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CPDVirtualSettingFileEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CPDVirtualSettingFileEntryModelImpl
-			cpdVirtualSettingFileEntryModelImpl) {
-
-		Object[] args = new Object[] {
-			cpdVirtualSettingFileEntryModelImpl.getUuid(),
-			cpdVirtualSettingFileEntryModelImpl.getGroupId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G, args,
-			cpdVirtualSettingFileEntryModelImpl);
-	}
-
-	/**
 	 * Creates a new cpd virtual setting file entry with the primary key. Does not add the cpd virtual setting file entry to the database.
 	 *
 	 * @param CPDefinitionVirtualSettingFileEntryId the primary key for the new cpd virtual setting file entry
@@ -980,50 +853,6 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 		throws NoSuchCPDVirtualSettingFileEntryException {
 
 		return remove((Serializable)CPDefinitionVirtualSettingFileEntryId);
-	}
-
-	/**
-	 * Removes the cpd virtual setting file entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the cpd virtual setting file entry
-	 * @return the cpd virtual setting file entry that was removed
-	 * @throws NoSuchCPDVirtualSettingFileEntryException if a cpd virtual setting file entry with the primary key could not be found
-	 */
-	@Override
-	public CPDVirtualSettingFileEntry remove(Serializable primaryKey)
-		throws NoSuchCPDVirtualSettingFileEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CPDVirtualSettingFileEntry cpdVirtualSettingFileEntry =
-				(CPDVirtualSettingFileEntry)session.get(
-					CPDVirtualSettingFileEntryImpl.class, primaryKey);
-
-			if (cpdVirtualSettingFileEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchCPDVirtualSettingFileEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(cpdVirtualSettingFileEntry);
-		}
-		catch (NoSuchCPDVirtualSettingFileEntryException
-					noSuchEntityException) {
-
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1141,43 +970,13 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CPDVirtualSettingFileEntryImpl.class,
-			cpdVirtualSettingFileEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(cpdVirtualSettingFileEntryModelImpl);
+		cacheUniqueFindersResult(cpdVirtualSettingFileEntry, false);
 
 		if (isNew) {
 			cpdVirtualSettingFileEntry.setNew(false);
 		}
 
 		cpdVirtualSettingFileEntry.resetOriginalValues();
-
-		return cpdVirtualSettingFileEntry;
-	}
-
-	/**
-	 * Returns the cpd virtual setting file entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the cpd virtual setting file entry
-	 * @return the cpd virtual setting file entry
-	 * @throws NoSuchCPDVirtualSettingFileEntryException if a cpd virtual setting file entry with the primary key could not be found
-	 */
-	@Override
-	public CPDVirtualSettingFileEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchCPDVirtualSettingFileEntryException {
-
-		CPDVirtualSettingFileEntry cpdVirtualSettingFileEntry =
-			fetchByPrimaryKey(primaryKey);
-
-		if (cpdVirtualSettingFileEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchCPDVirtualSettingFileEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return cpdVirtualSettingFileEntry;
 	}
@@ -1212,191 +1011,6 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 			(Serializable)CPDefinitionVirtualSettingFileEntryId);
 	}
 
-	/**
-	 * Returns all the cpd virtual setting file entries.
-	 *
-	 * @return the cpd virtual setting file entries
-	 */
-	@Override
-	public List<CPDVirtualSettingFileEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the cpd virtual setting file entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPDVirtualSettingFileEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cpd virtual setting file entries
-	 * @param end the upper bound of the range of cpd virtual setting file entries (not inclusive)
-	 * @return the range of cpd virtual setting file entries
-	 */
-	@Override
-	public List<CPDVirtualSettingFileEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the cpd virtual setting file entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPDVirtualSettingFileEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cpd virtual setting file entries
-	 * @param end the upper bound of the range of cpd virtual setting file entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cpd virtual setting file entries
-	 */
-	@Override
-	public List<CPDVirtualSettingFileEntry> findAll(
-		int start, int end,
-		OrderByComparator<CPDVirtualSettingFileEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the cpd virtual setting file entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPDVirtualSettingFileEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cpd virtual setting file entries
-	 * @param end the upper bound of the range of cpd virtual setting file entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cpd virtual setting file entries
-	 */
-	@Override
-	public List<CPDVirtualSettingFileEntry> findAll(
-		int start, int end,
-		OrderByComparator<CPDVirtualSettingFileEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<CPDVirtualSettingFileEntry> list = null;
-
-		if (useFinderCache) {
-			list = (List<CPDVirtualSettingFileEntry>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_CPDVIRTUALSETTINGFILEENTRY);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_CPDVIRTUALSETTINGFILEENTRY;
-
-				sql = sql.concat(
-					CPDVirtualSettingFileEntryModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<CPDVirtualSettingFileEntry>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the cpd virtual setting file entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CPDVirtualSettingFileEntry cpdVirtualSettingFileEntry :
-				findAll()) {
-
-			remove(cpdVirtualSettingFileEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of cpd virtual setting file entries.
-	 *
-	 * @return the number of cpd virtual setting file entries
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_CPDVIRTUALSETTINGFILEENTRY);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	public Set<String> getBadColumnNames() {
 		return _badColumnNames;
@@ -1427,21 +1041,6 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1452,13 +1051,13 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
@@ -1466,22 +1065,24 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 			_SQL_SELECT_CPDVIRTUALSETTINGFILEENTRY_WHERE,
 			_SQL_COUNT_CPDVIRTUALSETTINGFILEENTRY_WHERE,
 			CPDVirtualSettingFileEntryModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"cpdVirtualSettingFileEntry.", "uuid", FinderColumn.Type.STRING,
 				"=", true, true, CPDVirtualSettingFileEntry::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(CPDVirtualSettingFileEntry::getUuid),
+			CPDVirtualSettingFileEntry::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByUUID_G,
-			_SQL_SELECT_CPDVIRTUALSETTINGFILEENTRY_WHERE,
+			_SQL_SELECT_CPDVIRTUALSETTINGFILEENTRY_WHERE, "",
 			new FinderColumn<>(
 				"cpdVirtualSettingFileEntry.", "uuid", FinderColumn.Type.STRING,
-				"=", true, false, CPDVirtualSettingFileEntry::getUuid),
+				"=", true, true, CPDVirtualSettingFileEntry::getUuid),
 			new FinderColumn<>(
 				"cpdVirtualSettingFileEntry.", "groupId",
 				FinderColumn.Type.LONG, "=", true, true,
@@ -1499,12 +1100,12 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1514,10 +1115,10 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 				_SQL_SELECT_CPDVIRTUALSETTINGFILEENTRY_WHERE,
 				_SQL_COUNT_CPDVIRTUALSETTINGFILEENTRY_WHERE,
 				CPDVirtualSettingFileEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"cpdVirtualSettingFileEntry.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					CPDVirtualSettingFileEntry::getUuid),
 				new FinderColumn<>(
 					"cpdVirtualSettingFileEntry.", "companyId",
@@ -1556,7 +1157,7 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 				_SQL_SELECT_CPDVIRTUALSETTINGFILEENTRY_WHERE,
 				_SQL_COUNT_CPDVIRTUALSETTINGFILEENTRY_WHERE,
 				CPDVirtualSettingFileEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"cpdVirtualSettingFileEntry.",
 					"CPDefinitionVirtualSettingId", FinderColumn.Type.LONG, "=",
@@ -1590,7 +1191,7 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 				_SQL_SELECT_CPDVIRTUALSETTINGFILEENTRY_WHERE,
 				_SQL_COUNT_CPDVIRTUALSETTINGFILEENTRY_WHERE,
 				CPDVirtualSettingFileEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"cpdVirtualSettingFileEntry.", "fileEntryId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1638,23 +1239,17 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CPDVirtualSettingFileEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_CPDVIRTUALSETTINGFILEENTRY =
 		"SELECT cpdVirtualSettingFileEntry FROM CPDVirtualSettingFileEntry cpdVirtualSettingFileEntry";
 
 	private static final String _SQL_SELECT_CPDVIRTUALSETTINGFILEENTRY_WHERE =
 		"SELECT cpdVirtualSettingFileEntry FROM CPDVirtualSettingFileEntry cpdVirtualSettingFileEntry WHERE ";
 
-	private static final String _SQL_COUNT_CPDVIRTUALSETTINGFILEENTRY =
-		"SELECT COUNT(cpdVirtualSettingFileEntry) FROM CPDVirtualSettingFileEntry cpdVirtualSettingFileEntry";
-
 	private static final String _SQL_COUNT_CPDVIRTUALSETTINGFILEENTRY_WHERE =
 		"SELECT COUNT(cpdVirtualSettingFileEntry) FROM CPDVirtualSettingFileEntry cpdVirtualSettingFileEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"cpdVirtualSettingFileEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CPDVirtualSettingFileEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CPDVirtualSettingFileEntry exists with the key {";
@@ -1671,4 +1266,4 @@ public class CPDVirtualSettingFileEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:916321093
+// LIFERAY-SERVICE-BUILDER-HASH:1412849852

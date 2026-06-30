@@ -10,15 +10,16 @@ import {ClayDropDownWithItems} from '@clayui/drop-down';
 import {ClayInput} from '@clayui/form';
 import ClayIcon from '@clayui/icon';
 import ClayLink from '@clayui/link';
+import {AIAssistantChat} from '@liferay/ai-hub-cell-js-components-web';
 import {isCtrlOrMeta} from '@liferay/layout-js-components-web';
 import classNames from 'classnames';
 import {sessionStorage, sub} from 'frontend-js-web';
 import React, {useCallback, useEffect, useId, useRef, useState} from 'react';
 
 import Toolbar from '../../common/components/Toolbar';
-import AIAssistantChat from './AIAssistantChat/AIAssistantChat';
 import {toMomentDate} from './ScheduleField';
 import SchedulePublicationModal from './SchedulePublicationModal';
+import PreviewModal from './preview/PreviewModal';
 
 export const EVENT_CLOSE_PREVIEW = 'contentEditor:closePreview';
 
@@ -31,20 +32,25 @@ const STATUS_DRAFT_CODE = 2;
 export default function ContentEditorToolbar({
 	backURL,
 	displayDate: initialDisplayDate,
+	getPreviewDataURL,
 	hasWorkflow,
 	headerTitle,
+	title,
 	type,
 }: {
 	backURL: string;
 	displayDate: string;
+	getPreviewDataURL: string;
 	hasWorkflow: boolean;
 	headerTitle: string;
+	title: string;
 	type: string;
 }) {
 	const [displayDate, setDisplayDate] = useState<string>('');
 	const [formId, setFormId] = useState<string | undefined>();
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [showPreview, setShowPreview] = useState<boolean>(false);
+	const [showPreviewModal, setShowPreviewModal] = useState<boolean>(false);
 
 	const previewButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -156,7 +162,10 @@ export default function ContentEditorToolbar({
 			{Liferay.FeatureFlags['LPD-62272'] && (
 				<>
 					<Toolbar.Item>
-						<AIAssistantChat />
+						<AIAssistantChat
+							getContext={() => ({})}
+							instructionDefinitionScope="cms"
+						/>
 					</Toolbar.Item>
 
 					<div
@@ -180,8 +189,8 @@ export default function ContentEditorToolbar({
 								: Liferay.Language.get('open-preview')
 						}
 						aria-pressed={showPreview}
-						borderless={showPreview}
-						className={classNames('c-mr-3 d-lg-block d-none', {
+						borderless
+						className={classNames('c-mr-2 d-lg-block d-none', {
 							active: showPreview,
 						})}
 						displayType="secondary"
@@ -209,6 +218,7 @@ export default function ContentEditorToolbar({
 						aria-label={Liferay.Language.get('preview')}
 						className="c-mr-3 d-lg-none"
 						displayType="secondary"
+						onClick={() => setShowPreviewModal(true)}
 						size="sm"
 						symbol="view"
 						title={Liferay.Language.get('preview')}
@@ -331,6 +341,14 @@ export default function ContentEditorToolbar({
 					onCloseModal={() => setShowModal(false)}
 					onUpdateDate={setDisplayDate}
 					type={type}
+				/>
+			) : null}
+
+			{showPreviewModal ? (
+				<PreviewModal
+					getPreviewDataURL={getPreviewDataURL}
+					onCloseModal={() => setShowPreviewModal(false)}
+					title={title}
 				/>
 			) : null}
 		</Toolbar>

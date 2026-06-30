@@ -344,21 +344,6 @@ public interface CommerceVirtualOrderItemPersistence
 	public int countByCommerceOrderItemId(long commerceOrderItemId);
 
 	/**
-	 * Caches the commerce virtual order item in the entity cache if it is enabled.
-	 *
-	 * @param commerceVirtualOrderItem the commerce virtual order item
-	 */
-	public void cacheResult(CommerceVirtualOrderItem commerceVirtualOrderItem);
-
-	/**
-	 * Caches the commerce virtual order items in the entity cache if it is enabled.
-	 *
-	 * @param commerceVirtualOrderItems the commerce virtual order items
-	 */
-	public void cacheResult(
-		java.util.List<CommerceVirtualOrderItem> commerceVirtualOrderItems);
-
-	/**
 	 * Creates a new commerce virtual order item with the primary key. Does not add the commerce virtual order item to the database.
 	 *
 	 * @param commerceVirtualOrderItemId the primary key for the new commerce virtual order item
@@ -399,73 +384,5 @@ public interface CommerceVirtualOrderItemPersistence
 	public CommerceVirtualOrderItem fetchByPrimaryKey(
 		long commerceVirtualOrderItemId);
 
-	/**
-	 * Returns all the commerce virtual order items.
-	 *
-	 * @return the commerce virtual order items
-	 */
-	public java.util.List<CommerceVirtualOrderItem> findAll();
-
-	/**
-	 * Returns a range of all the commerce virtual order items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.type.virtual.order.model.impl.CommerceVirtualOrderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce virtual order items
-	 * @param end the upper bound of the range of commerce virtual order items (not inclusive)
-	 * @return the range of commerce virtual order items
-	 */
-	public java.util.List<CommerceVirtualOrderItem> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce virtual order items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.type.virtual.order.model.impl.CommerceVirtualOrderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce virtual order items
-	 * @param end the upper bound of the range of commerce virtual order items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce virtual order items
-	 */
-	public java.util.List<CommerceVirtualOrderItem> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceVirtualOrderItem> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce virtual order items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.type.virtual.order.model.impl.CommerceVirtualOrderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce virtual order items
-	 * @param end the upper bound of the range of commerce virtual order items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce virtual order items
-	 */
-	public java.util.List<CommerceVirtualOrderItem> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceVirtualOrderItem> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce virtual order items from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce virtual order items.
-	 *
-	 * @return the number of commerce virtual order items
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:813204736
+// LIFERAY-SERVICE-BUILDER-HASH:-91469298

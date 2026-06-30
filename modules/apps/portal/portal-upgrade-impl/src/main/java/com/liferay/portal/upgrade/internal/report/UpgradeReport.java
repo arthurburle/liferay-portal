@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.upgrade.recorder.UpgradeLogProgressTracker;
 import com.liferay.portal.kernel.upgrade.recorder.UpgradeSQLRecorder;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.EnvPropertiesUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -58,13 +59,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
@@ -112,8 +113,7 @@ public class UpgradeReport {
 		}
 
 		_executionDateString = _getExecutionDateString();
-		_executionTimeString =
-			(DBUpgrader.getUpgradeTime() / Time.SECOND) + " seconds";
+		_executionTimeString = _getExecutionTimeString();
 		_rootDir = _getRootDir();
 
 		Map<String, Object> reportData = _getReportData(upgradeRecorder);
@@ -144,14 +144,52 @@ public class UpgradeReport {
 	}
 
 	private String _getExecutionDateString() {
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
-			"EEE, MMM dd, yyyy hh:mm:ss z");
+		DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(
+			"EEE, MMM dd, yyyy HH:mm:ss z", LocaleUtil.US,
+			TimeZone.getTimeZone("UTC"));
 
-		simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return dateFormat.format(new Date());
+	}
 
-		Calendar calendar = Calendar.getInstance();
+	private String _getExecutionTimeString() {
+		long upgradeTime = DBUpgrader.getUpgradeTime();
 
-		return simpleDateFormat.format(calendar.getTime());
+		List<String> parts = new ArrayList<>();
+
+		long hours = upgradeTime / Time.HOUR;
+
+		if (hours > 0) {
+			parts.add(
+				hours + " hour" + ((hours == 1) ? StringPool.BLANK : "s"));
+		}
+
+		long minutes = (upgradeTime % Time.HOUR) / Time.MINUTE;
+
+		if (minutes > 0) {
+			parts.add(
+				minutes + " minute" +
+					((minutes == 1) ? StringPool.BLANK : "s"));
+		}
+
+		long totalSeconds = upgradeTime / Time.SECOND;
+
+		if (parts.isEmpty()) {
+			return totalSeconds + " second" +
+				((totalSeconds == 1) ? StringPool.BLANK : "s");
+		}
+
+		long seconds = (upgradeTime % Time.MINUTE) / Time.SECOND;
+
+		if (seconds > 0) {
+			parts.add(
+				seconds + " second" +
+					((seconds == 1) ? StringPool.BLANK : "s"));
+		}
+
+		return StringBundler.concat(
+			totalSeconds, " seconds (",
+			StringUtil.merge(parts, StringPool.SPACE),
+			StringPool.CLOSE_PARENTHESIS);
 	}
 
 	private List<MessagesPrinter> _getMessagesPrinters(
@@ -715,10 +753,14 @@ public class UpgradeReport {
 		File reportFile = new File(reportsDir, reportFileName);
 
 		if (reportFile.exists()) {
+			DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(
+				"yyyyMMdd_HHmmss", LocaleUtil.US, TimeZone.getTimeZone("UTC"));
+
+			String timestamp = dateFormat.format(
+				new Date(reportFile.lastModified()));
+
 			reportFile.renameTo(
-				new File(
-					reportsDir,
-					reportFileName + "." + reportFile.lastModified()));
+				new File(reportsDir, reportFileName + "." + timestamp));
 
 			reportFile = new File(reportsDir, reportFileName);
 		}

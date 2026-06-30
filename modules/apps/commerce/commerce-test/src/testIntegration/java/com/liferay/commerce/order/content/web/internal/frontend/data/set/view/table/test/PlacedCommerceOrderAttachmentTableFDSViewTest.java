@@ -53,16 +53,17 @@ public class PlacedCommerceOrderAttachmentTableFDSViewTest {
 
 	@Test
 	public void testGetFDSTableSchemaField() throws Exception {
-		_testGetFDSTableSchemaField(null, "extension", "attachment.extension");
-		_testGetFDSTableSchemaField(null, "type", "attachmentType.name");
-		_testGetFDSTableSchemaField("date", "modified-date", "dateModified");
-		_testGetFDSTableSchemaField(null, "priority", "priority");
-		_testGetFDSTableSchemaField(null, "title", "title");
+		_testGetFDSTableSchemaField(null, "extension", "extension", false);
+		_testGetFDSTableSchemaField(null, "type", "typeLabel", false);
+		_testGetFDSTableSchemaField(
+			"dateTime", "modified-date", "dateModified", true);
+		_testGetFDSTableSchemaField(null, "priority", "priority", true);
+		_testGetFDSTableSchemaField(null, "title", "title", true);
 	}
 
 	private void _testGetFDSTableSchemaField(
-		String expectedContentRenderer, String expectedLabel,
-		String fieldName) {
+		String expectedContentRenderer, String expectedLabel, String fieldName,
+		boolean sortable) {
 
 		FDSTableSchemaField fdsTableSchemaField = _fdsTableSchemaFieldsMap.get(
 			fieldName);
@@ -70,7 +71,7 @@ public class PlacedCommerceOrderAttachmentTableFDSViewTest {
 		Assert.assertEquals(
 			expectedContentRenderer, fdsTableSchemaField.getContentRenderer());
 		Assert.assertEquals(expectedLabel, fdsTableSchemaField.getLabel());
-		Assert.assertTrue(fdsTableSchemaField.isSortable());
+		Assert.assertEquals(sortable, fdsTableSchemaField.isSortable());
 	}
 
 	private Map<String, FDSTableSchemaField> _fdsTableSchemaFieldsMap;

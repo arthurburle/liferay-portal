@@ -39,6 +39,24 @@ public class CommerceNotificationQueueEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CommerceNotificationQueueEntry> commerceNotificationQueueEntries) {
+
+		getPersistence().cacheResult(commerceNotificationQueueEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		CommerceNotificationQueueEntry commerceNotificationQueueEntry) {
+
+		getPersistence().cacheResult(commerceNotificationQueueEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -799,28 +817,6 @@ public class CommerceNotificationQueueEntryUtil {
 	}
 
 	/**
-	 * Caches the commerce notification queue entry in the entity cache if it is enabled.
-	 *
-	 * @param commerceNotificationQueueEntry the commerce notification queue entry
-	 */
-	public static void cacheResult(
-		CommerceNotificationQueueEntry commerceNotificationQueueEntry) {
-
-		getPersistence().cacheResult(commerceNotificationQueueEntry);
-	}
-
-	/**
-	 * Caches the commerce notification queue entries in the entity cache if it is enabled.
-	 *
-	 * @param commerceNotificationQueueEntries the commerce notification queue entries
-	 */
-	public static void cacheResult(
-		List<CommerceNotificationQueueEntry> commerceNotificationQueueEntries) {
-
-		getPersistence().cacheResult(commerceNotificationQueueEntries);
-	}
-
-	/**
 	 * Creates a new commerce notification queue entry with the primary key. Does not add the commerce notification queue entry to the database.
 	 *
 	 * @param commerceNotificationQueueEntryId the primary key for the new commerce notification queue entry
@@ -882,89 +878,6 @@ public class CommerceNotificationQueueEntryUtil {
 			commerceNotificationQueueEntryId);
 	}
 
-	/**
-	 * Returns all the commerce notification queue entries.
-	 *
-	 * @return the commerce notification queue entries
-	 */
-	public static List<CommerceNotificationQueueEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce notification queue entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.notification.model.impl.CommerceNotificationQueueEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce notification queue entries
-	 * @param end the upper bound of the range of commerce notification queue entries (not inclusive)
-	 * @return the range of commerce notification queue entries
-	 */
-	public static List<CommerceNotificationQueueEntry> findAll(
-		int start, int end) {
-
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce notification queue entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.notification.model.impl.CommerceNotificationQueueEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce notification queue entries
-	 * @param end the upper bound of the range of commerce notification queue entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce notification queue entries
-	 */
-	public static List<CommerceNotificationQueueEntry> findAll(
-		int start, int end,
-		OrderByComparator<CommerceNotificationQueueEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce notification queue entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.notification.model.impl.CommerceNotificationQueueEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce notification queue entries
-	 * @param end the upper bound of the range of commerce notification queue entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce notification queue entries
-	 */
-	public static List<CommerceNotificationQueueEntry> findAll(
-		int start, int end,
-		OrderByComparator<CommerceNotificationQueueEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce notification queue entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce notification queue entries.
-	 *
-	 * @return the number of commerce notification queue entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceNotificationQueueEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -979,4 +892,4 @@ public class CommerceNotificationQueueEntryUtil {
 		_persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:575913988
+// LIFERAY-SERVICE-BUILDER-HASH:-446222486

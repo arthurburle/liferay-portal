@@ -1634,20 +1634,6 @@ public interface DLFileVersionPersistence
 		long groupId, long folderId, String title, String version);
 
 	/**
-	 * Caches the document library file version in the entity cache if it is enabled.
-	 *
-	 * @param dlFileVersion the document library file version
-	 */
-	public void cacheResult(DLFileVersion dlFileVersion);
-
-	/**
-	 * Caches the document library file versions in the entity cache if it is enabled.
-	 *
-	 * @param dlFileVersions the document library file versions
-	 */
-	public void cacheResult(java.util.List<DLFileVersion> dlFileVersions);
-
-	/**
 	 * Creates a new document library file version with the primary key. Does not add the document library file version to the database.
 	 *
 	 * @param fileVersionId the primary key for the new document library file version
@@ -1685,73 +1671,5 @@ public interface DLFileVersionPersistence
 	 */
 	public DLFileVersion fetchByPrimaryKey(long fileVersionId);
 
-	/**
-	 * Returns all the document library file versions.
-	 *
-	 * @return the document library file versions
-	 */
-	public java.util.List<DLFileVersion> findAll();
-
-	/**
-	 * Returns a range of all the document library file versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.documentlibrary.model.impl.DLFileVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of document library file versions
-	 * @param end the upper bound of the range of document library file versions (not inclusive)
-	 * @return the range of document library file versions
-	 */
-	public java.util.List<DLFileVersion> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the document library file versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.documentlibrary.model.impl.DLFileVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of document library file versions
-	 * @param end the upper bound of the range of document library file versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of document library file versions
-	 */
-	public java.util.List<DLFileVersion> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DLFileVersion>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the document library file versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.documentlibrary.model.impl.DLFileVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of document library file versions
-	 * @param end the upper bound of the range of document library file versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of document library file versions
-	 */
-	public java.util.List<DLFileVersion> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DLFileVersion>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the document library file versions from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of document library file versions.
-	 *
-	 * @return the number of document library file versions
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1545883081
+// LIFERAY-SERVICE-BUILDER-HASH:-836271002

@@ -645,20 +645,6 @@ public interface CalendarPersistence
 		long groupId, long calendarResourceId, boolean defaultCalendar);
 
 	/**
-	 * Caches the calendar in the entity cache if it is enabled.
-	 *
-	 * @param calendar the calendar
-	 */
-	public void cacheResult(Calendar calendar);
-
-	/**
-	 * Caches the calendars in the entity cache if it is enabled.
-	 *
-	 * @param calendars the calendars
-	 */
-	public void cacheResult(java.util.List<Calendar> calendars);
-
-	/**
 	 * Creates a new calendar with the primary key. Does not add the calendar to the database.
 	 *
 	 * @param calendarId the primary key for the new calendar
@@ -695,73 +681,5 @@ public interface CalendarPersistence
 	 */
 	public Calendar fetchByPrimaryKey(long calendarId);
 
-	/**
-	 * Returns all the calendars.
-	 *
-	 * @return the calendars
-	 */
-	public java.util.List<Calendar> findAll();
-
-	/**
-	 * Returns a range of all the calendars.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.calendar.model.impl.CalendarModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of calendars
-	 * @param end the upper bound of the range of calendars (not inclusive)
-	 * @return the range of calendars
-	 */
-	public java.util.List<Calendar> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the calendars.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.calendar.model.impl.CalendarModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of calendars
-	 * @param end the upper bound of the range of calendars (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of calendars
-	 */
-	public java.util.List<Calendar> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Calendar>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the calendars.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.calendar.model.impl.CalendarModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of calendars
-	 * @param end the upper bound of the range of calendars (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of calendars
-	 */
-	public java.util.List<Calendar> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Calendar>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the calendars from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of calendars.
-	 *
-	 * @return the number of calendars
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:520829339
+// LIFERAY-SERVICE-BUILDER-HASH:-1900263492

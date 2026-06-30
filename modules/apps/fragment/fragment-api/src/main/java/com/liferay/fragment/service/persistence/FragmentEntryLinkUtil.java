@@ -36,6 +36,20 @@ public class FragmentEntryLinkUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<FragmentEntryLink> fragmentEntryLinks) {
+		getPersistence().cacheResult(fragmentEntryLinks);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(FragmentEntryLink fragmentEntryLink) {
+		getPersistence().cacheResult(fragmentEntryLink);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -3676,24 +3690,6 @@ public class FragmentEntryLinkUtil {
 	}
 
 	/**
-	 * Caches the fragment entry link in the entity cache if it is enabled.
-	 *
-	 * @param fragmentEntryLink the fragment entry link
-	 */
-	public static void cacheResult(FragmentEntryLink fragmentEntryLink) {
-		getPersistence().cacheResult(fragmentEntryLink);
-	}
-
-	/**
-	 * Caches the fragment entry links in the entity cache if it is enabled.
-	 *
-	 * @param fragmentEntryLinks the fragment entry links
-	 */
-	public static void cacheResult(List<FragmentEntryLink> fragmentEntryLinks) {
-		getPersistence().cacheResult(fragmentEntryLinks);
-	}
-
-	/**
 	 * Creates a new fragment entry link with the primary key. Does not add the fragment entry link to the database.
 	 *
 	 * @param fragmentEntryLinkId the primary key for the new fragment entry link
@@ -3747,87 +3743,6 @@ public class FragmentEntryLinkUtil {
 		return getPersistence().fetchByPrimaryKey(fragmentEntryLinkId);
 	}
 
-	/**
-	 * Returns all the fragment entry links.
-	 *
-	 * @return the fragment entry links
-	 */
-	public static List<FragmentEntryLink> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the fragment entry links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.fragment.model.impl.FragmentEntryLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of fragment entry links
-	 * @param end the upper bound of the range of fragment entry links (not inclusive)
-	 * @return the range of fragment entry links
-	 */
-	public static List<FragmentEntryLink> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the fragment entry links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.fragment.model.impl.FragmentEntryLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of fragment entry links
-	 * @param end the upper bound of the range of fragment entry links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of fragment entry links
-	 */
-	public static List<FragmentEntryLink> findAll(
-		int start, int end,
-		OrderByComparator<FragmentEntryLink> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the fragment entry links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.fragment.model.impl.FragmentEntryLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of fragment entry links
-	 * @param end the upper bound of the range of fragment entry links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of fragment entry links
-	 */
-	public static List<FragmentEntryLink> findAll(
-		int start, int end,
-		OrderByComparator<FragmentEntryLink> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the fragment entry links from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of fragment entry links.
-	 *
-	 * @return the number of fragment entry links
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static FragmentEntryLinkPersistence getPersistence() {
 		return _persistence;
 	}
@@ -3841,4 +3756,4 @@ public class FragmentEntryLinkUtil {
 	private static volatile FragmentEntryLinkPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1122619223
+// LIFERAY-SERVICE-BUILDER-HASH:1592075129

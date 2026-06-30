@@ -13,12 +13,10 @@ import com.liferay.changeset.model.impl.ChangesetCollectionModelImpl;
 import com.liferay.changeset.service.persistence.ChangesetCollectionPersistence;
 import com.liferay.changeset.service.persistence.ChangesetCollectionUtil;
 import com.liferay.changeset.service.persistence.impl.constants.ChangesetPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -31,10 +29,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 
 import java.io.Serializable;
@@ -44,7 +39,6 @@ import java.lang.reflect.InvocationHandler;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -65,7 +59,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ChangesetCollectionPersistence.class)
 public class ChangesetCollectionPersistenceImpl
-	extends BasePersistenceImpl<ChangesetCollection>
+	extends BasePersistenceImpl<ChangesetCollection, NoSuchCollectionException>
 	implements ChangesetCollectionPersistence {
 
 	/*
@@ -82,9 +76,6 @@ public class ChangesetCollectionPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByGroupId;
 	private FinderPath _finderPathWithoutPaginationFindByGroupId;
 	private FinderPath _finderPathCountByGroupId;
@@ -793,108 +784,6 @@ public class ChangesetCollectionPersistenceImpl
 	}
 
 	/**
-	 * Caches the changeset collection in the entity cache if it is enabled.
-	 *
-	 * @param changesetCollection the changeset collection
-	 */
-	@Override
-	public void cacheResult(ChangesetCollection changesetCollection) {
-		entityCache.putResult(
-			ChangesetCollectionImpl.class, changesetCollection.getPrimaryKey(),
-			changesetCollection);
-
-		finderCache.putResult(
-			_finderPathFetchByG_N,
-			new Object[] {
-				changesetCollection.getGroupId(), changesetCollection.getName()
-			},
-			changesetCollection);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the changeset collections in the entity cache if it is enabled.
-	 *
-	 * @param changesetCollections the changeset collections
-	 */
-	@Override
-	public void cacheResult(List<ChangesetCollection> changesetCollections) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (changesetCollections.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ChangesetCollection changesetCollection : changesetCollections) {
-			if (entityCache.getResult(
-					ChangesetCollectionImpl.class,
-					changesetCollection.getPrimaryKey()) == null) {
-
-				cacheResult(changesetCollection);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all changeset collections.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ChangesetCollectionImpl.class);
-
-		finderCache.clearCache(ChangesetCollectionImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the changeset collection.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ChangesetCollection changesetCollection) {
-		entityCache.removeResult(
-			ChangesetCollectionImpl.class, changesetCollection);
-	}
-
-	@Override
-	public void clearCache(List<ChangesetCollection> changesetCollections) {
-		for (ChangesetCollection changesetCollection : changesetCollections) {
-			entityCache.removeResult(
-				ChangesetCollectionImpl.class, changesetCollection);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ChangesetCollectionImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(ChangesetCollectionImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		ChangesetCollectionModelImpl changesetCollectionModelImpl) {
-
-		Object[] args = new Object[] {
-			changesetCollectionModelImpl.getGroupId(),
-			changesetCollectionModelImpl.getName()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByG_N, args, changesetCollectionModelImpl);
-	}
-
-	/**
 	 * Creates a new changeset collection with the primary key. Does not add the changeset collection to the database.
 	 *
 	 * @param changesetCollectionId the primary key for the new changeset collection
@@ -924,48 +813,6 @@ public class ChangesetCollectionPersistenceImpl
 		throws NoSuchCollectionException {
 
 		return remove((Serializable)changesetCollectionId);
-	}
-
-	/**
-	 * Removes the changeset collection with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the changeset collection
-	 * @return the changeset collection that was removed
-	 * @throws NoSuchCollectionException if a changeset collection with the primary key could not be found
-	 */
-	@Override
-	public ChangesetCollection remove(Serializable primaryKey)
-		throws NoSuchCollectionException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ChangesetCollection changesetCollection =
-				(ChangesetCollection)session.get(
-					ChangesetCollectionImpl.class, primaryKey);
-
-			if (changesetCollection == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchCollectionException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(changesetCollection);
-		}
-		catch (NoSuchCollectionException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1072,42 +919,13 @@ public class ChangesetCollectionPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ChangesetCollectionImpl.class, changesetCollectionModelImpl, false,
-			true);
-
-		cacheUniqueFindersCache(changesetCollectionModelImpl);
+		cacheUniqueFindersResult(changesetCollection, false);
 
 		if (isNew) {
 			changesetCollection.setNew(false);
 		}
 
 		changesetCollection.resetOriginalValues();
-
-		return changesetCollection;
-	}
-
-	/**
-	 * Returns the changeset collection with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the changeset collection
-	 * @return the changeset collection
-	 * @throws NoSuchCollectionException if a changeset collection with the primary key could not be found
-	 */
-	@Override
-	public ChangesetCollection findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchCollectionException {
-
-		ChangesetCollection changesetCollection = fetchByPrimaryKey(primaryKey);
-
-		if (changesetCollection == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchCollectionException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return changesetCollection;
 	}
@@ -1137,188 +955,6 @@ public class ChangesetCollectionPersistenceImpl
 		return fetchByPrimaryKey((Serializable)changesetCollectionId);
 	}
 
-	/**
-	 * Returns all the changeset collections.
-	 *
-	 * @return the changeset collections
-	 */
-	@Override
-	public List<ChangesetCollection> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the changeset collections.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ChangesetCollectionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of changeset collections
-	 * @param end the upper bound of the range of changeset collections (not inclusive)
-	 * @return the range of changeset collections
-	 */
-	@Override
-	public List<ChangesetCollection> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the changeset collections.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ChangesetCollectionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of changeset collections
-	 * @param end the upper bound of the range of changeset collections (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of changeset collections
-	 */
-	@Override
-	public List<ChangesetCollection> findAll(
-		int start, int end,
-		OrderByComparator<ChangesetCollection> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the changeset collections.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ChangesetCollectionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of changeset collections
-	 * @param end the upper bound of the range of changeset collections (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of changeset collections
-	 */
-	@Override
-	public List<ChangesetCollection> findAll(
-		int start, int end,
-		OrderByComparator<ChangesetCollection> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ChangesetCollection> list = null;
-
-		if (useFinderCache) {
-			list = (List<ChangesetCollection>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_CHANGESETCOLLECTION);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_CHANGESETCOLLECTION;
-
-				sql = sql.concat(ChangesetCollectionModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ChangesetCollection>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the changeset collections from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ChangesetCollection changesetCollection : findAll()) {
-			remove(changesetCollection);
-		}
-	}
-
-	/**
-	 * Returns the number of changeset collections.
-	 *
-	 * @return the number of changeset collections
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_CHANGESETCOLLECTION);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	protected EntityCache getEntityCache() {
 		return entityCache;
@@ -1344,21 +980,6 @@ public class ChangesetCollectionPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByGroupId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByGroupId",
 			new String[] {
@@ -1385,7 +1006,7 @@ public class ChangesetCollectionPersistenceImpl
 				_SQL_SELECT_CHANGESETCOLLECTION_WHERE,
 				_SQL_COUNT_CHANGESETCOLLECTION_WHERE,
 				ChangesetCollectionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"changesetCollection.", "groupId", FinderColumn.Type.LONG,
 					"=", true, true, ChangesetCollection::getGroupId));
@@ -1416,7 +1037,7 @@ public class ChangesetCollectionPersistenceImpl
 				_SQL_SELECT_CHANGESETCOLLECTION_WHERE,
 				_SQL_COUNT_CHANGESETCOLLECTION_WHERE,
 				ChangesetCollectionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"changesetCollection.", "companyId", FinderColumn.Type.LONG,
 					"=", true, true, ChangesetCollection::getCompanyId));
@@ -1445,24 +1066,28 @@ public class ChangesetCollectionPersistenceImpl
 			_finderPathWithoutPaginationFindByG_U, _finderPathCountByG_U,
 			_SQL_SELECT_CHANGESETCOLLECTION_WHERE,
 			_SQL_COUNT_CHANGESETCOLLECTION_WHERE,
-			ChangesetCollectionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ChangesetCollectionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"changesetCollection.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, ChangesetCollection::getGroupId),
+				true, true, ChangesetCollection::getGroupId),
 			new FinderColumn<>(
 				"changesetCollection.", "userId", FinderColumn.Type.LONG, "=",
 				true, true, ChangesetCollection::getUserId));
 
-		_finderPathFetchByG_N = new FinderPath(
+		_finderPathFetchByG_N = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByG_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "name"}, true);
+			new String[] {"groupId", "name"}, 0, 2, false,
+			ChangesetCollection::getGroupId,
+			convertNullFunction(ChangesetCollection::getName));
 
 		_uniquePersistenceFinderByG_N = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByG_N, _SQL_SELECT_CHANGESETCOLLECTION_WHERE,
+			"",
 			new FinderColumn<>(
 				"changesetCollection.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, ChangesetCollection::getGroupId),
+				true, true, ChangesetCollection::getGroupId),
 			new FinderColumn<>(
 				"changesetCollection.", "name", FinderColumn.Type.STRING, "=",
 				true, true, ChangesetCollection::getName));
@@ -1479,22 +1104,23 @@ public class ChangesetCollectionPersistenceImpl
 		_finderPathWithoutPaginationFindByC_N = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "name"}, true);
+			new String[] {"companyId", "name"}, 0, 2, true, null);
 
 		_finderPathCountByC_N = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "name"}, false);
+			new String[] {"companyId", "name"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByC_N = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_N,
 			_finderPathWithoutPaginationFindByC_N, _finderPathCountByC_N,
 			_SQL_SELECT_CHANGESETCOLLECTION_WHERE,
 			_SQL_COUNT_CHANGESETCOLLECTION_WHERE,
-			ChangesetCollectionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ChangesetCollectionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"changesetCollection.", "companyId", FinderColumn.Type.LONG,
-				"=", true, false, ChangesetCollection::getCompanyId),
+				"=", true, true, ChangesetCollection::getCompanyId),
 			new FinderColumn<>(
 				"changesetCollection.", "name", FinderColumn.Type.STRING, "=",
 				true, true, ChangesetCollection::getName));
@@ -1541,22 +1167,17 @@ public class ChangesetCollectionPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ChangesetCollectionModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_CHANGESETCOLLECTION =
 		"SELECT changesetCollection FROM ChangesetCollection changesetCollection";
 
 	private static final String _SQL_SELECT_CHANGESETCOLLECTION_WHERE =
 		"SELECT changesetCollection FROM ChangesetCollection changesetCollection WHERE ";
 
-	private static final String _SQL_COUNT_CHANGESETCOLLECTION =
-		"SELECT COUNT(changesetCollection) FROM ChangesetCollection changesetCollection";
-
 	private static final String _SQL_COUNT_CHANGESETCOLLECTION_WHERE =
 		"SELECT COUNT(changesetCollection) FROM ChangesetCollection changesetCollection WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "changesetCollection.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ChangesetCollection exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ChangesetCollection exists with the key {";
@@ -1570,4 +1191,4 @@ public class ChangesetCollectionPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1350835519
+// LIFERAY-SERVICE-BUILDER-HASH:-644384502

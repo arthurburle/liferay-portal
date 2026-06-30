@@ -36,6 +36,22 @@ public class LayoutSetPrototypeUtil {
 	 */
 
 	/**
+	 * @see BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<LayoutSetPrototype> layoutSetPrototypes) {
+
+		getPersistence().cacheResult(layoutSetPrototypes);
+	}
+
+	/**
+	 * @see BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(LayoutSetPrototype layoutSetPrototype) {
+		getPersistence().cacheResult(layoutSetPrototype);
+	}
+
+	/**
 	 * @see BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -875,26 +891,6 @@ public class LayoutSetPrototypeUtil {
 	}
 
 	/**
-	 * Caches the layout set prototype in the entity cache if it is enabled.
-	 *
-	 * @param layoutSetPrototype the layout set prototype
-	 */
-	public static void cacheResult(LayoutSetPrototype layoutSetPrototype) {
-		getPersistence().cacheResult(layoutSetPrototype);
-	}
-
-	/**
-	 * Caches the layout set prototypes in the entity cache if it is enabled.
-	 *
-	 * @param layoutSetPrototypes the layout set prototypes
-	 */
-	public static void cacheResult(
-		List<LayoutSetPrototype> layoutSetPrototypes) {
-
-		getPersistence().cacheResult(layoutSetPrototypes);
-	}
-
-	/**
 	 * Creates a new layout set prototype with the primary key. Does not add the layout set prototype to the database.
 	 *
 	 * @param layoutSetPrototypeId the primary key for the new layout set prototype
@@ -950,87 +946,6 @@ public class LayoutSetPrototypeUtil {
 		return getPersistence().fetchByPrimaryKey(layoutSetPrototypeId);
 	}
 
-	/**
-	 * Returns all the layout set prototypes.
-	 *
-	 * @return the layout set prototypes
-	 */
-	public static List<LayoutSetPrototype> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the layout set prototypes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.LayoutSetPrototypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout set prototypes
-	 * @param end the upper bound of the range of layout set prototypes (not inclusive)
-	 * @return the range of layout set prototypes
-	 */
-	public static List<LayoutSetPrototype> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the layout set prototypes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.LayoutSetPrototypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout set prototypes
-	 * @param end the upper bound of the range of layout set prototypes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of layout set prototypes
-	 */
-	public static List<LayoutSetPrototype> findAll(
-		int start, int end,
-		OrderByComparator<LayoutSetPrototype> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the layout set prototypes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.LayoutSetPrototypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout set prototypes
-	 * @param end the upper bound of the range of layout set prototypes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of layout set prototypes
-	 */
-	public static List<LayoutSetPrototype> findAll(
-		int start, int end,
-		OrderByComparator<LayoutSetPrototype> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the layout set prototypes from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of layout set prototypes.
-	 *
-	 * @return the number of layout set prototypes
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static LayoutSetPrototypePersistence getPersistence() {
 		return _persistence;
 	}
@@ -1044,4 +959,4 @@ public class LayoutSetPrototypeUtil {
 	private static volatile LayoutSetPrototypePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-779271898
+// LIFERAY-SERVICE-BUILDER-HASH:-1304181614

@@ -36,6 +36,24 @@ public class AssetListEntryAssetEntryRelUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<AssetListEntryAssetEntryRel> assetListEntryAssetEntryRels) {
+
+		getPersistence().cacheResult(assetListEntryAssetEntryRels);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		AssetListEntryAssetEntryRel assetListEntryAssetEntryRel) {
+
+		getPersistence().cacheResult(assetListEntryAssetEntryRel);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1166,28 +1184,6 @@ public class AssetListEntryAssetEntryRelUtil {
 	}
 
 	/**
-	 * Caches the asset list entry asset entry rel in the entity cache if it is enabled.
-	 *
-	 * @param assetListEntryAssetEntryRel the asset list entry asset entry rel
-	 */
-	public static void cacheResult(
-		AssetListEntryAssetEntryRel assetListEntryAssetEntryRel) {
-
-		getPersistence().cacheResult(assetListEntryAssetEntryRel);
-	}
-
-	/**
-	 * Caches the asset list entry asset entry rels in the entity cache if it is enabled.
-	 *
-	 * @param assetListEntryAssetEntryRels the asset list entry asset entry rels
-	 */
-	public static void cacheResult(
-		List<AssetListEntryAssetEntryRel> assetListEntryAssetEntryRels) {
-
-		getPersistence().cacheResult(assetListEntryAssetEntryRels);
-	}
-
-	/**
 	 * Creates a new asset list entry asset entry rel with the primary key. Does not add the asset list entry asset entry rel to the database.
 	 *
 	 * @param assetListEntryAssetEntryRelId the primary key for the new asset list entry asset entry rel
@@ -1248,89 +1244,6 @@ public class AssetListEntryAssetEntryRelUtil {
 			assetListEntryAssetEntryRelId);
 	}
 
-	/**
-	 * Returns all the asset list entry asset entry rels.
-	 *
-	 * @return the asset list entry asset entry rels
-	 */
-	public static List<AssetListEntryAssetEntryRel> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the asset list entry asset entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.asset.list.model.impl.AssetListEntryAssetEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset list entry asset entry rels
-	 * @param end the upper bound of the range of asset list entry asset entry rels (not inclusive)
-	 * @return the range of asset list entry asset entry rels
-	 */
-	public static List<AssetListEntryAssetEntryRel> findAll(
-		int start, int end) {
-
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the asset list entry asset entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.asset.list.model.impl.AssetListEntryAssetEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset list entry asset entry rels
-	 * @param end the upper bound of the range of asset list entry asset entry rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of asset list entry asset entry rels
-	 */
-	public static List<AssetListEntryAssetEntryRel> findAll(
-		int start, int end,
-		OrderByComparator<AssetListEntryAssetEntryRel> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the asset list entry asset entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.asset.list.model.impl.AssetListEntryAssetEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset list entry asset entry rels
-	 * @param end the upper bound of the range of asset list entry asset entry rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of asset list entry asset entry rels
-	 */
-	public static List<AssetListEntryAssetEntryRel> findAll(
-		int start, int end,
-		OrderByComparator<AssetListEntryAssetEntryRel> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the asset list entry asset entry rels from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of asset list entry asset entry rels.
-	 *
-	 * @return the number of asset list entry asset entry rels
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static AssetListEntryAssetEntryRelPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1344,4 +1257,4 @@ public class AssetListEntryAssetEntryRelUtil {
 	private static volatile AssetListEntryAssetEntryRelPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:32007636
+// LIFERAY-SERVICE-BUILDER-HASH:-1785530120

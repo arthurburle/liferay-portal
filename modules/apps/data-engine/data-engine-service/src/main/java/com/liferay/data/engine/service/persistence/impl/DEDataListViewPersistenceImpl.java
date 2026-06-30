@@ -13,15 +13,11 @@ import com.liferay.data.engine.model.impl.DEDataListViewModelImpl;
 import com.liferay.data.engine.service.persistence.DEDataListViewPersistence;
 import com.liferay.data.engine.service.persistence.DEDataListViewUtil;
 import com.liferay.data.engine.service.persistence.impl.constants.DEPersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -35,10 +31,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -54,7 +47,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,7 +70,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = DEDataListViewPersistence.class)
 public class DEDataListViewPersistenceImpl
-	extends BasePersistenceImpl<DEDataListView>
+	extends BasePersistenceImpl<DEDataListView, NoSuchDataListViewException>
 	implements DEDataListViewPersistence {
 
 	/*
@@ -95,9 +87,6 @@ public class DEDataListViewPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -173,14 +162,9 @@ public class DEDataListViewPersistenceImpl
 		OrderByComparator<DEDataListView> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DEDataListView.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				finderCache, new Object[] {uuid}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			finderCache, new Object[] {uuid}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -242,13 +226,8 @@ public class DEDataListViewPersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DEDataListView.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				finderCache, new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			finderCache, new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathFetchByUUID_G;
@@ -308,13 +287,8 @@ public class DEDataListViewPersistenceImpl
 	public DEDataListView fetchByUUID_G(
 		String uuid, long groupId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DEDataListView.class)) {
-
-			return _uniquePersistenceFinderByUUID_G.fetch(
-				finderCache, new Object[] {uuid, groupId}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByUUID_G.fetch(
+			finderCache, new Object[] {uuid, groupId}, useFinderCache);
 	}
 
 	/**
@@ -429,14 +403,9 @@ public class DEDataListViewPersistenceImpl
 		OrderByComparator<DEDataListView> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DEDataListView.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				finderCache, new Object[] {uuid, companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			finderCache, new Object[] {uuid, companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -504,13 +473,8 @@ public class DEDataListViewPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DEDataListView.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				finderCache, new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			finderCache, new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByDDMStructureId;
@@ -592,14 +556,9 @@ public class DEDataListViewPersistenceImpl
 		OrderByComparator<DEDataListView> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DEDataListView.class)) {
-
-			return _collectionPersistenceFinderByDDMStructureId.find(
-				finderCache, new Object[] {ddmStructureId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByDDMStructureId.find(
+			finderCache, new Object[] {ddmStructureId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -663,13 +622,8 @@ public class DEDataListViewPersistenceImpl
 	 */
 	@Override
 	public int countByDDMStructureId(long ddmStructureId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DEDataListView.class)) {
-
-			return _collectionPersistenceFinderByDDMStructureId.count(
-				finderCache, new Object[] {ddmStructureId});
-		}
+		return _collectionPersistenceFinderByDDMStructureId.count(
+			finderCache, new Object[] {ddmStructureId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_C_DDMSI;
@@ -764,14 +718,9 @@ public class DEDataListViewPersistenceImpl
 		OrderByComparator<DEDataListView> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DEDataListView.class)) {
-
-			return _collectionPersistenceFinderByG_C_DDMSI.find(
-				finderCache, new Object[] {groupId, companyId, ddmStructureId},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_C_DDMSI.find(
+			finderCache, new Object[] {groupId, companyId, ddmStructureId},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -849,13 +798,8 @@ public class DEDataListViewPersistenceImpl
 	public int countByG_C_DDMSI(
 		long groupId, long companyId, long ddmStructureId) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DEDataListView.class)) {
-
-			return _collectionPersistenceFinderByG_C_DDMSI.count(
-				finderCache, new Object[] {groupId, companyId, ddmStructureId});
-		}
+		return _collectionPersistenceFinderByG_C_DDMSI.count(
+			finderCache, new Object[] {groupId, companyId, ddmStructureId});
 	}
 
 	public DEDataListViewPersistenceImpl() {
@@ -871,120 +815,6 @@ public class DEDataListViewPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(DEDataListViewTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the de data list view in the entity cache if it is enabled.
-	 *
-	 * @param deDataListView the de data list view
-	 */
-	@Override
-	public void cacheResult(DEDataListView deDataListView) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					deDataListView.getCtCollectionId())) {
-
-			entityCache.putResult(
-				DEDataListViewImpl.class, deDataListView.getPrimaryKey(),
-				deDataListView);
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G,
-				new Object[] {
-					deDataListView.getUuid(), deDataListView.getGroupId()
-				},
-				deDataListView);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the de data list views in the entity cache if it is enabled.
-	 *
-	 * @param deDataListViews the de data list views
-	 */
-	@Override
-	public void cacheResult(List<DEDataListView> deDataListViews) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (deDataListViews.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (DEDataListView deDataListView : deDataListViews) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						deDataListView.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						DEDataListViewImpl.class,
-						deDataListView.getPrimaryKey()) == null) {
-
-					cacheResult(deDataListView);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all de data list views.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(DEDataListViewImpl.class);
-
-		finderCache.clearCache(DEDataListViewImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the de data list view.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(DEDataListView deDataListView) {
-		entityCache.removeResult(DEDataListViewImpl.class, deDataListView);
-	}
-
-	@Override
-	public void clearCache(List<DEDataListView> deDataListViews) {
-		for (DEDataListView deDataListView : deDataListViews) {
-			entityCache.removeResult(DEDataListViewImpl.class, deDataListView);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(DEDataListViewImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(DEDataListViewImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		DEDataListViewModelImpl deDataListViewModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					deDataListViewModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				deDataListViewModelImpl.getUuid(),
-				deDataListViewModelImpl.getGroupId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G, args, deDataListViewModelImpl);
-		}
 	}
 
 	/**
@@ -1021,47 +851,6 @@ public class DEDataListViewPersistenceImpl
 		throws NoSuchDataListViewException {
 
 		return remove((Serializable)deDataListViewId);
-	}
-
-	/**
-	 * Removes the de data list view with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the de data list view
-	 * @return the de data list view that was removed
-	 * @throws NoSuchDataListViewException if a de data list view with the primary key could not be found
-	 */
-	@Override
-	public DEDataListView remove(Serializable primaryKey)
-		throws NoSuchDataListViewException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			DEDataListView deDataListView = (DEDataListView)session.get(
-				DEDataListViewImpl.class, primaryKey);
-
-			if (deDataListView == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchDataListViewException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(deDataListView);
-		}
-		catch (NoSuchDataListViewException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1177,41 +966,13 @@ public class DEDataListViewPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			DEDataListViewImpl.class, deDataListViewModelImpl, false, true);
-
-		cacheUniqueFindersCache(deDataListViewModelImpl);
+		cacheUniqueFindersResult(deDataListView, false);
 
 		if (isNew) {
 			deDataListView.setNew(false);
 		}
 
 		deDataListView.resetOriginalValues();
-
-		return deDataListView;
-	}
-
-	/**
-	 * Returns the de data list view with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the de data list view
-	 * @return the de data list view
-	 * @throws NoSuchDataListViewException if a de data list view with the primary key could not be found
-	 */
-	@Override
-	public DEDataListView findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchDataListViewException {
-
-		DEDataListView deDataListView = fetchByPrimaryKey(primaryKey);
-
-		if (deDataListView == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchDataListViewException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return deDataListView;
 	}
@@ -1230,52 +991,9 @@ public class DEDataListViewPersistenceImpl
 		return findByPrimaryKey((Serializable)deDataListViewId);
 	}
 
-	/**
-	 * Returns the de data list view with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the de data list view
-	 * @return the de data list view, or <code>null</code> if a de data list view with the primary key could not be found
-	 */
 	@Override
-	public DEDataListView fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				DEDataListView.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		DEDataListView deDataListView = (DEDataListView)entityCache.getResult(
-			DEDataListViewImpl.class, primaryKey);
-
-		if (deDataListView != null) {
-			return deDataListView;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			deDataListView = (DEDataListView)session.get(
-				DEDataListViewImpl.class, primaryKey);
-
-			if (deDataListView != null) {
-				cacheResult(deDataListView);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return deDataListView;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -1287,323 +1005,6 @@ public class DEDataListViewPersistenceImpl
 	@Override
 	public DEDataListView fetchByPrimaryKey(long deDataListViewId) {
 		return fetchByPrimaryKey((Serializable)deDataListViewId);
-	}
-
-	@Override
-	public Map<Serializable, DEDataListView> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(DEDataListView.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, DEDataListView> map =
-			new HashMap<Serializable, DEDataListView>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			DEDataListView deDataListView = fetchByPrimaryKey(primaryKey);
-
-			if (deDataListView != null) {
-				map.put(primaryKey, deDataListView);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						DEDataListView.class, primaryKey)) {
-
-				DEDataListView deDataListView =
-					(DEDataListView)entityCache.getResult(
-						DEDataListViewImpl.class, primaryKey);
-
-				if (deDataListView == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, deDataListView);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (DEDataListView deDataListView :
-					(List<DEDataListView>)query.list()) {
-
-				map.put(deDataListView.getPrimaryKeyObj(), deDataListView);
-
-				cacheResult(deDataListView);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the de data list views.
-	 *
-	 * @return the de data list views
-	 */
-	@Override
-	public List<DEDataListView> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the de data list views.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DEDataListViewModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of de data list views
-	 * @param end the upper bound of the range of de data list views (not inclusive)
-	 * @return the range of de data list views
-	 */
-	@Override
-	public List<DEDataListView> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the de data list views.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DEDataListViewModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of de data list views
-	 * @param end the upper bound of the range of de data list views (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of de data list views
-	 */
-	@Override
-	public List<DEDataListView> findAll(
-		int start, int end,
-		OrderByComparator<DEDataListView> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the de data list views.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DEDataListViewModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of de data list views
-	 * @param end the upper bound of the range of de data list views (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of de data list views
-	 */
-	@Override
-	public List<DEDataListView> findAll(
-		int start, int end, OrderByComparator<DEDataListView> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DEDataListView.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<DEDataListView> list = null;
-
-			if (useFinderCache) {
-				list = (List<DEDataListView>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_DEDATALISTVIEW);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_DEDATALISTVIEW;
-
-					sql = sql.concat(DEDataListViewModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<DEDataListView>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the de data list views from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (DEDataListView deDataListView : findAll()) {
-			remove(deDataListView);
-		}
-	}
-
-	/**
-	 * Returns the number of de data list views.
-	 *
-	 * @return the number of de data list views
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DEDataListView.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_DEDATALISTVIEW);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1702,21 +1103,6 @@ public class DEDataListViewPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1727,33 +1113,36 @@ public class DEDataListViewPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_DEDATALISTVIEW_WHERE, _SQL_COUNT_DEDATALISTVIEW_WHERE,
-			DEDataListViewModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			DEDataListViewModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"deDataListView.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, DEDataListView::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(DEDataListView::getUuid),
+			DEDataListView::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByUUID_G, _SQL_SELECT_DEDATALISTVIEW_WHERE,
+			"",
 			new FinderColumn<>(
 				"deDataListView.", "uuid", FinderColumn.Type.STRING, "=", true,
-				false, DEDataListView::getUuid),
+				true, DEDataListView::getUuid),
 			new FinderColumn<>(
 				"deDataListView.", "groupId", FinderColumn.Type.LONG, "=", true,
 				true, DEDataListView::getGroupId));
@@ -1770,12 +1159,12 @@ public class DEDataListViewPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1783,10 +1172,10 @@ public class DEDataListViewPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_DEDATALISTVIEW_WHERE,
 				_SQL_COUNT_DEDATALISTVIEW_WHERE,
-				DEDataListViewModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				DEDataListViewModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"deDataListView.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, DEDataListView::getUuid),
+					true, true, DEDataListView::getUuid),
 				new FinderColumn<>(
 					"deDataListView.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, DEDataListView::getCompanyId));
@@ -1816,7 +1205,7 @@ public class DEDataListViewPersistenceImpl
 				_finderPathCountByDDMStructureId,
 				_SQL_SELECT_DEDATALISTVIEW_WHERE,
 				_SQL_COUNT_DEDATALISTVIEW_WHERE,
-				DEDataListViewModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				DEDataListViewModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"deDataListView.", "ddmStructureId", FinderColumn.Type.LONG,
 					"=", true, true, DEDataListView::getDdmStructureId));
@@ -1850,13 +1239,13 @@ public class DEDataListViewPersistenceImpl
 				_finderPathWithoutPaginationFindByG_C_DDMSI,
 				_finderPathCountByG_C_DDMSI, _SQL_SELECT_DEDATALISTVIEW_WHERE,
 				_SQL_COUNT_DEDATALISTVIEW_WHERE,
-				DEDataListViewModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				DEDataListViewModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"deDataListView.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, DEDataListView::getGroupId),
+					true, true, DEDataListView::getGroupId),
 				new FinderColumn<>(
 					"deDataListView.", "companyId", FinderColumn.Type.LONG, "=",
-					true, false, DEDataListView::getCompanyId),
+					true, true, DEDataListView::getCompanyId),
 				new FinderColumn<>(
 					"deDataListView.", "ddmStructureId", FinderColumn.Type.LONG,
 					"=", true, true, DEDataListView::getDdmStructureId));
@@ -1906,22 +1295,17 @@ public class DEDataListViewPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		DEDataListViewModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_DEDATALISTVIEW =
 		"SELECT deDataListView FROM DEDataListView deDataListView";
 
 	private static final String _SQL_SELECT_DEDATALISTVIEW_WHERE =
 		"SELECT deDataListView FROM DEDataListView deDataListView WHERE ";
 
-	private static final String _SQL_COUNT_DEDATALISTVIEW =
-		"SELECT COUNT(deDataListView) FROM DEDataListView deDataListView";
-
 	private static final String _SQL_COUNT_DEDATALISTVIEW_WHERE =
 		"SELECT COUNT(deDataListView) FROM DEDataListView deDataListView WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "deDataListView.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No DEDataListView exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No DEDataListView exists with the key {";
@@ -1938,4 +1322,4 @@ public class DEDataListViewPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1630623060
+// LIFERAY-SERVICE-BUILDER-HASH:600099910

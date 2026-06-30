@@ -36,6 +36,20 @@ public class MappingEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<MappingEntry> mappingEntries) {
+		getPersistence().cacheResult(mappingEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(MappingEntry mappingEntry) {
+		getPersistence().cacheResult(mappingEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -111,24 +125,6 @@ public class MappingEntryUtil {
 	}
 
 	/**
-	 * Caches the mapping entry in the entity cache if it is enabled.
-	 *
-	 * @param mappingEntry the mapping entry
-	 */
-	public static void cacheResult(MappingEntry mappingEntry) {
-		getPersistence().cacheResult(mappingEntry);
-	}
-
-	/**
-	 * Caches the mapping entries in the entity cache if it is enabled.
-	 *
-	 * @param mappingEntries the mapping entries
-	 */
-	public static void cacheResult(List<MappingEntry> mappingEntries) {
-		getPersistence().cacheResult(mappingEntries);
-	}
-
-	/**
 	 * Creates a new mapping entry with the primary key. Does not add the mapping entry to the database.
 	 *
 	 * @param mappingEntryId the primary key for the new mapping entry
@@ -178,85 +174,6 @@ public class MappingEntryUtil {
 	 */
 	public static MappingEntry fetchByPrimaryKey(long mappingEntryId) {
 		return getPersistence().fetchByPrimaryKey(mappingEntryId);
-	}
-
-	/**
-	 * Returns all the mapping entries.
-	 *
-	 * @return the mapping entries
-	 */
-	public static List<MappingEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the mapping entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.MappingEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of mapping entries
-	 * @param end the upper bound of the range of mapping entries (not inclusive)
-	 * @return the range of mapping entries
-	 */
-	public static List<MappingEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the mapping entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.MappingEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of mapping entries
-	 * @param end the upper bound of the range of mapping entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of mapping entries
-	 */
-	public static List<MappingEntry> findAll(
-		int start, int end, OrderByComparator<MappingEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the mapping entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.MappingEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of mapping entries
-	 * @param end the upper bound of the range of mapping entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of mapping entries
-	 */
-	public static List<MappingEntry> findAll(
-		int start, int end, OrderByComparator<MappingEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the mapping entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of mapping entries.
-	 *
-	 * @return the number of mapping entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
 	}
 
 	/**
@@ -496,4 +413,4 @@ public class MappingEntryUtil {
 	private static volatile MappingEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:374077584
+// LIFERAY-SERVICE-BUILDER-HASH:303918698

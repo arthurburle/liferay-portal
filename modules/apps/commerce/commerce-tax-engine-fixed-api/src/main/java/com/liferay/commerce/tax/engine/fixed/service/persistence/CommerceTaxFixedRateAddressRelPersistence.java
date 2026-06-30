@@ -344,23 +344,6 @@ public interface CommerceTaxFixedRateAddressRelPersistence
 	public int countByCountryId(long countryId);
 
 	/**
-	 * Caches the commerce tax fixed rate address rel in the entity cache if it is enabled.
-	 *
-	 * @param commerceTaxFixedRateAddressRel the commerce tax fixed rate address rel
-	 */
-	public void cacheResult(
-		CommerceTaxFixedRateAddressRel commerceTaxFixedRateAddressRel);
-
-	/**
-	 * Caches the commerce tax fixed rate address rels in the entity cache if it is enabled.
-	 *
-	 * @param commerceTaxFixedRateAddressRels the commerce tax fixed rate address rels
-	 */
-	public void cacheResult(
-		java.util.List<CommerceTaxFixedRateAddressRel>
-			commerceTaxFixedRateAddressRels);
-
-	/**
 	 * Creates a new commerce tax fixed rate address rel with the primary key. Does not add the commerce tax fixed rate address rel to the database.
 	 *
 	 * @param commerceTaxFixedRateAddressRelId the primary key for the new commerce tax fixed rate address rel
@@ -403,74 +386,5 @@ public interface CommerceTaxFixedRateAddressRelPersistence
 	public CommerceTaxFixedRateAddressRel fetchByPrimaryKey(
 		long commerceTaxFixedRateAddressRelId);
 
-	/**
-	 * Returns all the commerce tax fixed rate address rels.
-	 *
-	 * @return the commerce tax fixed rate address rels
-	 */
-	public java.util.List<CommerceTaxFixedRateAddressRel> findAll();
-
-	/**
-	 * Returns a range of all the commerce tax fixed rate address rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.tax.engine.fixed.model.impl.CommerceTaxFixedRateAddressRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce tax fixed rate address rels
-	 * @param end the upper bound of the range of commerce tax fixed rate address rels (not inclusive)
-	 * @return the range of commerce tax fixed rate address rels
-	 */
-	public java.util.List<CommerceTaxFixedRateAddressRel> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce tax fixed rate address rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.tax.engine.fixed.model.impl.CommerceTaxFixedRateAddressRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce tax fixed rate address rels
-	 * @param end the upper bound of the range of commerce tax fixed rate address rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce tax fixed rate address rels
-	 */
-	public java.util.List<CommerceTaxFixedRateAddressRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceTaxFixedRateAddressRel> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce tax fixed rate address rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.tax.engine.fixed.model.impl.CommerceTaxFixedRateAddressRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce tax fixed rate address rels
-	 * @param end the upper bound of the range of commerce tax fixed rate address rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce tax fixed rate address rels
-	 */
-	public java.util.List<CommerceTaxFixedRateAddressRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceTaxFixedRateAddressRel> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce tax fixed rate address rels from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce tax fixed rate address rels.
-	 *
-	 * @return the number of commerce tax fixed rate address rels
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1557000844
+// LIFERAY-SERVICE-BUILDER-HASH:-1153877709

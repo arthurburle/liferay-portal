@@ -1404,21 +1404,6 @@ public interface SiteNavigationMenuPersistence
 	public int countByERC_G(String externalReferenceCode, long groupId);
 
 	/**
-	 * Caches the site navigation menu in the entity cache if it is enabled.
-	 *
-	 * @param siteNavigationMenu the site navigation menu
-	 */
-	public void cacheResult(SiteNavigationMenu siteNavigationMenu);
-
-	/**
-	 * Caches the site navigation menus in the entity cache if it is enabled.
-	 *
-	 * @param siteNavigationMenus the site navigation menus
-	 */
-	public void cacheResult(
-		java.util.List<SiteNavigationMenu> siteNavigationMenus);
-
-	/**
 	 * Creates a new site navigation menu with the primary key. Does not add the site navigation menu to the database.
 	 *
 	 * @param siteNavigationMenuId the primary key for the new site navigation menu
@@ -1456,73 +1441,5 @@ public interface SiteNavigationMenuPersistence
 	 */
 	public SiteNavigationMenu fetchByPrimaryKey(long siteNavigationMenuId);
 
-	/**
-	 * Returns all the site navigation menus.
-	 *
-	 * @return the site navigation menus
-	 */
-	public java.util.List<SiteNavigationMenu> findAll();
-
-	/**
-	 * Returns a range of all the site navigation menus.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.site.navigation.model.impl.SiteNavigationMenuModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of site navigation menus
-	 * @param end the upper bound of the range of site navigation menus (not inclusive)
-	 * @return the range of site navigation menus
-	 */
-	public java.util.List<SiteNavigationMenu> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the site navigation menus.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.site.navigation.model.impl.SiteNavigationMenuModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of site navigation menus
-	 * @param end the upper bound of the range of site navigation menus (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of site navigation menus
-	 */
-	public java.util.List<SiteNavigationMenu> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SiteNavigationMenu>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the site navigation menus.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.site.navigation.model.impl.SiteNavigationMenuModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of site navigation menus
-	 * @param end the upper bound of the range of site navigation menus (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of site navigation menus
-	 */
-	public java.util.List<SiteNavigationMenu> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SiteNavigationMenu>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the site navigation menus from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of site navigation menus.
-	 *
-	 * @return the number of site navigation menus
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-684367470
+// LIFERAY-SERVICE-BUILDER-HASH:2146641496

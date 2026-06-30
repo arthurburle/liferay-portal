@@ -13,15 +13,11 @@ import com.liferay.adaptive.media.image.model.impl.AMImageEntryModelImpl;
 import com.liferay.adaptive.media.image.service.persistence.AMImageEntryPersistence;
 import com.liferay.adaptive.media.image.service.persistence.AMImageEntryUtil;
 import com.liferay.adaptive.media.image.service.persistence.impl.constants.AMImageEntryPersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -35,10 +31,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -54,7 +47,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,7 +70,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = AMImageEntryPersistence.class)
 public class AMImageEntryPersistenceImpl
-	extends BasePersistenceImpl<AMImageEntry>
+	extends BasePersistenceImpl<AMImageEntry, NoSuchAMImageEntryException>
 	implements AMImageEntryPersistence {
 
 	/*
@@ -95,9 +87,6 @@ public class AMImageEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -173,14 +162,9 @@ public class AMImageEntryPersistenceImpl
 		OrderByComparator<AMImageEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				finderCache, new Object[] {uuid}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			finderCache, new Object[] {uuid}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -241,13 +225,8 @@ public class AMImageEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				finderCache, new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			finderCache, new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathFetchByUUID_G;
@@ -307,13 +286,8 @@ public class AMImageEntryPersistenceImpl
 	public AMImageEntry fetchByUUID_G(
 		String uuid, long groupId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _uniquePersistenceFinderByUUID_G.fetch(
-				finderCache, new Object[] {uuid, groupId}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByUUID_G.fetch(
+			finderCache, new Object[] {uuid, groupId}, useFinderCache);
 	}
 
 	/**
@@ -428,14 +402,9 @@ public class AMImageEntryPersistenceImpl
 		OrderByComparator<AMImageEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				finderCache, new Object[] {uuid, companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			finderCache, new Object[] {uuid, companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -503,13 +472,8 @@ public class AMImageEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				finderCache, new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			finderCache, new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByGroupId;
@@ -588,14 +552,9 @@ public class AMImageEntryPersistenceImpl
 		OrderByComparator<AMImageEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByGroupId.find(
-				finderCache, new Object[] {groupId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByGroupId.find(
+			finderCache, new Object[] {groupId}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -657,13 +616,8 @@ public class AMImageEntryPersistenceImpl
 	 */
 	@Override
 	public int countByGroupId(long groupId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByGroupId.count(
-				finderCache, new Object[] {groupId});
-		}
+		return _collectionPersistenceFinderByGroupId.count(
+			finderCache, new Object[] {groupId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByCompanyId;
@@ -744,14 +698,9 @@ public class AMImageEntryPersistenceImpl
 		OrderByComparator<AMImageEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByCompanyId.find(
-				finderCache, new Object[] {companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByCompanyId.find(
+			finderCache, new Object[] {companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -813,13 +762,8 @@ public class AMImageEntryPersistenceImpl
 	 */
 	@Override
 	public int countByCompanyId(long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByCompanyId.count(
-				finderCache, new Object[] {companyId});
-		}
+		return _collectionPersistenceFinderByCompanyId.count(
+			finderCache, new Object[] {companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByConfigurationUuid;
@@ -903,14 +847,9 @@ public class AMImageEntryPersistenceImpl
 		OrderByComparator<AMImageEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByConfigurationUuid.find(
-				finderCache, new Object[] {configurationUuid}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByConfigurationUuid.find(
+			finderCache, new Object[] {configurationUuid}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -976,13 +915,8 @@ public class AMImageEntryPersistenceImpl
 	 */
 	@Override
 	public int countByConfigurationUuid(String configurationUuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByConfigurationUuid.count(
-				finderCache, new Object[] {configurationUuid});
-		}
+		return _collectionPersistenceFinderByConfigurationUuid.count(
+			finderCache, new Object[] {configurationUuid});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByFileVersionId;
@@ -1064,14 +998,9 @@ public class AMImageEntryPersistenceImpl
 		OrderByComparator<AMImageEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByFileVersionId.find(
-				finderCache, new Object[] {fileVersionId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByFileVersionId.find(
+			finderCache, new Object[] {fileVersionId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1134,13 +1063,8 @@ public class AMImageEntryPersistenceImpl
 	 */
 	@Override
 	public int countByFileVersionId(long fileVersionId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByFileVersionId.count(
-				finderCache, new Object[] {fileVersionId});
-		}
+		return _collectionPersistenceFinderByFileVersionId.count(
+			finderCache, new Object[] {fileVersionId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_C;
@@ -1229,14 +1153,9 @@ public class AMImageEntryPersistenceImpl
 		OrderByComparator<AMImageEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByC_C.find(
-				finderCache, new Object[] {companyId, configurationUuid}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_C.find(
+			finderCache, new Object[] {companyId, configurationUuid}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1306,13 +1225,8 @@ public class AMImageEntryPersistenceImpl
 	 */
 	@Override
 	public int countByC_C(long companyId, String configurationUuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _collectionPersistenceFinderByC_C.count(
-				finderCache, new Object[] {companyId, configurationUuid});
-		}
+		return _collectionPersistenceFinderByC_C.count(
+			finderCache, new Object[] {companyId, configurationUuid});
 	}
 
 	private FinderPath _finderPathFetchByC_F;
@@ -1375,14 +1289,9 @@ public class AMImageEntryPersistenceImpl
 	public AMImageEntry fetchByC_F(
 		String configurationUuid, long fileVersionId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			return _uniquePersistenceFinderByC_F.fetch(
-				finderCache, new Object[] {configurationUuid, fileVersionId},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByC_F.fetch(
+			finderCache, new Object[] {configurationUuid, fileVersionId},
+			useFinderCache);
 	}
 
 	/**
@@ -1432,136 +1341,6 @@ public class AMImageEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the am image entry in the entity cache if it is enabled.
-	 *
-	 * @param amImageEntry the am image entry
-	 */
-	@Override
-	public void cacheResult(AMImageEntry amImageEntry) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					amImageEntry.getCtCollectionId())) {
-
-			entityCache.putResult(
-				AMImageEntryImpl.class, amImageEntry.getPrimaryKey(),
-				amImageEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G,
-				new Object[] {
-					amImageEntry.getUuid(), amImageEntry.getGroupId()
-				},
-				amImageEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByC_F,
-				new Object[] {
-					amImageEntry.getConfigurationUuid(),
-					amImageEntry.getFileVersionId()
-				},
-				amImageEntry);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the am image entries in the entity cache if it is enabled.
-	 *
-	 * @param amImageEntries the am image entries
-	 */
-	@Override
-	public void cacheResult(List<AMImageEntry> amImageEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (amImageEntries.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (AMImageEntry amImageEntry : amImageEntries) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						amImageEntry.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						AMImageEntryImpl.class, amImageEntry.getPrimaryKey()) ==
-							null) {
-
-					cacheResult(amImageEntry);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all am image entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(AMImageEntryImpl.class);
-
-		finderCache.clearCache(AMImageEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the am image entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(AMImageEntry amImageEntry) {
-		entityCache.removeResult(AMImageEntryImpl.class, amImageEntry);
-	}
-
-	@Override
-	public void clearCache(List<AMImageEntry> amImageEntries) {
-		for (AMImageEntry amImageEntry : amImageEntries) {
-			entityCache.removeResult(AMImageEntryImpl.class, amImageEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(AMImageEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(AMImageEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		AMImageEntryModelImpl amImageEntryModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					amImageEntryModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				amImageEntryModelImpl.getUuid(),
-				amImageEntryModelImpl.getGroupId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G, args, amImageEntryModelImpl);
-
-			args = new Object[] {
-				amImageEntryModelImpl.getConfigurationUuid(),
-				amImageEntryModelImpl.getFileVersionId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByC_F, args, amImageEntryModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new am image entry with the primary key. Does not add the am image entry to the database.
 	 *
 	 * @param amImageEntryId the primary key for the new am image entry
@@ -1595,47 +1374,6 @@ public class AMImageEntryPersistenceImpl
 		throws NoSuchAMImageEntryException {
 
 		return remove((Serializable)amImageEntryId);
-	}
-
-	/**
-	 * Removes the am image entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the am image entry
-	 * @return the am image entry that was removed
-	 * @throws NoSuchAMImageEntryException if a am image entry with the primary key could not be found
-	 */
-	@Override
-	public AMImageEntry remove(Serializable primaryKey)
-		throws NoSuchAMImageEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			AMImageEntry amImageEntry = (AMImageEntry)session.get(
-				AMImageEntryImpl.class, primaryKey);
-
-			if (amImageEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchAMImageEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(amImageEntry);
-		}
-		catch (NoSuchAMImageEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1739,41 +1477,13 @@ public class AMImageEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			AMImageEntryImpl.class, amImageEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(amImageEntryModelImpl);
+		cacheUniqueFindersResult(amImageEntry, false);
 
 		if (isNew) {
 			amImageEntry.setNew(false);
 		}
 
 		amImageEntry.resetOriginalValues();
-
-		return amImageEntry;
-	}
-
-	/**
-	 * Returns the am image entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the am image entry
-	 * @return the am image entry
-	 * @throws NoSuchAMImageEntryException if a am image entry with the primary key could not be found
-	 */
-	@Override
-	public AMImageEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchAMImageEntryException {
-
-		AMImageEntry amImageEntry = fetchByPrimaryKey(primaryKey);
-
-		if (amImageEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchAMImageEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return amImageEntry;
 	}
@@ -1792,52 +1502,9 @@ public class AMImageEntryPersistenceImpl
 		return findByPrimaryKey((Serializable)amImageEntryId);
 	}
 
-	/**
-	 * Returns the am image entry with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the am image entry
-	 * @return the am image entry, or <code>null</code> if a am image entry with the primary key could not be found
-	 */
 	@Override
-	public AMImageEntry fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				AMImageEntry.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		AMImageEntry amImageEntry = (AMImageEntry)entityCache.getResult(
-			AMImageEntryImpl.class, primaryKey);
-
-		if (amImageEntry != null) {
-			return amImageEntry;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			amImageEntry = (AMImageEntry)session.get(
-				AMImageEntryImpl.class, primaryKey);
-
-			if (amImageEntry != null) {
-				cacheResult(amImageEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return amImageEntry;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -1849,318 +1516,6 @@ public class AMImageEntryPersistenceImpl
 	@Override
 	public AMImageEntry fetchByPrimaryKey(long amImageEntryId) {
 		return fetchByPrimaryKey((Serializable)amImageEntryId);
-	}
-
-	@Override
-	public Map<Serializable, AMImageEntry> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(AMImageEntry.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, AMImageEntry> map =
-			new HashMap<Serializable, AMImageEntry>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			AMImageEntry amImageEntry = fetchByPrimaryKey(primaryKey);
-
-			if (amImageEntry != null) {
-				map.put(primaryKey, amImageEntry);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						AMImageEntry.class, primaryKey)) {
-
-				AMImageEntry amImageEntry = (AMImageEntry)entityCache.getResult(
-					AMImageEntryImpl.class, primaryKey);
-
-				if (amImageEntry == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, amImageEntry);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (AMImageEntry amImageEntry : (List<AMImageEntry>)query.list()) {
-				map.put(amImageEntry.getPrimaryKeyObj(), amImageEntry);
-
-				cacheResult(amImageEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the am image entries.
-	 *
-	 * @return the am image entries
-	 */
-	@Override
-	public List<AMImageEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the am image entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>AMImageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of am image entries
-	 * @param end the upper bound of the range of am image entries (not inclusive)
-	 * @return the range of am image entries
-	 */
-	@Override
-	public List<AMImageEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the am image entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>AMImageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of am image entries
-	 * @param end the upper bound of the range of am image entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of am image entries
-	 */
-	@Override
-	public List<AMImageEntry> findAll(
-		int start, int end, OrderByComparator<AMImageEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the am image entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>AMImageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of am image entries
-	 * @param end the upper bound of the range of am image entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of am image entries
-	 */
-	@Override
-	public List<AMImageEntry> findAll(
-		int start, int end, OrderByComparator<AMImageEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<AMImageEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<AMImageEntry>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_AMIMAGEENTRY);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_AMIMAGEENTRY;
-
-					sql = sql.concat(AMImageEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<AMImageEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the am image entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (AMImageEntry amImageEntry : findAll()) {
-			remove(amImageEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of am image entries.
-	 *
-	 * @return the number of am image entries
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AMImageEntry.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(_SQL_COUNT_AMIMAGEENTRY);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -2256,21 +1611,6 @@ public class AMImageEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -2281,33 +1621,35 @@ public class AMImageEntryPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_AMIMAGEENTRY_WHERE, _SQL_COUNT_AMIMAGEENTRY_WHERE,
-			AMImageEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			AMImageEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"amImageEntry.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, AMImageEntry::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(AMImageEntry::getUuid),
+			AMImageEntry::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByUUID_G, _SQL_SELECT_AMIMAGEENTRY_WHERE,
+			this, _finderPathFetchByUUID_G, _SQL_SELECT_AMIMAGEENTRY_WHERE, "",
 			new FinderColumn<>(
 				"amImageEntry.", "uuid", FinderColumn.Type.STRING, "=", true,
-				false, AMImageEntry::getUuid),
+				true, AMImageEntry::getUuid),
 			new FinderColumn<>(
 				"amImageEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
 				true, AMImageEntry::getGroupId));
@@ -2324,12 +1666,12 @@ public class AMImageEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -2337,10 +1679,10 @@ public class AMImageEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_AMIMAGEENTRY_WHERE,
 				_SQL_COUNT_AMIMAGEENTRY_WHERE,
-				AMImageEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				AMImageEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"amImageEntry.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, AMImageEntry::getUuid),
+					true, true, AMImageEntry::getUuid),
 				new FinderColumn<>(
 					"amImageEntry.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, AMImageEntry::getCompanyId));
@@ -2369,7 +1711,7 @@ public class AMImageEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByGroupId,
 				_finderPathCountByGroupId, _SQL_SELECT_AMIMAGEENTRY_WHERE,
 				_SQL_COUNT_AMIMAGEENTRY_WHERE,
-				AMImageEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				AMImageEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"amImageEntry.", "groupId", FinderColumn.Type.LONG, "=",
 					true, true, AMImageEntry::getGroupId));
@@ -2398,7 +1740,7 @@ public class AMImageEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByCompanyId,
 				_finderPathCountByCompanyId, _SQL_SELECT_AMIMAGEENTRY_WHERE,
 				_SQL_COUNT_AMIMAGEENTRY_WHERE,
-				AMImageEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				AMImageEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"amImageEntry.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, AMImageEntry::getCompanyId));
@@ -2414,12 +1756,12 @@ public class AMImageEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByConfigurationUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"findByConfigurationUuid", new String[] {String.class.getName()},
-			new String[] {"configurationUuid"}, true);
+			new String[] {"configurationUuid"}, 0, 1, true, null);
 
 		_finderPathCountByConfigurationUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"countByConfigurationUuid", new String[] {String.class.getName()},
-			new String[] {"configurationUuid"}, false);
+			new String[] {"configurationUuid"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByConfigurationUuid =
 			new CollectionPersistenceFinder<>(
@@ -2427,7 +1769,7 @@ public class AMImageEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByConfigurationUuid,
 				_finderPathCountByConfigurationUuid,
 				_SQL_SELECT_AMIMAGEENTRY_WHERE, _SQL_COUNT_AMIMAGEENTRY_WHERE,
-				AMImageEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				AMImageEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"amImageEntry.", "configurationUuid",
 					FinderColumn.Type.STRING, "=", true, true,
@@ -2457,7 +1799,7 @@ public class AMImageEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByFileVersionId,
 				_finderPathCountByFileVersionId, _SQL_SELECT_AMIMAGEENTRY_WHERE,
 				_SQL_COUNT_AMIMAGEENTRY_WHERE,
-				AMImageEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				AMImageEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"amImageEntry.", "fileVersionId", FinderColumn.Type.LONG,
 					"=", true, true, AMImageEntry::getFileVersionId));
@@ -2474,35 +1816,37 @@ public class AMImageEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByC_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC_C",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "configurationUuid"}, true);
+			new String[] {"companyId", "configurationUuid"}, 0, 2, true, null);
 
 		_finderPathCountByC_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_C",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "configurationUuid"}, false);
+			new String[] {"companyId", "configurationUuid"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByC_C = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_C,
 			_finderPathWithoutPaginationFindByC_C, _finderPathCountByC_C,
 			_SQL_SELECT_AMIMAGEENTRY_WHERE, _SQL_COUNT_AMIMAGEENTRY_WHERE,
-			AMImageEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			AMImageEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"amImageEntry.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, AMImageEntry::getCompanyId),
+				true, AMImageEntry::getCompanyId),
 			new FinderColumn<>(
 				"amImageEntry.", "configurationUuid", FinderColumn.Type.STRING,
 				"=", true, true, AMImageEntry::getConfigurationUuid));
 
-		_finderPathFetchByC_F = new FinderPath(
+		_finderPathFetchByC_F = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_F",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"configurationUuid", "fileVersionId"}, true);
+			new String[] {"configurationUuid", "fileVersionId"}, 0, 1, false,
+			convertNullFunction(AMImageEntry::getConfigurationUuid),
+			AMImageEntry::getFileVersionId);
 
 		_uniquePersistenceFinderByC_F = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByC_F, _SQL_SELECT_AMIMAGEENTRY_WHERE,
+			this, _finderPathFetchByC_F, _SQL_SELECT_AMIMAGEENTRY_WHERE, "",
 			new FinderColumn<>(
 				"amImageEntry.", "configurationUuid", FinderColumn.Type.STRING,
-				"=", true, false, AMImageEntry::getConfigurationUuid),
+				"=", true, true, AMImageEntry::getConfigurationUuid),
 			new FinderColumn<>(
 				"amImageEntry.", "fileVersionId", FinderColumn.Type.LONG, "=",
 				true, true, AMImageEntry::getFileVersionId));
@@ -2552,22 +1896,17 @@ public class AMImageEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		AMImageEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_AMIMAGEENTRY =
 		"SELECT amImageEntry FROM AMImageEntry amImageEntry";
 
 	private static final String _SQL_SELECT_AMIMAGEENTRY_WHERE =
 		"SELECT amImageEntry FROM AMImageEntry amImageEntry WHERE ";
 
-	private static final String _SQL_COUNT_AMIMAGEENTRY =
-		"SELECT COUNT(amImageEntry) FROM AMImageEntry amImageEntry";
-
 	private static final String _SQL_COUNT_AMIMAGEENTRY_WHERE =
 		"SELECT COUNT(amImageEntry) FROM AMImageEntry amImageEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "amImageEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No AMImageEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No AMImageEntry exists with the key {";
@@ -2584,4 +1923,4 @@ public class AMImageEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2100168742
+// LIFERAY-SERVICE-BUILDER-HASH:758473369

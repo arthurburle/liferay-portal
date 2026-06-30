@@ -5,6 +5,7 @@
 
 import {Locator, Page, expect} from '@playwright/test';
 
+import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
 import {SegmentConditions} from './selectors';
 import {searchByTerm} from './utils';
 
@@ -38,8 +39,13 @@ export async function addSegmentField({
 	criterionType: string;
 	page: Page;
 }) {
-	await page.locator('button.dropdown-toggle.btn-outline-secondary').click();
-	await page.getByRole('menuitem', {name: criterionType}).click();
+	await clickAndExpectToBeVisible({
+		autoClick: true,
+		target: page.getByRole('menuitem', {name: criterionType}),
+		trigger: page
+			.locator('.criteria-sidebar-root .sidebar-header')
+			.getByRole('button'),
+	});
 
 	await dragAndDropCriteriaItem({
 		page,
@@ -70,6 +76,16 @@ export async function addStaticMember({
 	}
 
 	await page.getByRole('button', {exact: true, name: 'Add'}).click();
+}
+
+export async function createBatchSegment(page: Page) {
+	await clickAndExpectToBeVisible({
+		autoClick: true,
+		target: page.getByRole('menuitem', {name: 'Batch'}),
+		trigger: page
+			.getByRole('button', {name: 'Menu'})
+			.filter({hasText: 'New Segment'}),
+	});
 }
 
 export async function createDynamicSegment(page: Page) {
@@ -117,7 +133,9 @@ export async function dragAndDropCriteriaItem({
 		target = page.locator('.display-value').getByText(nestedSegmentField);
 	}
 	else {
-		target = page.locator('div.drop-zone-target').last();
+		target = page
+			.locator('.empty-drop-zone-target, div.drop-zone-target')
+			.last();
 	}
 
 	return await source.dragTo(target);

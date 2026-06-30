@@ -316,23 +316,6 @@ public interface CommerceInventoryWarehouseRelPersistence
 		long classNameId, long classPK, long commerceInventoryWarehouseId);
 
 	/**
-	 * Caches the commerce inventory warehouse rel in the entity cache if it is enabled.
-	 *
-	 * @param commerceInventoryWarehouseRel the commerce inventory warehouse rel
-	 */
-	public void cacheResult(
-		CommerceInventoryWarehouseRel commerceInventoryWarehouseRel);
-
-	/**
-	 * Caches the commerce inventory warehouse rels in the entity cache if it is enabled.
-	 *
-	 * @param commerceInventoryWarehouseRels the commerce inventory warehouse rels
-	 */
-	public void cacheResult(
-		java.util.List<CommerceInventoryWarehouseRel>
-			commerceInventoryWarehouseRels);
-
-	/**
 	 * Creates a new commerce inventory warehouse rel with the primary key. Does not add the commerce inventory warehouse rel to the database.
 	 *
 	 * @param commerceInventoryWarehouseRelId the primary key for the new commerce inventory warehouse rel
@@ -375,74 +358,5 @@ public interface CommerceInventoryWarehouseRelPersistence
 	public CommerceInventoryWarehouseRel fetchByPrimaryKey(
 		long commerceInventoryWarehouseRelId);
 
-	/**
-	 * Returns all the commerce inventory warehouse rels.
-	 *
-	 * @return the commerce inventory warehouse rels
-	 */
-	public java.util.List<CommerceInventoryWarehouseRel> findAll();
-
-	/**
-	 * Returns a range of all the commerce inventory warehouse rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.inventory.model.impl.CommerceInventoryWarehouseRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory warehouse rels
-	 * @param end the upper bound of the range of commerce inventory warehouse rels (not inclusive)
-	 * @return the range of commerce inventory warehouse rels
-	 */
-	public java.util.List<CommerceInventoryWarehouseRel> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce inventory warehouse rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.inventory.model.impl.CommerceInventoryWarehouseRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory warehouse rels
-	 * @param end the upper bound of the range of commerce inventory warehouse rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce inventory warehouse rels
-	 */
-	public java.util.List<CommerceInventoryWarehouseRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceInventoryWarehouseRel> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce inventory warehouse rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.inventory.model.impl.CommerceInventoryWarehouseRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory warehouse rels
-	 * @param end the upper bound of the range of commerce inventory warehouse rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce inventory warehouse rels
-	 */
-	public java.util.List<CommerceInventoryWarehouseRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceInventoryWarehouseRel> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce inventory warehouse rels from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce inventory warehouse rels.
-	 *
-	 * @return the number of commerce inventory warehouse rels
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2096449406
+// LIFERAY-SERVICE-BUILDER-HASH:439856602

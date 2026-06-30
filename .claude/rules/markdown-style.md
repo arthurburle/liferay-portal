@@ -57,6 +57,7 @@ curl \
 ## Headings
 
 - Apply Title Case at every level, including table headers.
+- Do not number headings (`### Do the Thing`, not `### 1. Do the Thing`).
 - Follow every heading with a blank line before the body content.
 - Use correct casing for brand and product names (Arquillian, Atlassian, Git, GitHub, Gradle, Jira, JUnit, Liferay, Mockito, Playwright, Poshi, REST API, TypeScript).
 
@@ -100,6 +101,11 @@ gh pr create \
 ## Shell Variables
 
 - Brace every reference as `${VAR}`, both in code and prose.
+
+## Tables
+
+- Use `---` for each separator cell (or `:---`, `---:`, or `:---:` for alignment). Do not pad separator cells to match column widths.
+- Use a single space of padding inside each header and data cell.
 
 ## URLs
 

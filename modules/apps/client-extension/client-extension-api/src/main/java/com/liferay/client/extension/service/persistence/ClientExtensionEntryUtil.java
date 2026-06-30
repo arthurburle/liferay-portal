@@ -36,6 +36,22 @@ public class ClientExtensionEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<ClientExtensionEntry> clientExtensionEntries) {
+
+		getPersistence().cacheResult(clientExtensionEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(ClientExtensionEntry clientExtensionEntry) {
+		getPersistence().cacheResult(clientExtensionEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -949,26 +965,6 @@ public class ClientExtensionEntryUtil {
 	}
 
 	/**
-	 * Caches the client extension entry in the entity cache if it is enabled.
-	 *
-	 * @param clientExtensionEntry the client extension entry
-	 */
-	public static void cacheResult(ClientExtensionEntry clientExtensionEntry) {
-		getPersistence().cacheResult(clientExtensionEntry);
-	}
-
-	/**
-	 * Caches the client extension entries in the entity cache if it is enabled.
-	 *
-	 * @param clientExtensionEntries the client extension entries
-	 */
-	public static void cacheResult(
-		List<ClientExtensionEntry> clientExtensionEntries) {
-
-		getPersistence().cacheResult(clientExtensionEntries);
-	}
-
-	/**
 	 * Creates a new client extension entry with the primary key. Does not add the client extension entry to the database.
 	 *
 	 * @param clientExtensionEntryId the primary key for the new client extension entry
@@ -1025,87 +1021,6 @@ public class ClientExtensionEntryUtil {
 		return getPersistence().fetchByPrimaryKey(clientExtensionEntryId);
 	}
 
-	/**
-	 * Returns all the client extension entries.
-	 *
-	 * @return the client extension entries
-	 */
-	public static List<ClientExtensionEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the client extension entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.client.extension.model.impl.ClientExtensionEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of client extension entries
-	 * @param end the upper bound of the range of client extension entries (not inclusive)
-	 * @return the range of client extension entries
-	 */
-	public static List<ClientExtensionEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the client extension entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.client.extension.model.impl.ClientExtensionEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of client extension entries
-	 * @param end the upper bound of the range of client extension entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of client extension entries
-	 */
-	public static List<ClientExtensionEntry> findAll(
-		int start, int end,
-		OrderByComparator<ClientExtensionEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the client extension entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.client.extension.model.impl.ClientExtensionEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of client extension entries
-	 * @param end the upper bound of the range of client extension entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of client extension entries
-	 */
-	public static List<ClientExtensionEntry> findAll(
-		int start, int end,
-		OrderByComparator<ClientExtensionEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the client extension entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of client extension entries.
-	 *
-	 * @return the number of client extension entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static ClientExtensionEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1119,4 +1034,4 @@ public class ClientExtensionEntryUtil {
 	private static volatile ClientExtensionEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2034615299
+// LIFERAY-SERVICE-BUILDER-HASH:361901491

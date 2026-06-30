@@ -5,18 +5,14 @@
 
 package com.liferay.portal.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.exception.NoSuchUserNotificationEventException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.UserNotificationEvent;
 import com.liferay.portal.kernel.model.UserNotificationEventTable;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
@@ -25,10 +21,7 @@ import com.liferay.portal.kernel.service.persistence.UserNotificationEventUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -56,7 +49,8 @@ import java.util.Set;
  * @generated
  */
 public class UserNotificationEventPersistenceImpl
-	extends BasePersistenceImpl<UserNotificationEvent>
+	extends BasePersistenceImpl
+		<UserNotificationEvent, NoSuchUserNotificationEventException>
 	implements UserNotificationEventPersistence {
 
 	/*
@@ -73,9 +67,6 @@ public class UserNotificationEventPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -3647,96 +3638,6 @@ public class UserNotificationEventPersistenceImpl
 	}
 
 	/**
-	 * Caches the user notification event in the entity cache if it is enabled.
-	 *
-	 * @param userNotificationEvent the user notification event
-	 */
-	@Override
-	public void cacheResult(UserNotificationEvent userNotificationEvent) {
-		EntityCacheUtil.putResult(
-			UserNotificationEventImpl.class,
-			userNotificationEvent.getPrimaryKey(), userNotificationEvent);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the user notification events in the entity cache if it is enabled.
-	 *
-	 * @param userNotificationEvents the user notification events
-	 */
-	@Override
-	public void cacheResult(
-		List<UserNotificationEvent> userNotificationEvents) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (userNotificationEvents.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (UserNotificationEvent userNotificationEvent :
-				userNotificationEvents) {
-
-			if (EntityCacheUtil.getResult(
-					UserNotificationEventImpl.class,
-					userNotificationEvent.getPrimaryKey()) == null) {
-
-				cacheResult(userNotificationEvent);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all user notification events.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		EntityCacheUtil.clearCache(UserNotificationEventImpl.class);
-
-		FinderCacheUtil.clearCache(UserNotificationEventImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the user notification event.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(UserNotificationEvent userNotificationEvent) {
-		EntityCacheUtil.removeResult(
-			UserNotificationEventImpl.class, userNotificationEvent);
-	}
-
-	@Override
-	public void clearCache(List<UserNotificationEvent> userNotificationEvents) {
-		for (UserNotificationEvent userNotificationEvent :
-				userNotificationEvents) {
-
-			EntityCacheUtil.removeResult(
-				UserNotificationEventImpl.class, userNotificationEvent);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		FinderCacheUtil.clearCache(UserNotificationEventImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			EntityCacheUtil.removeResult(
-				UserNotificationEventImpl.class, primaryKey);
-		}
-	}
-
-	/**
 	 * Creates a new user notification event with the primary key. Does not add the user notification event to the database.
 	 *
 	 * @param userNotificationEventId the primary key for the new user notification event
@@ -3771,48 +3672,6 @@ public class UserNotificationEventPersistenceImpl
 		throws NoSuchUserNotificationEventException {
 
 		return remove((Serializable)userNotificationEventId);
-	}
-
-	/**
-	 * Removes the user notification event with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the user notification event
-	 * @return the user notification event that was removed
-	 * @throws NoSuchUserNotificationEventException if a user notification event with the primary key could not be found
-	 */
-	@Override
-	public UserNotificationEvent remove(Serializable primaryKey)
-		throws NoSuchUserNotificationEventException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			UserNotificationEvent userNotificationEvent =
-				(UserNotificationEvent)session.get(
-					UserNotificationEventImpl.class, primaryKey);
-
-			if (userNotificationEvent == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchUserNotificationEventException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(userNotificationEvent);
-		}
-		catch (NoSuchUserNotificationEventException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -3902,41 +3761,13 @@ public class UserNotificationEventPersistenceImpl
 			closeSession(session);
 		}
 
-		EntityCacheUtil.putResult(
-			UserNotificationEventImpl.class, userNotificationEventModelImpl,
-			false, true);
+		cacheUniqueFindersResult(userNotificationEvent, false);
 
 		if (isNew) {
 			userNotificationEvent.setNew(false);
 		}
 
 		userNotificationEvent.resetOriginalValues();
-
-		return userNotificationEvent;
-	}
-
-	/**
-	 * Returns the user notification event with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the user notification event
-	 * @return the user notification event
-	 * @throws NoSuchUserNotificationEventException if a user notification event with the primary key could not be found
-	 */
-	@Override
-	public UserNotificationEvent findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchUserNotificationEventException {
-
-		UserNotificationEvent userNotificationEvent = fetchByPrimaryKey(
-			primaryKey);
-
-		if (userNotificationEvent == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchUserNotificationEventException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return userNotificationEvent;
 	}
@@ -3968,188 +3799,6 @@ public class UserNotificationEventPersistenceImpl
 		return fetchByPrimaryKey((Serializable)userNotificationEventId);
 	}
 
-	/**
-	 * Returns all the user notification events.
-	 *
-	 * @return the user notification events
-	 */
-	@Override
-	public List<UserNotificationEvent> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the user notification events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>UserNotificationEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of user notification events
-	 * @param end the upper bound of the range of user notification events (not inclusive)
-	 * @return the range of user notification events
-	 */
-	@Override
-	public List<UserNotificationEvent> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the user notification events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>UserNotificationEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of user notification events
-	 * @param end the upper bound of the range of user notification events (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of user notification events
-	 */
-	@Override
-	public List<UserNotificationEvent> findAll(
-		int start, int end,
-		OrderByComparator<UserNotificationEvent> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the user notification events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>UserNotificationEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of user notification events
-	 * @param end the upper bound of the range of user notification events (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of user notification events
-	 */
-	@Override
-	public List<UserNotificationEvent> findAll(
-		int start, int end,
-		OrderByComparator<UserNotificationEvent> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<UserNotificationEvent> list = null;
-
-		if (useFinderCache) {
-			list = (List<UserNotificationEvent>)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_USERNOTIFICATIONEVENT);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_USERNOTIFICATIONEVENT;
-
-				sql = sql.concat(UserNotificationEventModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<UserNotificationEvent>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the user notification events from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (UserNotificationEvent userNotificationEvent : findAll()) {
-			remove(userNotificationEvent);
-		}
-	}
-
-	/**
-	 * Returns the number of user notification events.
-	 *
-	 * @return the number of user notification events
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)FinderCacheUtil.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_USERNOTIFICATIONEVENT);
-
-				count = (Long)query.uniqueResult();
-
-				FinderCacheUtil.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	public Set<String> getBadColumnNames() {
 		return _badColumnNames;
@@ -4179,21 +3828,6 @@ public class UserNotificationEventPersistenceImpl
 	 * Initializes the user notification event persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -4204,21 +3838,21 @@ public class UserNotificationEventPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 			_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
-			UserNotificationEventModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			UserNotificationEventModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"userNotificationEvent.", "uuid", FinderColumn.Type.STRING, "=",
 				true, true, UserNotificationEvent::getUuid));
@@ -4235,12 +3869,12 @@ public class UserNotificationEventPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -4250,10 +3884,10 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "uuid", FinderColumn.Type.STRING,
-					"=", true, false, UserNotificationEvent::getUuid),
+					"=", true, true, UserNotificationEvent::getUuid),
 				new FinderColumn<>(
 					"userNotificationEvent.", "companyId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -4284,7 +3918,7 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
 					"=", true, true, UserNotificationEvent::getUserId));
@@ -4299,21 +3933,21 @@ public class UserNotificationEventPersistenceImpl
 
 		_finderPathWithoutPaginationFindByType = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByType",
-			new String[] {String.class.getName()}, new String[] {"type_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"type_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByType = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByType",
-			new String[] {String.class.getName()}, new String[] {"type_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"type_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByType = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByType,
 			_finderPathWithoutPaginationFindByType, _finderPathCountByType,
 			_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 			_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
-			UserNotificationEventModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			UserNotificationEventModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"userNotificationEvent.", "type", FinderColumn.Type.STRING, "=",
 				true, true, UserNotificationEvent::getType));
@@ -4342,11 +3976,11 @@ public class UserNotificationEventPersistenceImpl
 			_finderPathWithoutPaginationFindByU_DT, _finderPathCountByU_DT,
 			_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 			_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
-			UserNotificationEventModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			UserNotificationEventModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"userNotificationEvent.", "userId", FinderColumn.Type.LONG, "=",
-				true, false, UserNotificationEvent::getUserId),
+				true, true, UserNotificationEvent::getUserId),
 			new FinderColumn<>(
 				"userNotificationEvent.", "deliveryType",
 				FinderColumn.Type.INTEGER, "=", true, true,
@@ -4376,11 +4010,11 @@ public class UserNotificationEventPersistenceImpl
 			_finderPathWithoutPaginationFindByU_D, _finderPathCountByU_D,
 			_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 			_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
-			UserNotificationEventModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			UserNotificationEventModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"userNotificationEvent.", "userId", FinderColumn.Type.LONG, "=",
-				true, false, UserNotificationEvent::getUserId),
+				true, true, UserNotificationEvent::getUserId),
 			new FinderColumn<>(
 				"userNotificationEvent.", "delivered",
 				FinderColumn.Type.BOOLEAN, "=", true, true,
@@ -4410,11 +4044,11 @@ public class UserNotificationEventPersistenceImpl
 			_finderPathWithoutPaginationFindByU_A, _finderPathCountByU_A,
 			_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 			_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
-			UserNotificationEventModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			UserNotificationEventModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"userNotificationEvent.", "userId", FinderColumn.Type.LONG, "=",
-				true, false, UserNotificationEvent::getUserId),
+				true, true, UserNotificationEvent::getUserId),
 			new FinderColumn<>(
 				"userNotificationEvent.", "archived", FinderColumn.Type.BOOLEAN,
 				"=", true, true, UserNotificationEvent::isArchived));
@@ -4452,13 +4086,13 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "deliveryType",
-					FinderColumn.Type.INTEGER, "=", true, false,
+					FinderColumn.Type.INTEGER, "=", true, true,
 					UserNotificationEvent::getDeliveryType),
 				new FinderColumn<>(
 					"userNotificationEvent.", "delivered",
@@ -4498,13 +4132,13 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "deliveryType",
-					FinderColumn.Type.INTEGER, "=", true, false,
+					FinderColumn.Type.INTEGER, "=", true, true,
 					UserNotificationEvent::getDeliveryType),
 				new FinderColumn<>(
 					"userNotificationEvent.", "archived",
@@ -4544,13 +4178,13 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "delivered",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					UserNotificationEvent::isDelivered),
 				new FinderColumn<>(
 					"userNotificationEvent.", "actionRequired",
@@ -4587,14 +4221,14 @@ public class UserNotificationEventPersistenceImpl
 			_finderPathWithoutPaginationFindByU_D_A, _finderPathCountByU_D_A,
 			_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 			_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
-			UserNotificationEventModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			UserNotificationEventModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"userNotificationEvent.", "userId", FinderColumn.Type.LONG, "=",
-				true, false, UserNotificationEvent::getUserId),
+				true, true, UserNotificationEvent::getUserId),
 			new FinderColumn<>(
 				"userNotificationEvent.", "delivered",
-				FinderColumn.Type.BOOLEAN, "=", true, false,
+				FinderColumn.Type.BOOLEAN, "=", true, true,
 				UserNotificationEvent::isDelivered),
 			new FinderColumn<>(
 				"userNotificationEvent.", "archived", FinderColumn.Type.BOOLEAN,
@@ -4633,13 +4267,13 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "actionRequired",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					UserNotificationEvent::isActionRequired),
 				new FinderColumn<>(
 					"userNotificationEvent.", "archived",
@@ -4671,16 +4305,16 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "type", FinderColumn.Type.STRING,
-					"=", true, false, UserNotificationEvent::getType),
+					"=", true, true, UserNotificationEvent::getType),
 				new FinderColumn<>(
 					"userNotificationEvent.", "timestamp",
-					FinderColumn.Type.LONG, ">=", true, false,
+					FinderColumn.Type.LONG, ">=", true, true,
 					UserNotificationEvent::getTimestamp),
 				new FinderColumn<>(
 					"userNotificationEvent.", "delivered",
@@ -4704,8 +4338,8 @@ public class UserNotificationEventPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName(), Boolean.class.getName()
 			},
-			new String[] {"userId", "type_", "deliveryType", "delivered"},
-			true);
+			new String[] {"userId", "type_", "deliveryType", "delivered"}, 0, 2,
+			true, null);
 
 		_finderPathCountByU_T_DT_D = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByU_T_DT_D",
@@ -4713,8 +4347,8 @@ public class UserNotificationEventPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName(), Boolean.class.getName()
 			},
-			new String[] {"userId", "type_", "deliveryType", "delivered"},
-			false);
+			new String[] {"userId", "type_", "deliveryType", "delivered"}, 0, 2,
+			false, null);
 
 		_collectionPersistenceFinderByU_T_DT_D =
 			new CollectionPersistenceFinder<>(
@@ -4724,16 +4358,16 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "type", FinderColumn.Type.STRING,
-					"=", true, false, UserNotificationEvent::getType),
+					"=", true, true, UserNotificationEvent::getType),
 				new FinderColumn<>(
 					"userNotificationEvent.", "deliveryType",
-					FinderColumn.Type.INTEGER, "=", true, false,
+					FinderColumn.Type.INTEGER, "=", true, true,
 					UserNotificationEvent::getDeliveryType),
 				new FinderColumn<>(
 					"userNotificationEvent.", "delivered",
@@ -4783,17 +4417,17 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "deliveryType",
-					FinderColumn.Type.INTEGER, "=", true, false,
+					FinderColumn.Type.INTEGER, "=", true, true,
 					UserNotificationEvent::getDeliveryType),
 				new FinderColumn<>(
 					"userNotificationEvent.", "delivered",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					UserNotificationEvent::isDelivered),
 				new FinderColumn<>(
 					"userNotificationEvent.", "actionRequired",
@@ -4837,17 +4471,17 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "deliveryType",
-					FinderColumn.Type.INTEGER, "=", true, false,
+					FinderColumn.Type.INTEGER, "=", true, true,
 					UserNotificationEvent::getDeliveryType),
 				new FinderColumn<>(
 					"userNotificationEvent.", "delivered",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					UserNotificationEvent::isDelivered),
 				new FinderColumn<>(
 					"userNotificationEvent.", "archived",
@@ -4897,17 +4531,17 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "deliveryType",
-					FinderColumn.Type.INTEGER, "=", true, false,
+					FinderColumn.Type.INTEGER, "=", true, true,
 					UserNotificationEvent::getDeliveryType),
 				new FinderColumn<>(
 					"userNotificationEvent.", "actionRequired",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					UserNotificationEvent::isActionRequired),
 				new FinderColumn<>(
 					"userNotificationEvent.", "archived",
@@ -4951,17 +4585,17 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "delivered",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					UserNotificationEvent::isDelivered),
 				new FinderColumn<>(
 					"userNotificationEvent.", "actionRequired",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					UserNotificationEvent::isActionRequired),
 				new FinderColumn<>(
 					"userNotificationEvent.", "archived",
@@ -4991,7 +4625,7 @@ public class UserNotificationEventPersistenceImpl
 			new String[] {
 				"userId", "type_", "deliveryType", "delivered", "archived"
 			},
-			true);
+			0, 2, true, null);
 
 		_finderPathCountByU_T_DT_D_A = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByU_T_DT_D_A",
@@ -5003,7 +4637,7 @@ public class UserNotificationEventPersistenceImpl
 			new String[] {
 				"userId", "type_", "deliveryType", "delivered", "archived"
 			},
-			false);
+			0, 2, false, null);
 
 		_collectionPersistenceFinderByU_T_DT_D_A =
 			new CollectionPersistenceFinder<>(
@@ -5013,20 +4647,20 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "type", FinderColumn.Type.STRING,
-					"=", true, false, UserNotificationEvent::getType),
+					"=", true, true, UserNotificationEvent::getType),
 				new FinderColumn<>(
 					"userNotificationEvent.", "deliveryType",
-					FinderColumn.Type.INTEGER, "=", true, false,
+					FinderColumn.Type.INTEGER, "=", true, true,
 					UserNotificationEvent::getDeliveryType),
 				new FinderColumn<>(
 					"userNotificationEvent.", "delivered",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					UserNotificationEvent::isDelivered),
 				new FinderColumn<>(
 					"userNotificationEvent.", "archived",
@@ -5081,21 +4715,21 @@ public class UserNotificationEventPersistenceImpl
 				_SQL_SELECT_USERNOTIFICATIONEVENT_WHERE,
 				_SQL_COUNT_USERNOTIFICATIONEVENT_WHERE,
 				UserNotificationEventModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userNotificationEvent.", "userId", FinderColumn.Type.LONG,
-					"=", true, false, UserNotificationEvent::getUserId),
+					"=", true, true, UserNotificationEvent::getUserId),
 				new FinderColumn<>(
 					"userNotificationEvent.", "deliveryType",
-					FinderColumn.Type.INTEGER, "=", true, false,
+					FinderColumn.Type.INTEGER, "=", true, true,
 					UserNotificationEvent::getDeliveryType),
 				new FinderColumn<>(
 					"userNotificationEvent.", "delivered",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					UserNotificationEvent::isDelivered),
 				new FinderColumn<>(
 					"userNotificationEvent.", "actionRequired",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					UserNotificationEvent::isActionRequired),
 				new FinderColumn<>(
 					"userNotificationEvent.", "archived",
@@ -5111,29 +4745,20 @@ public class UserNotificationEventPersistenceImpl
 		EntityCacheUtil.removeCache(UserNotificationEventImpl.class.getName());
 	}
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		UserNotificationEventModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_USERNOTIFICATIONEVENT =
 		"SELECT userNotificationEvent FROM UserNotificationEvent userNotificationEvent";
 
 	private static final String _SQL_SELECT_USERNOTIFICATIONEVENT_WHERE =
 		"SELECT userNotificationEvent FROM UserNotificationEvent userNotificationEvent WHERE ";
 
-	private static final String _SQL_COUNT_USERNOTIFICATIONEVENT =
-		"SELECT COUNT(userNotificationEvent) FROM UserNotificationEvent userNotificationEvent";
-
 	private static final String _SQL_COUNT_USERNOTIFICATIONEVENT_WHERE =
 		"SELECT COUNT(userNotificationEvent) FROM UserNotificationEvent userNotificationEvent WHERE ";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"userNotificationEvent.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No UserNotificationEvent exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No UserNotificationEvent exists with the key {";
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		UserNotificationEventPersistenceImpl.class);
 
 	private static final Set<String> _badColumnNames = SetUtil.fromArray(
 		new String[] {"uuid", "type"});
@@ -5144,4 +4769,4 @@ public class UserNotificationEventPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1236976237
+// LIFERAY-SERVICE-BUILDER-HASH:1499586170

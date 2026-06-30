@@ -36,6 +36,20 @@ public class CommerceCurrencyUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<CommerceCurrency> commerceCurrencies) {
+		getPersistence().cacheResult(commerceCurrencies);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CommerceCurrency commerceCurrency) {
+		getPersistence().cacheResult(commerceCurrency);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1030,24 +1044,6 @@ public class CommerceCurrencyUtil {
 	}
 
 	/**
-	 * Caches the commerce currency in the entity cache if it is enabled.
-	 *
-	 * @param commerceCurrency the commerce currency
-	 */
-	public static void cacheResult(CommerceCurrency commerceCurrency) {
-		getPersistence().cacheResult(commerceCurrency);
-	}
-
-	/**
-	 * Caches the commerce currencies in the entity cache if it is enabled.
-	 *
-	 * @param commerceCurrencies the commerce currencies
-	 */
-	public static void cacheResult(List<CommerceCurrency> commerceCurrencies) {
-		getPersistence().cacheResult(commerceCurrencies);
-	}
-
-	/**
 	 * Creates a new commerce currency with the primary key. Does not add the commerce currency to the database.
 	 *
 	 * @param commerceCurrencyId the primary key for the new commerce currency
@@ -1099,87 +1095,6 @@ public class CommerceCurrencyUtil {
 		return getPersistence().fetchByPrimaryKey(commerceCurrencyId);
 	}
 
-	/**
-	 * Returns all the commerce currencies.
-	 *
-	 * @return the commerce currencies
-	 */
-	public static List<CommerceCurrency> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce currencies.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.currency.model.impl.CommerceCurrencyModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce currencies
-	 * @param end the upper bound of the range of commerce currencies (not inclusive)
-	 * @return the range of commerce currencies
-	 */
-	public static List<CommerceCurrency> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce currencies.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.currency.model.impl.CommerceCurrencyModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce currencies
-	 * @param end the upper bound of the range of commerce currencies (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce currencies
-	 */
-	public static List<CommerceCurrency> findAll(
-		int start, int end,
-		OrderByComparator<CommerceCurrency> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce currencies.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.currency.model.impl.CommerceCurrencyModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce currencies
-	 * @param end the upper bound of the range of commerce currencies (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce currencies
-	 */
-	public static List<CommerceCurrency> findAll(
-		int start, int end,
-		OrderByComparator<CommerceCurrency> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce currencies from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce currencies.
-	 *
-	 * @return the number of commerce currencies
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceCurrencyPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1191,4 +1106,4 @@ public class CommerceCurrencyUtil {
 	private static volatile CommerceCurrencyPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-6454445
+// LIFERAY-SERVICE-BUILDER-HASH:1831012517

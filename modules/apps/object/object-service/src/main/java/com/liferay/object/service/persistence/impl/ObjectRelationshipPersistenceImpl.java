@@ -13,12 +13,10 @@ import com.liferay.object.model.impl.ObjectRelationshipModelImpl;
 import com.liferay.object.service.persistence.ObjectRelationshipPersistence;
 import com.liferay.object.service.persistence.ObjectRelationshipUtil;
 import com.liferay.object.service.persistence.impl.constants.ObjectPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -39,8 +37,6 @@ import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinde
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -76,7 +72,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ObjectRelationshipPersistence.class)
 public class ObjectRelationshipPersistenceImpl
-	extends BasePersistenceImpl<ObjectRelationship>
+	extends BasePersistenceImpl
+		<ObjectRelationship, NoSuchObjectRelationshipException>
 	implements ObjectRelationshipPersistence {
 
 	/*
@@ -93,9 +90,6 @@ public class ObjectRelationshipPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -3351,162 +3345,6 @@ public class ObjectRelationshipPersistenceImpl
 	}
 
 	/**
-	 * Caches the object relationship in the entity cache if it is enabled.
-	 *
-	 * @param objectRelationship the object relationship
-	 */
-	@Override
-	public void cacheResult(ObjectRelationship objectRelationship) {
-		entityCache.putResult(
-			ObjectRelationshipImpl.class, objectRelationship.getPrimaryKey(),
-			objectRelationship);
-
-		finderCache.putResult(
-			_finderPathFetchByObjectFieldId2,
-			new Object[] {objectRelationship.getObjectFieldId2()},
-			objectRelationship);
-
-		finderCache.putResult(
-			_finderPathFetchByDTN_R,
-			new Object[] {
-				objectRelationship.getDBTableName(),
-				objectRelationship.isReverse()
-			},
-			objectRelationship);
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C_ODI1,
-			new Object[] {
-				objectRelationship.getExternalReferenceCode(),
-				objectRelationship.getCompanyId(),
-				objectRelationship.getObjectDefinitionId1()
-			},
-			objectRelationship);
-
-		finderCache.putResult(
-			_finderPathFetchByODI1_ODI2_N_R_T,
-			new Object[] {
-				objectRelationship.getObjectDefinitionId1(),
-				objectRelationship.getObjectDefinitionId2(),
-				objectRelationship.getName(), objectRelationship.isReverse(),
-				objectRelationship.getType()
-			},
-			objectRelationship);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the object relationships in the entity cache if it is enabled.
-	 *
-	 * @param objectRelationships the object relationships
-	 */
-	@Override
-	public void cacheResult(List<ObjectRelationship> objectRelationships) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (objectRelationships.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ObjectRelationship objectRelationship : objectRelationships) {
-			if (entityCache.getResult(
-					ObjectRelationshipImpl.class,
-					objectRelationship.getPrimaryKey()) == null) {
-
-				cacheResult(objectRelationship);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all object relationships.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ObjectRelationshipImpl.class);
-
-		finderCache.clearCache(ObjectRelationshipImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the object relationship.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ObjectRelationship objectRelationship) {
-		entityCache.removeResult(
-			ObjectRelationshipImpl.class, objectRelationship);
-	}
-
-	@Override
-	public void clearCache(List<ObjectRelationship> objectRelationships) {
-		for (ObjectRelationship objectRelationship : objectRelationships) {
-			entityCache.removeResult(
-				ObjectRelationshipImpl.class, objectRelationship);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ObjectRelationshipImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(ObjectRelationshipImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		ObjectRelationshipModelImpl objectRelationshipModelImpl) {
-
-		Object[] args = new Object[] {
-			objectRelationshipModelImpl.getObjectFieldId2()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByObjectFieldId2, args,
-			objectRelationshipModelImpl);
-
-		args = new Object[] {
-			objectRelationshipModelImpl.getDBTableName(),
-			objectRelationshipModelImpl.isReverse()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByDTN_R, args, objectRelationshipModelImpl);
-
-		args = new Object[] {
-			objectRelationshipModelImpl.getExternalReferenceCode(),
-			objectRelationshipModelImpl.getCompanyId(),
-			objectRelationshipModelImpl.getObjectDefinitionId1()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C_ODI1, args, objectRelationshipModelImpl);
-
-		args = new Object[] {
-			objectRelationshipModelImpl.getObjectDefinitionId1(),
-			objectRelationshipModelImpl.getObjectDefinitionId2(),
-			objectRelationshipModelImpl.getName(),
-			objectRelationshipModelImpl.isReverse(),
-			objectRelationshipModelImpl.getType()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByODI1_ODI2_N_R_T, args,
-			objectRelationshipModelImpl);
-	}
-
-	/**
 	 * Creates a new object relationship with the primary key. Does not add the object relationship to the database.
 	 *
 	 * @param objectRelationshipId the primary key for the new object relationship
@@ -3540,48 +3378,6 @@ public class ObjectRelationshipPersistenceImpl
 		throws NoSuchObjectRelationshipException {
 
 		return remove((Serializable)objectRelationshipId);
-	}
-
-	/**
-	 * Removes the object relationship with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the object relationship
-	 * @return the object relationship that was removed
-	 * @throws NoSuchObjectRelationshipException if a object relationship with the primary key could not be found
-	 */
-	@Override
-	public ObjectRelationship remove(Serializable primaryKey)
-		throws NoSuchObjectRelationshipException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ObjectRelationship objectRelationship =
-				(ObjectRelationship)session.get(
-					ObjectRelationshipImpl.class, primaryKey);
-
-			if (objectRelationship == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchObjectRelationshipException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(objectRelationship);
-		}
-		catch (NoSuchObjectRelationshipException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -3734,42 +3530,13 @@ public class ObjectRelationshipPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ObjectRelationshipImpl.class, objectRelationshipModelImpl, false,
-			true);
-
-		cacheUniqueFindersCache(objectRelationshipModelImpl);
+		cacheUniqueFindersResult(objectRelationship, false);
 
 		if (isNew) {
 			objectRelationship.setNew(false);
 		}
 
 		objectRelationship.resetOriginalValues();
-
-		return objectRelationship;
-	}
-
-	/**
-	 * Returns the object relationship with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the object relationship
-	 * @return the object relationship
-	 * @throws NoSuchObjectRelationshipException if a object relationship with the primary key could not be found
-	 */
-	@Override
-	public ObjectRelationship findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchObjectRelationshipException {
-
-		ObjectRelationship objectRelationship = fetchByPrimaryKey(primaryKey);
-
-		if (objectRelationship == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchObjectRelationshipException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return objectRelationship;
 	}
@@ -3797,188 +3564,6 @@ public class ObjectRelationshipPersistenceImpl
 	@Override
 	public ObjectRelationship fetchByPrimaryKey(long objectRelationshipId) {
 		return fetchByPrimaryKey((Serializable)objectRelationshipId);
-	}
-
-	/**
-	 * Returns all the object relationships.
-	 *
-	 * @return the object relationships
-	 */
-	@Override
-	public List<ObjectRelationship> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the object relationships.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectRelationshipModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object relationships
-	 * @param end the upper bound of the range of object relationships (not inclusive)
-	 * @return the range of object relationships
-	 */
-	@Override
-	public List<ObjectRelationship> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the object relationships.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectRelationshipModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object relationships
-	 * @param end the upper bound of the range of object relationships (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object relationships
-	 */
-	@Override
-	public List<ObjectRelationship> findAll(
-		int start, int end,
-		OrderByComparator<ObjectRelationship> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the object relationships.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectRelationshipModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object relationships
-	 * @param end the upper bound of the range of object relationships (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object relationships
-	 */
-	@Override
-	public List<ObjectRelationship> findAll(
-		int start, int end,
-		OrderByComparator<ObjectRelationship> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ObjectRelationship> list = null;
-
-		if (useFinderCache) {
-			list = (List<ObjectRelationship>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_OBJECTRELATIONSHIP);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_OBJECTRELATIONSHIP;
-
-				sql = sql.concat(ObjectRelationshipModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ObjectRelationship>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the object relationships from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ObjectRelationship objectRelationship : findAll()) {
-			remove(objectRelationship);
-		}
-	}
-
-	/**
-	 * Returns the number of object relationships.
-	 *
-	 * @return the number of object relationships
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_OBJECTRELATIONSHIP);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -4011,21 +3596,6 @@ public class ObjectRelationshipPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -4036,20 +3606,20 @@ public class ObjectRelationshipPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 			_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-			ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"objectRelationship.", "uuid", FinderColumn.Type.STRING, "=",
 				true, true, ObjectRelationship::getUuid));
@@ -4066,12 +3636,12 @@ public class ObjectRelationshipPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -4079,11 +3649,11 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "uuid", FinderColumn.Type.STRING,
-					"=", true, false, ObjectRelationship::getUuid),
+					"=", true, true, ObjectRelationship::getUuid),
 				new FinderColumn<>(
 					"objectRelationship.", "companyId", FinderColumn.Type.LONG,
 					"=", true, true, ObjectRelationship::getCompanyId));
@@ -4113,8 +3683,8 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathCountByCompanyId,
 				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "companyId", FinderColumn.Type.LONG,
 					"=", true, true, ObjectRelationship::getCompanyId));
@@ -4144,8 +3714,8 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathCountByObjectDefinitionId1,
 				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId1",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -4176,22 +3746,23 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathCountByObjectDefinitionId2,
 				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId2",
 					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId2));
 
-		_finderPathFetchByObjectFieldId2 = new FinderPath(
+		_finderPathFetchByObjectFieldId2 = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByObjectFieldId2",
 			new String[] {Long.class.getName()},
-			new String[] {"objectFieldId2"}, true);
+			new String[] {"objectFieldId2"}, 0, 0, false,
+			ObjectRelationship::getObjectFieldId2);
 
 		_uniquePersistenceFinderByObjectFieldId2 =
 			new UniquePersistenceFinder<>(
 				this, _finderPathFetchByObjectFieldId2,
-				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
+				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE, "",
 				new FinderColumn<>(
 					"objectRelationship.", "objectFieldId2",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -4226,8 +3797,8 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathCountByParameterObjectFieldId,
 				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "parameterObjectFieldId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -4257,10 +3828,10 @@ public class ObjectRelationshipPersistenceImpl
 			_finderPathWithoutPaginationFindByC_U, _finderPathCountByC_U,
 			_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 			_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-			ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"objectRelationship.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, ObjectRelationship::getCompanyId),
+				true, true, ObjectRelationship::getCompanyId),
 			new FinderColumn<>(
 				"objectRelationship.", "userId", FinderColumn.Type.LONG, "=",
 				true, true, ObjectRelationship::getUserId));
@@ -4290,11 +3861,11 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathWithoutPaginationFindByODI1_E,
 				_finderPathCountByODI1_E, _SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId1",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId1),
 				new FinderColumn<>(
 					"objectRelationship.", "edge", FinderColumn.Type.BOOLEAN,
@@ -4312,12 +3883,12 @@ public class ObjectRelationshipPersistenceImpl
 		_finderPathWithoutPaginationFindByODI1_N = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByODI1_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"objectDefinitionId1", "name"}, true);
+			new String[] {"objectDefinitionId1", "name"}, 0, 2, true, null);
 
 		_finderPathCountByODI1_N = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByODI1_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"objectDefinitionId1", "name"}, false);
+			new String[] {"objectDefinitionId1", "name"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByODI1_N =
 			new CollectionPersistenceFinder<>(
@@ -4325,11 +3896,11 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathWithoutPaginationFindByODI1_N,
 				_finderPathCountByODI1_N, _SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId1",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId1),
 				new FinderColumn<>(
 					"objectRelationship.", "name", FinderColumn.Type.STRING,
@@ -4360,11 +3931,11 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathWithoutPaginationFindByODI1_R,
 				_finderPathCountByODI1_R, _SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId1",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId1),
 				new FinderColumn<>(
 					"objectRelationship.", "reverse", FinderColumn.Type.BOOLEAN,
@@ -4395,11 +3966,11 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathWithoutPaginationFindByODI2_E,
 				_finderPathCountByODI2_E, _SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId2",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId2),
 				new FinderColumn<>(
 					"objectRelationship.", "edge", FinderColumn.Type.BOOLEAN,
@@ -4430,31 +4001,34 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathWithoutPaginationFindByODI2_R,
 				_finderPathCountByODI2_R, _SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId2",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId2),
 				new FinderColumn<>(
 					"objectRelationship.", "reverse", FinderColumn.Type.BOOLEAN,
 					"=", true, true, ObjectRelationship::isReverse));
 
-		_finderPathFetchByDTN_R = new FinderPath(
+		_finderPathFetchByDTN_R = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByDTN_R",
 			new String[] {String.class.getName(), Boolean.class.getName()},
-			new String[] {"dbTableName", "reverse"}, true);
+			new String[] {"dbTableName", "reverse"}, 0, 1, false,
+			convertNullFunction(ObjectRelationship::getDBTableName),
+			ObjectRelationship::isReverse);
 
 		_uniquePersistenceFinderByDTN_R = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByDTN_R, _SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
+			"",
 			new FinderColumn<>(
 				"objectRelationship.", "dbTableName", FinderColumn.Type.STRING,
-				"=", true, false, ObjectRelationship::getDBTableName),
+				"=", true, true, ObjectRelationship::getDBTableName),
 			new FinderColumn<>(
 				"objectRelationship.", "reverse", FinderColumn.Type.BOOLEAN,
 				"=", true, true, ObjectRelationship::isReverse));
 
-		_finderPathFetchByERC_C_ODI1 = new FinderPath(
+		_finderPathFetchByERC_C_ODI1 = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_C_ODI1",
 			new String[] {
 				String.class.getName(), Long.class.getName(),
@@ -4463,18 +4037,21 @@ public class ObjectRelationshipPersistenceImpl
 			new String[] {
 				"externalReferenceCode", "companyId", "objectDefinitionId1"
 			},
-			true);
+			0, 1, false,
+			convertNullFunction(ObjectRelationship::getExternalReferenceCode),
+			ObjectRelationship::getCompanyId,
+			ObjectRelationship::getObjectDefinitionId1);
 
 		_uniquePersistenceFinderByERC_C_ODI1 = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByERC_C_ODI1,
-			_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
+			_SQL_SELECT_OBJECTRELATIONSHIP_WHERE, "",
 			new FinderColumn<>(
 				"objectRelationship.", "externalReferenceCode",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				ObjectRelationship::getExternalReferenceCode),
 			new FinderColumn<>(
 				"objectRelationship.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, ObjectRelationship::getCompanyId),
+				true, true, ObjectRelationship::getCompanyId),
 			new FinderColumn<>(
 				"objectRelationship.", "objectDefinitionId1",
 				FinderColumn.Type.LONG, "=", true, true,
@@ -4501,7 +4078,7 @@ public class ObjectRelationshipPersistenceImpl
 			new String[] {
 				"objectDefinitionId1", "objectDefinitionId2", "type_"
 			},
-			true);
+			0, 4, true, null);
 
 		_finderPathCountByODI1_ODI2_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByODI1_ODI2_T",
@@ -4512,7 +4089,7 @@ public class ObjectRelationshipPersistenceImpl
 			new String[] {
 				"objectDefinitionId1", "objectDefinitionId2", "type_"
 			},
-			false);
+			0, 4, false, null);
 
 		_collectionPersistenceFinderByODI1_ODI2_T =
 			new CollectionPersistenceFinder<>(
@@ -4521,15 +4098,15 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathCountByODI1_ODI2_T,
 				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId1",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId1),
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId2",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId2),
 				new FinderColumn<>(
 					"objectRelationship.", "type", FinderColumn.Type.STRING,
@@ -4551,8 +4128,8 @@ public class ObjectRelationshipPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"objectDefinitionId1", "deletionType", "reverse"},
-			true);
+			new String[] {"objectDefinitionId1", "deletionType", "reverse"}, 0,
+			2, true, null);
 
 		_finderPathCountByODI1_DT_R = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByODI1_DT_R",
@@ -4560,8 +4137,8 @@ public class ObjectRelationshipPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"objectDefinitionId1", "deletionType", "reverse"},
-			false);
+			new String[] {"objectDefinitionId1", "deletionType", "reverse"}, 0,
+			2, false, null);
 
 		_collectionPersistenceFinderByODI1_DT_R =
 			new CollectionPersistenceFinder<>(
@@ -4570,15 +4147,15 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathCountByODI1_DT_R,
 				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId1",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId1),
 				new FinderColumn<>(
 					"objectRelationship.", "deletionType",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					ObjectRelationship::getDeletionType),
 				new FinderColumn<>(
 					"objectRelationship.", "reverse", FinderColumn.Type.BOOLEAN,
@@ -4599,7 +4176,8 @@ public class ObjectRelationshipPersistenceImpl
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"objectDefinitionId1", "reverse", "type_"}, true);
+			new String[] {"objectDefinitionId1", "reverse", "type_"}, 0, 4,
+			true, null);
 
 		_finderPathCountByODI1_R_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByODI1_R_T",
@@ -4607,7 +4185,8 @@ public class ObjectRelationshipPersistenceImpl
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"objectDefinitionId1", "reverse", "type_"}, false);
+			new String[] {"objectDefinitionId1", "reverse", "type_"}, 0, 4,
+			false, null);
 
 		_collectionPersistenceFinderByODI1_R_T =
 			new CollectionPersistenceFinder<>(
@@ -4616,15 +4195,15 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathCountByODI1_R_T,
 				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId1",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId1),
 				new FinderColumn<>(
 					"objectRelationship.", "reverse", FinderColumn.Type.BOOLEAN,
-					"=", true, false, ObjectRelationship::isReverse),
+					"=", true, true, ObjectRelationship::isReverse),
 				new FinderColumn<>(
 					"objectRelationship.", "type", FinderColumn.Type.STRING,
 					"=", true, true, ObjectRelationship::getType));
@@ -4644,7 +4223,8 @@ public class ObjectRelationshipPersistenceImpl
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"objectDefinitionId2", "reverse", "type_"}, true);
+			new String[] {"objectDefinitionId2", "reverse", "type_"}, 0, 4,
+			true, null);
 
 		_finderPathCountByODI2_R_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByODI2_R_T",
@@ -4652,7 +4232,8 @@ public class ObjectRelationshipPersistenceImpl
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"objectDefinitionId2", "reverse", "type_"}, false);
+			new String[] {"objectDefinitionId2", "reverse", "type_"}, 0, 4,
+			false, null);
 
 		_collectionPersistenceFinderByODI2_R_T =
 			new CollectionPersistenceFinder<>(
@@ -4661,15 +4242,15 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathCountByODI2_R_T,
 				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId2",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId2),
 				new FinderColumn<>(
 					"objectRelationship.", "reverse", FinderColumn.Type.BOOLEAN,
-					"=", true, false, ObjectRelationship::isReverse),
+					"=", true, true, ObjectRelationship::isReverse),
 				new FinderColumn<>(
 					"objectRelationship.", "type", FinderColumn.Type.STRING,
 					"=", true, true, ObjectRelationship::getType));
@@ -4696,7 +4277,7 @@ public class ObjectRelationshipPersistenceImpl
 			new String[] {
 				"objectDefinitionId1", "objectDefinitionId2", "name", "type_"
 			},
-			true);
+			0, 12, true, null);
 
 		_finderPathCountByODI1_ODI2_N_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByODI1_ODI2_N_T",
@@ -4707,7 +4288,7 @@ public class ObjectRelationshipPersistenceImpl
 			new String[] {
 				"objectDefinitionId1", "objectDefinitionId2", "name", "type_"
 			},
-			false);
+			0, 12, false, null);
 
 		_collectionPersistenceFinderByODI1_ODI2_N_T =
 			new CollectionPersistenceFinder<>(
@@ -4716,24 +4297,24 @@ public class ObjectRelationshipPersistenceImpl
 				_finderPathCountByODI1_ODI2_N_T,
 				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
 				_SQL_COUNT_OBJECTRELATIONSHIP_WHERE,
-				ObjectRelationshipModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				ObjectRelationshipModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId1",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId1),
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId2",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId2),
 				new FinderColumn<>(
 					"objectRelationship.", "name", FinderColumn.Type.STRING,
-					"=", true, false, ObjectRelationship::getName),
+					"=", true, true, ObjectRelationship::getName),
 				new FinderColumn<>(
 					"objectRelationship.", "type", FinderColumn.Type.STRING,
 					"=", true, true, ObjectRelationship::getType));
 
-		_finderPathFetchByODI1_ODI2_N_R_T = new FinderPath(
+		_finderPathFetchByODI1_ODI2_N_R_T = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByODI1_ODI2_N_R_T",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
@@ -4744,26 +4325,30 @@ public class ObjectRelationshipPersistenceImpl
 				"objectDefinitionId1", "objectDefinitionId2", "name", "reverse",
 				"type_"
 			},
-			true);
+			0, 20, false, ObjectRelationship::getObjectDefinitionId1,
+			ObjectRelationship::getObjectDefinitionId2,
+			convertNullFunction(ObjectRelationship::getName),
+			ObjectRelationship::isReverse,
+			convertNullFunction(ObjectRelationship::getType));
 
 		_uniquePersistenceFinderByODI1_ODI2_N_R_T =
 			new UniquePersistenceFinder<>(
 				this, _finderPathFetchByODI1_ODI2_N_R_T,
-				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE,
+				_SQL_SELECT_OBJECTRELATIONSHIP_WHERE, "",
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId1",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId1),
 				new FinderColumn<>(
 					"objectRelationship.", "objectDefinitionId2",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectRelationship::getObjectDefinitionId2),
 				new FinderColumn<>(
 					"objectRelationship.", "name", FinderColumn.Type.STRING,
-					"=", true, false, ObjectRelationship::getName),
+					"=", true, true, ObjectRelationship::getName),
 				new FinderColumn<>(
 					"objectRelationship.", "reverse", FinderColumn.Type.BOOLEAN,
-					"=", true, false, ObjectRelationship::isReverse),
+					"=", true, true, ObjectRelationship::isReverse),
 				new FinderColumn<>(
 					"objectRelationship.", "type", FinderColumn.Type.STRING,
 					"=", true, true, ObjectRelationship::getType));
@@ -4810,22 +4395,17 @@ public class ObjectRelationshipPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ObjectRelationshipModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_OBJECTRELATIONSHIP =
 		"SELECT objectRelationship FROM ObjectRelationship objectRelationship";
 
 	private static final String _SQL_SELECT_OBJECTRELATIONSHIP_WHERE =
 		"SELECT objectRelationship FROM ObjectRelationship objectRelationship WHERE ";
 
-	private static final String _SQL_COUNT_OBJECTRELATIONSHIP =
-		"SELECT COUNT(objectRelationship) FROM ObjectRelationship objectRelationship";
-
 	private static final String _SQL_COUNT_OBJECTRELATIONSHIP_WHERE =
 		"SELECT COUNT(objectRelationship) FROM ObjectRelationship objectRelationship WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "objectRelationship.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ObjectRelationship exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ObjectRelationship exists with the key {";
@@ -4842,4 +4422,4 @@ public class ObjectRelationshipPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1372330115
+// LIFERAY-SERVICE-BUILDER-HASH:1036375736

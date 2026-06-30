@@ -8,9 +8,9 @@ import {render, screen} from '@testing-library/react';
 import React from 'react';
 
 import StatusLabel from '../../../../src/main/resources/META-INF/resources/js/common/components/StatusLabel';
+import {MS_PER_DAY} from '../../../../src/main/resources/META-INF/resources/js/common/utils/constants';
 
 const NOW = new Date('2026-04-21T10:00:00Z');
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 describe('StatusLabel', () => {
 	it.each([
@@ -111,6 +111,40 @@ describe('StatusLabel', () => {
 			expect(screen.queryByText('approved')).not.toBeInTheDocument();
 			expect(screen.queryByText('expiring-soon')).not.toBeInTheDocument();
 			expect(container.querySelectorAll('.label')).toHaveLength(1);
+		});
+	});
+
+	describe('Expired tooltip', () => {
+		beforeAll(() => {
+			jest.useFakeTimers();
+			jest.setSystemTime(NOW);
+		});
+
+		afterAll(() => {
+			jest.useRealTimers();
+		});
+
+		it('exposes focus, tooltip and aria-label attributes on the Expired label', () => {
+			const past = new Date(NOW.getTime() - MS_PER_DAY).toISOString();
+
+			render(<StatusLabel expirationDate={past} label="expired" />);
+
+			const badge = screen
+				.getByText('expired')
+				.closest('span[tabindex]') as HTMLElement;
+
+			expect(badge).not.toBeNull();
+			expect(badge).toHaveAttribute('tabindex', '0');
+			expect(badge.getAttribute('title')).toBeTruthy();
+			expect(badge.getAttribute('aria-label')).toBeTruthy();
+		});
+
+		it('falls back to the plain Expired label when no expirationDate is provided', () => {
+			render(<StatusLabel label="expired" />);
+
+			const badge = screen.getByText('expired').closest('span[tabindex]');
+
+			expect(badge).toBeNull();
 		});
 	});
 });

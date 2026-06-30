@@ -13,12 +13,10 @@ import com.liferay.osb.faro.model.impl.FaroPreferencesModelImpl;
 import com.liferay.osb.faro.service.persistence.FaroPreferencesPersistence;
 import com.liferay.osb.faro.service.persistence.FaroPreferencesUtil;
 import com.liferay.osb.faro.service.persistence.impl.constants.OSBFaroPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -29,10 +27,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 
 import java.io.Serializable;
@@ -41,7 +36,6 @@ import java.lang.reflect.InvocationHandler;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -62,7 +56,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = FaroPreferencesPersistence.class)
 public class FaroPreferencesPersistenceImpl
-	extends BasePersistenceImpl<FaroPreferences>
+	extends BasePersistenceImpl<FaroPreferences, NoSuchFaroPreferencesException>
 	implements FaroPreferencesPersistence {
 
 	/*
@@ -79,9 +73,6 @@ public class FaroPreferencesPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByGroupId;
 	private FinderPath _finderPathWithoutPaginationFindByGroupId;
 	private FinderPath _finderPathCountByGroupId;
@@ -328,107 +319,6 @@ public class FaroPreferencesPersistenceImpl
 	}
 
 	/**
-	 * Caches the faro preferences in the entity cache if it is enabled.
-	 *
-	 * @param faroPreferences the faro preferences
-	 */
-	@Override
-	public void cacheResult(FaroPreferences faroPreferences) {
-		entityCache.putResult(
-			FaroPreferencesImpl.class, faroPreferences.getPrimaryKey(),
-			faroPreferences);
-
-		finderCache.putResult(
-			_finderPathFetchByG_O,
-			new Object[] {
-				faroPreferences.getGroupId(), faroPreferences.getOwnerId()
-			},
-			faroPreferences);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the faro preferenceses in the entity cache if it is enabled.
-	 *
-	 * @param faroPreferenceses the faro preferenceses
-	 */
-	@Override
-	public void cacheResult(List<FaroPreferences> faroPreferenceses) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (faroPreferenceses.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (FaroPreferences faroPreferences : faroPreferenceses) {
-			if (entityCache.getResult(
-					FaroPreferencesImpl.class,
-					faroPreferences.getPrimaryKey()) == null) {
-
-				cacheResult(faroPreferences);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all faro preferenceses.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(FaroPreferencesImpl.class);
-
-		finderCache.clearCache(FaroPreferencesImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the faro preferences.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(FaroPreferences faroPreferences) {
-		entityCache.removeResult(FaroPreferencesImpl.class, faroPreferences);
-	}
-
-	@Override
-	public void clearCache(List<FaroPreferences> faroPreferenceses) {
-		for (FaroPreferences faroPreferences : faroPreferenceses) {
-			entityCache.removeResult(
-				FaroPreferencesImpl.class, faroPreferences);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(FaroPreferencesImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(FaroPreferencesImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		FaroPreferencesModelImpl faroPreferencesModelImpl) {
-
-		Object[] args = new Object[] {
-			faroPreferencesModelImpl.getGroupId(),
-			faroPreferencesModelImpl.getOwnerId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByG_O, args, faroPreferencesModelImpl);
-	}
-
-	/**
 	 * Creates a new faro preferences with the primary key. Does not add the faro preferences to the database.
 	 *
 	 * @param faroPreferencesId the primary key for the new faro preferences
@@ -458,47 +348,6 @@ public class FaroPreferencesPersistenceImpl
 		throws NoSuchFaroPreferencesException {
 
 		return remove((Serializable)faroPreferencesId);
-	}
-
-	/**
-	 * Removes the faro preferences with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the faro preferences
-	 * @return the faro preferences that was removed
-	 * @throws NoSuchFaroPreferencesException if a faro preferences with the primary key could not be found
-	 */
-	@Override
-	public FaroPreferences remove(Serializable primaryKey)
-		throws NoSuchFaroPreferencesException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			FaroPreferences faroPreferences = (FaroPreferences)session.get(
-				FaroPreferencesImpl.class, primaryKey);
-
-			if (faroPreferences == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchFaroPreferencesException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(faroPreferences);
-		}
-		catch (NoSuchFaroPreferencesException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -576,41 +425,13 @@ public class FaroPreferencesPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			FaroPreferencesImpl.class, faroPreferencesModelImpl, false, true);
-
-		cacheUniqueFindersCache(faroPreferencesModelImpl);
+		cacheUniqueFindersResult(faroPreferences, false);
 
 		if (isNew) {
 			faroPreferences.setNew(false);
 		}
 
 		faroPreferences.resetOriginalValues();
-
-		return faroPreferences;
-	}
-
-	/**
-	 * Returns the faro preferences with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the faro preferences
-	 * @return the faro preferences
-	 * @throws NoSuchFaroPreferencesException if a faro preferences with the primary key could not be found
-	 */
-	@Override
-	public FaroPreferences findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchFaroPreferencesException {
-
-		FaroPreferences faroPreferences = fetchByPrimaryKey(primaryKey);
-
-		if (faroPreferences == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchFaroPreferencesException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return faroPreferences;
 	}
@@ -640,187 +461,6 @@ public class FaroPreferencesPersistenceImpl
 		return fetchByPrimaryKey((Serializable)faroPreferencesId);
 	}
 
-	/**
-	 * Returns all the faro preferenceses.
-	 *
-	 * @return the faro preferenceses
-	 */
-	@Override
-	public List<FaroPreferences> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the faro preferenceses.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FaroPreferencesModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of faro preferenceses
-	 * @param end the upper bound of the range of faro preferenceses (not inclusive)
-	 * @return the range of faro preferenceses
-	 */
-	@Override
-	public List<FaroPreferences> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the faro preferenceses.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FaroPreferencesModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of faro preferenceses
-	 * @param end the upper bound of the range of faro preferenceses (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of faro preferenceses
-	 */
-	@Override
-	public List<FaroPreferences> findAll(
-		int start, int end,
-		OrderByComparator<FaroPreferences> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the faro preferenceses.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FaroPreferencesModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of faro preferenceses
-	 * @param end the upper bound of the range of faro preferenceses (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of faro preferenceses
-	 */
-	@Override
-	public List<FaroPreferences> findAll(
-		int start, int end,
-		OrderByComparator<FaroPreferences> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<FaroPreferences> list = null;
-
-		if (useFinderCache) {
-			list = (List<FaroPreferences>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_FAROPREFERENCES);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_FAROPREFERENCES;
-
-				sql = sql.concat(FaroPreferencesModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<FaroPreferences>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the faro preferenceses from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (FaroPreferences faroPreferences : findAll()) {
-			remove(faroPreferences);
-		}
-	}
-
-	/**
-	 * Returns the number of faro preferenceses.
-	 *
-	 * @return the number of faro preferenceses
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_FAROPREFERENCES);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	protected EntityCache getEntityCache() {
 		return entityCache;
@@ -846,21 +486,6 @@ public class FaroPreferencesPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByGroupId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByGroupId",
 			new String[] {
@@ -885,21 +510,23 @@ public class FaroPreferencesPersistenceImpl
 				_finderPathWithoutPaginationFindByGroupId,
 				_finderPathCountByGroupId, _SQL_SELECT_FAROPREFERENCES_WHERE,
 				_SQL_COUNT_FAROPREFERENCES_WHERE,
-				FaroPreferencesModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FaroPreferencesModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"faroPreferences.", "groupId", FinderColumn.Type.LONG, "=",
 					true, true, FaroPreferences::getGroupId));
 
-		_finderPathFetchByG_O = new FinderPath(
+		_finderPathFetchByG_O = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByG_O",
 			new String[] {Long.class.getName(), Long.class.getName()},
-			new String[] {"groupId", "ownerId"}, true);
+			new String[] {"groupId", "ownerId"}, 0, 0, false,
+			FaroPreferences::getGroupId, FaroPreferences::getOwnerId);
 
 		_uniquePersistenceFinderByG_O = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByG_O, _SQL_SELECT_FAROPREFERENCES_WHERE,
+			this, _finderPathFetchByG_O, _SQL_SELECT_FAROPREFERENCES_WHERE, "",
 			new FinderColumn<>(
 				"faroPreferences.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, FaroPreferences::getGroupId),
+				true, true, FaroPreferences::getGroupId),
 			new FinderColumn<>(
 				"faroPreferences.", "ownerId", FinderColumn.Type.LONG, "=",
 				true, true, FaroPreferences::getOwnerId));
@@ -946,22 +573,17 @@ public class FaroPreferencesPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		FaroPreferencesModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_FAROPREFERENCES =
 		"SELECT faroPreferences FROM FaroPreferences faroPreferences";
 
 	private static final String _SQL_SELECT_FAROPREFERENCES_WHERE =
 		"SELECT faroPreferences FROM FaroPreferences faroPreferences WHERE ";
 
-	private static final String _SQL_COUNT_FAROPREFERENCES =
-		"SELECT COUNT(faroPreferences) FROM FaroPreferences faroPreferences";
-
 	private static final String _SQL_COUNT_FAROPREFERENCES_WHERE =
 		"SELECT COUNT(faroPreferences) FROM FaroPreferences faroPreferences WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "faroPreferences.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No FaroPreferences exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No FaroPreferences exists with the key {";
@@ -975,4 +597,4 @@ public class FaroPreferencesPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:350915409
+// LIFERAY-SERVICE-BUILDER-HASH:-1984103344

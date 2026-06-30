@@ -28,6 +28,8 @@ export class CheckoutPage extends CommerceDNDTablePage {
 	readonly assertDataDeliveryGroupModal: (data: string) => Locator;
 	readonly addressInput: Locator;
 	readonly cityInput: Locator;
+	readonly commerceAddressOptions: Locator;
+	readonly commerceAddressSelect: Locator;
 	readonly commerceBillingAddress: Locator;
 	readonly commerceShippingAddress: Locator;
 	readonly configurationIFrame: FrameLocator;
@@ -48,9 +50,11 @@ export class CheckoutPage extends CommerceDNDTablePage {
 	readonly multishippingTableLocator: Locator;
 	readonly nameInput: Locator;
 	readonly optionsButton: Locator;
+	readonly orderConfirmationContainer: Locator;
 	readonly orderItemsTabLink: Locator;
 	readonly orderItemsTableLocator: Locator;
 	readonly orderSuccessMessage: Locator;
+	readonly noDefaultBillingAddressError: Locator;
 	readonly orderSummaryTableRow: (
 		colPosition: number,
 		value: number | string,
@@ -67,6 +71,8 @@ export class CheckoutPage extends CommerceDNDTablePage {
 	readonly shippingAddressSelect: Locator;
 	readonly shippingCost: Locator;
 	readonly shippingMethod: Locator;
+	readonly shippingMethodRadio: (name: string) => Locator;
+	readonly summaryAmount: (amount: string) => Locator;
 	readonly subtypeErrorMessage: Locator;
 	readonly subtypeInput: Locator;
 	readonly subtypeMenuItem: (name: string) => Locator;
@@ -87,6 +93,11 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		);
 		this.addressInput = page.getByPlaceholder('Address', {exact: true});
 		this.cityInput = page.getByPlaceholder('City', {exact: true});
+		this.commerceAddressSelect = page.locator(
+			'select[id$="_commerceAddress"]'
+		);
+		this.commerceAddressOptions =
+			this.commerceAddressSelect.locator('option');
 		this.commerceBillingAddress = page.getByTestId(
 			'commerceBillingAddress'
 		);
@@ -150,8 +161,15 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		this.orderItemsTableLocator = page.locator(
 			'#_com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet_commerceOrderItems table'
 		);
+		this.orderConfirmationContainer = page.locator(
+			'.commerce-checkout-confirmation'
+		);
 		this.orderSuccessMessage = page.getByText(
 			'Success! Your order has been processed.'
+		);
+		this.noDefaultBillingAddressError = page.getByText(
+			'No default billing address has been created for this account',
+			{exact: false}
 		);
 		this.orderSummaryTableRow = async (
 			colPosition: number,
@@ -183,6 +201,9 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		this.shippingAddressSelect = page.getByText('Choose Shipping Address');
 		this.shippingCost = page.locator('.shipping-cost');
 		this.shippingMethod = page.locator('.shipping-method');
+		this.shippingMethodRadio = (name: string) =>
+			page.getByRole('radio', {name});
+		this.summaryAmount = (amount: string) => page.getByText(amount).first();
 		this.subtypeErrorMessage = page.getByText(
 			'previous selection is not valid anymore'
 		);
@@ -271,6 +292,8 @@ export class CheckoutPage extends CommerceDNDTablePage {
 			await callback(currentStep);
 
 			await this.continueButton.click();
+
+			await expect(this.orderConfirmationContainer).toBeVisible();
 		}
 
 		currentStep = await this.activeCheckoutStep.textContent();

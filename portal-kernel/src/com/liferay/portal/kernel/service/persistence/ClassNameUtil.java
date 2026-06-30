@@ -36,6 +36,20 @@ public class ClassNameUtil {
 	 */
 
 	/**
+	 * @see BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<ClassName> classNames) {
+		getPersistence().cacheResult(classNames);
+	}
+
+	/**
+	 * @see BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(ClassName className) {
+		getPersistence().cacheResult(className);
+	}
+
+	/**
 	 * @see BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -167,24 +181,6 @@ public class ClassNameUtil {
 	}
 
 	/**
-	 * Caches the class name in the entity cache if it is enabled.
-	 *
-	 * @param className the class name
-	 */
-	public static void cacheResult(ClassName className) {
-		getPersistence().cacheResult(className);
-	}
-
-	/**
-	 * Caches the class names in the entity cache if it is enabled.
-	 *
-	 * @param classNames the class names
-	 */
-	public static void cacheResult(List<ClassName> classNames) {
-		getPersistence().cacheResult(classNames);
-	}
-
-	/**
 	 * Creates a new class name with the primary key. Does not add the class name to the database.
 	 *
 	 * @param classNameId the primary key for the new class name
@@ -234,85 +230,6 @@ public class ClassNameUtil {
 		return getPersistence().fetchByPrimaryKey(classNameId);
 	}
 
-	/**
-	 * Returns all the class names.
-	 *
-	 * @return the class names
-	 */
-	public static List<ClassName> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the class names.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.ClassNameModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of class names
-	 * @param end the upper bound of the range of class names (not inclusive)
-	 * @return the range of class names
-	 */
-	public static List<ClassName> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the class names.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.ClassNameModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of class names
-	 * @param end the upper bound of the range of class names (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of class names
-	 */
-	public static List<ClassName> findAll(
-		int start, int end, OrderByComparator<ClassName> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the class names.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.ClassNameModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of class names
-	 * @param end the upper bound of the range of class names (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of class names
-	 */
-	public static List<ClassName> findAll(
-		int start, int end, OrderByComparator<ClassName> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the class names from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of class names.
-	 *
-	 * @return the number of class names
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static ClassNamePersistence getPersistence() {
 		return _persistence;
 	}
@@ -324,4 +241,4 @@ public class ClassNameUtil {
 	private static volatile ClassNamePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:732083851
+// LIFERAY-SERVICE-BUILDER-HASH:-29757939

@@ -13,31 +13,24 @@ import com.liferay.commerce.notification.model.impl.CommerceNotificationTemplate
 import com.liferay.commerce.notification.service.persistence.CommerceNotificationTemplatePersistence;
 import com.liferay.commerce.notification.service.persistence.CommerceNotificationTemplateUtil;
 import com.liferay.commerce.notification.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
-import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.dao.orm.SQLQuery;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
-import com.liferay.portal.kernel.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
+import com.liferay.portal.kernel.service.persistence.impl.FilterCollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -51,7 +44,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -75,7 +67,8 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = CommerceNotificationTemplatePersistence.class)
 @Deprecated
 public class CommerceNotificationTemplatePersistenceImpl
-	extends BasePersistenceImpl<CommerceNotificationTemplate>
+	extends BasePersistenceImpl
+		<CommerceNotificationTemplate, NoSuchNotificationTemplateException>
 	implements CommerceNotificationTemplatePersistence {
 
 	/*
@@ -92,9 +85,6 @@ public class CommerceNotificationTemplatePersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -499,7 +489,7 @@ public class CommerceNotificationTemplatePersistenceImpl
 	private FinderPath _finderPathWithPaginationFindByGroupId;
 	private FinderPath _finderPathWithoutPaginationFindByGroupId;
 	private FinderPath _finderPathCountByGroupId;
-	private CollectionPersistenceFinder<CommerceNotificationTemplate>
+	private FilterCollectionPersistenceFinder<CommerceNotificationTemplate>
 		_collectionPersistenceFinderByGroupId;
 
 	/**
@@ -672,101 +662,9 @@ public class CommerceNotificationTemplatePersistenceImpl
 		long groupId, int start, int end,
 		OrderByComparator<CommerceNotificationTemplate> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByGroupId(groupId, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByGroupId(
-					groupId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				3 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(4);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					CommerceNotificationTemplateModelImpl.
-						ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(CommerceNotificationTemplateModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommerceNotificationTemplate.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS,
-					CommerceNotificationTemplateImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE,
-					CommerceNotificationTemplateImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			return (List<CommerceNotificationTemplate>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByGroupId.filterFind(
+			finderCache, new Object[] {groupId}, start, end, orderByComparator,
+			groupId);
 	}
 
 	/**
@@ -800,63 +698,14 @@ public class CommerceNotificationTemplatePersistenceImpl
 	 */
 	@Override
 	public int filterCountByGroupId(long groupId) {
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByGroupId(groupId);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<CommerceNotificationTemplate> commerceNotificationTemplates =
-				findByGroupId(groupId);
-
-			commerceNotificationTemplates = InlineSQLHelperUtil.filter(
-				commerceNotificationTemplates, groupId);
-
-			return commerceNotificationTemplates.size();
-		}
-
-		StringBundler sb = new StringBundler(2);
-
-		sb.append(_FILTER_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE);
-
-		sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommerceNotificationTemplate.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByGroupId.filterCount(
+			finderCache, new Object[] {groupId}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_GROUPID_GROUPID_2 =
-		"commerceNotificationTemplate.groupId = ?";
 
 	private FinderPath _finderPathWithPaginationFindByG_E;
 	private FinderPath _finderPathWithoutPaginationFindByG_E;
 	private FinderPath _finderPathCountByG_E;
-	private CollectionPersistenceFinder<CommerceNotificationTemplate>
+	private FilterCollectionPersistenceFinder<CommerceNotificationTemplate>
 		_collectionPersistenceFinderByG_E;
 
 	/**
@@ -1040,105 +889,9 @@ public class CommerceNotificationTemplatePersistenceImpl
 		long groupId, boolean enabled, int start, int end,
 		OrderByComparator<CommerceNotificationTemplate> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_E(groupId, enabled, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_E(
-					groupId, enabled, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				4 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(5);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_E_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_E_ENABLED_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					CommerceNotificationTemplateModelImpl.
-						ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(CommerceNotificationTemplateModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommerceNotificationTemplate.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS,
-					CommerceNotificationTemplateImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE,
-					CommerceNotificationTemplateImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(enabled);
-
-			return (List<CommerceNotificationTemplate>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_E.filterFind(
+			finderCache, new Object[] {groupId, enabled}, start, end,
+			orderByComparator, groupId);
 	}
 
 	/**
@@ -1175,70 +928,14 @@ public class CommerceNotificationTemplatePersistenceImpl
 	 */
 	@Override
 	public int filterCountByG_E(long groupId, boolean enabled) {
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_E(groupId, enabled);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<CommerceNotificationTemplate> commerceNotificationTemplates =
-				findByG_E(groupId, enabled);
-
-			commerceNotificationTemplates = InlineSQLHelperUtil.filter(
-				commerceNotificationTemplates, groupId);
-
-			return commerceNotificationTemplates.size();
-		}
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(_FILTER_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_E_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_E_ENABLED_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommerceNotificationTemplate.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(enabled);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_E.filterCount(
+			finderCache, new Object[] {groupId, enabled}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_E_GROUPID_2 =
-		"commerceNotificationTemplate.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_E_ENABLED_2 =
-		"commerceNotificationTemplate.enabled = ?";
 
 	private FinderPath _finderPathWithPaginationFindByG_T_E;
 	private FinderPath _finderPathWithoutPaginationFindByG_T_E;
 	private FinderPath _finderPathCountByG_T_E;
-	private CollectionPersistenceFinder<CommerceNotificationTemplate>
+	private FilterCollectionPersistenceFinder<CommerceNotificationTemplate>
 		_collectionPersistenceFinderByG_T_E;
 
 	/**
@@ -1434,123 +1131,9 @@ public class CommerceNotificationTemplatePersistenceImpl
 		long groupId, String type, boolean enabled, int start, int end,
 		OrderByComparator<CommerceNotificationTemplate> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_T_E(
-				groupId, type, enabled, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_T_E(
-					groupId, type, enabled, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		type = Objects.toString(type, "");
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				5 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(6);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_T_E_GROUPID_2);
-
-		boolean bindType = false;
-
-		if (type.isEmpty()) {
-			sb.append(_FINDER_COLUMN_G_T_E_TYPE_3_SQL);
-		}
-		else {
-			bindType = true;
-
-			sb.append(_FINDER_COLUMN_G_T_E_TYPE_2_SQL);
-		}
-
-		sb.append(_FINDER_COLUMN_G_T_E_ENABLED_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					CommerceNotificationTemplateModelImpl.
-						ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(CommerceNotificationTemplateModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommerceNotificationTemplate.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS,
-					CommerceNotificationTemplateImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE,
-					CommerceNotificationTemplateImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			if (bindType) {
-				queryPos.add(type);
-			}
-
-			queryPos.add(enabled);
-
-			return (List<CommerceNotificationTemplate>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_T_E.filterFind(
+			finderCache, new Object[] {groupId, type, enabled}, start, end,
+			orderByComparator, groupId);
 	}
 
 	/**
@@ -1590,88 +1173,9 @@ public class CommerceNotificationTemplatePersistenceImpl
 	 */
 	@Override
 	public int filterCountByG_T_E(long groupId, String type, boolean enabled) {
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_T_E(groupId, type, enabled);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<CommerceNotificationTemplate> commerceNotificationTemplates =
-				findByG_T_E(groupId, type, enabled);
-
-			commerceNotificationTemplates = InlineSQLHelperUtil.filter(
-				commerceNotificationTemplates, groupId);
-
-			return commerceNotificationTemplates.size();
-		}
-
-		type = Objects.toString(type, "");
-
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_FILTER_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_T_E_GROUPID_2);
-
-		boolean bindType = false;
-
-		if (type.isEmpty()) {
-			sb.append(_FINDER_COLUMN_G_T_E_TYPE_3_SQL);
-		}
-		else {
-			bindType = true;
-
-			sb.append(_FINDER_COLUMN_G_T_E_TYPE_2_SQL);
-		}
-
-		sb.append(_FINDER_COLUMN_G_T_E_ENABLED_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommerceNotificationTemplate.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			if (bindType) {
-				queryPos.add(type);
-			}
-
-			queryPos.add(enabled);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_T_E.filterCount(
+			finderCache, new Object[] {groupId, type, enabled}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_T_E_GROUPID_2 =
-		"commerceNotificationTemplate.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_T_E_TYPE_2_SQL =
-		"commerceNotificationTemplate.type_ = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_T_E_TYPE_3_SQL =
-		"(commerceNotificationTemplate.type_ IS NULL OR commerceNotificationTemplate.type_ = '') AND ";
-
-	private static final String _FINDER_COLUMN_G_T_E_ENABLED_2 =
-		"commerceNotificationTemplate.enabled = ?";
 
 	public CommerceNotificationTemplatePersistenceImpl() {
 		Map<String, String> dbColumnNames = new HashMap<String, String>();
@@ -1689,127 +1193,6 @@ public class CommerceNotificationTemplatePersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(CommerceNotificationTemplateTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the commerce notification template in the entity cache if it is enabled.
-	 *
-	 * @param commerceNotificationTemplate the commerce notification template
-	 */
-	@Override
-	public void cacheResult(
-		CommerceNotificationTemplate commerceNotificationTemplate) {
-
-		entityCache.putResult(
-			CommerceNotificationTemplateImpl.class,
-			commerceNotificationTemplate.getPrimaryKey(),
-			commerceNotificationTemplate);
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G,
-			new Object[] {
-				commerceNotificationTemplate.getUuid(),
-				commerceNotificationTemplate.getGroupId()
-			},
-			commerceNotificationTemplate);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the commerce notification templates in the entity cache if it is enabled.
-	 *
-	 * @param commerceNotificationTemplates the commerce notification templates
-	 */
-	@Override
-	public void cacheResult(
-		List<CommerceNotificationTemplate> commerceNotificationTemplates) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (commerceNotificationTemplates.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CommerceNotificationTemplate commerceNotificationTemplate :
-				commerceNotificationTemplates) {
-
-			if (entityCache.getResult(
-					CommerceNotificationTemplateImpl.class,
-					commerceNotificationTemplate.getPrimaryKey()) == null) {
-
-				cacheResult(commerceNotificationTemplate);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all commerce notification templates.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CommerceNotificationTemplateImpl.class);
-
-		finderCache.clearCache(CommerceNotificationTemplateImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the commerce notification template.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(
-		CommerceNotificationTemplate commerceNotificationTemplate) {
-
-		entityCache.removeResult(
-			CommerceNotificationTemplateImpl.class,
-			commerceNotificationTemplate);
-	}
-
-	@Override
-	public void clearCache(
-		List<CommerceNotificationTemplate> commerceNotificationTemplates) {
-
-		for (CommerceNotificationTemplate commerceNotificationTemplate :
-				commerceNotificationTemplates) {
-
-			entityCache.removeResult(
-				CommerceNotificationTemplateImpl.class,
-				commerceNotificationTemplate);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CommerceNotificationTemplateImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CommerceNotificationTemplateImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CommerceNotificationTemplateModelImpl
-			commerceNotificationTemplateModelImpl) {
-
-		Object[] args = new Object[] {
-			commerceNotificationTemplateModelImpl.getUuid(),
-			commerceNotificationTemplateModelImpl.getGroupId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G, args,
-			commerceNotificationTemplateModelImpl);
 	}
 
 	/**
@@ -1852,48 +1235,6 @@ public class CommerceNotificationTemplatePersistenceImpl
 		throws NoSuchNotificationTemplateException {
 
 		return remove((Serializable)commerceNotificationTemplateId);
-	}
-
-	/**
-	 * Removes the commerce notification template with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the commerce notification template
-	 * @return the commerce notification template that was removed
-	 * @throws NoSuchNotificationTemplateException if a commerce notification template with the primary key could not be found
-	 */
-	@Override
-	public CommerceNotificationTemplate remove(Serializable primaryKey)
-		throws NoSuchNotificationTemplateException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CommerceNotificationTemplate commerceNotificationTemplate =
-				(CommerceNotificationTemplate)session.get(
-					CommerceNotificationTemplateImpl.class, primaryKey);
-
-			if (commerceNotificationTemplate == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchNotificationTemplateException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(commerceNotificationTemplate);
-		}
-		catch (NoSuchNotificationTemplateException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -2014,44 +1355,13 @@ public class CommerceNotificationTemplatePersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CommerceNotificationTemplateImpl.class,
-			commerceNotificationTemplateModelImpl, false, true);
-
-		cacheUniqueFindersCache(commerceNotificationTemplateModelImpl);
+		cacheUniqueFindersResult(commerceNotificationTemplate, false);
 
 		if (isNew) {
 			commerceNotificationTemplate.setNew(false);
 		}
 
 		commerceNotificationTemplate.resetOriginalValues();
-
-		return commerceNotificationTemplate;
-	}
-
-	/**
-	 * Returns the commerce notification template with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the commerce notification template
-	 * @return the commerce notification template
-	 * @throws NoSuchNotificationTemplateException if a commerce notification template with the primary key could not be found
-	 */
-	@Override
-	public CommerceNotificationTemplate findByPrimaryKey(
-			Serializable primaryKey)
-		throws NoSuchNotificationTemplateException {
-
-		CommerceNotificationTemplate commerceNotificationTemplate =
-			fetchByPrimaryKey(primaryKey);
-
-		if (commerceNotificationTemplate == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchNotificationTemplateException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return commerceNotificationTemplate;
 	}
@@ -2084,191 +1394,6 @@ public class CommerceNotificationTemplatePersistenceImpl
 		return fetchByPrimaryKey((Serializable)commerceNotificationTemplateId);
 	}
 
-	/**
-	 * Returns all the commerce notification templates.
-	 *
-	 * @return the commerce notification templates
-	 */
-	@Override
-	public List<CommerceNotificationTemplate> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the commerce notification templates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceNotificationTemplateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce notification templates
-	 * @param end the upper bound of the range of commerce notification templates (not inclusive)
-	 * @return the range of commerce notification templates
-	 */
-	@Override
-	public List<CommerceNotificationTemplate> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce notification templates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceNotificationTemplateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce notification templates
-	 * @param end the upper bound of the range of commerce notification templates (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce notification templates
-	 */
-	@Override
-	public List<CommerceNotificationTemplate> findAll(
-		int start, int end,
-		OrderByComparator<CommerceNotificationTemplate> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce notification templates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceNotificationTemplateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce notification templates
-	 * @param end the upper bound of the range of commerce notification templates (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce notification templates
-	 */
-	@Override
-	public List<CommerceNotificationTemplate> findAll(
-		int start, int end,
-		OrderByComparator<CommerceNotificationTemplate> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<CommerceNotificationTemplate> list = null;
-
-		if (useFinderCache) {
-			list = (List<CommerceNotificationTemplate>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE;
-
-				sql = sql.concat(
-					CommerceNotificationTemplateModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<CommerceNotificationTemplate>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the commerce notification templates from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CommerceNotificationTemplate commerceNotificationTemplate :
-				findAll()) {
-
-			remove(commerceNotificationTemplate);
-		}
-	}
-
-	/**
-	 * Returns the number of commerce notification templates.
-	 *
-	 * @return the number of commerce notification templates
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	public Set<String> getBadColumnNames() {
 		return _badColumnNames;
@@ -2299,21 +1424,6 @@ public class CommerceNotificationTemplatePersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -2324,13 +1434,13 @@ public class CommerceNotificationTemplatePersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
@@ -2338,23 +1448,25 @@ public class CommerceNotificationTemplatePersistenceImpl
 			_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
 			_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
 			CommerceNotificationTemplateModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commerceNotificationTemplate.", "uuid",
 				FinderColumn.Type.STRING, "=", true, true,
 				CommerceNotificationTemplate::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(CommerceNotificationTemplate::getUuid),
+			CommerceNotificationTemplate::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByUUID_G,
-			_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
+			_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE, "",
 			new FinderColumn<>(
 				"commerceNotificationTemplate.", "uuid",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				CommerceNotificationTemplate::getUuid),
 			new FinderColumn<>(
 				"commerceNotificationTemplate.", "groupId",
@@ -2373,12 +1485,12 @@ public class CommerceNotificationTemplatePersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -2388,10 +1500,10 @@ public class CommerceNotificationTemplatePersistenceImpl
 				_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
 				_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
 				CommerceNotificationTemplateModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"commerceNotificationTemplate.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					CommerceNotificationTemplate::getUuid),
 				new FinderColumn<>(
 					"commerceNotificationTemplate.", "companyId",
@@ -2417,14 +1529,25 @@ public class CommerceNotificationTemplatePersistenceImpl
 			false);
 
 		_collectionPersistenceFinderByGroupId =
-			new CollectionPersistenceFinder<>(
+			new FilterCollectionPersistenceFinder<>(
 				this, _finderPathWithPaginationFindByGroupId,
 				_finderPathWithoutPaginationFindByGroupId,
 				_finderPathCountByGroupId,
 				_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
 				_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
 				CommerceNotificationTemplateModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					CommerceNotificationTemplateImpl.class,
+					CommerceNotificationTemplate.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
+					_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
+					CommerceNotificationTemplateModelImpl.ORDER_BY_SQL,
+					CommerceNotificationTemplateModelImpl.
+						ORDER_BY_SQL_INLINE_DISTINCT),
 				new FinderColumn<>(
 					"commerceNotificationTemplate.", "groupId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2449,21 +1572,33 @@ public class CommerceNotificationTemplatePersistenceImpl
 			new String[] {Long.class.getName(), Boolean.class.getName()},
 			new String[] {"groupId", "enabled"}, false);
 
-		_collectionPersistenceFinderByG_E = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByG_E,
-			_finderPathWithoutPaginationFindByG_E, _finderPathCountByG_E,
-			_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
-			_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
-			CommerceNotificationTemplateModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"commerceNotificationTemplate.", "groupId",
-				FinderColumn.Type.LONG, "=", true, false,
-				CommerceNotificationTemplate::getGroupId),
-			new FinderColumn<>(
-				"commerceNotificationTemplate.", "enabled",
-				FinderColumn.Type.BOOLEAN, "=", true, true,
-				CommerceNotificationTemplate::isEnabled));
+		_collectionPersistenceFinderByG_E =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_E,
+				_finderPathWithoutPaginationFindByG_E, _finderPathCountByG_E,
+				_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
+				_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
+				CommerceNotificationTemplateModelImpl.ORDER_BY_JPQL,
+				_ENTITY_ALIAS_PREFIX, "",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					CommerceNotificationTemplateImpl.class,
+					CommerceNotificationTemplate.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
+					_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
+					CommerceNotificationTemplateModelImpl.ORDER_BY_SQL,
+					CommerceNotificationTemplateModelImpl.
+						ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"commerceNotificationTemplate.", "groupId",
+					FinderColumn.Type.LONG, "=", true, true,
+					CommerceNotificationTemplate::getGroupId),
+				new FinderColumn<>(
+					"commerceNotificationTemplate.", "enabled",
+					FinderColumn.Type.BOOLEAN, "=", true, true,
+					CommerceNotificationTemplate::isEnabled));
 
 		_finderPathWithPaginationFindByG_T_E = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_T_E",
@@ -2480,7 +1615,7 @@ public class CommerceNotificationTemplatePersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"groupId", "type_", "enabled"}, true);
+			new String[] {"groupId", "type_", "enabled"}, 0, 2, true, null);
 
 		_finderPathCountByG_T_E = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_T_E",
@@ -2488,27 +1623,40 @@ public class CommerceNotificationTemplatePersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"groupId", "type_", "enabled"}, false);
+			new String[] {"groupId", "type_", "enabled"}, 0, 2, false, null);
 
-		_collectionPersistenceFinderByG_T_E = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByG_T_E,
-			_finderPathWithoutPaginationFindByG_T_E, _finderPathCountByG_T_E,
-			_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
-			_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
-			CommerceNotificationTemplateModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"commerceNotificationTemplate.", "groupId",
-				FinderColumn.Type.LONG, "=", true, false,
-				CommerceNotificationTemplate::getGroupId),
-			new FinderColumn<>(
-				"commerceNotificationTemplate.", "type",
-				FinderColumn.Type.STRING, "=", true, false,
-				CommerceNotificationTemplate::getType),
-			new FinderColumn<>(
-				"commerceNotificationTemplate.", "enabled",
-				FinderColumn.Type.BOOLEAN, "=", true, true,
-				CommerceNotificationTemplate::isEnabled));
+		_collectionPersistenceFinderByG_T_E =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_T_E,
+				_finderPathWithoutPaginationFindByG_T_E,
+				_finderPathCountByG_T_E,
+				_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
+				_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
+				CommerceNotificationTemplateModelImpl.ORDER_BY_JPQL,
+				_ENTITY_ALIAS_PREFIX, "",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					CommerceNotificationTemplateImpl.class,
+					CommerceNotificationTemplate.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
+					_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE,
+					CommerceNotificationTemplateModelImpl.ORDER_BY_SQL,
+					CommerceNotificationTemplateModelImpl.
+						ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"commerceNotificationTemplate.", "groupId",
+					FinderColumn.Type.LONG, "=", true, true,
+					CommerceNotificationTemplate::getGroupId),
+				new FinderColumn<>(
+					"commerceNotificationTemplate.", "type",
+					FinderColumn.Type.STRING, "=", true, true,
+					CommerceNotificationTemplate::getType),
+				new FinderColumn<>(
+					"commerceNotificationTemplate.", "enabled",
+					FinderColumn.Type.BOOLEAN, "=", true, true,
+					CommerceNotificationTemplate::isEnabled));
 
 		CommerceNotificationTemplateUtil.setPersistence(this);
 	}
@@ -2553,14 +1701,14 @@ public class CommerceNotificationTemplatePersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CommerceNotificationTemplateModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE =
 		"SELECT commerceNotificationTemplate FROM CommerceNotificationTemplate commerceNotificationTemplate";
 
 	private static final String _SQL_SELECT_COMMERCENOTIFICATIONTEMPLATE_WHERE =
 		"SELECT commerceNotificationTemplate FROM CommerceNotificationTemplate commerceNotificationTemplate WHERE ";
-
-	private static final String _SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE =
-		"SELECT COUNT(commerceNotificationTemplate) FROM CommerceNotificationTemplate commerceNotificationTemplate";
 
 	private static final String _SQL_COUNT_COMMERCENOTIFICATIONTEMPLATE_WHERE =
 		"SELECT COUNT(commerceNotificationTemplate) FROM CommerceNotificationTemplate commerceNotificationTemplate WHERE ";
@@ -2590,15 +1738,6 @@ public class CommerceNotificationTemplatePersistenceImpl
 	private static final String _FILTER_ENTITY_TABLE =
 		"CommerceNotificationTemplate";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"commerceNotificationTemplate.";
-
-	private static final String _ORDER_BY_ENTITY_TABLE =
-		"CommerceNotificationTemplate.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CommerceNotificationTemplate exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CommerceNotificationTemplate exists with the key {";
 
@@ -2614,4 +1753,4 @@ public class CommerceNotificationTemplatePersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-500120167
+// LIFERAY-SERVICE-BUILDER-HASH:-932529864

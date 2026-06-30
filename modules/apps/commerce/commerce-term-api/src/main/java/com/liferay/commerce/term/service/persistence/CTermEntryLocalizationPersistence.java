@@ -190,21 +190,6 @@ public interface CTermEntryLocalizationPersistence
 		long commerceTermEntryId, String languageId);
 
 	/**
-	 * Caches the c term entry localization in the entity cache if it is enabled.
-	 *
-	 * @param cTermEntryLocalization the c term entry localization
-	 */
-	public void cacheResult(CTermEntryLocalization cTermEntryLocalization);
-
-	/**
-	 * Caches the c term entry localizations in the entity cache if it is enabled.
-	 *
-	 * @param cTermEntryLocalizations the c term entry localizations
-	 */
-	public void cacheResult(
-		java.util.List<CTermEntryLocalization> cTermEntryLocalizations);
-
-	/**
 	 * Creates a new c term entry localization with the primary key. Does not add the c term entry localization to the database.
 	 *
 	 * @param cTermEntryLocalizationId the primary key for the new c term entry localization
@@ -245,73 +230,5 @@ public interface CTermEntryLocalizationPersistence
 	public CTermEntryLocalization fetchByPrimaryKey(
 		long cTermEntryLocalizationId);
 
-	/**
-	 * Returns all the c term entry localizations.
-	 *
-	 * @return the c term entry localizations
-	 */
-	public java.util.List<CTermEntryLocalization> findAll();
-
-	/**
-	 * Returns a range of all the c term entry localizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.term.model.impl.CTermEntryLocalizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of c term entry localizations
-	 * @param end the upper bound of the range of c term entry localizations (not inclusive)
-	 * @return the range of c term entry localizations
-	 */
-	public java.util.List<CTermEntryLocalization> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the c term entry localizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.term.model.impl.CTermEntryLocalizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of c term entry localizations
-	 * @param end the upper bound of the range of c term entry localizations (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of c term entry localizations
-	 */
-	public java.util.List<CTermEntryLocalization> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CTermEntryLocalization>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the c term entry localizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.term.model.impl.CTermEntryLocalizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of c term entry localizations
-	 * @param end the upper bound of the range of c term entry localizations (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of c term entry localizations
-	 */
-	public java.util.List<CTermEntryLocalization> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CTermEntryLocalization>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the c term entry localizations from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of c term entry localizations.
-	 *
-	 * @return the number of c term entry localizations
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1072815947
+// LIFERAY-SERVICE-BUILDER-HASH:1071030585

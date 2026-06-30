@@ -608,18 +608,54 @@ public interface RegionPersistence
 	public int countByC_R(long countryId, String regionCode);
 
 	/**
-	 * Caches the region in the entity cache if it is enabled.
+	 * Returns the region where externalReferenceCode = &#63; and companyId = &#63; or throws a <code>NoSuchRegionException</code> if it could not be found.
 	 *
-	 * @param region the region
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the matching region
+	 * @throws NoSuchRegionException if a matching region could not be found
 	 */
-	public void cacheResult(Region region);
+	public Region findByERC_C(String externalReferenceCode, long companyId)
+		throws NoSuchRegionException;
 
 	/**
-	 * Caches the regions in the entity cache if it is enabled.
+	 * Returns the region where externalReferenceCode = &#63; and companyId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
-	 * @param regions the regions
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the matching region, or <code>null</code> if a matching region could not be found
 	 */
-	public void cacheResult(java.util.List<Region> regions);
+	public Region fetchByERC_C(String externalReferenceCode, long companyId);
+
+	/**
+	 * Returns the region where externalReferenceCode = &#63; and companyId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 *
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the matching region, or <code>null</code> if a matching region could not be found
+	 */
+	public Region fetchByERC_C(
+		String externalReferenceCode, long companyId, boolean useFinderCache);
+
+	/**
+	 * Removes the region where externalReferenceCode = &#63; and companyId = &#63; from the database.
+	 *
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the region that was removed
+	 */
+	public Region removeByERC_C(String externalReferenceCode, long companyId)
+		throws NoSuchRegionException;
+
+	/**
+	 * Returns the number of regions where externalReferenceCode = &#63; and companyId = &#63;.
+	 *
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the number of matching regions
+	 */
+	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
 	 * Creates a new region with the primary key. Does not add the region to the database.
@@ -657,73 +693,5 @@ public interface RegionPersistence
 	 */
 	public Region fetchByPrimaryKey(long regionId);
 
-	/**
-	 * Returns all the regions.
-	 *
-	 * @return the regions
-	 */
-	public java.util.List<Region> findAll();
-
-	/**
-	 * Returns a range of all the regions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RegionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of regions
-	 * @param end the upper bound of the range of regions (not inclusive)
-	 * @return the range of regions
-	 */
-	public java.util.List<Region> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the regions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RegionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of regions
-	 * @param end the upper bound of the range of regions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of regions
-	 */
-	public java.util.List<Region> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Region>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the regions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RegionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of regions
-	 * @param end the upper bound of the range of regions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of regions
-	 */
-	public java.util.List<Region> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Region>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the regions from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of regions.
-	 *
-	 * @return the number of regions
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-708567722
+// LIFERAY-SERVICE-BUILDER-HASH:1244785405

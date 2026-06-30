@@ -20,7 +20,7 @@ import React, {Ref, useContext, useState} from 'react';
 import FrontendDataSetContext from '../../FrontendDataSetContext';
 import {DEFAULT_FETCH_HEADERS} from '../../constants';
 import getRandomId from '../../utils/getRandomId';
-import ViewsContext, {ISnapshot} from '../../views/ViewsContext';
+import ViewsContext, {ISnapshot, ISnapshots} from '../../views/ViewsContext';
 import {EViewsActionTypes} from '../../views/viewsReducer';
 
 const DEFAULT_VIEW_ID = 'DEFAULT_VIEW';
@@ -192,13 +192,30 @@ const SnapshotsControls = () => {
 		label: Liferay.Language.get('default-view'),
 	};
 
+	const snapshotsList = snapshots.flatMap((group: ISnapshots) => group.items);
+
 	const activeSnapshot: ISnapshot =
-		(snapshots.length &&
+		(snapshotsList.length &&
 			activeSnapshotERC &&
-			snapshots.find(
-				(view: ISnapshot) => view.erc === activeSnapshotERC
+			snapshotsList.find(
+				(snapshot: ISnapshot) => snapshot.erc === activeSnapshotERC
 			)) ||
 		defaultSnapshotItem;
+
+	const ownedSnapshots = snapshots.find(
+		(group: ISnapshots) => !group.headerVisible
+	);
+	const visibleHeaderSnapshots = snapshots.filter(
+		(group: ISnapshots) => group.headerVisible
+	);
+
+	const pickerItems: ISnapshots[] = [
+		{
+			headerVisible: false,
+			items: [defaultSnapshotItem, ...(ownedSnapshots?.items ?? [])],
+		},
+		...visibleHeaderSnapshots,
+	];
 
 	const activeSnapshotLabel = activeSnapshot.label ?? '';
 	const initialLabel =
@@ -450,7 +467,7 @@ const SnapshotsControls = () => {
 			<ManagementToolbar.Item>
 				<Picker
 					as={SnapshotsControlsTrigger}
-					items={[defaultSnapshotItem, ...snapshots]}
+					items={pickerItems}
 					messages={{
 						itemDescribedby: Liferay.Language.get(
 							'you-are-currently-on-a-text-element,-inside-of-a-list-box'
@@ -472,7 +489,20 @@ const SnapshotsControls = () => {
 							: Liferay.Language.get('default-view')
 					}
 				>
-					{(view) => <Option key={view.erc}>{view.label}</Option>}
+					{(group: ISnapshots) => (
+						<ClayDropDown.Group
+							header={
+								group.headerVisible ? group.label : undefined
+							}
+							items={group.items}
+						>
+							{(snapshot: ISnapshot) => (
+								<Option key={snapshot.erc}>
+									{snapshot.label}
+								</Option>
+							)}
+						</ClayDropDown.Group>
+					)}
 				</Picker>
 			</ManagementToolbar.Item>
 

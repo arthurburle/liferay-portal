@@ -36,6 +36,22 @@ public class CPConfigurationEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CPConfigurationEntry> cpConfigurationEntries) {
+
+		getPersistence().cacheResult(cpConfigurationEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CPConfigurationEntry cpConfigurationEntry) {
+		getPersistence().cacheResult(cpConfigurationEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -981,26 +997,6 @@ public class CPConfigurationEntryUtil {
 	}
 
 	/**
-	 * Caches the cp configuration entry in the entity cache if it is enabled.
-	 *
-	 * @param cpConfigurationEntry the cp configuration entry
-	 */
-	public static void cacheResult(CPConfigurationEntry cpConfigurationEntry) {
-		getPersistence().cacheResult(cpConfigurationEntry);
-	}
-
-	/**
-	 * Caches the cp configuration entries in the entity cache if it is enabled.
-	 *
-	 * @param cpConfigurationEntries the cp configuration entries
-	 */
-	public static void cacheResult(
-		List<CPConfigurationEntry> cpConfigurationEntries) {
-
-		getPersistence().cacheResult(cpConfigurationEntries);
-	}
-
-	/**
 	 * Creates a new cp configuration entry with the primary key. Does not add the cp configuration entry to the database.
 	 *
 	 * @param CPConfigurationEntryId the primary key for the new cp configuration entry
@@ -1057,87 +1053,6 @@ public class CPConfigurationEntryUtil {
 		return getPersistence().fetchByPrimaryKey(CPConfigurationEntryId);
 	}
 
-	/**
-	 * Returns all the cp configuration entries.
-	 *
-	 * @return the cp configuration entries
-	 */
-	public static List<CPConfigurationEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the cp configuration entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPConfigurationEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp configuration entries
-	 * @param end the upper bound of the range of cp configuration entries (not inclusive)
-	 * @return the range of cp configuration entries
-	 */
-	public static List<CPConfigurationEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp configuration entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPConfigurationEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp configuration entries
-	 * @param end the upper bound of the range of cp configuration entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cp configuration entries
-	 */
-	public static List<CPConfigurationEntry> findAll(
-		int start, int end,
-		OrderByComparator<CPConfigurationEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp configuration entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPConfigurationEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp configuration entries
-	 * @param end the upper bound of the range of cp configuration entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cp configuration entries
-	 */
-	public static List<CPConfigurationEntry> findAll(
-		int start, int end,
-		OrderByComparator<CPConfigurationEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the cp configuration entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of cp configuration entries.
-	 *
-	 * @return the number of cp configuration entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CPConfigurationEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1151,4 +1066,4 @@ public class CPConfigurationEntryUtil {
 	private static volatile CPConfigurationEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1445559110
+// LIFERAY-SERVICE-BUILDER-HASH:1811305844

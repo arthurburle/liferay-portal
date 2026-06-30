@@ -36,6 +36,20 @@ public class KBTemplateUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<KBTemplate> kbTemplates) {
+		getPersistence().cacheResult(kbTemplates);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(KBTemplate kbTemplate) {
+		getPersistence().cacheResult(kbTemplate);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -600,24 +614,6 @@ public class KBTemplateUtil {
 	}
 
 	/**
-	 * Caches the kb template in the entity cache if it is enabled.
-	 *
-	 * @param kbTemplate the kb template
-	 */
-	public static void cacheResult(KBTemplate kbTemplate) {
-		getPersistence().cacheResult(kbTemplate);
-	}
-
-	/**
-	 * Caches the kb templates in the entity cache if it is enabled.
-	 *
-	 * @param kbTemplates the kb templates
-	 */
-	public static void cacheResult(List<KBTemplate> kbTemplates) {
-		getPersistence().cacheResult(kbTemplates);
-	}
-
-	/**
 	 * Creates a new kb template with the primary key. Does not add the kb template to the database.
 	 *
 	 * @param kbTemplateId the primary key for the new kb template
@@ -667,85 +663,6 @@ public class KBTemplateUtil {
 		return getPersistence().fetchByPrimaryKey(kbTemplateId);
 	}
 
-	/**
-	 * Returns all the kb templates.
-	 *
-	 * @return the kb templates
-	 */
-	public static List<KBTemplate> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the kb templates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.knowledge.base.model.impl.KBTemplateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kb templates
-	 * @param end the upper bound of the range of kb templates (not inclusive)
-	 * @return the range of kb templates
-	 */
-	public static List<KBTemplate> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the kb templates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.knowledge.base.model.impl.KBTemplateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kb templates
-	 * @param end the upper bound of the range of kb templates (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of kb templates
-	 */
-	public static List<KBTemplate> findAll(
-		int start, int end, OrderByComparator<KBTemplate> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the kb templates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.knowledge.base.model.impl.KBTemplateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kb templates
-	 * @param end the upper bound of the range of kb templates (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of kb templates
-	 */
-	public static List<KBTemplate> findAll(
-		int start, int end, OrderByComparator<KBTemplate> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the kb templates from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of kb templates.
-	 *
-	 * @return the number of kb templates
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static KBTemplatePersistence getPersistence() {
 		return _persistence;
 	}
@@ -757,4 +674,4 @@ public class KBTemplateUtil {
 	private static volatile KBTemplatePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2100035675
+// LIFERAY-SERVICE-BUILDER-HASH:-1244902332

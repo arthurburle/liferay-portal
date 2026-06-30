@@ -36,6 +36,20 @@ public class KaleoConditionUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<KaleoCondition> kaleoConditions) {
+		getPersistence().cacheResult(kaleoConditions);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(KaleoCondition kaleoCondition) {
+		getPersistence().cacheResult(kaleoCondition);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -428,24 +442,6 @@ public class KaleoConditionUtil {
 	}
 
 	/**
-	 * Caches the kaleo condition in the entity cache if it is enabled.
-	 *
-	 * @param kaleoCondition the kaleo condition
-	 */
-	public static void cacheResult(KaleoCondition kaleoCondition) {
-		getPersistence().cacheResult(kaleoCondition);
-	}
-
-	/**
-	 * Caches the kaleo conditions in the entity cache if it is enabled.
-	 *
-	 * @param kaleoConditions the kaleo conditions
-	 */
-	public static void cacheResult(List<KaleoCondition> kaleoConditions) {
-		getPersistence().cacheResult(kaleoConditions);
-	}
-
-	/**
 	 * Creates a new kaleo condition with the primary key. Does not add the kaleo condition to the database.
 	 *
 	 * @param kaleoConditionId the primary key for the new kaleo condition
@@ -497,86 +493,6 @@ public class KaleoConditionUtil {
 		return getPersistence().fetchByPrimaryKey(kaleoConditionId);
 	}
 
-	/**
-	 * Returns all the kaleo conditions.
-	 *
-	 * @return the kaleo conditions
-	 */
-	public static List<KaleoCondition> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the kaleo conditions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoConditionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo conditions
-	 * @param end the upper bound of the range of kaleo conditions (not inclusive)
-	 * @return the range of kaleo conditions
-	 */
-	public static List<KaleoCondition> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the kaleo conditions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoConditionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo conditions
-	 * @param end the upper bound of the range of kaleo conditions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of kaleo conditions
-	 */
-	public static List<KaleoCondition> findAll(
-		int start, int end,
-		OrderByComparator<KaleoCondition> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the kaleo conditions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoConditionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo conditions
-	 * @param end the upper bound of the range of kaleo conditions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of kaleo conditions
-	 */
-	public static List<KaleoCondition> findAll(
-		int start, int end, OrderByComparator<KaleoCondition> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the kaleo conditions from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of kaleo conditions.
-	 *
-	 * @return the number of kaleo conditions
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static KaleoConditionPersistence getPersistence() {
 		return _persistence;
 	}
@@ -588,4 +504,4 @@ public class KaleoConditionUtil {
 	private static volatile KaleoConditionPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2064322390
+// LIFERAY-SERVICE-BUILDER-HASH:-427809757

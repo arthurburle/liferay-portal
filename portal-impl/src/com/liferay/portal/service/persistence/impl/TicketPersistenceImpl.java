@@ -5,13 +5,11 @@
 
 package com.liferay.portal.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.exception.NoSuchTicketException;
@@ -28,10 +26,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.model.impl.TicketImpl;
@@ -58,7 +53,8 @@ import java.util.Set;
  * @generated
  */
 public class TicketPersistenceImpl
-	extends BasePersistenceImpl<Ticket> implements TicketPersistence {
+	extends BasePersistenceImpl<Ticket, NoSuchTicketException>
+	implements TicketPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -74,9 +70,6 @@ public class TicketPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathFetchByKey;
 	private UniquePersistenceFinder<Ticket> _uniquePersistenceFinderByKey;
 
@@ -705,93 +698,6 @@ public class TicketPersistenceImpl
 	}
 
 	/**
-	 * Caches the ticket in the entity cache if it is enabled.
-	 *
-	 * @param ticket the ticket
-	 */
-	@Override
-	public void cacheResult(Ticket ticket) {
-		EntityCacheUtil.putResult(
-			TicketImpl.class, ticket.getPrimaryKey(), ticket);
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByKey, new Object[] {ticket.getKey()}, ticket);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the tickets in the entity cache if it is enabled.
-	 *
-	 * @param tickets the tickets
-	 */
-	@Override
-	public void cacheResult(List<Ticket> tickets) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (tickets.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (Ticket ticket : tickets) {
-			if (EntityCacheUtil.getResult(
-					TicketImpl.class, ticket.getPrimaryKey()) == null) {
-
-				cacheResult(ticket);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all tickets.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		EntityCacheUtil.clearCache(TicketImpl.class);
-
-		FinderCacheUtil.clearCache(TicketImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the ticket.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(Ticket ticket) {
-		EntityCacheUtil.removeResult(TicketImpl.class, ticket);
-	}
-
-	@Override
-	public void clearCache(List<Ticket> tickets) {
-		for (Ticket ticket : tickets) {
-			EntityCacheUtil.removeResult(TicketImpl.class, ticket);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		FinderCacheUtil.clearCache(TicketImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			EntityCacheUtil.removeResult(TicketImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(TicketModelImpl ticketModelImpl) {
-		Object[] args = new Object[] {ticketModelImpl.getKey()};
-
-		FinderCacheUtil.putResult(_finderPathFetchByKey, args, ticketModelImpl);
-	}
-
-	/**
 	 * Creates a new ticket with the primary key. Does not add the ticket to the database.
 	 *
 	 * @param ticketId the primary key for the new ticket
@@ -819,44 +725,6 @@ public class TicketPersistenceImpl
 	@Override
 	public Ticket remove(long ticketId) throws NoSuchTicketException {
 		return remove((Serializable)ticketId);
-	}
-
-	/**
-	 * Removes the ticket with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the ticket
-	 * @return the ticket that was removed
-	 * @throws NoSuchTicketException if a ticket with the primary key could not be found
-	 */
-	@Override
-	public Ticket remove(Serializable primaryKey) throws NoSuchTicketException {
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Ticket ticket = (Ticket)session.get(TicketImpl.class, primaryKey);
-
-			if (ticket == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchTicketException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(ticket);
-		}
-		catch (NoSuchTicketException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -944,41 +812,13 @@ public class TicketPersistenceImpl
 			closeSession(session);
 		}
 
-		EntityCacheUtil.putResult(
-			TicketImpl.class, ticketModelImpl, false, true);
-
-		cacheUniqueFindersCache(ticketModelImpl);
+		cacheUniqueFindersResult(ticket, false);
 
 		if (isNew) {
 			ticket.setNew(false);
 		}
 
 		ticket.resetOriginalValues();
-
-		return ticket;
-	}
-
-	/**
-	 * Returns the ticket with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the ticket
-	 * @return the ticket
-	 * @throws NoSuchTicketException if a ticket with the primary key could not be found
-	 */
-	@Override
-	public Ticket findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchTicketException {
-
-		Ticket ticket = fetchByPrimaryKey(primaryKey);
-
-		if (ticket == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchTicketException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return ticket;
 	}
@@ -1004,185 +844,6 @@ public class TicketPersistenceImpl
 	@Override
 	public Ticket fetchByPrimaryKey(long ticketId) {
 		return fetchByPrimaryKey((Serializable)ticketId);
-	}
-
-	/**
-	 * Returns all the tickets.
-	 *
-	 * @return the tickets
-	 */
-	@Override
-	public List<Ticket> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the tickets.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>TicketModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of tickets
-	 * @param end the upper bound of the range of tickets (not inclusive)
-	 * @return the range of tickets
-	 */
-	@Override
-	public List<Ticket> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the tickets.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>TicketModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of tickets
-	 * @param end the upper bound of the range of tickets (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of tickets
-	 */
-	@Override
-	public List<Ticket> findAll(
-		int start, int end, OrderByComparator<Ticket> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the tickets.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>TicketModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of tickets
-	 * @param end the upper bound of the range of tickets (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of tickets
-	 */
-	@Override
-	public List<Ticket> findAll(
-		int start, int end, OrderByComparator<Ticket> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<Ticket> list = null;
-
-		if (useFinderCache) {
-			list = (List<Ticket>)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_TICKET);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_TICKET;
-
-				sql = sql.concat(TicketModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<Ticket>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the tickets from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (Ticket ticket : findAll()) {
-			remove(ticket);
-		}
-	}
-
-	/**
-	 * Returns the number of tickets.
-	 *
-	 * @return the number of tickets
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)FinderCacheUtil.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_TICKET);
-
-				count = (Long)query.uniqueResult();
-
-				FinderCacheUtil.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -1214,27 +875,13 @@ public class TicketPersistenceImpl
 	 * Initializes the ticket persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
-		_finderPathFetchByKey = new FinderPath(
+		_finderPathFetchByKey = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByKey",
-			new String[] {String.class.getName()}, new String[] {"key_"}, true);
+			new String[] {String.class.getName()}, new String[] {"key_"}, 0, 1,
+			false, convertNullFunction(Ticket::getKey));
 
 		_uniquePersistenceFinderByKey = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByKey, _SQL_SELECT_TICKET_WHERE,
+			this, _finderPathFetchByKey, _SQL_SELECT_TICKET_WHERE, "",
 			new FinderColumn<>(
 				"ticket.", "key", FinderColumn.Type.STRING, "=", true, true,
 				Ticket::getKey));
@@ -1266,13 +913,13 @@ public class TicketPersistenceImpl
 			this, _finderPathWithPaginationFindByC_C_C,
 			_finderPathWithoutPaginationFindByC_C_C, _finderPathCountByC_C_C,
 			_SQL_SELECT_TICKET_WHERE, _SQL_COUNT_TICKET_WHERE,
-			TicketModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			TicketModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
-				"ticket.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, Ticket::getCompanyId),
+				"ticket.", "companyId", FinderColumn.Type.LONG, "=", true, true,
+				Ticket::getCompanyId),
 			new FinderColumn<>(
 				"ticket.", "classNameId", FinderColumn.Type.LONG, "=", true,
-				false, Ticket::getClassNameId),
+				true, Ticket::getClassNameId),
 			new FinderColumn<>(
 				"ticket.", "classPK", FinderColumn.Type.LONG, "=", true, true,
 				Ticket::getClassPK));
@@ -1306,12 +953,12 @@ public class TicketPersistenceImpl
 			this, _finderPathWithPaginationFindByC_C_T,
 			_finderPathWithoutPaginationFindByC_C_T, _finderPathCountByC_C_T,
 			_SQL_SELECT_TICKET_WHERE, _SQL_COUNT_TICKET_WHERE,
-			TicketModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			TicketModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ticket.", "classNameId", FinderColumn.Type.LONG, "=", true,
-				false, Ticket::getClassNameId),
+				true, Ticket::getClassNameId),
 			new FinderColumn<>(
-				"ticket.", "classPK", FinderColumn.Type.LONG, "=", true, false,
+				"ticket.", "classPK", FinderColumn.Type.LONG, "=", true, true,
 				Ticket::getClassPK),
 			new FinderColumn<>(
 				"ticket.", "type", FinderColumn.Type.INTEGER, "=", true, true,
@@ -1352,16 +999,16 @@ public class TicketPersistenceImpl
 				_finderPathWithoutPaginationFindByC_C_C_T,
 				_finderPathCountByC_C_C_T, _SQL_SELECT_TICKET_WHERE,
 				_SQL_COUNT_TICKET_WHERE, TicketModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ticket.", "companyId", FinderColumn.Type.LONG, "=", true,
-					false, Ticket::getCompanyId),
+					true, Ticket::getCompanyId),
 				new FinderColumn<>(
 					"ticket.", "classNameId", FinderColumn.Type.LONG, "=", true,
-					false, Ticket::getClassNameId),
+					true, Ticket::getClassNameId),
 				new FinderColumn<>(
 					"ticket.", "classPK", FinderColumn.Type.LONG, "=", true,
-					false, Ticket::getClassPK),
+					true, Ticket::getClassPK),
 				new FinderColumn<>(
 					"ticket.", "type", FinderColumn.Type.INTEGER, "=", true,
 					true, Ticket::getType));
@@ -1375,22 +1022,17 @@ public class TicketPersistenceImpl
 		EntityCacheUtil.removeCache(TicketImpl.class.getName());
 	}
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		TicketModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_TICKET =
 		"SELECT ticket FROM Ticket ticket";
 
 	private static final String _SQL_SELECT_TICKET_WHERE =
 		"SELECT ticket FROM Ticket ticket WHERE ";
 
-	private static final String _SQL_COUNT_TICKET =
-		"SELECT COUNT(ticket) FROM Ticket ticket";
-
 	private static final String _SQL_COUNT_TICKET_WHERE =
 		"SELECT COUNT(ticket) FROM Ticket ticket WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "ticket.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No Ticket exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No Ticket exists with the key {";
@@ -1407,4 +1049,4 @@ public class TicketPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:673964652
+// LIFERAY-SERVICE-BUILDER-HASH:326790043

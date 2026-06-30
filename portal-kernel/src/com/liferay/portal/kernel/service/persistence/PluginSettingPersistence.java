@@ -193,20 +193,6 @@ public interface PluginSettingPersistence
 	public int countByC_P_P(long companyId, String pluginId, String pluginType);
 
 	/**
-	 * Caches the plugin setting in the entity cache if it is enabled.
-	 *
-	 * @param pluginSetting the plugin setting
-	 */
-	public void cacheResult(PluginSetting pluginSetting);
-
-	/**
-	 * Caches the plugin settings in the entity cache if it is enabled.
-	 *
-	 * @param pluginSettings the plugin settings
-	 */
-	public void cacheResult(java.util.List<PluginSetting> pluginSettings);
-
-	/**
 	 * Creates a new plugin setting with the primary key. Does not add the plugin setting to the database.
 	 *
 	 * @param pluginSettingId the primary key for the new plugin setting
@@ -244,73 +230,5 @@ public interface PluginSettingPersistence
 	 */
 	public PluginSetting fetchByPrimaryKey(long pluginSettingId);
 
-	/**
-	 * Returns all the plugin settings.
-	 *
-	 * @return the plugin settings
-	 */
-	public java.util.List<PluginSetting> findAll();
-
-	/**
-	 * Returns a range of all the plugin settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.PluginSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of plugin settings
-	 * @param end the upper bound of the range of plugin settings (not inclusive)
-	 * @return the range of plugin settings
-	 */
-	public java.util.List<PluginSetting> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the plugin settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.PluginSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of plugin settings
-	 * @param end the upper bound of the range of plugin settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of plugin settings
-	 */
-	public java.util.List<PluginSetting> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<PluginSetting>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the plugin settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.PluginSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of plugin settings
-	 * @param end the upper bound of the range of plugin settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of plugin settings
-	 */
-	public java.util.List<PluginSetting> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<PluginSetting>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the plugin settings from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of plugin settings.
-	 *
-	 * @return the number of plugin settings
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-744540888
+// LIFERAY-SERVICE-BUILDER-HASH:2094361269

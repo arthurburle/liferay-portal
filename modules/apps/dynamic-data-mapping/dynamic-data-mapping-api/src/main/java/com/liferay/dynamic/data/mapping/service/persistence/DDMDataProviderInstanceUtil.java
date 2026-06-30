@@ -36,6 +36,24 @@ public class DDMDataProviderInstanceUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<DDMDataProviderInstance> ddmDataProviderInstances) {
+
+		getPersistence().cacheResult(ddmDataProviderInstances);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		DDMDataProviderInstance ddmDataProviderInstance) {
+
+		getPersistence().cacheResult(ddmDataProviderInstance);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -897,28 +915,6 @@ public class DDMDataProviderInstanceUtil {
 	}
 
 	/**
-	 * Caches the ddm data provider instance in the entity cache if it is enabled.
-	 *
-	 * @param ddmDataProviderInstance the ddm data provider instance
-	 */
-	public static void cacheResult(
-		DDMDataProviderInstance ddmDataProviderInstance) {
-
-		getPersistence().cacheResult(ddmDataProviderInstance);
-	}
-
-	/**
-	 * Caches the ddm data provider instances in the entity cache if it is enabled.
-	 *
-	 * @param ddmDataProviderInstances the ddm data provider instances
-	 */
-	public static void cacheResult(
-		List<DDMDataProviderInstance> ddmDataProviderInstances) {
-
-		getPersistence().cacheResult(ddmDataProviderInstances);
-	}
-
-	/**
 	 * Creates a new ddm data provider instance with the primary key. Does not add the ddm data provider instance to the database.
 	 *
 	 * @param dataProviderInstanceId the primary key for the new ddm data provider instance
@@ -975,87 +971,6 @@ public class DDMDataProviderInstanceUtil {
 		return getPersistence().fetchByPrimaryKey(dataProviderInstanceId);
 	}
 
-	/**
-	 * Returns all the ddm data provider instances.
-	 *
-	 * @return the ddm data provider instances
-	 */
-	public static List<DDMDataProviderInstance> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the ddm data provider instances.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMDataProviderInstanceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm data provider instances
-	 * @param end the upper bound of the range of ddm data provider instances (not inclusive)
-	 * @return the range of ddm data provider instances
-	 */
-	public static List<DDMDataProviderInstance> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm data provider instances.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMDataProviderInstanceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm data provider instances
-	 * @param end the upper bound of the range of ddm data provider instances (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm data provider instances
-	 */
-	public static List<DDMDataProviderInstance> findAll(
-		int start, int end,
-		OrderByComparator<DDMDataProviderInstance> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm data provider instances.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMDataProviderInstanceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm data provider instances
-	 * @param end the upper bound of the range of ddm data provider instances (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm data provider instances
-	 */
-	public static List<DDMDataProviderInstance> findAll(
-		int start, int end,
-		OrderByComparator<DDMDataProviderInstance> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the ddm data provider instances from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of ddm data provider instances.
-	 *
-	 * @return the number of ddm data provider instances
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static DDMDataProviderInstancePersistence getPersistence() {
 		return _persistence;
 	}
@@ -1069,4 +984,4 @@ public class DDMDataProviderInstanceUtil {
 	private static volatile DDMDataProviderInstancePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1700717404
+// LIFERAY-SERVICE-BUILDER-HASH:1563876117

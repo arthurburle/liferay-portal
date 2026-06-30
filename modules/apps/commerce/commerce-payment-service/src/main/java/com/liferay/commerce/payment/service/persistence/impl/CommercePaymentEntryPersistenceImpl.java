@@ -14,15 +14,11 @@ import com.liferay.commerce.payment.model.impl.CommercePaymentEntryModelImpl;
 import com.liferay.commerce.payment.service.persistence.CommercePaymentEntryPersistence;
 import com.liferay.commerce.payment.service.persistence.CommercePaymentEntryUtil;
 import com.liferay.commerce.payment.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
-import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.dao.orm.SQLQuery;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -33,18 +29,15 @@ import com.liferay.portal.kernel.sanitizer.SanitizerException;
 import com.liferay.portal.kernel.sanitizer.SanitizerUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
-import com.liferay.portal.kernel.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
-import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
+import com.liferay.portal.kernel.service.persistence.impl.FilterCollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -79,7 +72,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CommercePaymentEntryPersistence.class)
 public class CommercePaymentEntryPersistenceImpl
-	extends BasePersistenceImpl<CommercePaymentEntry>
+	extends BasePersistenceImpl
+		<CommercePaymentEntry, NoSuchPaymentEntryException>
 	implements CommercePaymentEntryPersistence {
 
 	/*
@@ -96,13 +90,10 @@ public class CommercePaymentEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByCompanyId;
 	private FinderPath _finderPathWithoutPaginationFindByCompanyId;
 	private FinderPath _finderPathCountByCompanyId;
-	private CollectionPersistenceFinder<CommercePaymentEntry>
+	private FilterCollectionPersistenceFinder<CommercePaymentEntry>
 		_collectionPersistenceFinderByCompanyId;
 
 	/**
@@ -273,97 +264,9 @@ public class CommercePaymentEntryPersistenceImpl
 		long companyId, int start, int end,
 		OrderByComparator<CommercePaymentEntry> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return findByCompanyId(companyId, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByCompanyId(
-					companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator));
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				3 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(4);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_COMPANYID_COMPANYID_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					CommercePaymentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(CommercePaymentEntryModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommercePaymentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, CommercePaymentEntryImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, CommercePaymentEntryImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			return (List<CommercePaymentEntry>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByCompanyId.filterFind(
+			finderCache, new Object[] {companyId}, start, end,
+			orderByComparator, companyId, 0);
 	}
 
 	/**
@@ -397,63 +300,14 @@ public class CommercePaymentEntryPersistenceImpl
 	 */
 	@Override
 	public int filterCountByCompanyId(long companyId) {
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return countByCompanyId(companyId);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<CommercePaymentEntry> commercePaymentEntries = findByCompanyId(
-				companyId);
-
-			commercePaymentEntries = InlineSQLHelperUtil.filter(
-				commercePaymentEntries);
-
-			return commercePaymentEntries.size();
-		}
-
-		StringBundler sb = new StringBundler(2);
-
-		sb.append(_FILTER_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE);
-
-		sb.append(_FINDER_COLUMN_COMPANYID_COMPANYID_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommercePaymentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByCompanyId.filterCount(
+			finderCache, new Object[] {companyId}, companyId, 0);
 	}
-
-	private static final String _FINDER_COLUMN_COMPANYID_COMPANYID_2 =
-		"commercePaymentEntry.companyId = ?";
 
 	private FinderPath _finderPathWithPaginationFindByC_C_C;
 	private FinderPath _finderPathWithoutPaginationFindByC_C_C;
 	private FinderPath _finderPathCountByC_C_C;
-	private CollectionPersistenceFinder<CommercePaymentEntry>
+	private FilterCollectionPersistenceFinder<CommercePaymentEntry>
 		_collectionPersistenceFinderByC_C_C;
 
 	/**
@@ -653,106 +507,9 @@ public class CommercePaymentEntryPersistenceImpl
 		long companyId, long classNameId, long classPK, int start, int end,
 		OrderByComparator<CommercePaymentEntry> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return findByC_C_C(
-				companyId, classNameId, classPK, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByC_C_C(
-					companyId, classNameId, classPK, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator));
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				5 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(6);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_C_C_C_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_CLASSNAMEID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_CLASSPK_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					CommercePaymentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(CommercePaymentEntryModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommercePaymentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, CommercePaymentEntryImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, CommercePaymentEntryImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(classNameId);
-
-			queryPos.add(classPK);
-
-			return (List<CommercePaymentEntry>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_C_C.filterFind(
+			finderCache, new Object[] {companyId, classNameId, classPK}, start,
+			end, orderByComparator, companyId, 0);
 	}
 
 	/**
@@ -794,77 +551,15 @@ public class CommercePaymentEntryPersistenceImpl
 	public int filterCountByC_C_C(
 		long companyId, long classNameId, long classPK) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return countByC_C_C(companyId, classNameId, classPK);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<CommercePaymentEntry> commercePaymentEntries = findByC_C_C(
-				companyId, classNameId, classPK);
-
-			commercePaymentEntries = InlineSQLHelperUtil.filter(
-				commercePaymentEntries);
-
-			return commercePaymentEntries.size();
-		}
-
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_FILTER_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE);
-
-		sb.append(_FINDER_COLUMN_C_C_C_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_CLASSNAMEID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_CLASSPK_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommercePaymentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(classNameId);
-
-			queryPos.add(classPK);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_C_C.filterCount(
+			finderCache, new Object[] {companyId, classNameId, classPK},
+			companyId, 0);
 	}
-
-	private static final String _FINDER_COLUMN_C_C_C_COMPANYID_2 =
-		"commercePaymentEntry.companyId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_C_C_CLASSNAMEID_2 =
-		"commercePaymentEntry.classNameId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_C_C_CLASSPK_2 =
-		"commercePaymentEntry.classPK = ?";
 
 	private FinderPath _finderPathWithPaginationFindByC_C_C_T;
 	private FinderPath _finderPathWithoutPaginationFindByC_C_C_T;
 	private FinderPath _finderPathCountByC_C_C_T;
-	private CollectionPersistenceFinder<CommercePaymentEntry>
+	private FilterCollectionPersistenceFinder<CommercePaymentEntry>
 		_collectionPersistenceFinderByC_C_C_T;
 
 	/**
@@ -1076,111 +771,9 @@ public class CommercePaymentEntryPersistenceImpl
 		long companyId, long classNameId, long classPK, int type, int start,
 		int end, OrderByComparator<CommercePaymentEntry> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return findByC_C_C_T(
-				companyId, classNameId, classPK, type, start, end,
-				orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByC_C_C_T(
-					companyId, classNameId, classPK, type, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator));
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				6 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(7);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_C_C_C_T_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_T_CLASSNAMEID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_T_CLASSPK_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_T_TYPE_2_SQL);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					CommercePaymentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(CommercePaymentEntryModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommercePaymentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, CommercePaymentEntryImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, CommercePaymentEntryImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(classNameId);
-
-			queryPos.add(classPK);
-
-			queryPos.add(type);
-
-			return (List<CommercePaymentEntry>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_C_C_T.filterFind(
+			finderCache, new Object[] {companyId, classNameId, classPK, type},
+			start, end, orderByComparator, companyId, 0);
 	}
 
 	/**
@@ -1229,84 +822,15 @@ public class CommercePaymentEntryPersistenceImpl
 	public int filterCountByC_C_C_T(
 		long companyId, long classNameId, long classPK, int type) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return countByC_C_C_T(companyId, classNameId, classPK, type);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<CommercePaymentEntry> commercePaymentEntries = findByC_C_C_T(
-				companyId, classNameId, classPK, type);
-
-			commercePaymentEntries = InlineSQLHelperUtil.filter(
-				commercePaymentEntries);
-
-			return commercePaymentEntries.size();
-		}
-
-		StringBundler sb = new StringBundler(5);
-
-		sb.append(_FILTER_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE);
-
-		sb.append(_FINDER_COLUMN_C_C_C_T_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_T_CLASSNAMEID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_T_CLASSPK_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_T_TYPE_2_SQL);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommercePaymentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(classNameId);
-
-			queryPos.add(classPK);
-
-			queryPos.add(type);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_C_C_T.filterCount(
+			finderCache, new Object[] {companyId, classNameId, classPK, type},
+			companyId, 0);
 	}
-
-	private static final String _FINDER_COLUMN_C_C_C_T_COMPANYID_2 =
-		"commercePaymentEntry.companyId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_C_C_T_CLASSNAMEID_2 =
-		"commercePaymentEntry.classNameId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_C_C_T_CLASSPK_2 =
-		"commercePaymentEntry.classPK = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_C_C_T_TYPE_2_SQL =
-		"commercePaymentEntry.type_ = ?";
 
 	private FinderPath _finderPathWithPaginationFindByC_C_C_P_T;
 	private FinderPath _finderPathWithoutPaginationFindByC_C_C_P_T;
 	private FinderPath _finderPathCountByC_C_C_P_T;
-	private CollectionPersistenceFinder<CommercePaymentEntry>
+	private FilterCollectionPersistenceFinder<CommercePaymentEntry>
 		_collectionPersistenceFinderByC_C_C_P_T;
 
 	/**
@@ -1539,115 +1063,10 @@ public class CommercePaymentEntryPersistenceImpl
 		int type, int start, int end,
 		OrderByComparator<CommercePaymentEntry> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return findByC_C_C_P_T(
-				companyId, classNameId, classPK, paymentStatus, type, start,
-				end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByC_C_C_P_T(
-					companyId, classNameId, classPK, paymentStatus, type,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, orderByComparator));
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				7 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(8);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_C_C_C_P_T_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_P_T_CLASSNAMEID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_P_T_CLASSPK_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_P_T_PAYMENTSTATUS_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_P_T_TYPE_2_SQL);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					CommercePaymentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(CommercePaymentEntryModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommercePaymentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, CommercePaymentEntryImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, CommercePaymentEntryImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(classNameId);
-
-			queryPos.add(classPK);
-
-			queryPos.add(paymentStatus);
-
-			queryPos.add(type);
-
-			return (List<CommercePaymentEntry>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_C_C_P_T.filterFind(
+			finderCache,
+			new Object[] {companyId, classNameId, classPK, paymentStatus, type},
+			start, end, orderByComparator, companyId, 0);
 	}
 
 	/**
@@ -1708,87 +1127,11 @@ public class CommercePaymentEntryPersistenceImpl
 		long companyId, long classNameId, long classPK, int paymentStatus,
 		int type) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return countByC_C_C_P_T(
-				companyId, classNameId, classPK, paymentStatus, type);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<CommercePaymentEntry> commercePaymentEntries = findByC_C_C_P_T(
-				companyId, classNameId, classPK, paymentStatus, type);
-
-			commercePaymentEntries = InlineSQLHelperUtil.filter(
-				commercePaymentEntries);
-
-			return commercePaymentEntries.size();
-		}
-
-		StringBundler sb = new StringBundler(6);
-
-		sb.append(_FILTER_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE);
-
-		sb.append(_FINDER_COLUMN_C_C_C_P_T_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_P_T_CLASSNAMEID_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_P_T_CLASSPK_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_P_T_PAYMENTSTATUS_2);
-
-		sb.append(_FINDER_COLUMN_C_C_C_P_T_TYPE_2_SQL);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), CommercePaymentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(classNameId);
-
-			queryPos.add(classPK);
-
-			queryPos.add(paymentStatus);
-
-			queryPos.add(type);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_C_C_P_T.filterCount(
+			finderCache,
+			new Object[] {companyId, classNameId, classPK, paymentStatus, type},
+			companyId, 0);
 	}
-
-	private static final String _FINDER_COLUMN_C_C_C_P_T_COMPANYID_2 =
-		"commercePaymentEntry.companyId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_C_C_P_T_CLASSNAMEID_2 =
-		"commercePaymentEntry.classNameId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_C_C_P_T_CLASSPK_2 =
-		"commercePaymentEntry.classPK = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_C_C_P_T_PAYMENTSTATUS_2 =
-		"commercePaymentEntry.paymentStatus = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_C_C_P_T_TYPE_2_SQL =
-		"commercePaymentEntry.type_ = ?";
 
 	private FinderPath _finderPathFetchByERC_C;
 	private UniquePersistenceFinder<CommercePaymentEntry>
@@ -1904,114 +1247,6 @@ public class CommercePaymentEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the commerce payment entry in the entity cache if it is enabled.
-	 *
-	 * @param commercePaymentEntry the commerce payment entry
-	 */
-	@Override
-	public void cacheResult(CommercePaymentEntry commercePaymentEntry) {
-		entityCache.putResult(
-			CommercePaymentEntryImpl.class,
-			commercePaymentEntry.getPrimaryKey(), commercePaymentEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C,
-			new Object[] {
-				commercePaymentEntry.getExternalReferenceCode(),
-				commercePaymentEntry.getCompanyId()
-			},
-			commercePaymentEntry);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the commerce payment entries in the entity cache if it is enabled.
-	 *
-	 * @param commercePaymentEntries the commerce payment entries
-	 */
-	@Override
-	public void cacheResult(List<CommercePaymentEntry> commercePaymentEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (commercePaymentEntries.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CommercePaymentEntry commercePaymentEntry :
-				commercePaymentEntries) {
-
-			if (entityCache.getResult(
-					CommercePaymentEntryImpl.class,
-					commercePaymentEntry.getPrimaryKey()) == null) {
-
-				cacheResult(commercePaymentEntry);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all commerce payment entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CommercePaymentEntryImpl.class);
-
-		finderCache.clearCache(CommercePaymentEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the commerce payment entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(CommercePaymentEntry commercePaymentEntry) {
-		entityCache.removeResult(
-			CommercePaymentEntryImpl.class, commercePaymentEntry);
-	}
-
-	@Override
-	public void clearCache(List<CommercePaymentEntry> commercePaymentEntries) {
-		for (CommercePaymentEntry commercePaymentEntry :
-				commercePaymentEntries) {
-
-			entityCache.removeResult(
-				CommercePaymentEntryImpl.class, commercePaymentEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CommercePaymentEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CommercePaymentEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CommercePaymentEntryModelImpl commercePaymentEntryModelImpl) {
-
-		Object[] args = new Object[] {
-			commercePaymentEntryModelImpl.getExternalReferenceCode(),
-			commercePaymentEntryModelImpl.getCompanyId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C, args, commercePaymentEntryModelImpl);
-	}
-
-	/**
 	 * Creates a new commerce payment entry with the primary key. Does not add the commerce payment entry to the database.
 	 *
 	 * @param commercePaymentEntryId the primary key for the new commerce payment entry
@@ -2042,48 +1277,6 @@ public class CommercePaymentEntryPersistenceImpl
 		throws NoSuchPaymentEntryException {
 
 		return remove((Serializable)commercePaymentEntryId);
-	}
-
-	/**
-	 * Removes the commerce payment entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the commerce payment entry
-	 * @return the commerce payment entry that was removed
-	 * @throws NoSuchPaymentEntryException if a commerce payment entry with the primary key could not be found
-	 */
-	@Override
-	public CommercePaymentEntry remove(Serializable primaryKey)
-		throws NoSuchPaymentEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CommercePaymentEntry commercePaymentEntry =
-				(CommercePaymentEntry)session.get(
-					CommercePaymentEntryImpl.class, primaryKey);
-
-			if (commercePaymentEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchPaymentEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(commercePaymentEntry);
-		}
-		catch (NoSuchPaymentEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -2256,43 +1449,13 @@ public class CommercePaymentEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CommercePaymentEntryImpl.class, commercePaymentEntryModelImpl,
-			false, true);
-
-		cacheUniqueFindersCache(commercePaymentEntryModelImpl);
+		cacheUniqueFindersResult(commercePaymentEntry, false);
 
 		if (isNew) {
 			commercePaymentEntry.setNew(false);
 		}
 
 		commercePaymentEntry.resetOriginalValues();
-
-		return commercePaymentEntry;
-	}
-
-	/**
-	 * Returns the commerce payment entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the commerce payment entry
-	 * @return the commerce payment entry
-	 * @throws NoSuchPaymentEntryException if a commerce payment entry with the primary key could not be found
-	 */
-	@Override
-	public CommercePaymentEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchPaymentEntryException {
-
-		CommercePaymentEntry commercePaymentEntry = fetchByPrimaryKey(
-			primaryKey);
-
-		if (commercePaymentEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchPaymentEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return commercePaymentEntry;
 	}
@@ -2320,188 +1483,6 @@ public class CommercePaymentEntryPersistenceImpl
 	@Override
 	public CommercePaymentEntry fetchByPrimaryKey(long commercePaymentEntryId) {
 		return fetchByPrimaryKey((Serializable)commercePaymentEntryId);
-	}
-
-	/**
-	 * Returns all the commerce payment entries.
-	 *
-	 * @return the commerce payment entries
-	 */
-	@Override
-	public List<CommercePaymentEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the commerce payment entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommercePaymentEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce payment entries
-	 * @param end the upper bound of the range of commerce payment entries (not inclusive)
-	 * @return the range of commerce payment entries
-	 */
-	@Override
-	public List<CommercePaymentEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce payment entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommercePaymentEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce payment entries
-	 * @param end the upper bound of the range of commerce payment entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce payment entries
-	 */
-	@Override
-	public List<CommercePaymentEntry> findAll(
-		int start, int end,
-		OrderByComparator<CommercePaymentEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce payment entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommercePaymentEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce payment entries
-	 * @param end the upper bound of the range of commerce payment entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce payment entries
-	 */
-	@Override
-	public List<CommercePaymentEntry> findAll(
-		int start, int end,
-		OrderByComparator<CommercePaymentEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<CommercePaymentEntry> list = null;
-
-		if (useFinderCache) {
-			list = (List<CommercePaymentEntry>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_COMMERCEPAYMENTENTRY);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_COMMERCEPAYMENTENTRY;
-
-				sql = sql.concat(CommercePaymentEntryModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<CommercePaymentEntry>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the commerce payment entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CommercePaymentEntry commercePaymentEntry : findAll()) {
-			remove(commercePaymentEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of commerce payment entries.
-	 *
-	 * @return the number of commerce payment entries
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_COMMERCEPAYMENTENTRY);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -2534,21 +1515,6 @@ public class CommercePaymentEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByCompanyId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByCompanyId",
 			new String[] {
@@ -2568,14 +1534,24 @@ public class CommercePaymentEntryPersistenceImpl
 			false);
 
 		_collectionPersistenceFinderByCompanyId =
-			new CollectionPersistenceFinder<>(
+			new FilterCollectionPersistenceFinder<>(
 				this, _finderPathWithPaginationFindByCompanyId,
 				_finderPathWithoutPaginationFindByCompanyId,
 				_finderPathCountByCompanyId,
 				_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE,
 				_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE,
 				CommercePaymentEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					CommercePaymentEntryImpl.class, CommercePaymentEntry.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE,
+					CommercePaymentEntryModelImpl.ORDER_BY_SQL,
+					CommercePaymentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
 				new FinderColumn<>(
 					"commercePaymentEntry.", "companyId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2604,21 +1580,35 @@ public class CommercePaymentEntryPersistenceImpl
 			},
 			new String[] {"companyId", "classNameId", "classPK"}, false);
 
-		_collectionPersistenceFinderByC_C_C = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByC_C_C,
-			_finderPathWithoutPaginationFindByC_C_C, _finderPathCountByC_C_C,
-			_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE,
-			_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE,
-			CommercePaymentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"commercePaymentEntry.", "companyId", FinderColumn.Type.LONG,
-				"=", true, false, CommercePaymentEntry::getCompanyId),
-			new FinderColumn<>(
-				"commercePaymentEntry.", "classNameId", FinderColumn.Type.LONG,
-				"=", true, false, CommercePaymentEntry::getClassNameId),
-			new FinderColumn<>(
-				"commercePaymentEntry.", "classPK", FinderColumn.Type.LONG, "=",
-				true, true, CommercePaymentEntry::getClassPK));
+		_collectionPersistenceFinderByC_C_C =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByC_C_C,
+				_finderPathWithoutPaginationFindByC_C_C,
+				_finderPathCountByC_C_C, _SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE,
+				_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE,
+				CommercePaymentEntryModelImpl.ORDER_BY_JPQL,
+				_ENTITY_ALIAS_PREFIX, "",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					CommercePaymentEntryImpl.class, CommercePaymentEntry.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE,
+					CommercePaymentEntryModelImpl.ORDER_BY_SQL,
+					CommercePaymentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"commercePaymentEntry.", "companyId",
+					FinderColumn.Type.LONG, "=", true, true,
+					CommercePaymentEntry::getCompanyId),
+				new FinderColumn<>(
+					"commercePaymentEntry.", "classNameId",
+					FinderColumn.Type.LONG, "=", true, true,
+					CommercePaymentEntry::getClassNameId),
+				new FinderColumn<>(
+					"commercePaymentEntry.", "classPK", FinderColumn.Type.LONG,
+					"=", true, true, CommercePaymentEntry::getClassPK));
 
 		_finderPathWithPaginationFindByC_C_C_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByC_C_C_T",
@@ -2650,25 +1640,35 @@ public class CommercePaymentEntryPersistenceImpl
 			false);
 
 		_collectionPersistenceFinderByC_C_C_T =
-			new CollectionPersistenceFinder<>(
+			new FilterCollectionPersistenceFinder<>(
 				this, _finderPathWithPaginationFindByC_C_C_T,
 				_finderPathWithoutPaginationFindByC_C_C_T,
 				_finderPathCountByC_C_C_T,
 				_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE,
 				_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE,
 				CommercePaymentEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					CommercePaymentEntryImpl.class, CommercePaymentEntry.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE,
+					CommercePaymentEntryModelImpl.ORDER_BY_SQL,
+					CommercePaymentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
 				new FinderColumn<>(
 					"commercePaymentEntry.", "companyId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					CommercePaymentEntry::getCompanyId),
 				new FinderColumn<>(
 					"commercePaymentEntry.", "classNameId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					CommercePaymentEntry::getClassNameId),
 				new FinderColumn<>(
 					"commercePaymentEntry.", "classPK", FinderColumn.Type.LONG,
-					"=", true, false, CommercePaymentEntry::getClassPK),
+					"=", true, true, CommercePaymentEntry::getClassPK),
 				new FinderColumn<>(
 					"commercePaymentEntry.", "type", FinderColumn.Type.INTEGER,
 					"=", true, true, CommercePaymentEntry::getType));
@@ -2711,44 +1711,56 @@ public class CommercePaymentEntryPersistenceImpl
 			false);
 
 		_collectionPersistenceFinderByC_C_C_P_T =
-			new CollectionPersistenceFinder<>(
+			new FilterCollectionPersistenceFinder<>(
 				this, _finderPathWithPaginationFindByC_C_C_P_T,
 				_finderPathWithoutPaginationFindByC_C_C_P_T,
 				_finderPathCountByC_C_C_P_T,
 				_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE,
 				_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE,
 				CommercePaymentEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					CommercePaymentEntryImpl.class, CommercePaymentEntry.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_COMMERCEPAYMENTENTRY_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE,
+					CommercePaymentEntryModelImpl.ORDER_BY_SQL,
+					CommercePaymentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
 				new FinderColumn<>(
 					"commercePaymentEntry.", "companyId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					CommercePaymentEntry::getCompanyId),
 				new FinderColumn<>(
 					"commercePaymentEntry.", "classNameId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					CommercePaymentEntry::getClassNameId),
 				new FinderColumn<>(
 					"commercePaymentEntry.", "classPK", FinderColumn.Type.LONG,
-					"=", true, false, CommercePaymentEntry::getClassPK),
+					"=", true, true, CommercePaymentEntry::getClassPK),
 				new FinderColumn<>(
 					"commercePaymentEntry.", "paymentStatus",
-					FinderColumn.Type.INTEGER, "=", true, false,
+					FinderColumn.Type.INTEGER, "=", true, true,
 					CommercePaymentEntry::getPaymentStatus),
 				new FinderColumn<>(
 					"commercePaymentEntry.", "type", FinderColumn.Type.INTEGER,
 					"=", true, true, CommercePaymentEntry::getType));
 
-		_finderPathFetchByERC_C = new FinderPath(
+		_finderPathFetchByERC_C = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"externalReferenceCode", "companyId"}, true);
+			new String[] {"externalReferenceCode", "companyId"}, 0, 1, false,
+			convertNullFunction(CommercePaymentEntry::getExternalReferenceCode),
+			CommercePaymentEntry::getCompanyId);
 
 		_uniquePersistenceFinderByERC_C = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByERC_C,
-			_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE,
+			_SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE, "",
 			new FinderColumn<>(
 				"commercePaymentEntry.", "externalReferenceCode",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				CommercePaymentEntry::getExternalReferenceCode),
 			new FinderColumn<>(
 				"commercePaymentEntry.", "companyId", FinderColumn.Type.LONG,
@@ -2796,14 +1808,14 @@ public class CommercePaymentEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CommercePaymentEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_COMMERCEPAYMENTENTRY =
 		"SELECT commercePaymentEntry FROM CommercePaymentEntry commercePaymentEntry";
 
 	private static final String _SQL_SELECT_COMMERCEPAYMENTENTRY_WHERE =
 		"SELECT commercePaymentEntry FROM CommercePaymentEntry commercePaymentEntry WHERE ";
-
-	private static final String _SQL_COUNT_COMMERCEPAYMENTENTRY =
-		"SELECT COUNT(commercePaymentEntry) FROM CommercePaymentEntry commercePaymentEntry";
 
 	private static final String _SQL_COUNT_COMMERCEPAYMENTENTRY_WHERE =
 		"SELECT COUNT(commercePaymentEntry) FROM CommercePaymentEntry commercePaymentEntry WHERE ";
@@ -2829,15 +1841,6 @@ public class CommercePaymentEntryPersistenceImpl
 
 	private static final String _FILTER_ENTITY_TABLE = "CommercePaymentEntry";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"commercePaymentEntry.";
-
-	private static final String _ORDER_BY_ENTITY_TABLE =
-		"CommercePaymentEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CommercePaymentEntry exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CommercePaymentEntry exists with the key {";
 
@@ -2853,4 +1856,4 @@ public class CommercePaymentEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1068616687
+// LIFERAY-SERVICE-BUILDER-HASH:-1959832922

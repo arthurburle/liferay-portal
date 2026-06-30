@@ -185,21 +185,6 @@ public interface RedirectNotFoundEntryPersistence
 	public int countByG_U(long groupId, String url);
 
 	/**
-	 * Caches the redirect not found entry in the entity cache if it is enabled.
-	 *
-	 * @param redirectNotFoundEntry the redirect not found entry
-	 */
-	public void cacheResult(RedirectNotFoundEntry redirectNotFoundEntry);
-
-	/**
-	 * Caches the redirect not found entries in the entity cache if it is enabled.
-	 *
-	 * @param redirectNotFoundEntries the redirect not found entries
-	 */
-	public void cacheResult(
-		java.util.List<RedirectNotFoundEntry> redirectNotFoundEntries);
-
-	/**
 	 * Creates a new redirect not found entry with the primary key. Does not add the redirect not found entry to the database.
 	 *
 	 * @param redirectNotFoundEntryId the primary key for the new redirect not found entry
@@ -239,73 +224,5 @@ public interface RedirectNotFoundEntryPersistence
 	public RedirectNotFoundEntry fetchByPrimaryKey(
 		long redirectNotFoundEntryId);
 
-	/**
-	 * Returns all the redirect not found entries.
-	 *
-	 * @return the redirect not found entries
-	 */
-	public java.util.List<RedirectNotFoundEntry> findAll();
-
-	/**
-	 * Returns a range of all the redirect not found entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.redirect.model.impl.RedirectNotFoundEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of redirect not found entries
-	 * @param end the upper bound of the range of redirect not found entries (not inclusive)
-	 * @return the range of redirect not found entries
-	 */
-	public java.util.List<RedirectNotFoundEntry> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the redirect not found entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.redirect.model.impl.RedirectNotFoundEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of redirect not found entries
-	 * @param end the upper bound of the range of redirect not found entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of redirect not found entries
-	 */
-	public java.util.List<RedirectNotFoundEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<RedirectNotFoundEntry>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the redirect not found entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.redirect.model.impl.RedirectNotFoundEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of redirect not found entries
-	 * @param end the upper bound of the range of redirect not found entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of redirect not found entries
-	 */
-	public java.util.List<RedirectNotFoundEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<RedirectNotFoundEntry>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the redirect not found entries from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of redirect not found entries.
-	 *
-	 * @return the number of redirect not found entries
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1390735832
+// LIFERAY-SERVICE-BUILDER-HASH:348879828

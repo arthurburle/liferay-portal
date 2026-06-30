@@ -604,20 +604,6 @@ public interface RepositoryPersistence
 	public int countByERC_G(String externalReferenceCode, long groupId);
 
 	/**
-	 * Caches the repository in the entity cache if it is enabled.
-	 *
-	 * @param repository the repository
-	 */
-	public void cacheResult(Repository repository);
-
-	/**
-	 * Caches the repositories in the entity cache if it is enabled.
-	 *
-	 * @param repositories the repositories
-	 */
-	public void cacheResult(java.util.List<Repository> repositories);
-
-	/**
 	 * Creates a new repository with the primary key. Does not add the repository to the database.
 	 *
 	 * @param repositoryId the primary key for the new repository
@@ -655,73 +641,5 @@ public interface RepositoryPersistence
 	 */
 	public Repository fetchByPrimaryKey(long repositoryId);
 
-	/**
-	 * Returns all the repositories.
-	 *
-	 * @return the repositories
-	 */
-	public java.util.List<Repository> findAll();
-
-	/**
-	 * Returns a range of all the repositories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RepositoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of repositories
-	 * @param end the upper bound of the range of repositories (not inclusive)
-	 * @return the range of repositories
-	 */
-	public java.util.List<Repository> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the repositories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RepositoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of repositories
-	 * @param end the upper bound of the range of repositories (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of repositories
-	 */
-	public java.util.List<Repository> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Repository>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the repositories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RepositoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of repositories
-	 * @param end the upper bound of the range of repositories (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of repositories
-	 */
-	public java.util.List<Repository> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Repository>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the repositories from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of repositories.
-	 *
-	 * @return the number of repositories
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:447999190
+// LIFERAY-SERVICE-BUILDER-HASH:-1156261604

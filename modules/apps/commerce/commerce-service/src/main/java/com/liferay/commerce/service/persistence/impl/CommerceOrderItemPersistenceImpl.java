@@ -14,12 +14,10 @@ import com.liferay.commerce.model.impl.CommerceOrderItemModelImpl;
 import com.liferay.commerce.service.persistence.CommerceOrderItemPersistence;
 import com.liferay.commerce.service.persistence.CommerceOrderItemUtil;
 import com.liferay.commerce.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -40,8 +38,6 @@ import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinde
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -77,7 +73,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CommerceOrderItemPersistence.class)
 public class CommerceOrderItemPersistenceImpl
-	extends BasePersistenceImpl<CommerceOrderItem>
+	extends BasePersistenceImpl<CommerceOrderItem, NoSuchOrderItemException>
 	implements CommerceOrderItemPersistence {
 
 	/*
@@ -94,9 +90,6 @@ public class CommerceOrderItemPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -2058,124 +2051,6 @@ public class CommerceOrderItemPersistenceImpl
 	}
 
 	/**
-	 * Caches the commerce order item in the entity cache if it is enabled.
-	 *
-	 * @param commerceOrderItem the commerce order item
-	 */
-	@Override
-	public void cacheResult(CommerceOrderItem commerceOrderItem) {
-		entityCache.putResult(
-			CommerceOrderItemImpl.class, commerceOrderItem.getPrimaryKey(),
-			commerceOrderItem);
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G,
-			new Object[] {
-				commerceOrderItem.getUuid(), commerceOrderItem.getGroupId()
-			},
-			commerceOrderItem);
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C,
-			new Object[] {
-				commerceOrderItem.getExternalReferenceCode(),
-				commerceOrderItem.getCompanyId()
-			},
-			commerceOrderItem);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the commerce order items in the entity cache if it is enabled.
-	 *
-	 * @param commerceOrderItems the commerce order items
-	 */
-	@Override
-	public void cacheResult(List<CommerceOrderItem> commerceOrderItems) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (commerceOrderItems.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CommerceOrderItem commerceOrderItem : commerceOrderItems) {
-			if (entityCache.getResult(
-					CommerceOrderItemImpl.class,
-					commerceOrderItem.getPrimaryKey()) == null) {
-
-				cacheResult(commerceOrderItem);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all commerce order items.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CommerceOrderItemImpl.class);
-
-		finderCache.clearCache(CommerceOrderItemImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the commerce order item.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(CommerceOrderItem commerceOrderItem) {
-		entityCache.removeResult(
-			CommerceOrderItemImpl.class, commerceOrderItem);
-	}
-
-	@Override
-	public void clearCache(List<CommerceOrderItem> commerceOrderItems) {
-		for (CommerceOrderItem commerceOrderItem : commerceOrderItems) {
-			entityCache.removeResult(
-				CommerceOrderItemImpl.class, commerceOrderItem);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CommerceOrderItemImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(CommerceOrderItemImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CommerceOrderItemModelImpl commerceOrderItemModelImpl) {
-
-		Object[] args = new Object[] {
-			commerceOrderItemModelImpl.getUuid(),
-			commerceOrderItemModelImpl.getGroupId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G, args, commerceOrderItemModelImpl);
-
-		args = new Object[] {
-			commerceOrderItemModelImpl.getExternalReferenceCode(),
-			commerceOrderItemModelImpl.getCompanyId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C, args, commerceOrderItemModelImpl);
-	}
-
-	/**
 	 * Creates a new commerce order item with the primary key. Does not add the commerce order item to the database.
 	 *
 	 * @param commerceOrderItemId the primary key for the new commerce order item
@@ -2209,48 +2084,6 @@ public class CommerceOrderItemPersistenceImpl
 		throws NoSuchOrderItemException {
 
 		return remove((Serializable)commerceOrderItemId);
-	}
-
-	/**
-	 * Removes the commerce order item with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the commerce order item
-	 * @return the commerce order item that was removed
-	 * @throws NoSuchOrderItemException if a commerce order item with the primary key could not be found
-	 */
-	@Override
-	public CommerceOrderItem remove(Serializable primaryKey)
-		throws NoSuchOrderItemException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CommerceOrderItem commerceOrderItem =
-				(CommerceOrderItem)session.get(
-					CommerceOrderItemImpl.class, primaryKey);
-
-			if (commerceOrderItem == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchOrderItemException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(commerceOrderItem);
-		}
-		catch (NoSuchOrderItemException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -2427,42 +2260,13 @@ public class CommerceOrderItemPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CommerceOrderItemImpl.class, commerceOrderItemModelImpl, false,
-			true);
-
-		cacheUniqueFindersCache(commerceOrderItemModelImpl);
+		cacheUniqueFindersResult(commerceOrderItem, false);
 
 		if (isNew) {
 			commerceOrderItem.setNew(false);
 		}
 
 		commerceOrderItem.resetOriginalValues();
-
-		return commerceOrderItem;
-	}
-
-	/**
-	 * Returns the commerce order item with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the commerce order item
-	 * @return the commerce order item
-	 * @throws NoSuchOrderItemException if a commerce order item with the primary key could not be found
-	 */
-	@Override
-	public CommerceOrderItem findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchOrderItemException {
-
-		CommerceOrderItem commerceOrderItem = fetchByPrimaryKey(primaryKey);
-
-		if (commerceOrderItem == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchOrderItemException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return commerceOrderItem;
 	}
@@ -2490,187 +2294,6 @@ public class CommerceOrderItemPersistenceImpl
 	@Override
 	public CommerceOrderItem fetchByPrimaryKey(long commerceOrderItemId) {
 		return fetchByPrimaryKey((Serializable)commerceOrderItemId);
-	}
-
-	/**
-	 * Returns all the commerce order items.
-	 *
-	 * @return the commerce order items
-	 */
-	@Override
-	public List<CommerceOrderItem> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the commerce order items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceOrderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order items
-	 * @param end the upper bound of the range of commerce order items (not inclusive)
-	 * @return the range of commerce order items
-	 */
-	@Override
-	public List<CommerceOrderItem> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce order items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceOrderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order items
-	 * @param end the upper bound of the range of commerce order items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce order items
-	 */
-	@Override
-	public List<CommerceOrderItem> findAll(
-		int start, int end,
-		OrderByComparator<CommerceOrderItem> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce order items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceOrderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order items
-	 * @param end the upper bound of the range of commerce order items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce order items
-	 */
-	@Override
-	public List<CommerceOrderItem> findAll(
-		int start, int end,
-		OrderByComparator<CommerceOrderItem> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<CommerceOrderItem> list = null;
-
-		if (useFinderCache) {
-			list = (List<CommerceOrderItem>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_COMMERCEORDERITEM);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_COMMERCEORDERITEM;
-
-				sql = sql.concat(CommerceOrderItemModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<CommerceOrderItem>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the commerce order items from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CommerceOrderItem commerceOrderItem : findAll()) {
-			remove(commerceOrderItem);
-		}
-	}
-
-	/**
-	 * Returns the number of commerce order items.
-	 *
-	 * @return the number of commerce order items
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_COMMERCEORDERITEM);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -2703,21 +2326,6 @@ public class CommerceOrderItemPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -2728,34 +2336,37 @@ public class CommerceOrderItemPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_COMMERCEORDERITEM_WHERE,
 			_SQL_COUNT_COMMERCEORDERITEM_WHERE,
-			CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commerceOrderItem.", "uuid", FinderColumn.Type.STRING, "=",
 				true, true, CommerceOrderItem::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(CommerceOrderItem::getUuid),
+			CommerceOrderItem::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByUUID_G, _SQL_SELECT_COMMERCEORDERITEM_WHERE,
+			"",
 			new FinderColumn<>(
 				"commerceOrderItem.", "uuid", FinderColumn.Type.STRING, "=",
-				true, false, CommerceOrderItem::getUuid),
+				true, true, CommerceOrderItem::getUuid),
 			new FinderColumn<>(
 				"commerceOrderItem.", "groupId", FinderColumn.Type.LONG, "=",
 				true, true, CommerceOrderItem::getGroupId));
@@ -2772,12 +2383,12 @@ public class CommerceOrderItemPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -2785,11 +2396,11 @@ public class CommerceOrderItemPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_COMMERCEORDERITEM_WHERE,
 				_SQL_COUNT_COMMERCEORDERITEM_WHERE,
-				CommerceOrderItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"commerceOrderItem.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, CommerceOrderItem::getUuid),
+					true, true, CommerceOrderItem::getUuid),
 				new FinderColumn<>(
 					"commerceOrderItem.", "companyId", FinderColumn.Type.LONG,
 					"=", true, true, CommerceOrderItem::getCompanyId));
@@ -2825,8 +2436,8 @@ public class CommerceOrderItemPersistenceImpl
 				_finderPathCountByCommerceInventoryBookedQuantityId,
 				_SQL_SELECT_COMMERCEORDERITEM_WHERE,
 				_SQL_COUNT_COMMERCEORDERITEM_WHERE,
-				CommerceOrderItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"commerceOrderItem.", "commerceInventoryBookedQuantityId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2857,8 +2468,8 @@ public class CommerceOrderItemPersistenceImpl
 				_finderPathCountByCommerceOrderId,
 				_SQL_SELECT_COMMERCEORDERITEM_WHERE,
 				_SQL_COUNT_COMMERCEORDERITEM_WHERE,
-				CommerceOrderItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"commerceOrderItem.", "commerceOrderId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2889,8 +2500,8 @@ public class CommerceOrderItemPersistenceImpl
 				_finderPathCountByCPInstanceId,
 				_SQL_SELECT_COMMERCEORDERITEM_WHERE,
 				_SQL_COUNT_COMMERCEORDERITEM_WHERE,
-				CommerceOrderItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"commerceOrderItem.", "CPInstanceId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2921,8 +2532,8 @@ public class CommerceOrderItemPersistenceImpl
 				_finderPathCountByCProductId,
 				_SQL_SELECT_COMMERCEORDERITEM_WHERE,
 				_SQL_COUNT_COMMERCEORDERITEM_WHERE,
-				CommerceOrderItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"commerceOrderItem.", "CProductId", FinderColumn.Type.LONG,
 					"=", true, true, CommerceOrderItem::getCProductId));
@@ -2958,8 +2569,8 @@ public class CommerceOrderItemPersistenceImpl
 				_finderPathCountByCustomerCommerceOrderItemId,
 				_SQL_SELECT_COMMERCEORDERITEM_WHERE,
 				_SQL_COUNT_COMMERCEORDERITEM_WHERE,
-				CommerceOrderItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"commerceOrderItem.", "customerCommerceOrderItemId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2995,8 +2606,8 @@ public class CommerceOrderItemPersistenceImpl
 				_finderPathCountByParentCommerceOrderItemId,
 				_SQL_SELECT_COMMERCEORDERITEM_WHERE,
 				_SQL_COUNT_COMMERCEORDERITEM_WHERE,
-				CommerceOrderItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"commerceOrderItem.", "parentCommerceOrderItemId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -3026,10 +2637,10 @@ public class CommerceOrderItemPersistenceImpl
 			_finderPathWithoutPaginationFindByC_CPI, _finderPathCountByC_CPI,
 			_SQL_SELECT_COMMERCEORDERITEM_WHERE,
 			_SQL_COUNT_COMMERCEORDERITEM_WHERE,
-			CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commerceOrderItem.", "commerceOrderId", FinderColumn.Type.LONG,
-				"=", true, false, CommerceOrderItem::getCommerceOrderId),
+				"=", true, true, CommerceOrderItem::getCommerceOrderId),
 			new FinderColumn<>(
 				"commerceOrderItem.", "CPInstanceId", FinderColumn.Type.LONG,
 				"=", true, true, CommerceOrderItem::getCPInstanceId));
@@ -3062,11 +2673,11 @@ public class CommerceOrderItemPersistenceImpl
 				_finderPathWithoutPaginationFindByC_PCOI,
 				_finderPathCountByC_PCOI, _SQL_SELECT_COMMERCEORDERITEM_WHERE,
 				_SQL_COUNT_COMMERCEORDERITEM_WHERE,
-				CommerceOrderItemModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"commerceOrderItem.", "commerceOrderId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					CommerceOrderItem::getCommerceOrderId),
 				new FinderColumn<>(
 					"commerceOrderItem.", "parentCommerceOrderItemId",
@@ -3097,24 +2708,27 @@ public class CommerceOrderItemPersistenceImpl
 			_finderPathWithoutPaginationFindByC_S, _finderPathCountByC_S,
 			_SQL_SELECT_COMMERCEORDERITEM_WHERE,
 			_SQL_COUNT_COMMERCEORDERITEM_WHERE,
-			CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			CommerceOrderItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commerceOrderItem.", "commerceOrderId", FinderColumn.Type.LONG,
-				"=", true, false, CommerceOrderItem::getCommerceOrderId),
+				"=", true, true, CommerceOrderItem::getCommerceOrderId),
 			new FinderColumn<>(
 				"commerceOrderItem.", "subscription", FinderColumn.Type.BOOLEAN,
 				"=", true, true, CommerceOrderItem::isSubscription));
 
-		_finderPathFetchByERC_C = new FinderPath(
+		_finderPathFetchByERC_C = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"externalReferenceCode", "companyId"}, true);
+			new String[] {"externalReferenceCode", "companyId"}, 0, 1, false,
+			convertNullFunction(CommerceOrderItem::getExternalReferenceCode),
+			CommerceOrderItem::getCompanyId);
 
 		_uniquePersistenceFinderByERC_C = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByERC_C, _SQL_SELECT_COMMERCEORDERITEM_WHERE,
+			"",
 			new FinderColumn<>(
 				"commerceOrderItem.", "externalReferenceCode",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				CommerceOrderItem::getExternalReferenceCode),
 			new FinderColumn<>(
 				"commerceOrderItem.", "companyId", FinderColumn.Type.LONG, "=",
@@ -3162,22 +2776,17 @@ public class CommerceOrderItemPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CommerceOrderItemModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_COMMERCEORDERITEM =
 		"SELECT commerceOrderItem FROM CommerceOrderItem commerceOrderItem";
 
 	private static final String _SQL_SELECT_COMMERCEORDERITEM_WHERE =
 		"SELECT commerceOrderItem FROM CommerceOrderItem commerceOrderItem WHERE ";
 
-	private static final String _SQL_COUNT_COMMERCEORDERITEM =
-		"SELECT COUNT(commerceOrderItem) FROM CommerceOrderItem commerceOrderItem";
-
 	private static final String _SQL_COUNT_COMMERCEORDERITEM_WHERE =
 		"SELECT COUNT(commerceOrderItem) FROM CommerceOrderItem commerceOrderItem WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "commerceOrderItem.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CommerceOrderItem exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CommerceOrderItem exists with the key {";
@@ -3202,4 +2811,4 @@ public class CommerceOrderItemPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1976320230
+// LIFERAY-SERVICE-BUILDER-HASH:-1538550945

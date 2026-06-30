@@ -505,22 +505,6 @@ public interface CommerceTaxCategoryMappingPersistence
 	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
-	 * Caches the commerce tax category mapping in the entity cache if it is enabled.
-	 *
-	 * @param commerceTaxCategoryMapping the commerce tax category mapping
-	 */
-	public void cacheResult(
-		CommerceTaxCategoryMapping commerceTaxCategoryMapping);
-
-	/**
-	 * Caches the commerce tax category mappings in the entity cache if it is enabled.
-	 *
-	 * @param commerceTaxCategoryMappings the commerce tax category mappings
-	 */
-	public void cacheResult(
-		java.util.List<CommerceTaxCategoryMapping> commerceTaxCategoryMappings);
-
-	/**
 	 * Creates a new commerce tax category mapping with the primary key. Does not add the commerce tax category mapping to the database.
 	 *
 	 * @param commerceTaxCategoryMappingId the primary key for the new commerce tax category mapping
@@ -561,74 +545,5 @@ public interface CommerceTaxCategoryMappingPersistence
 	public CommerceTaxCategoryMapping fetchByPrimaryKey(
 		long commerceTaxCategoryMappingId);
 
-	/**
-	 * Returns all the commerce tax category mappings.
-	 *
-	 * @return the commerce tax category mappings
-	 */
-	public java.util.List<CommerceTaxCategoryMapping> findAll();
-
-	/**
-	 * Returns a range of all the commerce tax category mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.tax.model.impl.CommerceTaxCategoryMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce tax category mappings
-	 * @param end the upper bound of the range of commerce tax category mappings (not inclusive)
-	 * @return the range of commerce tax category mappings
-	 */
-	public java.util.List<CommerceTaxCategoryMapping> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce tax category mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.tax.model.impl.CommerceTaxCategoryMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce tax category mappings
-	 * @param end the upper bound of the range of commerce tax category mappings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce tax category mappings
-	 */
-	public java.util.List<CommerceTaxCategoryMapping> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceTaxCategoryMapping> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce tax category mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.tax.model.impl.CommerceTaxCategoryMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce tax category mappings
-	 * @param end the upper bound of the range of commerce tax category mappings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce tax category mappings
-	 */
-	public java.util.List<CommerceTaxCategoryMapping> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceTaxCategoryMapping> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce tax category mappings from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce tax category mappings.
-	 *
-	 * @return the number of commerce tax category mappings
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1354486263
+// LIFERAY-SERVICE-BUILDER-HASH:-129354294

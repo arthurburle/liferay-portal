@@ -13,15 +13,11 @@ import com.liferay.dynamic.data.lists.model.impl.DDLRecordModelImpl;
 import com.liferay.dynamic.data.lists.service.persistence.DDLRecordPersistence;
 import com.liferay.dynamic.data.lists.service.persistence.DDLRecordUtil;
 import com.liferay.dynamic.data.lists.service.persistence.impl.constants.DDLPersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -35,10 +31,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -54,7 +47,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,7 +70,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = DDLRecordPersistence.class)
 public class DDLRecordPersistenceImpl
-	extends BasePersistenceImpl<DDLRecord> implements DDLRecordPersistence {
+	extends BasePersistenceImpl<DDLRecord, NoSuchRecordException>
+	implements DDLRecordPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -94,9 +87,6 @@ public class DDLRecordPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -172,14 +162,9 @@ public class DDLRecordPersistenceImpl
 		OrderByComparator<DDLRecord> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				finderCache, new Object[] {uuid}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			finderCache, new Object[] {uuid}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -240,13 +225,8 @@ public class DDLRecordPersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				finderCache, new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			finderCache, new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathFetchByUUID_G;
@@ -305,13 +285,8 @@ public class DDLRecordPersistenceImpl
 	public DDLRecord fetchByUUID_G(
 		String uuid, long groupId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _uniquePersistenceFinderByUUID_G.fetch(
-				finderCache, new Object[] {uuid, groupId}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByUUID_G.fetch(
+			finderCache, new Object[] {uuid, groupId}, useFinderCache);
 	}
 
 	/**
@@ -426,14 +401,9 @@ public class DDLRecordPersistenceImpl
 		OrderByComparator<DDLRecord> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				finderCache, new Object[] {uuid, companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			finderCache, new Object[] {uuid, companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -501,13 +471,8 @@ public class DDLRecordPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				finderCache, new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			finderCache, new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByCompanyId;
@@ -586,14 +551,9 @@ public class DDLRecordPersistenceImpl
 		OrderByComparator<DDLRecord> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByCompanyId.find(
-				finderCache, new Object[] {companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByCompanyId.find(
+			finderCache, new Object[] {companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -655,13 +615,8 @@ public class DDLRecordPersistenceImpl
 	 */
 	@Override
 	public int countByCompanyId(long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByCompanyId.count(
-				finderCache, new Object[] {companyId});
-		}
+		return _collectionPersistenceFinderByCompanyId.count(
+			finderCache, new Object[] {companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByRecordSetId;
@@ -743,14 +698,9 @@ public class DDLRecordPersistenceImpl
 		OrderByComparator<DDLRecord> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByRecordSetId.find(
-				finderCache, new Object[] {recordSetId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByRecordSetId.find(
+			finderCache, new Object[] {recordSetId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -812,13 +762,8 @@ public class DDLRecordPersistenceImpl
 	 */
 	@Override
 	public int countByRecordSetId(long recordSetId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByRecordSetId.count(
-				finderCache, new Object[] {recordSetId});
-		}
+		return _collectionPersistenceFinderByRecordSetId.count(
+			finderCache, new Object[] {recordSetId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByR_U;
@@ -904,14 +849,9 @@ public class DDLRecordPersistenceImpl
 		OrderByComparator<DDLRecord> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByR_U.find(
-				finderCache, new Object[] {recordSetId, userId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByR_U.find(
+			finderCache, new Object[] {recordSetId, userId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -979,13 +919,8 @@ public class DDLRecordPersistenceImpl
 	 */
 	@Override
 	public int countByR_U(long recordSetId, long userId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByR_U.count(
-				finderCache, new Object[] {recordSetId, userId});
-		}
+		return _collectionPersistenceFinderByR_U.count(
+			finderCache, new Object[] {recordSetId, userId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByR_R;
@@ -1074,14 +1009,9 @@ public class DDLRecordPersistenceImpl
 		OrderByComparator<DDLRecord> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByR_R.find(
-				finderCache, new Object[] {recordSetId, recordSetVersion},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByR_R.find(
+			finderCache, new Object[] {recordSetId, recordSetVersion}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1151,13 +1081,8 @@ public class DDLRecordPersistenceImpl
 	 */
 	@Override
 	public int countByR_R(long recordSetId, String recordSetVersion) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByR_R.count(
-				finderCache, new Object[] {recordSetId, recordSetVersion});
-		}
+		return _collectionPersistenceFinderByR_R.count(
+			finderCache, new Object[] {recordSetId, recordSetVersion});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_C;
@@ -1243,14 +1168,9 @@ public class DDLRecordPersistenceImpl
 		OrderByComparator<DDLRecord> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByC_C.find(
-				finderCache, new Object[] {className, classPK}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_C.find(
+			finderCache, new Object[] {className, classPK}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1318,13 +1238,8 @@ public class DDLRecordPersistenceImpl
 	 */
 	@Override
 	public int countByC_C(String className, long classPK) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			return _collectionPersistenceFinderByC_C.count(
-				finderCache, new Object[] {className, classPK});
-		}
+		return _collectionPersistenceFinderByC_C.count(
+			finderCache, new Object[] {className, classPK});
 	}
 
 	public DDLRecordPersistenceImpl() {
@@ -1340,116 +1255,6 @@ public class DDLRecordPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(DDLRecordTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the ddl record in the entity cache if it is enabled.
-	 *
-	 * @param ddlRecord the ddl record
-	 */
-	@Override
-	public void cacheResult(DDLRecord ddlRecord) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ddlRecord.getCtCollectionId())) {
-
-			entityCache.putResult(
-				DDLRecordImpl.class, ddlRecord.getPrimaryKey(), ddlRecord);
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G,
-				new Object[] {ddlRecord.getUuid(), ddlRecord.getGroupId()},
-				ddlRecord);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the ddl records in the entity cache if it is enabled.
-	 *
-	 * @param ddlRecords the ddl records
-	 */
-	@Override
-	public void cacheResult(List<DDLRecord> ddlRecords) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (ddlRecords.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (DDLRecord ddlRecord : ddlRecords) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						ddlRecord.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						DDLRecordImpl.class, ddlRecord.getPrimaryKey()) ==
-							null) {
-
-					cacheResult(ddlRecord);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all ddl records.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(DDLRecordImpl.class);
-
-		finderCache.clearCache(DDLRecordImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the ddl record.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(DDLRecord ddlRecord) {
-		entityCache.removeResult(DDLRecordImpl.class, ddlRecord);
-	}
-
-	@Override
-	public void clearCache(List<DDLRecord> ddlRecords) {
-		for (DDLRecord ddlRecord : ddlRecords) {
-			entityCache.removeResult(DDLRecordImpl.class, ddlRecord);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(DDLRecordImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(DDLRecordImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		DDLRecordModelImpl ddlRecordModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ddlRecordModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				ddlRecordModelImpl.getUuid(), ddlRecordModelImpl.getGroupId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G, args, ddlRecordModelImpl);
-		}
 	}
 
 	/**
@@ -1484,47 +1289,6 @@ public class DDLRecordPersistenceImpl
 	@Override
 	public DDLRecord remove(long recordId) throws NoSuchRecordException {
 		return remove((Serializable)recordId);
-	}
-
-	/**
-	 * Removes the ddl record with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the ddl record
-	 * @return the ddl record that was removed
-	 * @throws NoSuchRecordException if a ddl record with the primary key could not be found
-	 */
-	@Override
-	public DDLRecord remove(Serializable primaryKey)
-		throws NoSuchRecordException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			DDLRecord ddlRecord = (DDLRecord)session.get(
-				DDLRecordImpl.class, primaryKey);
-
-			if (ddlRecord == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchRecordException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(ddlRecord);
-		}
-		catch (NoSuchRecordException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1634,41 +1398,13 @@ public class DDLRecordPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			DDLRecordImpl.class, ddlRecordModelImpl, false, true);
-
-		cacheUniqueFindersCache(ddlRecordModelImpl);
+		cacheUniqueFindersResult(ddlRecord, false);
 
 		if (isNew) {
 			ddlRecord.setNew(false);
 		}
 
 		ddlRecord.resetOriginalValues();
-
-		return ddlRecord;
-	}
-
-	/**
-	 * Returns the ddl record with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the ddl record
-	 * @return the ddl record
-	 * @throws NoSuchRecordException if a ddl record with the primary key could not be found
-	 */
-	@Override
-	public DDLRecord findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchRecordException {
-
-		DDLRecord ddlRecord = fetchByPrimaryKey(primaryKey);
-
-		if (ddlRecord == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchRecordException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return ddlRecord;
 	}
@@ -1687,49 +1423,9 @@ public class DDLRecordPersistenceImpl
 		return findByPrimaryKey((Serializable)recordId);
 	}
 
-	/**
-	 * Returns the ddl record with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the ddl record
-	 * @return the ddl record, or <code>null</code> if a ddl record with the primary key could not be found
-	 */
 	@Override
-	public DDLRecord fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(DDLRecord.class, primaryKey)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		DDLRecord ddlRecord = (DDLRecord)entityCache.getResult(
-			DDLRecordImpl.class, primaryKey);
-
-		if (ddlRecord != null) {
-			return ddlRecord;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ddlRecord = (DDLRecord)session.get(DDLRecordImpl.class, primaryKey);
-
-			if (ddlRecord != null) {
-				cacheResult(ddlRecord);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return ddlRecord;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -1741,318 +1437,6 @@ public class DDLRecordPersistenceImpl
 	@Override
 	public DDLRecord fetchByPrimaryKey(long recordId) {
 		return fetchByPrimaryKey((Serializable)recordId);
-	}
-
-	@Override
-	public Map<Serializable, DDLRecord> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(DDLRecord.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, DDLRecord> map =
-			new HashMap<Serializable, DDLRecord>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			DDLRecord ddlRecord = fetchByPrimaryKey(primaryKey);
-
-			if (ddlRecord != null) {
-				map.put(primaryKey, ddlRecord);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						DDLRecord.class, primaryKey)) {
-
-				DDLRecord ddlRecord = (DDLRecord)entityCache.getResult(
-					DDLRecordImpl.class, primaryKey);
-
-				if (ddlRecord == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, ddlRecord);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (DDLRecord ddlRecord : (List<DDLRecord>)query.list()) {
-				map.put(ddlRecord.getPrimaryKeyObj(), ddlRecord);
-
-				cacheResult(ddlRecord);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the ddl records.
-	 *
-	 * @return the ddl records
-	 */
-	@Override
-	public List<DDLRecord> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the ddl records.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDLRecordModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddl records
-	 * @param end the upper bound of the range of ddl records (not inclusive)
-	 * @return the range of ddl records
-	 */
-	@Override
-	public List<DDLRecord> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddl records.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDLRecordModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddl records
-	 * @param end the upper bound of the range of ddl records (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddl records
-	 */
-	@Override
-	public List<DDLRecord> findAll(
-		int start, int end, OrderByComparator<DDLRecord> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddl records.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDLRecordModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddl records
-	 * @param end the upper bound of the range of ddl records (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddl records
-	 */
-	@Override
-	public List<DDLRecord> findAll(
-		int start, int end, OrderByComparator<DDLRecord> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<DDLRecord> list = null;
-
-			if (useFinderCache) {
-				list = (List<DDLRecord>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_DDLRECORD);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_DDLRECORD;
-
-					sql = sql.concat(DDLRecordModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<DDLRecord>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the ddl records from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (DDLRecord ddlRecord : findAll()) {
-			remove(ddlRecord);
-		}
-	}
-
-	/**
-	 * Returns the number of ddl records.
-	 *
-	 * @return the number of ddl records
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDLRecord.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(_SQL_COUNT_DDLRECORD);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -2155,21 +1539,6 @@ public class DDLRecordPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -2180,33 +1549,34 @@ public class DDLRecordPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_DDLRECORD_WHERE, _SQL_COUNT_DDLRECORD_WHERE,
-			DDLRecordModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			DDLRecordModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ddlRecord.", "uuid", FinderColumn.Type.STRING, "=", true, true,
 				DDLRecord::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(DDLRecord::getUuid), DDLRecord::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByUUID_G, _SQL_SELECT_DDLRECORD_WHERE,
+			this, _finderPathFetchByUUID_G, _SQL_SELECT_DDLRECORD_WHERE, "",
 			new FinderColumn<>(
-				"ddlRecord.", "uuid", FinderColumn.Type.STRING, "=", true,
-				false, DDLRecord::getUuid),
+				"ddlRecord.", "uuid", FinderColumn.Type.STRING, "=", true, true,
+				DDLRecord::getUuid),
 			new FinderColumn<>(
 				"ddlRecord.", "groupId", FinderColumn.Type.LONG, "=", true,
 				true, DDLRecord::getGroupId));
@@ -2223,12 +1593,12 @@ public class DDLRecordPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -2236,10 +1606,10 @@ public class DDLRecordPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_DDLRECORD_WHERE,
 				_SQL_COUNT_DDLRECORD_WHERE, DDLRecordModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ddlRecord.", "uuid", FinderColumn.Type.STRING, "=", true,
-					false, DDLRecord::getUuid),
+					true, DDLRecord::getUuid),
 				new FinderColumn<>(
 					"ddlRecord.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, DDLRecord::getCompanyId));
@@ -2268,7 +1638,7 @@ public class DDLRecordPersistenceImpl
 				_finderPathWithoutPaginationFindByCompanyId,
 				_finderPathCountByCompanyId, _SQL_SELECT_DDLRECORD_WHERE,
 				_SQL_COUNT_DDLRECORD_WHERE, DDLRecordModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ddlRecord.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, DDLRecord::getCompanyId));
@@ -2297,7 +1667,7 @@ public class DDLRecordPersistenceImpl
 				_finderPathWithoutPaginationFindByRecordSetId,
 				_finderPathCountByRecordSetId, _SQL_SELECT_DDLRECORD_WHERE,
 				_SQL_COUNT_DDLRECORD_WHERE, DDLRecordModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ddlRecord.", "recordSetId", FinderColumn.Type.LONG, "=",
 					true, true, DDLRecord::getRecordSetId));
@@ -2325,10 +1695,10 @@ public class DDLRecordPersistenceImpl
 			this, _finderPathWithPaginationFindByR_U,
 			_finderPathWithoutPaginationFindByR_U, _finderPathCountByR_U,
 			_SQL_SELECT_DDLRECORD_WHERE, _SQL_COUNT_DDLRECORD_WHERE,
-			DDLRecordModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			DDLRecordModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ddlRecord.", "recordSetId", FinderColumn.Type.LONG, "=", true,
-				false, DDLRecord::getRecordSetId),
+				true, DDLRecord::getRecordSetId),
 			new FinderColumn<>(
 				"ddlRecord.", "userId", FinderColumn.Type.LONG, "=", true, true,
 				DDLRecord::getUserId));
@@ -2345,21 +1715,22 @@ public class DDLRecordPersistenceImpl
 		_finderPathWithoutPaginationFindByR_R = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByR_R",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"recordSetId", "recordSetVersion"}, true);
+			new String[] {"recordSetId", "recordSetVersion"}, 0, 2, true, null);
 
 		_finderPathCountByR_R = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByR_R",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"recordSetId", "recordSetVersion"}, false);
+			new String[] {"recordSetId", "recordSetVersion"}, 0, 2, false,
+			null);
 
 		_collectionPersistenceFinderByR_R = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByR_R,
 			_finderPathWithoutPaginationFindByR_R, _finderPathCountByR_R,
 			_SQL_SELECT_DDLRECORD_WHERE, _SQL_COUNT_DDLRECORD_WHERE,
-			DDLRecordModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			DDLRecordModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ddlRecord.", "recordSetId", FinderColumn.Type.LONG, "=", true,
-				false, DDLRecord::getRecordSetId),
+				true, DDLRecord::getRecordSetId),
 			new FinderColumn<>(
 				"ddlRecord.", "recordSetVersion", FinderColumn.Type.STRING, "=",
 				true, true, DDLRecord::getRecordSetVersion));
@@ -2376,21 +1747,21 @@ public class DDLRecordPersistenceImpl
 		_finderPathWithoutPaginationFindByC_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"className", "classPK"}, true);
+			new String[] {"className", "classPK"}, 0, 1, true, null);
 
 		_finderPathCountByC_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"className", "classPK"}, false);
+			new String[] {"className", "classPK"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByC_C = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_C,
 			_finderPathWithoutPaginationFindByC_C, _finderPathCountByC_C,
 			_SQL_SELECT_DDLRECORD_WHERE, _SQL_COUNT_DDLRECORD_WHERE,
-			DDLRecordModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			DDLRecordModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ddlRecord.", "className", FinderColumn.Type.STRING, "=", true,
-				false, DDLRecord::getClassName),
+				true, DDLRecord::getClassName),
 			new FinderColumn<>(
 				"ddlRecord.", "classPK", FinderColumn.Type.LONG, "=", true,
 				true, DDLRecord::getClassPK));
@@ -2440,22 +1811,17 @@ public class DDLRecordPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		DDLRecordModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_DDLRECORD =
 		"SELECT ddlRecord FROM DDLRecord ddlRecord";
 
 	private static final String _SQL_SELECT_DDLRECORD_WHERE =
 		"SELECT ddlRecord FROM DDLRecord ddlRecord WHERE ";
 
-	private static final String _SQL_COUNT_DDLRECORD =
-		"SELECT COUNT(ddlRecord) FROM DDLRecord ddlRecord";
-
 	private static final String _SQL_COUNT_DDLRECORD_WHERE =
 		"SELECT COUNT(ddlRecord) FROM DDLRecord ddlRecord WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "ddlRecord.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No DDLRecord exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No DDLRecord exists with the key {";
@@ -2472,4 +1838,4 @@ public class DDLRecordPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:812667170
+// LIFERAY-SERVICE-BUILDER-HASH:-133183531

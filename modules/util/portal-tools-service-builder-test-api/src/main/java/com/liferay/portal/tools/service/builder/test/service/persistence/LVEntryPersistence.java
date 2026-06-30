@@ -1215,20 +1215,6 @@ public interface LVEntryPersistence extends BasePersistence<LVEntry> {
 	public int countByHeadId(long headId);
 
 	/**
-	 * Caches the lv entry in the entity cache if it is enabled.
-	 *
-	 * @param lvEntry the lv entry
-	 */
-	public void cacheResult(LVEntry lvEntry);
-
-	/**
-	 * Caches the lv entries in the entity cache if it is enabled.
-	 *
-	 * @param lvEntries the lv entries
-	 */
-	public void cacheResult(java.util.List<LVEntry> lvEntries);
-
-	/**
 	 * Creates a new lv entry with the primary key. Does not add the lv entry to the database.
 	 *
 	 * @param lvEntryId the primary key for the new lv entry
@@ -1264,74 +1250,6 @@ public interface LVEntryPersistence extends BasePersistence<LVEntry> {
 	 * @return the lv entry, or <code>null</code> if a lv entry with the primary key could not be found
 	 */
 	public LVEntry fetchByPrimaryKey(long lvEntryId);
-
-	/**
-	 * Returns all the lv entries.
-	 *
-	 * @return the lv entries
-	 */
-	public java.util.List<LVEntry> findAll();
-
-	/**
-	 * Returns a range of all the lv entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.LVEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of lv entries
-	 * @param end the upper bound of the range of lv entries (not inclusive)
-	 * @return the range of lv entries
-	 */
-	public java.util.List<LVEntry> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the lv entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.LVEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of lv entries
-	 * @param end the upper bound of the range of lv entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of lv entries
-	 */
-	public java.util.List<LVEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<LVEntry>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the lv entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.LVEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of lv entries
-	 * @param end the upper bound of the range of lv entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of lv entries
-	 */
-	public java.util.List<LVEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<LVEntry>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the lv entries from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of lv entries.
-	 *
-	 * @return the number of lv entries
-	 */
-	public int countAll();
 
 	/**
 	 * Returns the primaryKeys of big decimal entries associated with the lv entry.
@@ -1523,4 +1441,4 @@ public interface LVEntryPersistence extends BasePersistence<LVEntry> {
 				BigDecimalEntry> bigDecimalEntries);
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:388114320
+// LIFERAY-SERVICE-BUILDER-HASH:1084768369

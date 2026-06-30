@@ -1347,6 +1347,9 @@ public class EditableFragmentEntryProcessorTest {
 		Assert.assertEquals(
 			assetCategory1.getTitle(LocaleUtil.US),
 			jsonObject.getString("name"));
+		Assert.assertEquals(
+			assetVocabulary.getVocabularyId(),
+			jsonObject.getLong("vocabularyId"));
 
 		jsonObject = jsonArray.getJSONObject(1);
 
@@ -1355,6 +1358,9 @@ public class EditableFragmentEntryProcessorTest {
 		Assert.assertEquals(
 			assetCategory2.getTitle(LocaleUtil.US),
 			jsonObject.getString("name"));
+		Assert.assertEquals(
+			assetVocabulary.getVocabularyId(),
+			jsonObject.getLong("vocabularyId"));
 
 		jsonArray = JSONFactoryUtil.createJSONArray(
 			element.attr("data-analytics-asset-tags"));
@@ -1368,6 +1374,19 @@ public class EditableFragmentEntryProcessorTest {
 
 		Assert.assertEquals(assetTag2.getTagId(), jsonObject.getLong("id"));
 		Assert.assertEquals(assetTag2.getName(), jsonObject.getString("name"));
+
+		jsonArray = JSONFactoryUtil.createJSONArray(
+			element.attr("data-analytics-asset-vocabularies"));
+
+		Assert.assertEquals(1, jsonArray.length());
+
+		jsonObject = jsonArray.getJSONObject(0);
+
+		Assert.assertEquals(
+			assetVocabulary.getVocabularyId(), jsonObject.getLong("id"));
+		Assert.assertEquals(
+			assetVocabulary.getTitle(LocaleUtil.US),
+			jsonObject.getString("name"));
 	}
 
 	@Test
@@ -2613,12 +2632,6 @@ public class EditableFragmentEntryProcessorTest {
 		).toString();
 	}
 
-	@Inject
-	private static JournalArticleLocalService _journalArticleLocalService;
-
-	@Inject(filter = "ddm.form.deserializer.type=json")
-	private static DDMFormDeserializer _jsonDDMFormDeserializer;
-
 	private Company _company;
 	private CompanyConfigurationTemporarySwapper
 		_companyConfigurationTemporarySwapper;
@@ -2661,7 +2674,13 @@ public class EditableFragmentEntryProcessorTest {
 	private InfoItemServiceRegistry _infoItemServiceRegistry;
 
 	@Inject
+	private JournalArticleLocalService _journalArticleLocalService;
+
+	@Inject
 	private JournalConverter _journalConverter;
+
+	@Inject(filter = "ddm.form.deserializer.type=json")
+	private DDMFormDeserializer _jsonDDMFormDeserializer;
 
 	private Layout _layout;
 

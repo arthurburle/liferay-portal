@@ -5,39 +5,41 @@
 
 package com.liferay.portal.service.persistence.impl;
 
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.bean.BeanReference;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
+import com.liferay.portal.kernel.exception.DuplicateRegionExternalReferenceCodeException;
 import com.liferay.portal.kernel.exception.NoSuchRegionException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Region;
 import com.liferay.portal.kernel.model.RegionTable;
+import com.liferay.portal.kernel.sanitizer.Sanitizer;
+import com.liferay.portal.kernel.sanitizer.SanitizerException;
+import com.liferay.portal.kernel.sanitizer.SanitizerUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
+import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.RegionLocalizationPersistence;
 import com.liferay.portal.kernel.service.persistence.RegionPersistence;
 import com.liferay.portal.kernel.service.persistence.RegionUtil;
+import com.liferay.portal.kernel.service.persistence.change.tracking.helper.CTPersistenceHelper;
 import com.liferay.portal.kernel.service.persistence.change.tracking.helper.CTPersistenceHelperUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -55,9 +57,9 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -71,7 +73,8 @@ import java.util.Set;
  * @generated
  */
 public class RegionPersistenceImpl
-	extends BasePersistenceImpl<Region> implements RegionPersistence {
+	extends BasePersistenceImpl<Region, NoSuchRegionException>
+	implements RegionPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -87,9 +90,6 @@ public class RegionPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -164,14 +164,9 @@ public class RegionPersistenceImpl
 		String uuid, int start, int end,
 		OrderByComparator<Region> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				FinderCacheUtil.getFinderCache(), new Object[] {uuid}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {uuid}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -233,13 +228,8 @@ public class RegionPersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				FinderCacheUtil.getFinderCache(), new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByUuid_C;
@@ -324,15 +314,9 @@ public class RegionPersistenceImpl
 		String uuid, long companyId, int start, int end,
 		OrderByComparator<Region> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {uuid, companyId}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {uuid, companyId},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -400,14 +384,8 @@ public class RegionPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByCountryId;
@@ -485,14 +463,9 @@ public class RegionPersistenceImpl
 		long countryId, int start, int end,
 		OrderByComparator<Region> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			return _collectionPersistenceFinderByCountryId.find(
-				FinderCacheUtil.getFinderCache(), new Object[] {countryId},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByCountryId.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {countryId}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -554,13 +527,8 @@ public class RegionPersistenceImpl
 	 */
 	@Override
 	public int countByCountryId(long countryId) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			return _collectionPersistenceFinderByCountryId.count(
-				FinderCacheUtil.getFinderCache(), new Object[] {countryId});
-		}
+		return _collectionPersistenceFinderByCountryId.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {countryId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByActive;
@@ -637,14 +605,9 @@ public class RegionPersistenceImpl
 		boolean active, int start, int end,
 		OrderByComparator<Region> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			return _collectionPersistenceFinderByActive.find(
-				FinderCacheUtil.getFinderCache(), new Object[] {active}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByActive.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {active}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -706,13 +669,8 @@ public class RegionPersistenceImpl
 	 */
 	@Override
 	public int countByActive(boolean active) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			return _collectionPersistenceFinderByActive.count(
-				FinderCacheUtil.getFinderCache(), new Object[] {active});
-		}
+		return _collectionPersistenceFinderByActive.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {active});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_A;
@@ -797,15 +755,9 @@ public class RegionPersistenceImpl
 		long countryId, boolean active, int start, int end,
 		OrderByComparator<Region> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			return _collectionPersistenceFinderByC_A.find(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {countryId, active}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_A.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {countryId, active},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -873,14 +825,8 @@ public class RegionPersistenceImpl
 	 */
 	@Override
 	public int countByC_A(long countryId, boolean active) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			return _collectionPersistenceFinderByC_A.count(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {countryId, active});
-		}
+		return _collectionPersistenceFinderByC_A.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {countryId, active});
 	}
 
 	private FinderPath _finderPathFetchByC_R;
@@ -940,14 +886,9 @@ public class RegionPersistenceImpl
 	public Region fetchByC_R(
 		long countryId, String regionCode, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			return _uniquePersistenceFinderByC_R.fetch(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {countryId, regionCode}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByC_R.fetch(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {countryId, regionCode}, useFinderCache);
 	}
 
 	/**
@@ -980,6 +921,98 @@ public class RegionPersistenceImpl
 			new Object[] {countryId, regionCode});
 	}
 
+	private FinderPath _finderPathFetchByERC_C;
+	private UniquePersistenceFinder<Region> _uniquePersistenceFinderByERC_C;
+
+	/**
+	 * Returns the region where externalReferenceCode = &#63; and companyId = &#63; or throws a <code>NoSuchRegionException</code> if it could not be found.
+	 *
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the matching region
+	 * @throws NoSuchRegionException if a matching region could not be found
+	 */
+	@Override
+	public Region findByERC_C(String externalReferenceCode, long companyId)
+		throws NoSuchRegionException {
+
+		Region region = fetchByERC_C(externalReferenceCode, companyId);
+
+		if (region == null) {
+			String message =
+				_uniquePersistenceFinderByERC_C.buildNoSuchKeyMessage(
+					_NO_SUCH_ENTITY_WITH_KEY,
+					new Object[] {externalReferenceCode, companyId});
+
+			if (_log.isDebugEnabled()) {
+				_log.debug(message);
+			}
+
+			throw new NoSuchRegionException(message);
+		}
+
+		return region;
+	}
+
+	/**
+	 * Returns the region where externalReferenceCode = &#63; and companyId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 *
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the matching region, or <code>null</code> if a matching region could not be found
+	 */
+	@Override
+	public Region fetchByERC_C(String externalReferenceCode, long companyId) {
+		return fetchByERC_C(externalReferenceCode, companyId, true);
+	}
+
+	/**
+	 * Returns the region where externalReferenceCode = &#63; and companyId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 *
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the matching region, or <code>null</code> if a matching region could not be found
+	 */
+	@Override
+	public Region fetchByERC_C(
+		String externalReferenceCode, long companyId, boolean useFinderCache) {
+
+		return _uniquePersistenceFinderByERC_C.fetch(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {externalReferenceCode, companyId}, useFinderCache);
+	}
+
+	/**
+	 * Removes the region where externalReferenceCode = &#63; and companyId = &#63; from the database.
+	 *
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the region that was removed
+	 */
+	@Override
+	public Region removeByERC_C(String externalReferenceCode, long companyId)
+		throws NoSuchRegionException {
+
+		Region region = findByERC_C(externalReferenceCode, companyId);
+
+		return remove(region);
+	}
+
+	/**
+	 * Returns the number of regions where externalReferenceCode = &#63; and companyId = &#63;.
+	 *
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the number of matching regions
+	 */
+	@Override
+	public int countByERC_C(String externalReferenceCode, long companyId) {
+		return _uniquePersistenceFinderByERC_C.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {externalReferenceCode, companyId});
+	}
+
 	public RegionPersistenceImpl() {
 		Map<String, String> dbColumnNames = new HashMap<String, String>();
 
@@ -994,113 +1027,6 @@ public class RegionPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(RegionTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the region in the entity cache if it is enabled.
-	 *
-	 * @param region the region
-	 */
-	@Override
-	public void cacheResult(Region region) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					region.getCtCollectionId())) {
-
-			EntityCacheUtil.putResult(
-				RegionImpl.class, region.getPrimaryKey(), region);
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByC_R,
-				new Object[] {region.getCountryId(), region.getRegionCode()},
-				region);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the regions in the entity cache if it is enabled.
-	 *
-	 * @param regions the regions
-	 */
-	@Override
-	public void cacheResult(List<Region> regions) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (regions.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (Region region : regions) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						region.getCtCollectionId())) {
-
-				if (EntityCacheUtil.getResult(
-						RegionImpl.class, region.getPrimaryKey()) == null) {
-
-					cacheResult(region);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all regions.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		EntityCacheUtil.clearCache(RegionImpl.class);
-
-		FinderCacheUtil.clearCache(RegionImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the region.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(Region region) {
-		EntityCacheUtil.removeResult(RegionImpl.class, region);
-	}
-
-	@Override
-	public void clearCache(List<Region> regions) {
-		for (Region region : regions) {
-			EntityCacheUtil.removeResult(RegionImpl.class, region);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		FinderCacheUtil.clearCache(RegionImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			EntityCacheUtil.removeResult(RegionImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(RegionModelImpl regionModelImpl) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					regionModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				regionModelImpl.getCountryId(), regionModelImpl.getRegionCode()
-			};
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByC_R, args, regionModelImpl);
-		}
 	}
 
 	/**
@@ -1135,44 +1061,6 @@ public class RegionPersistenceImpl
 	@Override
 	public Region remove(long regionId) throws NoSuchRegionException {
 		return remove((Serializable)regionId);
-	}
-
-	/**
-	 * Removes the region with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the region
-	 * @return the region that was removed
-	 * @throws NoSuchRegionException if a region with the primary key could not be found
-	 */
-	@Override
-	public Region remove(Serializable primaryKey) throws NoSuchRegionException {
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Region region = (Region)session.get(RegionImpl.class, primaryKey);
-
-			if (region == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchRegionException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(region);
-		}
-		catch (NoSuchRegionException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1235,6 +1123,66 @@ public class RegionPersistenceImpl
 			region.setUuid(uuid);
 		}
 
+		if (Validator.isNull(region.getExternalReferenceCode())) {
+			region.setExternalReferenceCode(region.getUuid());
+		}
+		else {
+			if (!Objects.equals(
+					regionModelImpl.getColumnOriginalValue(
+						"externalReferenceCode"),
+					region.getExternalReferenceCode())) {
+
+				long userId = GetterUtil.getLong(
+					PrincipalThreadLocal.getName());
+
+				if (userId > 0) {
+					long companyId = region.getCompanyId();
+
+					long groupId = 0;
+
+					long classPK = 0;
+
+					if (!isNew) {
+						classPK = region.getPrimaryKey();
+					}
+
+					try {
+						region.setExternalReferenceCode(
+							SanitizerUtil.sanitize(
+								companyId, groupId, userId,
+								Region.class.getName(), classPK,
+								ContentTypes.TEXT_HTML, Sanitizer.MODE_ALL,
+								region.getExternalReferenceCode(), null));
+					}
+					catch (SanitizerException sanitizerException) {
+						throw new SystemException(sanitizerException);
+					}
+				}
+			}
+
+			Region ercRegion = fetchByERC_C(
+				region.getExternalReferenceCode(), region.getCompanyId());
+
+			if (isNew) {
+				if (ercRegion != null) {
+					throw new DuplicateRegionExternalReferenceCodeException(
+						"Duplicate region with external reference code " +
+							region.getExternalReferenceCode() +
+								" and company " + region.getCompanyId());
+				}
+			}
+			else {
+				if ((ercRegion != null) &&
+					(region.getRegionId() != ercRegion.getRegionId())) {
+
+					throw new DuplicateRegionExternalReferenceCodeException(
+						"Duplicate region with external reference code " +
+							region.getExternalReferenceCode() +
+								" and company " + region.getCompanyId());
+				}
+			}
+		}
+
 		ServiceContext serviceContext =
 			ServiceContextThreadLocal.getServiceContext();
 
@@ -1281,41 +1229,13 @@ public class RegionPersistenceImpl
 			closeSession(session);
 		}
 
-		EntityCacheUtil.putResult(
-			RegionImpl.class, regionModelImpl, false, true);
-
-		cacheUniqueFindersCache(regionModelImpl);
+		cacheUniqueFindersResult(region, false);
 
 		if (isNew) {
 			region.setNew(false);
 		}
 
 		region.resetOriginalValues();
-
-		return region;
-	}
-
-	/**
-	 * Returns the region with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the region
-	 * @return the region
-	 * @throws NoSuchRegionException if a region with the primary key could not be found
-	 */
-	@Override
-	public Region findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchRegionException {
-
-		Region region = fetchByPrimaryKey(primaryKey);
-
-		if (region == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchRegionException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return region;
 	}
@@ -1332,51 +1252,9 @@ public class RegionPersistenceImpl
 		return findByPrimaryKey((Serializable)regionId);
 	}
 
-	/**
-	 * Returns the region with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the region
-	 * @return the region, or <code>null</code> if a region with the primary key could not be found
-	 */
 	@Override
-	public Region fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(
-				Region.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		Region region = (Region)EntityCacheUtil.getResult(
-			RegionImpl.class, primaryKey);
-
-		if (region != null) {
-			return region;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			region = (Region)session.get(RegionImpl.class, primaryKey);
-
-			if (region != null) {
-				cacheResult(region);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return region;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return CTPersistenceHelperUtil.getCTPersistenceHelper();
 	}
 
 	/**
@@ -1388,317 +1266,6 @@ public class RegionPersistenceImpl
 	@Override
 	public Region fetchByPrimaryKey(long regionId) {
 		return fetchByPrimaryKey((Serializable)regionId);
-	}
-
-	@Override
-	public Map<Serializable, Region> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (CTPersistenceHelperUtil.isProductionMode(Region.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, Region> map = new HashMap<Serializable, Region>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			Region region = fetchByPrimaryKey(primaryKey);
-
-			if (region != null) {
-				map.put(primaryKey, region);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-						Region.class, primaryKey)) {
-
-				Region region = (Region)EntityCacheUtil.getResult(
-					RegionImpl.class, primaryKey);
-
-				if (region == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, region);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (Region region : (List<Region>)query.list()) {
-				map.put(region.getPrimaryKeyObj(), region);
-
-				cacheResult(region);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the regions.
-	 *
-	 * @return the regions
-	 */
-	@Override
-	public List<Region> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the regions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>RegionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of regions
-	 * @param end the upper bound of the range of regions (not inclusive)
-	 * @return the range of regions
-	 */
-	@Override
-	public List<Region> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the regions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>RegionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of regions
-	 * @param end the upper bound of the range of regions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of regions
-	 */
-	@Override
-	public List<Region> findAll(
-		int start, int end, OrderByComparator<Region> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the regions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>RegionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of regions
-	 * @param end the upper bound of the range of regions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of regions
-	 */
-	@Override
-	public List<Region> findAll(
-		int start, int end, OrderByComparator<Region> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<Region> list = null;
-
-			if (useFinderCache) {
-				list = (List<Region>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_REGION);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_REGION;
-
-					sql = sql.concat(RegionModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<Region>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the regions from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (Region region : findAll()) {
-			remove(region);
-		}
-	}
-
-	/**
-	 * Returns the number of regions.
-	 *
-	 * @return the number of regions
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Region.class)) {
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(_SQL_COUNT_REGION);
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1766,6 +1333,7 @@ public class RegionPersistenceImpl
 		ctControlColumnNames.add("mvccVersion");
 		ctControlColumnNames.add("ctCollectionId");
 		ctStrictColumnNames.add("uuid_");
+		ctStrictColumnNames.add("externalReferenceCode");
 		ctStrictColumnNames.add("defaultLanguageId");
 		ctStrictColumnNames.add("companyId");
 		ctStrictColumnNames.add("userId");
@@ -1778,6 +1346,7 @@ public class RegionPersistenceImpl
 		ctMergeColumnNames.add("position");
 		ctMergeColumnNames.add("regionCode");
 		ctMergeColumnNames.add("lastPublishDate");
+		ctMergeColumnNames.add("status");
 
 		_ctColumnNamesMap.put(
 			CTColumnResolutionType.CONTROL, ctControlColumnNames);
@@ -1790,27 +1359,15 @@ public class RegionPersistenceImpl
 			CTColumnResolutionType.STRICT, ctStrictColumnNames);
 
 		_uniqueIndexColumnNames.add(new String[] {"countryId", "regionCode"});
+
+		_uniqueIndexColumnNames.add(
+			new String[] {"externalReferenceCode", "companyId"});
 	}
 
 	/**
 	 * Initializes the region persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1821,19 +1378,19 @@ public class RegionPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_REGION_WHERE, _SQL_COUNT_REGION_WHERE,
-			RegionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			RegionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"region.", "uuid", FinderColumn.Type.STRING, "=", true, true,
 				Region::getUuid));
@@ -1850,12 +1407,12 @@ public class RegionPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1863,10 +1420,10 @@ public class RegionPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_REGION_WHERE,
 				_SQL_COUNT_REGION_WHERE, RegionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"region.", "uuid", FinderColumn.Type.STRING, "=", true,
-					false, Region::getUuid),
+					true, Region::getUuid),
 				new FinderColumn<>(
 					"region.", "companyId", FinderColumn.Type.LONG, "=", true,
 					true, Region::getCompanyId));
@@ -1895,7 +1452,7 @@ public class RegionPersistenceImpl
 				_finderPathWithoutPaginationFindByCountryId,
 				_finderPathCountByCountryId, _SQL_SELECT_REGION_WHERE,
 				_SQL_COUNT_REGION_WHERE, RegionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"region.", "countryId", FinderColumn.Type.LONG, "=", true,
 					true, Region::getCountryId));
@@ -1924,7 +1481,7 @@ public class RegionPersistenceImpl
 				_finderPathWithoutPaginationFindByActive,
 				_finderPathCountByActive, _SQL_SELECT_REGION_WHERE,
 				_SQL_COUNT_REGION_WHERE, RegionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"region.", "active", FinderColumn.Type.BOOLEAN, "=", true,
 					true, Region::isActive));
@@ -1952,27 +1509,44 @@ public class RegionPersistenceImpl
 			this, _finderPathWithPaginationFindByC_A,
 			_finderPathWithoutPaginationFindByC_A, _finderPathCountByC_A,
 			_SQL_SELECT_REGION_WHERE, _SQL_COUNT_REGION_WHERE,
-			RegionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			RegionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
-				"region.", "countryId", FinderColumn.Type.LONG, "=", true,
-				false, Region::getCountryId),
+				"region.", "countryId", FinderColumn.Type.LONG, "=", true, true,
+				Region::getCountryId),
 			new FinderColumn<>(
 				"region.", "active", FinderColumn.Type.BOOLEAN, "=", true, true,
 				Region::isActive));
 
-		_finderPathFetchByC_R = new FinderPath(
+		_finderPathFetchByC_R = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_R",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"countryId", "regionCode"}, true);
+			new String[] {"countryId", "regionCode"}, 0, 2, false,
+			Region::getCountryId, convertNullFunction(Region::getRegionCode));
 
 		_uniquePersistenceFinderByC_R = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByC_R, _SQL_SELECT_REGION_WHERE,
+			this, _finderPathFetchByC_R, _SQL_SELECT_REGION_WHERE, "",
 			new FinderColumn<>(
-				"region.", "countryId", FinderColumn.Type.LONG, "=", true,
-				false, Region::getCountryId),
+				"region.", "countryId", FinderColumn.Type.LONG, "=", true, true,
+				Region::getCountryId),
 			new FinderColumn<>(
 				"region.", "regionCode", FinderColumn.Type.STRING, "=", true,
 				true, Region::getRegionCode));
+
+		_finderPathFetchByERC_C = createUniqueFinderPath(
+			FINDER_CLASS_NAME_ENTITY, "fetchByERC_C",
+			new String[] {String.class.getName(), Long.class.getName()},
+			new String[] {"externalReferenceCode", "companyId"}, 0, 1, false,
+			convertNullFunction(Region::getExternalReferenceCode),
+			Region::getCompanyId);
+
+		_uniquePersistenceFinderByERC_C = new UniquePersistenceFinder<>(
+			this, _finderPathFetchByERC_C, _SQL_SELECT_REGION_WHERE, "",
+			new FinderColumn<>(
+				"region.", "externalReferenceCode", FinderColumn.Type.STRING,
+				"=", true, true, Region::getExternalReferenceCode),
+			new FinderColumn<>(
+				"region.", "companyId", FinderColumn.Type.LONG, "=", true, true,
+				Region::getCompanyId));
 
 		RegionUtil.setPersistence(this);
 	}
@@ -1986,22 +1560,17 @@ public class RegionPersistenceImpl
 	@BeanReference(type = RegionLocalizationPersistence.class)
 	protected RegionLocalizationPersistence regionLocalizationPersistence;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		RegionModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_REGION =
 		"SELECT region FROM Region region";
 
 	private static final String _SQL_SELECT_REGION_WHERE =
 		"SELECT region FROM Region region WHERE ";
 
-	private static final String _SQL_COUNT_REGION =
-		"SELECT COUNT(region) FROM Region region";
-
 	private static final String _SQL_COUNT_REGION_WHERE =
 		"SELECT COUNT(region) FROM Region region WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "region.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No Region exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No Region exists with the key {";
@@ -2018,4 +1587,4 @@ public class RegionPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1508090477
+// LIFERAY-SERVICE-BUILDER-HASH:1397189621

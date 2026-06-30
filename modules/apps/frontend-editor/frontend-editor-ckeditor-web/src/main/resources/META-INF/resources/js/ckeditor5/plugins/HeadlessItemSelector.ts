@@ -33,7 +33,20 @@ const ALLOWED_VIDEO_FILE_EXTENSIONS = [
 	'wmv',
 ];
 
-const CMS_CREATE_ITEM_URL = `${location.origin}/web/cms/files?com.liferay.site.cms.site.initializer-filesSection_fdsConfig=(view:gallery)`;
+const toAllowedExtensionsCSV = (extensions: string[]) =>
+	extensions.map((extension) => `.${extension}`).join(',');
+
+const ALLOWED_IMAGE_EXTENSIONS_CSV = toAllowedExtensionsCSV(
+	ALLOWED_IMAGE_FILE_EXTENSIONS
+);
+
+const ALLOWED_VIDEO_EXTENSIONS_CSV = toAllowedExtensionsCSV(
+	ALLOWED_VIDEO_FILE_EXTENSIONS
+);
+
+const VIDEO_FILTER = `((objectDefinitionExternalReferenceCode eq 'L_CMS_EXTERNAL_VIDEO') or (extension in ('${ALLOWED_VIDEO_FILE_EXTENSIONS.join(
+	"','"
+)}')))`;
 
 class HeadlessItemSelector extends Plugin {
 	init() {
@@ -44,6 +57,10 @@ class HeadlessItemSelector extends Plugin {
 		editor.commands.add(commandName, new Command(editor));
 
 		const command = editor.commands.get(commandName)!;
+
+		const getGroupId = () =>
+			Number(editor.config.get('groupId')) ||
+			Liferay.ThemeDisplay.getScopeGroupId();
 
 		editor.ui.componentFactory.add('headlessImageSelector', () => {
 			const buttonView = new ButtonView();
@@ -58,9 +75,9 @@ class HeadlessItemSelector extends Plugin {
 
 			buttonView.on('execute', () => {
 				openCMSFileSelectorModal({
-					allowedExtensions: ALLOWED_IMAGE_FILE_EXTENSIONS.join(','),
-					createItemURL: CMS_CREATE_ITEM_URL,
-					groupId: Liferay.ThemeDisplay.getSiteGroupId(),
+					allowDragAndDrop: true,
+					allowedExtensions: ALLOWED_IMAGE_EXTENSIONS_CSV,
+					groupId: getGroupId(),
 					itemTypeLabel: Liferay.Language.get('image'),
 					onSelect: (items) => {
 						const href = items[0]?.embedded?.file?.link?.href;
@@ -96,14 +113,15 @@ class HeadlessItemSelector extends Plugin {
 
 			buttonView.on('execute', () => {
 				openCMSFileSelectorModal({
-					createItemURL: CMS_CREATE_ITEM_URL,
-					filters: [
-						`((objectDefinitionExternalReferenceCode eq 'L_CMS_EXTERNAL_VIDEO') or (extension in ('${ALLOWED_VIDEO_FILE_EXTENSIONS.join("','")}')))`,
-					],
-					groupId: Liferay.ThemeDisplay.getSiteGroupId(),
+					allowDragAndDrop: true,
+					allowedExtensions: ALLOWED_VIDEO_EXTENSIONS_CSV,
+					filters: [VIDEO_FILTER],
+					groupId: getGroupId(),
 					itemTypeLabel: Liferay.Language.get('video'),
 					onSelect: (items) => {
-						const videoURL = items[0]?.embedded?.videoURL;
+						const videoURL =
+							items[0]?.embedded?.videoURL ??
+							items[0]?.embedded?.file?.link?.href;
 
 						if (!videoURL) {
 							return;

@@ -135,20 +135,6 @@ public interface CTSGrandParentPersistence
 	public int countByCompanyId(long companyId);
 
 	/**
-	 * Caches the cts grand parent in the entity cache if it is enabled.
-	 *
-	 * @param ctsGrandParent the cts grand parent
-	 */
-	public void cacheResult(CTSGrandParent ctsGrandParent);
-
-	/**
-	 * Caches the cts grand parents in the entity cache if it is enabled.
-	 *
-	 * @param ctsGrandParents the cts grand parents
-	 */
-	public void cacheResult(java.util.List<CTSGrandParent> ctsGrandParents);
-
-	/**
 	 * Creates a new cts grand parent with the primary key. Does not add the cts grand parent to the database.
 	 *
 	 * @param ctsGrandParentId the primary key for the new cts grand parent
@@ -186,73 +172,5 @@ public interface CTSGrandParentPersistence
 	 */
 	public CTSGrandParent fetchByPrimaryKey(long ctsGrandParentId);
 
-	/**
-	 * Returns all the cts grand parents.
-	 *
-	 * @return the cts grand parents
-	 */
-	public java.util.List<CTSGrandParent> findAll();
-
-	/**
-	 * Returns a range of all the cts grand parents.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.change.tracking.sample.model.impl.CTSGrandParentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cts grand parents
-	 * @param end the upper bound of the range of cts grand parents (not inclusive)
-	 * @return the range of cts grand parents
-	 */
-	public java.util.List<CTSGrandParent> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the cts grand parents.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.change.tracking.sample.model.impl.CTSGrandParentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cts grand parents
-	 * @param end the upper bound of the range of cts grand parents (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cts grand parents
-	 */
-	public java.util.List<CTSGrandParent> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CTSGrandParent>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the cts grand parents.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.change.tracking.sample.model.impl.CTSGrandParentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cts grand parents
-	 * @param end the upper bound of the range of cts grand parents (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cts grand parents
-	 */
-	public java.util.List<CTSGrandParent> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CTSGrandParent>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the cts grand parents from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of cts grand parents.
-	 *
-	 * @return the number of cts grand parents
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2113439471
+// LIFERAY-SERVICE-BUILDER-HASH:894361745

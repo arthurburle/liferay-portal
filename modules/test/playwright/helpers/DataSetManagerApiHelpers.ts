@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
+import {Page} from '@playwright/test';
+
 import {liferayConfig} from '../liferay.config';
 import {
 	API_ENDPOINT_PATH,
@@ -17,7 +19,9 @@ import {
 	EModalActionVariant,
 } from '../tests/frontend-data-set-fragment-web/main/utils/types';
 import getDataSetResourceURL from '../utils/getDataSetResourceURL';
-import {ApiHelpers} from './ApiHelpers';
+import getRandomString from '../utils/getRandomString';
+import {userData} from '../utils/performLogin';
+import {ApiHelpers, DataApiHelpers} from './ApiHelpers';
 
 const DEFAULT_DATA_SET_ERC = 'sampleDataSetERC';
 export class DataSetManagerApiHelpers extends ApiHelpers {
@@ -32,6 +36,7 @@ export class DataSetManagerApiHelpers extends ApiHelpers {
 		restApplication = API_ENDPOINT_PATH,
 		restEndpoint = `/by-external-reference-code/${erc}/dataSetToDataSetTableSections`,
 		restSchema = 'DataSetTableSection',
+		showSearch = true,
 		snapshotsEnabled,
 	}: {
 		additionalAPIURLParameters?: string;
@@ -44,6 +49,7 @@ export class DataSetManagerApiHelpers extends ApiHelpers {
 		restApplication?: string;
 		restEndpoint?: string;
 		restSchema?: string;
+		showSearch?: boolean;
 		snapshotsEnabled?: boolean;
 	}) {
 		const url = getDataSetResourceURL({});
@@ -59,6 +65,7 @@ export class DataSetManagerApiHelpers extends ApiHelpers {
 			restApplication,
 			restEndpoint,
 			restSchema,
+			showSearch,
 			snapshotsEnabled,
 		};
 
@@ -394,9 +401,35 @@ export class DataSetManagerApiHelpers extends ApiHelpers {
 	}
 
 	async createDataSetSnapshot({
+		configuration = `{
+			"activeView": {
+				"schema": {
+					"fields": [
+						{
+							"fieldName": "id",
+							"contentRenderer": "default",
+							"label": "Id",
+							"sortable": true
+						}
+					]
+				},
+				"default": true,
+				"thumbnail": "table",
+				"name": "table",
+				"contentRenderer": "table",
+				"label": "Table"
+			},
+			"filters": [],
+			"paginationDelta": 20,
+			"sorts": [],
+			"visibleFieldNames": {
+				"id": true
+			}
+		}`,
 		dataSetERC,
 		snapshotName,
 	}: {
+		configuration?: string;
 		dataSetERC: string;
 		snapshotName: string;
 	}) {
@@ -405,6 +438,7 @@ export class DataSetManagerApiHelpers extends ApiHelpers {
 		const data = {
 			fdsName: dataSetERC,
 			label: snapshotName,
+			viewConfig: configuration,
 		};
 
 		return this.post(url, {data});
@@ -430,6 +464,7 @@ export class DataSetManagerApiHelpers extends ApiHelpers {
 		filtersOrder,
 		label,
 		listOfItemsPerPage,
+		showSearch,
 		snapshotsEnabled,
 	}: {
 		additionalAPIURLParameters?: string;
@@ -439,6 +474,7 @@ export class DataSetManagerApiHelpers extends ApiHelpers {
 		filtersOrder?: string;
 		label?: string;
 		listOfItemsPerPage?: string;
+		showSearch?: boolean;
 		snapshotsEnabled?: boolean;
 	}) {
 		const url = getDataSetResourceURL({
@@ -452,6 +488,7 @@ export class DataSetManagerApiHelpers extends ApiHelpers {
 			filtersOrder,
 			label,
 			listOfItemsPerPage,
+			showSearch,
 			snapshotsEnabled,
 		};
 
@@ -500,4 +537,64 @@ export class DataSetManagerApiHelpers extends ApiHelpers {
 
 		return this.patch(url, data);
 	}
+}
+
+export async function createRecipientWithDataSetViewerRole({
+	apiHelpers,
+	page,
+}: {
+	apiHelpers: DataApiHelpers;
+	page: Page;
+}) {
+	const companyId = await page.evaluate(() =>
+		Liferay.ThemeDisplay.getCompanyId()
+	);
+
+	const [dataSetObject, dataSetSnapshotObject] = (await Promise.all([
+		apiHelpers.objectEntry.getObjectEntryByExternalReferenceCode({
+			applicationName: 'object-admin/v1.0/object-definitions',
+			externalReferenceCode: 'L_DATA_SET',
+		}),
+		apiHelpers.objectEntry.getObjectEntryByExternalReferenceCode({
+			applicationName: 'object-admin/v1.0/object-definitions',
+			externalReferenceCode: 'L_DATA_SET_SNAPSHOT',
+		}),
+	])) as [{className: string}, {className: string}];
+
+	const role = await apiHelpers.headlessAdminUser.postRole({
+		name: `ds_viewer_${getRandomString()}`,
+		rolePermissions: [
+			{
+				actionIds: ['VIEW'],
+				primaryKey: companyId,
+				resourceName: dataSetObject.className,
+				scope: 1,
+			},
+			{
+				actionIds: ['VIEW'],
+				primaryKey: companyId,
+				resourceName: dataSetSnapshotObject.className,
+				scope: 1,
+			},
+		],
+		roleType: 'regular',
+	});
+
+	const recipient = await apiHelpers.headlessAdminUser.postUserAccount();
+
+	await apiHelpers.headlessAdminUser.postRoleUserAccountAssociation(
+		role.id,
+		Number(recipient.id)
+	);
+
+	userData[recipient.alternateName] = {
+		name: recipient.givenName,
+		password: 'test',
+		surname: recipient.familyName,
+	};
+
+	return {
+		alternateName: recipient.alternateName,
+		id: recipient.id,
+	};
 }

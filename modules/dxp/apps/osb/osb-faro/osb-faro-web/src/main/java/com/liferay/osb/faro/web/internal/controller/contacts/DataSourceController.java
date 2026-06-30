@@ -8,6 +8,9 @@ package com.liferay.osb.faro.web.internal.controller.contacts;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileVersion;
 import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
+import com.liferay.oauth2.provider.model.OAuth2Application;
+import com.liferay.oauth2.provider.service.OAuth2ApplicationLocalService;
+import com.liferay.oauth2.provider.service.OAuth2AuthorizationService;
 import com.liferay.osb.faro.contacts.model.constants.ContactsConstants;
 import com.liferay.osb.faro.engine.client.constants.FieldMappingConstants;
 import com.liferay.osb.faro.engine.client.exception.InvalidFilterException;
@@ -31,11 +34,13 @@ import com.liferay.osb.faro.engine.client.model.credentials.OAuth1Credentials;
 import com.liferay.osb.faro.engine.client.model.credentials.OAuth2Credentials;
 import com.liferay.osb.faro.engine.client.model.provider.CSVProvider;
 import com.liferay.osb.faro.engine.client.model.provider.DemandbaseProvider;
+import com.liferay.osb.faro.engine.client.model.provider.HubSpotProvider;
 import com.liferay.osb.faro.engine.client.model.provider.LiferayProvider;
 import com.liferay.osb.faro.engine.client.model.provider.SalesforceProvider;
 import com.liferay.osb.faro.engine.client.util.EngineServiceURLUtil;
 import com.liferay.osb.faro.engine.client.util.OrderByField;
 import com.liferay.osb.faro.model.FaroProject;
+import com.liferay.osb.faro.util.FaroPropsValues;
 import com.liferay.osb.faro.web.internal.annotations.PATCH;
 import com.liferay.osb.faro.web.internal.annotations.Unauthenticated;
 import com.liferay.osb.faro.web.internal.antivirus.ClamAVScanner;
@@ -61,6 +66,7 @@ import com.liferay.osb.faro.web.internal.util.ContactsCSVHelper;
 import com.liferay.osb.faro.web.internal.util.FieldMappingUtil;
 import com.liferay.osb.faro.web.internal.util.OAuthUtil;
 import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
@@ -230,16 +236,39 @@ public class DataSourceController extends BaseFaroController {
 			groupId, credentials, demandbaseProvider, name, null, null, status);
 	}
 
+	@Path("/hubspot")
+	@POST
+	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
+	public DataSourceDisplay createTypeHubSpot(
+			@PathParam("groupId") long groupId,
+			@DefaultValue(StringPool.BLANK) @FormParam("channelsConfiguration")
+				FaroParam<HubSpotProvider.ChannelsConfiguration>
+					channelsConfigurationFaroParam,
+			@FormParam("credentials") Credentials credentials,
+			@FormParam("name") String name,
+			@DefaultValue("ACTIVE") @FormParam("status") String status)
+		throws Exception {
+
+		HubSpotProvider hubSpotProvider = new HubSpotProvider();
+
+		hubSpotProvider.setChannelsConfiguration(
+			channelsConfigurationFaroParam.getValue());
+
+		return create(
+			groupId, credentials, hubSpotProvider, name, null, null, status);
+	}
+
 	@Path("/liferay")
 	@POST
 	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
 	public DataSourceDisplay createTypeLiferay(
 			@PathParam("groupId") long groupId,
 			@FormParam("credentials") Credentials credentials,
-			@FormParam("name") String name, @FormParam("url") String url,
-			@DefaultValue("INACTIVE") @FormParam("status") String status,
 			@DefaultValue(StringPool.BLANK) @FormParam("fieldMappingMaps")
-				FaroParam<List<FieldMappingMap>> fieldMappingMapsFaroParam)
+				FaroParam<List<FieldMappingMap>> fieldMappingMapsFaroParam,
+			@FormParam("name") String name,
+			@DefaultValue("INACTIVE") @FormParam("status") String status,
+			@FormParam("url") String url)
 		throws Exception {
 
 		DataSourceDisplay dataSourceDisplay = create(
@@ -261,8 +290,6 @@ public class DataSourceController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
 	public DataSourceDisplay createTypeSalesforce(
 			@PathParam("groupId") long groupId,
-			@FormParam("credentials") Credentials credentials,
-			@FormParam("name") String name, @FormParam("url") String url,
 			@DefaultValue(StringPool.BLANK) @FormParam("accountsConfiguration")
 				FaroParam<SalesforceProvider.AccountsConfiguration>
 					accountsConfigurationFaroParam,
@@ -272,7 +299,10 @@ public class DataSourceController extends BaseFaroController {
 			@DefaultValue(StringPool.BLANK) @FormParam("contactsConfiguration")
 				FaroParam<SalesforceProvider.ContactsConfiguration>
 					contactsConfigurationFaroParam,
-			@DefaultValue("INACTIVE") @FormParam("status") String status)
+			@FormParam("credentials") Credentials credentials,
+			@FormParam("name") String name,
+			@DefaultValue("INACTIVE") @FormParam("status") String status,
+			@FormParam("url") String url)
 		throws Exception {
 
 		SalesforceProvider salesforceProvider = new SalesforceProvider();
@@ -356,6 +386,19 @@ public class DataSourceController extends BaseFaroController {
 					resourceBundle, "data-source-already-disconnected"));
 		}
 
+		Provider provider = dataSource.getProvider();
+
+		if (StringUtil.equals(provider.getType(), DemandbaseProvider.TYPE)) {
+			OAuth2Application oAuth2Application =
+				_oAuth2ApplicationLocalService.fetchOAuth2Application(
+					getCompanyId(), DemandbaseProvider.TYPE);
+
+			if (oAuth2Application != null) {
+				_oAuth2AuthorizationService.revokeAllOAuth2Authorizations(
+					oAuth2Application.getOAuth2ApplicationId());
+			}
+		}
+
 		contactsEngineClient.disconnectDataSource(faroProject, id);
 	}
 
@@ -373,6 +416,21 @@ public class DataSourceController extends BaseFaroController {
 		faroProject.setDataSourceConnected(false);
 
 		faroProjectLocalService.updateFaroProject(faroProject);
+	}
+
+	public String generateDataSourceAccessToken(
+		long groupId, long faroProjectId) {
+
+		String json = JSONUtil.put(
+			"token", _tokenManager.getToken(null, faroProjectId)
+		).put(
+			"url",
+			StringBundler.concat(
+				FaroPropsValues.FARO_URL, "/o/faro/contacts/", groupId,
+				"/data_source/connect")
+		).toString();
+
+		return Base64.encode(json.getBytes(StandardCharsets.UTF_8));
 	}
 
 	@GET
@@ -443,16 +501,17 @@ public class DataSourceController extends BaseFaroController {
 	@Path("/mappings")
 	@RolesAllowed(RoleConstants.SITE_MEMBER)
 	public List<DataSourceMappingDisplay> getDataSourceMappingDisplays(
-			@PathParam("groupId") long groupId, @QueryParam("id") String id,
-			@QueryParam("fileVersionId") long fileVersionId)
+			@PathParam("groupId") long groupId,
+			@QueryParam("fileVersionId") long fileVersionId,
+			@QueryParam("id") String id)
 		throws Exception {
 
 		List<DataSourceMappingDisplay> dataSourceMappingDisplays =
 			new ArrayList<>();
 
 		List<FieldValuesDisplay> fieldValuesDisplays = getFieldValuesDisplays(
-			groupId, id, fileVersionId, null,
-			FieldMappingConstants.CONTEXT_DEMOGRAPHICS, 1);
+			groupId, FieldMappingConstants.CONTEXT_DEMOGRAPHICS, 1, null,
+			fileVersionId, id);
 
 		FaroProject faroProject =
 			faroProjectLocalService.getFaroProjectByGroupId(groupId);
@@ -581,7 +640,7 @@ public class DataSourceController extends BaseFaroController {
 		Map<String, FieldValuesDisplay> fieldValuesDisplayMap = new HashMap<>();
 
 		List<FieldValuesDisplay> fieldValuesDisplays = getFieldValuesDisplays(
-			groupId, id, 0, null, context, 1);
+			groupId, context, 1, null, 0, id);
 
 		for (FieldValuesDisplay fieldValuesDisplay : fieldValuesDisplays) {
 			fieldValuesDisplayMap.put(
@@ -797,13 +856,14 @@ public class DataSourceController extends BaseFaroController {
 	@Path("/field_values")
 	@RolesAllowed(RoleConstants.SITE_MEMBER)
 	public List<FieldValuesDisplay> getFieldValuesDisplays(
-			@PathParam("groupId") long groupId, @QueryParam("id") String id,
-			@QueryParam("fileVersionId") long fileVersionId,
-			@QueryParam("fieldName") String fieldName,
+			@PathParam("groupId") long groupId,
 			@DefaultValue(FieldMappingConstants.CONTEXT_DEMOGRAPHICS)
 			@QueryParam("context")
 			String context,
-			@QueryParam("count") int count)
+			@QueryParam("count") int count,
+			@QueryParam("fieldName") String fieldName,
+			@QueryParam("fileVersionId") long fileVersionId,
+			@QueryParam("id") String id)
 		throws Exception {
 
 		List<DataSourceField> dataSourceFields = null;
@@ -864,9 +924,9 @@ public class DataSourceController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_MEMBER)
 	public FaroResultsDisplay getGroups(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
+			@DefaultValue(StringPool.BLANK) @QueryParam("name") String name,
 			@DefaultValue("-1") @QueryParam("parentGroupId") long parentGroupId,
 			@DefaultValue("true") @QueryParam("site") boolean site,
-			@DefaultValue(StringPool.BLANK) @QueryParam("name") String name,
 			@QueryParam("cur") int cur, @QueryParam("delta") int delta)
 		throws Exception {
 
@@ -908,10 +968,10 @@ public class DataSourceController extends BaseFaroController {
 	public Credentials getOAuthRequestTokenCredentials(
 		@PathParam("groupId") long groupId, @PathParam("type") String type,
 		@QueryParam("baseURL") String baseURL,
-		@QueryParam("oAuthConsumerKey") String oAuthConsumerKey,
-		@QueryParam("oAuthConsumerSecret") String oAuthConsumerSecret,
 		@DefaultValue(StringPool.BLANK) @QueryParam("oAuthCallbackURL") String
-			oAuthCallbackURL) {
+			oAuthCallbackURL,
+		@QueryParam("oAuthConsumerKey") String oAuthConsumerKey,
+		@QueryParam("oAuthConsumerSecret") String oAuthConsumerSecret) {
 
 		baseURL = getURL(baseURL);
 
@@ -953,9 +1013,9 @@ public class DataSourceController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_MEMBER)
 	public FaroResultsDisplay getOrganizations(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
+			@DefaultValue(StringPool.BLANK) @QueryParam("name") String name,
 			@DefaultValue("-1") @QueryParam("parentOrganizationId") long
 				parentOrganizationId,
-			@DefaultValue(StringPool.BLANK) @QueryParam("name") String name,
 			@QueryParam("cur") int cur, @QueryParam("delta") int delta)
 		throws Exception {
 
@@ -1033,11 +1093,11 @@ public class DataSourceController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
 	public DataSourceDisplay patchTypeCSV(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
-			@FormParam("name") String name,
-			@FormParam("fileVersionId") long fileVersionId,
-			@FormParam("event") Event event, @FormParam("status") String status,
+			@FormParam("event") Event event,
 			@DefaultValue(StringPool.BLANK) @FormParam("fieldMappingMaps")
-				FaroParam<List<FieldMappingMap>> fieldMappingMapsFaroParam)
+				FaroParam<List<FieldMappingMap>> fieldMappingMapsFaroParam,
+			@FormParam("fileVersionId") long fileVersionId,
+			@FormParam("name") String name, @FormParam("status") String status)
 		throws Exception {
 
 		return update(
@@ -1051,12 +1111,11 @@ public class DataSourceController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
 	public DataSourceDisplay patchTypeDemandbase(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
-			@FormParam("credentials") Credentials credentials,
-			@FormParam("name") String name,
 			@DefaultValue(StringPool.BLANK) @FormParam("channelsConfiguration")
 				FaroParam<DemandbaseProvider.ChannelsConfiguration>
 					channelsConfigurationFaroParam,
-			@FormParam("status") String status)
+			@FormParam("credentials") Credentials credentials,
+			@FormParam("name") String name, @FormParam("status") String status)
 		throws Exception {
 
 		DemandbaseProvider demandbaseProvider = new DemandbaseProvider();
@@ -1074,12 +1133,36 @@ public class DataSourceController extends BaseFaroController {
 	}
 
 	@PATCH
+	@Path("/{id}/hubspot")
+	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
+	public DataSourceDisplay patchTypeHubSpot(
+			@PathParam("groupId") long groupId, @PathParam("id") String id,
+			@DefaultValue(StringPool.BLANK) @FormParam("channelsConfiguration")
+				FaroParam<HubSpotProvider.ChannelsConfiguration>
+					channelsConfigurationFaroParam,
+			@FormParam("credentials") Credentials credentials,
+			@FormParam("name") String name, @FormParam("status") String status)
+		throws Exception {
+
+		HubSpotProvider hubSpotProvider = new HubSpotProvider();
+
+		HubSpotProvider.ChannelsConfiguration channelsConfiguration =
+			channelsConfigurationFaroParam.getValue();
+
+		if (channelsConfiguration != null) {
+			hubSpotProvider.setChannelsConfiguration(channelsConfiguration);
+		}
+
+		return update(
+			groupId, id, credentials, name, null, hubSpotProvider,
+			HubSpotProvider.TYPE, 0, null, status, null, true);
+	}
+
+	@PATCH
 	@Path("/{id}/liferay")
 	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
 	public DataSourceDisplay patchTypeLiferay(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
-			@FormParam("credentials") Credentials credentials,
-			@FormParam("name") String name, @FormParam("url") String url,
 			@DefaultValue(StringPool.BLANK) @FormParam("analyticsConfiguration")
 				FaroParam<LiferayProvider.AnalyticsConfiguration>
 					analyticsConfigurationFaroParam,
@@ -1089,9 +1172,11 @@ public class DataSourceController extends BaseFaroController {
 			@DefaultValue(StringPool.BLANK) @FormParam("contactsConfiguration")
 				FaroParam<LiferayProvider.ContactsConfiguration>
 					contactsConfigurationFaroParam,
-			@FormParam("status") String status,
+			@FormParam("credentials") Credentials credentials,
 			@DefaultValue(StringPool.BLANK) @FormParam("fieldMappingMaps")
-				FaroParam<List<FieldMappingMap>> fieldMappingMapsFaroParam)
+				FaroParam<List<FieldMappingMap>> fieldMappingMapsFaroParam,
+			@FormParam("name") String name, @FormParam("status") String status,
+			@FormParam("url") String url)
 		throws Exception {
 
 		LiferayProvider liferayProvider = null;
@@ -1147,8 +1232,6 @@ public class DataSourceController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
 	public DataSourceDisplay patchTypeSalesforce(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
-			@FormParam("credentials") Credentials credentials,
-			@FormParam("name") String name, @FormParam("url") String url,
 			@DefaultValue(StringPool.BLANK) @FormParam("accountsConfiguration")
 				FaroParam<SalesforceProvider.AccountsConfiguration>
 					accountsConfigurationFaroParam,
@@ -1158,7 +1241,9 @@ public class DataSourceController extends BaseFaroController {
 			@DefaultValue(StringPool.BLANK) @FormParam("contactsConfiguration")
 				FaroParam<SalesforceProvider.ContactsConfiguration>
 					contactsConfigurationFaroParam,
-			@FormParam("status") String status)
+			@FormParam("credentials") Credentials credentials,
+			@FormParam("name") String name, @FormParam("status") String status,
+			@FormParam("url") String url)
 		throws Exception {
 
 		SalesforceProvider salesforceProvider = null;
@@ -1257,7 +1342,7 @@ public class DataSourceController extends BaseFaroController {
 	public FaroResultsDisplay search(
 			@PathParam("groupId") long groupId,
 			@QueryParam("faroEntityId") String faroEntityId,
-			@QueryParam("query") String query, @QueryParam("name") String name,
+			@QueryParam("name") String name, @QueryParam("query") String query,
 			@DefaultValue(StringPool.BLANK) @QueryParam("states") FaroParam
 				<List<String>> statesFaroParam,
 			@QueryParam("cur") int cur, @QueryParam("delta") int delta,
@@ -1302,7 +1387,7 @@ public class DataSourceController extends BaseFaroController {
 	public FaroResultsDisplay searchByForm(
 			@PathParam("groupId") long groupId,
 			@FormParam("faroEntityId") String faroEntityId,
-			@FormParam("query") String query, @FormParam("name") String name,
+			@FormParam("name") String name, @FormParam("query") String query,
 			@DefaultValue(StringPool.BLANK) @FormParam("states") FaroParam
 				<List<String>> statesFaroParam,
 			@FormParam("cur") int cur, @FormParam("delta") int delta,
@@ -1320,11 +1405,11 @@ public class DataSourceController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
 	public DataSourceDisplay updateTypeCSV(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
-			@FormParam("name") String name,
-			@FormParam("fileVersionId") long fileVersionId,
-			@FormParam("event") Event event, @FormParam("status") String status,
+			@FormParam("event") Event event,
 			@DefaultValue(StringPool.BLANK) @FormParam("fieldMappingMaps")
-				FaroParam<List<FieldMappingMap>> fieldMappingMapsFaroParam)
+				FaroParam<List<FieldMappingMap>> fieldMappingMapsFaroParam,
+			@FormParam("fileVersionId") long fileVersionId,
+			@FormParam("name") String name, @FormParam("status") String status)
 		throws Exception {
 
 		return update(
@@ -1338,12 +1423,11 @@ public class DataSourceController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
 	public DataSourceDisplay updateTypeDemandbase(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
-			@FormParam("credentials") Credentials credentials,
-			@FormParam("name") String name,
 			@DefaultValue(StringPool.BLANK) @FormParam("channelsConfiguration")
 				FaroParam<DemandbaseProvider.ChannelsConfiguration>
 					channelsConfigurationFaroParam,
-			@FormParam("status") String status)
+			@FormParam("credentials") Credentials credentials,
+			@FormParam("name") String name, @FormParam("status") String status)
 		throws Exception {
 
 		DemandbaseProvider demandbaseProvider = new DemandbaseProvider();
@@ -1356,22 +1440,44 @@ public class DataSourceController extends BaseFaroController {
 			DemandbaseProvider.TYPE, 0, null, status, null, false);
 	}
 
+	@Path("/{id}/hubspot")
+	@PUT
+	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
+	public DataSourceDisplay updateTypeHubSpot(
+			@PathParam("groupId") long groupId, @PathParam("id") String id,
+			@DefaultValue(StringPool.BLANK) @FormParam("channelsConfiguration")
+				FaroParam<HubSpotProvider.ChannelsConfiguration>
+					channelsConfigurationFaroParam,
+			@FormParam("credentials") Credentials credentials,
+			@FormParam("name") String name, @FormParam("status") String status)
+		throws Exception {
+
+		HubSpotProvider hubSpotProvider = new HubSpotProvider();
+
+		hubSpotProvider.setChannelsConfiguration(
+			channelsConfigurationFaroParam.getValue());
+
+		return update(
+			groupId, id, credentials, name, null, hubSpotProvider,
+			HubSpotProvider.TYPE, 0, null, status, null, false);
+	}
+
 	@Path("/{id}/liferay")
 	@PUT
 	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
 	public DataSourceDisplay updateTypeLiferay(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
-			@FormParam("credentials") Credentials credentials,
-			@FormParam("name") String name, @FormParam("url") String url,
 			@DefaultValue(StringPool.BLANK) @FormParam("analyticsConfiguration")
 				FaroParam<LiferayProvider.AnalyticsConfiguration>
 					analyticsConfigurationFaroParam,
 			@DefaultValue(StringPool.BLANK) @FormParam("contactsConfiguration")
 				FaroParam<LiferayProvider.ContactsConfiguration>
 					contactsConfigurationFaroParam,
-			@FormParam("status") String status,
+			@FormParam("credentials") Credentials credentials,
 			@DefaultValue(StringPool.BLANK) @FormParam("fieldMappingMaps")
-				FaroParam<List<FieldMappingMap>> fieldMappingMapsFaroParam)
+				FaroParam<List<FieldMappingMap>> fieldMappingMapsFaroParam,
+			@FormParam("name") String name, @FormParam("status") String status,
+			@FormParam("url") String url)
 		throws Exception {
 
 		LiferayProvider liferayProvider = new LiferayProvider();
@@ -1392,8 +1498,6 @@ public class DataSourceController extends BaseFaroController {
 	@RolesAllowed(RoleConstants.SITE_ADMINISTRATOR)
 	public DataSourceDisplay updateTypeSalesforce(
 			@PathParam("groupId") long groupId, @PathParam("id") String id,
-			@FormParam("credentials") Credentials credentials,
-			@FormParam("name") String name, @FormParam("url") String url,
 			@DefaultValue(StringPool.BLANK) @FormParam("accountsConfiguration")
 				FaroParam<SalesforceProvider.AccountsConfiguration>
 					accountsConfigurationFaroParam,
@@ -1403,7 +1507,9 @@ public class DataSourceController extends BaseFaroController {
 			@DefaultValue(StringPool.BLANK) @FormParam("contactsConfiguration")
 				FaroParam<SalesforceProvider.ContactsConfiguration>
 					contactsConfigurationFaroParam,
-			@FormParam("status") String status)
+			@FormParam("credentials") Credentials credentials,
+			@FormParam("name") String name, @FormParam("status") String status,
+			@FormParam("url") String url)
 		throws Exception {
 
 		SalesforceProvider salesforceProvider = new SalesforceProvider();
@@ -1766,6 +1872,12 @@ public class DataSourceController extends BaseFaroController {
 
 	@Reference
 	private Language _language;
+
+	@Reference
+	private OAuth2ApplicationLocalService _oAuth2ApplicationLocalService;
+
+	@Reference
+	private OAuth2AuthorizationService _oAuth2AuthorizationService;
 
 	@Reference
 	private PortletFileRepository _portletFileRepository;

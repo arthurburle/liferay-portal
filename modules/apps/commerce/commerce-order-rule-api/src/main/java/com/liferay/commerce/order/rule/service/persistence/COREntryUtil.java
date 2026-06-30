@@ -37,6 +37,20 @@ public class COREntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<COREntry> corEntries) {
+		getPersistence().cacheResult(corEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(COREntry corEntry) {
+		getPersistence().cacheResult(corEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1564,24 +1578,6 @@ public class COREntryUtil {
 	}
 
 	/**
-	 * Caches the cor entry in the entity cache if it is enabled.
-	 *
-	 * @param corEntry the cor entry
-	 */
-	public static void cacheResult(COREntry corEntry) {
-		getPersistence().cacheResult(corEntry);
-	}
-
-	/**
-	 * Caches the cor entries in the entity cache if it is enabled.
-	 *
-	 * @param corEntries the cor entries
-	 */
-	public static void cacheResult(List<COREntry> corEntries) {
-		getPersistence().cacheResult(corEntries);
-	}
-
-	/**
 	 * Creates a new cor entry with the primary key. Does not add the cor entry to the database.
 	 *
 	 * @param COREntryId the primary key for the new cor entry
@@ -1633,85 +1629,6 @@ public class COREntryUtil {
 		return getPersistence().fetchByPrimaryKey(COREntryId);
 	}
 
-	/**
-	 * Returns all the cor entries.
-	 *
-	 * @return the cor entries
-	 */
-	public static List<COREntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the cor entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.order.rule.model.impl.COREntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cor entries
-	 * @param end the upper bound of the range of cor entries (not inclusive)
-	 * @return the range of cor entries
-	 */
-	public static List<COREntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the cor entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.order.rule.model.impl.COREntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cor entries
-	 * @param end the upper bound of the range of cor entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cor entries
-	 */
-	public static List<COREntry> findAll(
-		int start, int end, OrderByComparator<COREntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the cor entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.order.rule.model.impl.COREntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cor entries
-	 * @param end the upper bound of the range of cor entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cor entries
-	 */
-	public static List<COREntry> findAll(
-		int start, int end, OrderByComparator<COREntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the cor entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of cor entries.
-	 *
-	 * @return the number of cor entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static COREntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1723,4 +1640,4 @@ public class COREntryUtil {
 	private static volatile COREntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1121846066
+// LIFERAY-SERVICE-BUILDER-HASH:2111334623

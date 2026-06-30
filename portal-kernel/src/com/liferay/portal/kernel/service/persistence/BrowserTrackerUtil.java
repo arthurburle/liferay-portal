@@ -36,6 +36,20 @@ public class BrowserTrackerUtil {
 	 */
 
 	/**
+	 * @see BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<BrowserTracker> browserTrackers) {
+		getPersistence().cacheResult(browserTrackers);
+	}
+
+	/**
+	 * @see BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(BrowserTracker browserTracker) {
+		getPersistence().cacheResult(browserTracker);
+	}
+
+	/**
 	 * @see BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -171,24 +185,6 @@ public class BrowserTrackerUtil {
 	}
 
 	/**
-	 * Caches the browser tracker in the entity cache if it is enabled.
-	 *
-	 * @param browserTracker the browser tracker
-	 */
-	public static void cacheResult(BrowserTracker browserTracker) {
-		getPersistence().cacheResult(browserTracker);
-	}
-
-	/**
-	 * Caches the browser trackers in the entity cache if it is enabled.
-	 *
-	 * @param browserTrackers the browser trackers
-	 */
-	public static void cacheResult(List<BrowserTracker> browserTrackers) {
-		getPersistence().cacheResult(browserTrackers);
-	}
-
-	/**
 	 * Creates a new browser tracker with the primary key. Does not add the browser tracker to the database.
 	 *
 	 * @param browserTrackerId the primary key for the new browser tracker
@@ -240,86 +236,6 @@ public class BrowserTrackerUtil {
 		return getPersistence().fetchByPrimaryKey(browserTrackerId);
 	}
 
-	/**
-	 * Returns all the browser trackers.
-	 *
-	 * @return the browser trackers
-	 */
-	public static List<BrowserTracker> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the browser trackers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.BrowserTrackerModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of browser trackers
-	 * @param end the upper bound of the range of browser trackers (not inclusive)
-	 * @return the range of browser trackers
-	 */
-	public static List<BrowserTracker> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the browser trackers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.BrowserTrackerModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of browser trackers
-	 * @param end the upper bound of the range of browser trackers (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of browser trackers
-	 */
-	public static List<BrowserTracker> findAll(
-		int start, int end,
-		OrderByComparator<BrowserTracker> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the browser trackers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.BrowserTrackerModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of browser trackers
-	 * @param end the upper bound of the range of browser trackers (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of browser trackers
-	 */
-	public static List<BrowserTracker> findAll(
-		int start, int end, OrderByComparator<BrowserTracker> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the browser trackers from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of browser trackers.
-	 *
-	 * @return the number of browser trackers
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static BrowserTrackerPersistence getPersistence() {
 		return _persistence;
 	}
@@ -331,4 +247,4 @@ public class BrowserTrackerUtil {
 	private static volatile BrowserTrackerPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:716565093
+// LIFERAY-SERVICE-BUILDER-HASH:-1743484491

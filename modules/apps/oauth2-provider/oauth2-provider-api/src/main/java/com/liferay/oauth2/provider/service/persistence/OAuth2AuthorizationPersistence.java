@@ -584,21 +584,6 @@ public interface OAuth2AuthorizationPersistence
 		long userId, long oAuth2ApplicationId, String rememberDeviceContent);
 
 	/**
-	 * Caches the o auth2 authorization in the entity cache if it is enabled.
-	 *
-	 * @param oAuth2Authorization the o auth2 authorization
-	 */
-	public void cacheResult(OAuth2Authorization oAuth2Authorization);
-
-	/**
-	 * Caches the o auth2 authorizations in the entity cache if it is enabled.
-	 *
-	 * @param oAuth2Authorizations the o auth2 authorizations
-	 */
-	public void cacheResult(
-		java.util.List<OAuth2Authorization> oAuth2Authorizations);
-
-	/**
 	 * Creates a new o auth2 authorization with the primary key. Does not add the o auth2 authorization to the database.
 	 *
 	 * @param oAuth2AuthorizationId the primary key for the new o auth2 authorization
@@ -636,74 +621,6 @@ public interface OAuth2AuthorizationPersistence
 	 * @return the o auth2 authorization, or <code>null</code> if a o auth2 authorization with the primary key could not be found
 	 */
 	public OAuth2Authorization fetchByPrimaryKey(long oAuth2AuthorizationId);
-
-	/**
-	 * Returns all the o auth2 authorizations.
-	 *
-	 * @return the o auth2 authorizations
-	 */
-	public java.util.List<OAuth2Authorization> findAll();
-
-	/**
-	 * Returns a range of all the o auth2 authorizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.oauth2.provider.model.impl.OAuth2AuthorizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth2 authorizations
-	 * @param end the upper bound of the range of o auth2 authorizations (not inclusive)
-	 * @return the range of o auth2 authorizations
-	 */
-	public java.util.List<OAuth2Authorization> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the o auth2 authorizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.oauth2.provider.model.impl.OAuth2AuthorizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth2 authorizations
-	 * @param end the upper bound of the range of o auth2 authorizations (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of o auth2 authorizations
-	 */
-	public java.util.List<OAuth2Authorization> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<OAuth2Authorization>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the o auth2 authorizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.oauth2.provider.model.impl.OAuth2AuthorizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth2 authorizations
-	 * @param end the upper bound of the range of o auth2 authorizations (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of o auth2 authorizations
-	 */
-	public java.util.List<OAuth2Authorization> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<OAuth2Authorization>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the o auth2 authorizations from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of o auth2 authorizations.
-	 *
-	 * @return the number of o auth2 authorizations
-	 */
-	public int countAll();
 
 	/**
 	 * Returns the primaryKeys of o auth2 scope grants associated with the o auth2 authorization.
@@ -886,4 +803,4 @@ public interface OAuth2AuthorizationPersistence
 			oAuth2ScopeGrants);
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-816359001
+// LIFERAY-SERVICE-BUILDER-HASH:92754332

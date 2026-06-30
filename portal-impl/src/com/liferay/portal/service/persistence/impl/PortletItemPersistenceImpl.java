@@ -5,14 +5,11 @@
 
 package com.liferay.portal.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
-import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.exception.NoSuchPortletItemException;
@@ -28,12 +25,9 @@ import com.liferay.portal.kernel.service.persistence.PortletItemUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
-import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.model.impl.PortletItemImpl;
 import com.liferay.portal.model.impl.PortletItemModelImpl;
 
@@ -44,8 +38,6 @@ import java.lang.reflect.InvocationHandler;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * The persistence implementation for the portlet item service.
@@ -58,7 +50,8 @@ import java.util.Set;
  * @generated
  */
 public class PortletItemPersistenceImpl
-	extends BasePersistenceImpl<PortletItem> implements PortletItemPersistence {
+	extends BasePersistenceImpl<PortletItem, NoSuchPortletItemException>
+	implements PortletItemPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -74,9 +67,6 @@ public class PortletItemPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByG_C;
 	private FinderPath _finderPathWithoutPaginationFindByG_C;
 	private FinderPath _finderPathCountByG_C;
@@ -415,6 +405,8 @@ public class PortletItemPersistenceImpl
 	}
 
 	private FinderPath _finderPathFetchByG_N_P_C;
+	private UniquePersistenceFinder<PortletItem>
+		_uniquePersistenceFinderByG_N_P_C;
 
 	/**
 	 * Returns the portlet item where groupId = &#63; and name = &#63; and portletId = &#63; and classNameId = &#63; or throws a <code>NoSuchPortletItemException</code> if it could not be found.
@@ -435,29 +427,16 @@ public class PortletItemPersistenceImpl
 			groupId, name, portletId, classNameId);
 
 		if (portletItem == null) {
-			StringBundler sb = new StringBundler(10);
-
-			sb.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-			sb.append("groupId=");
-			sb.append(groupId);
-
-			sb.append(", name=");
-			sb.append(name);
-
-			sb.append(", portletId=");
-			sb.append(portletId);
-
-			sb.append(", classNameId=");
-			sb.append(classNameId);
-
-			sb.append("}");
+			String message =
+				_uniquePersistenceFinderByG_N_P_C.buildNoSuchKeyMessage(
+					_NO_SUCH_ENTITY_WITH_KEY,
+					new Object[] {groupId, name, portletId, classNameId});
 
 			if (_log.isDebugEnabled()) {
-				_log.debug(sb.toString());
+				_log.debug(message);
 			}
 
-			throw new NoSuchPortletItemException(sb.toString());
+			throw new NoSuchPortletItemException(message);
 		}
 
 		return portletItem;
@@ -494,118 +473,10 @@ public class PortletItemPersistenceImpl
 		long groupId, String name, String portletId, long classNameId,
 		boolean useFinderCache) {
 
-		name = Objects.toString(name, "");
-		portletId = Objects.toString(portletId, "");
-
-		Object[] finderArgs = null;
-
-		if (useFinderCache) {
-			finderArgs = new Object[] {groupId, name, portletId, classNameId};
-		}
-
-		Object result = null;
-
-		if (useFinderCache) {
-			result = FinderCacheUtil.getResult(
-				_finderPathFetchByG_N_P_C, finderArgs, this);
-		}
-
-		if (result instanceof PortletItem) {
-			PortletItem portletItem = (PortletItem)result;
-
-			if ((groupId != portletItem.getGroupId()) ||
-				!Objects.equals(name, portletItem.getName()) ||
-				!Objects.equals(portletId, portletItem.getPortletId()) ||
-				(classNameId != portletItem.getClassNameId())) {
-
-				result = null;
-			}
-		}
-
-		if (result == null) {
-			StringBundler sb = new StringBundler(6);
-
-			sb.append(_SQL_SELECT_PORTLETITEM_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_N_P_C_GROUPID_2);
-
-			boolean bindName = false;
-
-			if (name.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_P_C_NAME_3);
-			}
-			else {
-				bindName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_P_C_NAME_2);
-			}
-
-			boolean bindPortletId = false;
-
-			if (portletId.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_P_C_PORTLETID_3);
-			}
-			else {
-				bindPortletId = true;
-
-				sb.append(_FINDER_COLUMN_G_N_P_C_PORTLETID_2);
-			}
-
-			sb.append(_FINDER_COLUMN_G_N_P_C_CLASSNAMEID_2);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				if (bindName) {
-					queryPos.add(StringUtil.toLowerCase(name));
-				}
-
-				if (bindPortletId) {
-					queryPos.add(portletId);
-				}
-
-				queryPos.add(classNameId);
-
-				List<PortletItem> list = query.list();
-
-				if (list.isEmpty()) {
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(
-							_finderPathFetchByG_N_P_C, finderArgs, list);
-					}
-				}
-				else {
-					PortletItem portletItem = list.get(0);
-
-					result = portletItem;
-
-					cacheResult(portletItem);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		if (result instanceof List<?>) {
-			return null;
-		}
-		else {
-			return (PortletItem)result;
-		}
+		return _uniquePersistenceFinderByG_N_P_C.fetch(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, name, portletId, classNameId},
+			useFinderCache);
 	}
 
 	/**
@@ -641,33 +512,10 @@ public class PortletItemPersistenceImpl
 	public int countByG_N_P_C(
 		long groupId, String name, String portletId, long classNameId) {
 
-		PortletItem portletItem = fetchByG_N_P_C(
-			groupId, name, portletId, classNameId);
-
-		if (portletItem == null) {
-			return 0;
-		}
-
-		return 1;
+		return _uniquePersistenceFinderByG_N_P_C.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, name, portletId, classNameId});
 	}
-
-	private static final String _FINDER_COLUMN_G_N_P_C_GROUPID_2 =
-		"portletItem.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_N_P_C_NAME_2 =
-		"lower(portletItem.name) = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_N_P_C_NAME_3 =
-		"(portletItem.name IS NULL OR portletItem.name = '') AND ";
-
-	private static final String _FINDER_COLUMN_G_N_P_C_PORTLETID_2 =
-		"portletItem.portletId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_N_P_C_PORTLETID_3 =
-		"(portletItem.portletId IS NULL OR portletItem.portletId = '') AND ";
-
-	private static final String _FINDER_COLUMN_G_N_P_C_CLASSNAMEID_2 =
-		"portletItem.classNameId = ?";
 
 	public PortletItemPersistenceImpl() {
 		setModelClass(PortletItem.class);
@@ -676,106 +524,6 @@ public class PortletItemPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(PortletItemTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the portlet item in the entity cache if it is enabled.
-	 *
-	 * @param portletItem the portlet item
-	 */
-	@Override
-	public void cacheResult(PortletItem portletItem) {
-		EntityCacheUtil.putResult(
-			PortletItemImpl.class, portletItem.getPrimaryKey(), portletItem);
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByG_N_P_C,
-			new Object[] {
-				portletItem.getGroupId(), portletItem.getName(),
-				portletItem.getPortletId(), portletItem.getClassNameId()
-			},
-			portletItem);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the portlet items in the entity cache if it is enabled.
-	 *
-	 * @param portletItems the portlet items
-	 */
-	@Override
-	public void cacheResult(List<PortletItem> portletItems) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (portletItems.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (PortletItem portletItem : portletItems) {
-			if (EntityCacheUtil.getResult(
-					PortletItemImpl.class, portletItem.getPrimaryKey()) ==
-						null) {
-
-				cacheResult(portletItem);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all portlet items.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		EntityCacheUtil.clearCache(PortletItemImpl.class);
-
-		FinderCacheUtil.clearCache(PortletItemImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the portlet item.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(PortletItem portletItem) {
-		EntityCacheUtil.removeResult(PortletItemImpl.class, portletItem);
-	}
-
-	@Override
-	public void clearCache(List<PortletItem> portletItems) {
-		for (PortletItem portletItem : portletItems) {
-			EntityCacheUtil.removeResult(PortletItemImpl.class, portletItem);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		FinderCacheUtil.clearCache(PortletItemImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			EntityCacheUtil.removeResult(PortletItemImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		PortletItemModelImpl portletItemModelImpl) {
-
-		Object[] args = new Object[] {
-			portletItemModelImpl.getGroupId(), portletItemModelImpl.getName(),
-			portletItemModelImpl.getPortletId(),
-			portletItemModelImpl.getClassNameId()
-		};
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByG_N_P_C, args, portletItemModelImpl);
 	}
 
 	/**
@@ -808,47 +556,6 @@ public class PortletItemPersistenceImpl
 		throws NoSuchPortletItemException {
 
 		return remove((Serializable)portletItemId);
-	}
-
-	/**
-	 * Removes the portlet item with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the portlet item
-	 * @return the portlet item that was removed
-	 * @throws NoSuchPortletItemException if a portlet item with the primary key could not be found
-	 */
-	@Override
-	public PortletItem remove(Serializable primaryKey)
-		throws NoSuchPortletItemException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			PortletItem portletItem = (PortletItem)session.get(
-				PortletItemImpl.class, primaryKey);
-
-			if (portletItem == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchPortletItemException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(portletItem);
-		}
-		catch (NoSuchPortletItemException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -947,41 +654,13 @@ public class PortletItemPersistenceImpl
 			closeSession(session);
 		}
 
-		EntityCacheUtil.putResult(
-			PortletItemImpl.class, portletItemModelImpl, false, true);
-
-		cacheUniqueFindersCache(portletItemModelImpl);
+		cacheUniqueFindersResult(portletItem, false);
 
 		if (isNew) {
 			portletItem.setNew(false);
 		}
 
 		portletItem.resetOriginalValues();
-
-		return portletItem;
-	}
-
-	/**
-	 * Returns the portlet item with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the portlet item
-	 * @return the portlet item
-	 * @throws NoSuchPortletItemException if a portlet item with the primary key could not be found
-	 */
-	@Override
-	public PortletItem findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchPortletItemException {
-
-		PortletItem portletItem = fetchByPrimaryKey(primaryKey);
-
-		if (portletItem == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchPortletItemException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return portletItem;
 	}
@@ -1011,185 +690,6 @@ public class PortletItemPersistenceImpl
 		return fetchByPrimaryKey((Serializable)portletItemId);
 	}
 
-	/**
-	 * Returns all the portlet items.
-	 *
-	 * @return the portlet items
-	 */
-	@Override
-	public List<PortletItem> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the portlet items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>PortletItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of portlet items
-	 * @param end the upper bound of the range of portlet items (not inclusive)
-	 * @return the range of portlet items
-	 */
-	@Override
-	public List<PortletItem> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the portlet items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>PortletItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of portlet items
-	 * @param end the upper bound of the range of portlet items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of portlet items
-	 */
-	@Override
-	public List<PortletItem> findAll(
-		int start, int end, OrderByComparator<PortletItem> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the portlet items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>PortletItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of portlet items
-	 * @param end the upper bound of the range of portlet items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of portlet items
-	 */
-	@Override
-	public List<PortletItem> findAll(
-		int start, int end, OrderByComparator<PortletItem> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<PortletItem> list = null;
-
-		if (useFinderCache) {
-			list = (List<PortletItem>)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_PORTLETITEM);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_PORTLETITEM;
-
-				sql = sql.concat(PortletItemModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<PortletItem>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the portlet items from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (PortletItem portletItem : findAll()) {
-			remove(portletItem);
-		}
-	}
-
-	/**
-	 * Returns the number of portlet items.
-	 *
-	 * @return the number of portlet items
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)FinderCacheUtil.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_PORTLETITEM);
-
-				count = (Long)query.uniqueResult();
-
-				FinderCacheUtil.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	protected EntityCache getEntityCache() {
 		return EntityCacheUtil.getEntityCache();
@@ -1214,21 +714,6 @@ public class PortletItemPersistenceImpl
 	 * Initializes the portlet item persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByG_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_C",
 			new String[] {
@@ -1252,10 +737,10 @@ public class PortletItemPersistenceImpl
 			this, _finderPathWithPaginationFindByG_C,
 			_finderPathWithoutPaginationFindByG_C, _finderPathCountByG_C,
 			_SQL_SELECT_PORTLETITEM_WHERE, _SQL_COUNT_PORTLETITEM_WHERE,
-			PortletItemModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			PortletItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"portletItem.", "groupId", FinderColumn.Type.LONG, "=", true,
-				false, PortletItem::getGroupId),
+				true, PortletItem::getGroupId),
 			new FinderColumn<>(
 				"portletItem.", "classNameId", FinderColumn.Type.LONG, "=",
 				true, true, PortletItem::getClassNameId));
@@ -1275,7 +760,8 @@ public class PortletItemPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Long.class.getName()
 			},
-			new String[] {"groupId", "portletId", "classNameId"}, true);
+			new String[] {"groupId", "portletId", "classNameId"}, 0, 2, true,
+			null);
 
 		_finderPathCountByG_P_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_P_C",
@@ -1283,30 +769,50 @@ public class PortletItemPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Long.class.getName()
 			},
-			new String[] {"groupId", "portletId", "classNameId"}, false);
+			new String[] {"groupId", "portletId", "classNameId"}, 0, 2, false,
+			null);
 
 		_collectionPersistenceFinderByG_P_C = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByG_P_C,
 			_finderPathWithoutPaginationFindByG_P_C, _finderPathCountByG_P_C,
 			_SQL_SELECT_PORTLETITEM_WHERE, _SQL_COUNT_PORTLETITEM_WHERE,
-			PortletItemModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			PortletItemModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"portletItem.", "groupId", FinderColumn.Type.LONG, "=", true,
-				false, PortletItem::getGroupId),
+				true, PortletItem::getGroupId),
 			new FinderColumn<>(
 				"portletItem.", "portletId", FinderColumn.Type.STRING, "=",
-				true, false, PortletItem::getPortletId),
+				true, true, PortletItem::getPortletId),
 			new FinderColumn<>(
 				"portletItem.", "classNameId", FinderColumn.Type.LONG, "=",
 				true, true, PortletItem::getClassNameId));
 
-		_finderPathFetchByG_N_P_C = new FinderPath(
+		_finderPathFetchByG_N_P_C = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByG_N_P_C",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				String.class.getName(), Long.class.getName()
 			},
-			new String[] {"groupId", "name", "portletId", "classNameId"}, true);
+			new String[] {"groupId", "name", "portletId", "classNameId"}, 2, 6,
+			false, PortletItem::getGroupId,
+			convertCaseFunction(PortletItem::getName),
+			convertNullFunction(PortletItem::getPortletId),
+			PortletItem::getClassNameId);
+
+		_uniquePersistenceFinderByG_N_P_C = new UniquePersistenceFinder<>(
+			this, _finderPathFetchByG_N_P_C, _SQL_SELECT_PORTLETITEM_WHERE, "",
+			new FinderColumn<>(
+				"portletItem.", "groupId", FinderColumn.Type.LONG, "=", true,
+				true, PortletItem::getGroupId),
+			new FinderColumn<>(
+				"portletItem.", "name", FinderColumn.Type.STRING, "=", false,
+				true, PortletItem::getName),
+			new FinderColumn<>(
+				"portletItem.", "portletId", FinderColumn.Type.STRING, "=",
+				true, true, PortletItem::getPortletId),
+			new FinderColumn<>(
+				"portletItem.", "classNameId", FinderColumn.Type.LONG, "=",
+				true, true, PortletItem::getClassNameId));
 
 		PortletItemUtil.setPersistence(this);
 	}
@@ -1317,22 +823,17 @@ public class PortletItemPersistenceImpl
 		EntityCacheUtil.removeCache(PortletItemImpl.class.getName());
 	}
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		PortletItemModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_PORTLETITEM =
 		"SELECT portletItem FROM PortletItem portletItem";
 
 	private static final String _SQL_SELECT_PORTLETITEM_WHERE =
 		"SELECT portletItem FROM PortletItem portletItem WHERE ";
 
-	private static final String _SQL_COUNT_PORTLETITEM =
-		"SELECT COUNT(portletItem) FROM PortletItem portletItem";
-
 	private static final String _SQL_COUNT_PORTLETITEM_WHERE =
 		"SELECT COUNT(portletItem) FROM PortletItem portletItem WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "portletItem.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No PortletItem exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No PortletItem exists with the key {";
@@ -1346,4 +847,4 @@ public class PortletItemPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1045704074
+// LIFERAY-SERVICE-BUILDER-HASH:-2073724376

@@ -497,20 +497,6 @@ public interface SystemEventPersistence
 		long groupId, long classNameId, long classPK, int type);
 
 	/**
-	 * Caches the system event in the entity cache if it is enabled.
-	 *
-	 * @param systemEvent the system event
-	 */
-	public void cacheResult(SystemEvent systemEvent);
-
-	/**
-	 * Caches the system events in the entity cache if it is enabled.
-	 *
-	 * @param systemEvents the system events
-	 */
-	public void cacheResult(java.util.List<SystemEvent> systemEvents);
-
-	/**
 	 * Creates a new system event with the primary key. Does not add the system event to the database.
 	 *
 	 * @param systemEventId the primary key for the new system event
@@ -548,73 +534,5 @@ public interface SystemEventPersistence
 	 */
 	public SystemEvent fetchByPrimaryKey(long systemEventId);
 
-	/**
-	 * Returns all the system events.
-	 *
-	 * @return the system events
-	 */
-	public java.util.List<SystemEvent> findAll();
-
-	/**
-	 * Returns a range of all the system events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.SystemEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of system events
-	 * @param end the upper bound of the range of system events (not inclusive)
-	 * @return the range of system events
-	 */
-	public java.util.List<SystemEvent> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the system events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.SystemEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of system events
-	 * @param end the upper bound of the range of system events (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of system events
-	 */
-	public java.util.List<SystemEvent> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SystemEvent>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the system events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.SystemEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of system events
-	 * @param end the upper bound of the range of system events (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of system events
-	 */
-	public java.util.List<SystemEvent> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SystemEvent>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the system events from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of system events.
-	 *
-	 * @return the number of system events
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2122791070
+// LIFERAY-SERVICE-BUILDER-HASH:-305117533

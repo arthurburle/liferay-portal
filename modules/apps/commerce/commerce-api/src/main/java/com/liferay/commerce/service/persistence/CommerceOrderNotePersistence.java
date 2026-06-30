@@ -563,21 +563,6 @@ public interface CommerceOrderNotePersistence
 	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
-	 * Caches the commerce order note in the entity cache if it is enabled.
-	 *
-	 * @param commerceOrderNote the commerce order note
-	 */
-	public void cacheResult(CommerceOrderNote commerceOrderNote);
-
-	/**
-	 * Caches the commerce order notes in the entity cache if it is enabled.
-	 *
-	 * @param commerceOrderNotes the commerce order notes
-	 */
-	public void cacheResult(
-		java.util.List<CommerceOrderNote> commerceOrderNotes);
-
-	/**
 	 * Creates a new commerce order note with the primary key. Does not add the commerce order note to the database.
 	 *
 	 * @param commerceOrderNoteId the primary key for the new commerce order note
@@ -615,73 +600,5 @@ public interface CommerceOrderNotePersistence
 	 */
 	public CommerceOrderNote fetchByPrimaryKey(long commerceOrderNoteId);
 
-	/**
-	 * Returns all the commerce order notes.
-	 *
-	 * @return the commerce order notes
-	 */
-	public java.util.List<CommerceOrderNote> findAll();
-
-	/**
-	 * Returns a range of all the commerce order notes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderNoteModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order notes
-	 * @param end the upper bound of the range of commerce order notes (not inclusive)
-	 * @return the range of commerce order notes
-	 */
-	public java.util.List<CommerceOrderNote> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce order notes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderNoteModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order notes
-	 * @param end the upper bound of the range of commerce order notes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce order notes
-	 */
-	public java.util.List<CommerceOrderNote> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CommerceOrderNote>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce order notes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderNoteModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order notes
-	 * @param end the upper bound of the range of commerce order notes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce order notes
-	 */
-	public java.util.List<CommerceOrderNote> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CommerceOrderNote>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce order notes from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce order notes.
-	 *
-	 * @return the number of commerce order notes
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-879686963
+// LIFERAY-SERVICE-BUILDER-HASH:933807667

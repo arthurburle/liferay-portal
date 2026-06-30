@@ -5,15 +5,11 @@
 
 package com.liferay.portal.workflow.kaleo.service.persistence.impl;
 
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -27,10 +23,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.workflow.kaleo.exception.NoSuchInstanceException;
@@ -52,7 +45,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +68,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = KaleoInstancePersistence.class)
 public class KaleoInstancePersistenceImpl
-	extends BasePersistenceImpl<KaleoInstance>
+	extends BasePersistenceImpl<KaleoInstance, NoSuchInstanceException>
 	implements KaleoInstancePersistence {
 
 	/*
@@ -93,9 +85,6 @@ public class KaleoInstancePersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByCompanyId;
 	private FinderPath _finderPathWithoutPaginationFindByCompanyId;
 	private FinderPath _finderPathCountByCompanyId;
@@ -174,14 +163,9 @@ public class KaleoInstancePersistenceImpl
 		OrderByComparator<KaleoInstance> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByCompanyId.find(
-				finderCache, new Object[] {companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByCompanyId.find(
+			finderCache, new Object[] {companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -243,13 +227,8 @@ public class KaleoInstancePersistenceImpl
 	 */
 	@Override
 	public int countByCompanyId(long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByCompanyId.count(
-				finderCache, new Object[] {companyId});
-		}
+		return _collectionPersistenceFinderByCompanyId.count(
+			finderCache, new Object[] {companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByKaleoDefinitionVersionId;
@@ -336,14 +315,9 @@ public class KaleoInstancePersistenceImpl
 		OrderByComparator<KaleoInstance> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByKaleoDefinitionVersionId.find(
-				finderCache, new Object[] {kaleoDefinitionVersionId}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByKaleoDefinitionVersionId.find(
+			finderCache, new Object[] {kaleoDefinitionVersionId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -413,13 +387,8 @@ public class KaleoInstancePersistenceImpl
 	 */
 	@Override
 	public int countByKaleoDefinitionVersionId(long kaleoDefinitionVersionId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByKaleoDefinitionVersionId.count(
-				finderCache, new Object[] {kaleoDefinitionVersionId});
-		}
+		return _collectionPersistenceFinderByKaleoDefinitionVersionId.count(
+			finderCache, new Object[] {kaleoDefinitionVersionId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_U;
@@ -505,14 +474,9 @@ public class KaleoInstancePersistenceImpl
 		OrderByComparator<KaleoInstance> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByC_U.find(
-				finderCache, new Object[] {companyId, userId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_U.find(
+			finderCache, new Object[] {companyId, userId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -580,13 +544,8 @@ public class KaleoInstancePersistenceImpl
 	 */
 	@Override
 	public int countByC_U(long companyId, long userId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByC_U.count(
-				finderCache, new Object[] {companyId, userId});
-		}
+		return _collectionPersistenceFinderByC_U.count(
+			finderCache, new Object[] {companyId, userId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByKDI_C;
@@ -675,14 +634,9 @@ public class KaleoInstancePersistenceImpl
 		OrderByComparator<KaleoInstance> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByKDI_C.find(
-				finderCache, new Object[] {kaleoDefinitionId, completed}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByKDI_C.find(
+			finderCache, new Object[] {kaleoDefinitionId, completed}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -752,13 +706,8 @@ public class KaleoInstancePersistenceImpl
 	 */
 	@Override
 	public int countByKDI_C(long kaleoDefinitionId, boolean completed) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByKDI_C.count(
-				finderCache, new Object[] {kaleoDefinitionId, completed});
-		}
+		return _collectionPersistenceFinderByKDI_C.count(
+			finderCache, new Object[] {kaleoDefinitionId, completed});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByKDVI_C;
@@ -849,14 +798,9 @@ public class KaleoInstancePersistenceImpl
 		OrderByComparator<KaleoInstance> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByKDVI_C.find(
-				finderCache, new Object[] {kaleoDefinitionVersionId, completed},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByKDVI_C.find(
+			finderCache, new Object[] {kaleoDefinitionVersionId, completed},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -928,14 +872,8 @@ public class KaleoInstancePersistenceImpl
 	 */
 	@Override
 	public int countByKDVI_C(long kaleoDefinitionVersionId, boolean completed) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByKDVI_C.count(
-				finderCache,
-				new Object[] {kaleoDefinitionVersionId, completed});
-		}
+		return _collectionPersistenceFinderByKDVI_C.count(
+			finderCache, new Object[] {kaleoDefinitionVersionId, completed});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByCN_CPK;
@@ -1021,14 +959,9 @@ public class KaleoInstancePersistenceImpl
 		OrderByComparator<KaleoInstance> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByCN_CPK.find(
-				finderCache, new Object[] {className, classPK}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByCN_CPK.find(
+			finderCache, new Object[] {className, classPK}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1096,13 +1029,8 @@ public class KaleoInstancePersistenceImpl
 	 */
 	@Override
 	public int countByCN_CPK(String className, long classPK) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByCN_CPK.count(
-				finderCache, new Object[] {className, classPK});
-		}
+		return _collectionPersistenceFinderByCN_CPK.count(
+			finderCache, new Object[] {className, classPK});
 	}
 
 	private FinderPath _finderPathFetchByKII_C_U;
@@ -1171,14 +1099,9 @@ public class KaleoInstancePersistenceImpl
 		long kaleoInstanceId, long companyId, long userId,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _uniquePersistenceFinderByKII_C_U.fetch(
-				finderCache, new Object[] {kaleoInstanceId, companyId, userId},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByKII_C_U.fetch(
+			finderCache, new Object[] {kaleoInstanceId, companyId, userId},
+			useFinderCache);
 	}
 
 	/**
@@ -1317,18 +1240,13 @@ public class KaleoInstancePersistenceImpl
 		OrderByComparator<KaleoInstance> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByC_KDN_KDV_CD.find(
-				finderCache,
-				new Object[] {
-					companyId, kaleoDefinitionName, kaleoDefinitionVersion,
-					completionDate
-				},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_KDN_KDV_CD.find(
+			finderCache,
+			new Object[] {
+				companyId, kaleoDefinitionName, kaleoDefinitionVersion,
+				completionDate
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1426,17 +1344,12 @@ public class KaleoInstancePersistenceImpl
 		long companyId, String kaleoDefinitionName, int kaleoDefinitionVersion,
 		Date completionDate) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			return _collectionPersistenceFinderByC_KDN_KDV_CD.count(
-				finderCache,
-				new Object[] {
-					companyId, kaleoDefinitionName, kaleoDefinitionVersion,
-					completionDate
-				});
-		}
+		return _collectionPersistenceFinderByC_KDN_KDV_CD.count(
+			finderCache,
+			new Object[] {
+				companyId, kaleoDefinitionName, kaleoDefinitionVersion,
+				completionDate
+			});
 	}
 
 	public KaleoInstancePersistenceImpl() {
@@ -1452,122 +1365,6 @@ public class KaleoInstancePersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(KaleoInstanceTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the kaleo instance in the entity cache if it is enabled.
-	 *
-	 * @param kaleoInstance the kaleo instance
-	 */
-	@Override
-	public void cacheResult(KaleoInstance kaleoInstance) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					kaleoInstance.getCtCollectionId())) {
-
-			entityCache.putResult(
-				KaleoInstanceImpl.class, kaleoInstance.getPrimaryKey(),
-				kaleoInstance);
-
-			finderCache.putResult(
-				_finderPathFetchByKII_C_U,
-				new Object[] {
-					kaleoInstance.getKaleoInstanceId(),
-					kaleoInstance.getCompanyId(), kaleoInstance.getUserId()
-				},
-				kaleoInstance);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the kaleo instances in the entity cache if it is enabled.
-	 *
-	 * @param kaleoInstances the kaleo instances
-	 */
-	@Override
-	public void cacheResult(List<KaleoInstance> kaleoInstances) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (kaleoInstances.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (KaleoInstance kaleoInstance : kaleoInstances) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						kaleoInstance.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						KaleoInstanceImpl.class,
-						kaleoInstance.getPrimaryKey()) == null) {
-
-					cacheResult(kaleoInstance);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all kaleo instances.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(KaleoInstanceImpl.class);
-
-		finderCache.clearCache(KaleoInstanceImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the kaleo instance.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(KaleoInstance kaleoInstance) {
-		entityCache.removeResult(KaleoInstanceImpl.class, kaleoInstance);
-	}
-
-	@Override
-	public void clearCache(List<KaleoInstance> kaleoInstances) {
-		for (KaleoInstance kaleoInstance : kaleoInstances) {
-			entityCache.removeResult(KaleoInstanceImpl.class, kaleoInstance);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(KaleoInstanceImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(KaleoInstanceImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		KaleoInstanceModelImpl kaleoInstanceModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					kaleoInstanceModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				kaleoInstanceModelImpl.getKaleoInstanceId(),
-				kaleoInstanceModelImpl.getCompanyId(),
-				kaleoInstanceModelImpl.getUserId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByKII_C_U, args, kaleoInstanceModelImpl);
-		}
 	}
 
 	/**
@@ -1600,47 +1397,6 @@ public class KaleoInstancePersistenceImpl
 		throws NoSuchInstanceException {
 
 		return remove((Serializable)kaleoInstanceId);
-	}
-
-	/**
-	 * Removes the kaleo instance with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the kaleo instance
-	 * @return the kaleo instance that was removed
-	 * @throws NoSuchInstanceException if a kaleo instance with the primary key could not be found
-	 */
-	@Override
-	public KaleoInstance remove(Serializable primaryKey)
-		throws NoSuchInstanceException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			KaleoInstance kaleoInstance = (KaleoInstance)session.get(
-				KaleoInstanceImpl.class, primaryKey);
-
-			if (kaleoInstance == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchInstanceException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(kaleoInstance);
-		}
-		catch (NoSuchInstanceException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1748,41 +1504,13 @@ public class KaleoInstancePersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			KaleoInstanceImpl.class, kaleoInstanceModelImpl, false, true);
-
-		cacheUniqueFindersCache(kaleoInstanceModelImpl);
+		cacheUniqueFindersResult(kaleoInstance, false);
 
 		if (isNew) {
 			kaleoInstance.setNew(false);
 		}
 
 		kaleoInstance.resetOriginalValues();
-
-		return kaleoInstance;
-	}
-
-	/**
-	 * Returns the kaleo instance with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the kaleo instance
-	 * @return the kaleo instance
-	 * @throws NoSuchInstanceException if a kaleo instance with the primary key could not be found
-	 */
-	@Override
-	public KaleoInstance findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchInstanceException {
-
-		KaleoInstance kaleoInstance = fetchByPrimaryKey(primaryKey);
-
-		if (kaleoInstance == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchInstanceException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return kaleoInstance;
 	}
@@ -1801,52 +1529,9 @@ public class KaleoInstancePersistenceImpl
 		return findByPrimaryKey((Serializable)kaleoInstanceId);
 	}
 
-	/**
-	 * Returns the kaleo instance with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the kaleo instance
-	 * @return the kaleo instance, or <code>null</code> if a kaleo instance with the primary key could not be found
-	 */
 	@Override
-	public KaleoInstance fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				KaleoInstance.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		KaleoInstance kaleoInstance = (KaleoInstance)entityCache.getResult(
-			KaleoInstanceImpl.class, primaryKey);
-
-		if (kaleoInstance != null) {
-			return kaleoInstance;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			kaleoInstance = (KaleoInstance)session.get(
-				KaleoInstanceImpl.class, primaryKey);
-
-			if (kaleoInstance != null) {
-				cacheResult(kaleoInstance);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return kaleoInstance;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -1858,322 +1543,6 @@ public class KaleoInstancePersistenceImpl
 	@Override
 	public KaleoInstance fetchByPrimaryKey(long kaleoInstanceId) {
 		return fetchByPrimaryKey((Serializable)kaleoInstanceId);
-	}
-
-	@Override
-	public Map<Serializable, KaleoInstance> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(KaleoInstance.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, KaleoInstance> map =
-			new HashMap<Serializable, KaleoInstance>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			KaleoInstance kaleoInstance = fetchByPrimaryKey(primaryKey);
-
-			if (kaleoInstance != null) {
-				map.put(primaryKey, kaleoInstance);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						KaleoInstance.class, primaryKey)) {
-
-				KaleoInstance kaleoInstance =
-					(KaleoInstance)entityCache.getResult(
-						KaleoInstanceImpl.class, primaryKey);
-
-				if (kaleoInstance == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, kaleoInstance);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (KaleoInstance kaleoInstance :
-					(List<KaleoInstance>)query.list()) {
-
-				map.put(kaleoInstance.getPrimaryKeyObj(), kaleoInstance);
-
-				cacheResult(kaleoInstance);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the kaleo instances.
-	 *
-	 * @return the kaleo instances
-	 */
-	@Override
-	public List<KaleoInstance> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the kaleo instances.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>KaleoInstanceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo instances
-	 * @param end the upper bound of the range of kaleo instances (not inclusive)
-	 * @return the range of kaleo instances
-	 */
-	@Override
-	public List<KaleoInstance> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the kaleo instances.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>KaleoInstanceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo instances
-	 * @param end the upper bound of the range of kaleo instances (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of kaleo instances
-	 */
-	@Override
-	public List<KaleoInstance> findAll(
-		int start, int end,
-		OrderByComparator<KaleoInstance> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the kaleo instances.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>KaleoInstanceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo instances
-	 * @param end the upper bound of the range of kaleo instances (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of kaleo instances
-	 */
-	@Override
-	public List<KaleoInstance> findAll(
-		int start, int end, OrderByComparator<KaleoInstance> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<KaleoInstance> list = null;
-
-			if (useFinderCache) {
-				list = (List<KaleoInstance>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_KALEOINSTANCE);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_KALEOINSTANCE;
-
-					sql = sql.concat(KaleoInstanceModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<KaleoInstance>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the kaleo instances from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (KaleoInstance kaleoInstance : findAll()) {
-			remove(kaleoInstance);
-		}
-	}
-
-	/**
-	 * Returns the number of kaleo instances.
-	 *
-	 * @return the number of kaleo instances
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					KaleoInstance.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(_SQL_COUNT_KALEOINSTANCE);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -2275,21 +1644,6 @@ public class KaleoInstancePersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByCompanyId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByCompanyId",
 			new String[] {
@@ -2314,7 +1668,7 @@ public class KaleoInstancePersistenceImpl
 				_finderPathWithoutPaginationFindByCompanyId,
 				_finderPathCountByCompanyId, _SQL_SELECT_KALEOINSTANCE_WHERE,
 				_SQL_COUNT_KALEOINSTANCE_WHERE,
-				KaleoInstanceModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				KaleoInstanceModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"kaleoInstance.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, KaleoInstance::getCompanyId));
@@ -2348,7 +1702,7 @@ public class KaleoInstancePersistenceImpl
 				_finderPathWithoutPaginationFindByKaleoDefinitionVersionId,
 				_finderPathCountByKaleoDefinitionVersionId,
 				_SQL_SELECT_KALEOINSTANCE_WHERE, _SQL_COUNT_KALEOINSTANCE_WHERE,
-				KaleoInstanceModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				KaleoInstanceModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"kaleoInstance.", "kaleoDefinitionVersionId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2377,10 +1731,10 @@ public class KaleoInstancePersistenceImpl
 			this, _finderPathWithPaginationFindByC_U,
 			_finderPathWithoutPaginationFindByC_U, _finderPathCountByC_U,
 			_SQL_SELECT_KALEOINSTANCE_WHERE, _SQL_COUNT_KALEOINSTANCE_WHERE,
-			KaleoInstanceModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			KaleoInstanceModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"kaleoInstance.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, KaleoInstance::getCompanyId),
+				true, true, KaleoInstance::getCompanyId),
 			new FinderColumn<>(
 				"kaleoInstance.", "userId", FinderColumn.Type.LONG, "=", true,
 				true, KaleoInstance::getUserId));
@@ -2408,10 +1762,10 @@ public class KaleoInstancePersistenceImpl
 			this, _finderPathWithPaginationFindByKDI_C,
 			_finderPathWithoutPaginationFindByKDI_C, _finderPathCountByKDI_C,
 			_SQL_SELECT_KALEOINSTANCE_WHERE, _SQL_COUNT_KALEOINSTANCE_WHERE,
-			KaleoInstanceModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			KaleoInstanceModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"kaleoInstance.", "kaleoDefinitionId", FinderColumn.Type.LONG,
-				"=", true, false, KaleoInstance::getKaleoDefinitionId),
+				"=", true, true, KaleoInstance::getKaleoDefinitionId),
 			new FinderColumn<>(
 				"kaleoInstance.", "completed", FinderColumn.Type.BOOLEAN, "=",
 				true, true, KaleoInstance::isCompleted));
@@ -2441,10 +1795,10 @@ public class KaleoInstancePersistenceImpl
 				_finderPathWithoutPaginationFindByKDVI_C,
 				_finderPathCountByKDVI_C, _SQL_SELECT_KALEOINSTANCE_WHERE,
 				_SQL_COUNT_KALEOINSTANCE_WHERE,
-				KaleoInstanceModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				KaleoInstanceModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"kaleoInstance.", "kaleoDefinitionVersionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					KaleoInstance::getKaleoDefinitionVersionId),
 				new FinderColumn<>(
 					"kaleoInstance.", "completed", FinderColumn.Type.BOOLEAN,
@@ -2462,12 +1816,12 @@ public class KaleoInstancePersistenceImpl
 		_finderPathWithoutPaginationFindByCN_CPK = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByCN_CPK",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"className", "classPK"}, true);
+			new String[] {"className", "classPK"}, 0, 1, true, null);
 
 		_finderPathCountByCN_CPK = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByCN_CPK",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"className", "classPK"}, false);
+			new String[] {"className", "classPK"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByCN_CPK =
 			new CollectionPersistenceFinder<>(
@@ -2475,29 +1829,32 @@ public class KaleoInstancePersistenceImpl
 				_finderPathWithoutPaginationFindByCN_CPK,
 				_finderPathCountByCN_CPK, _SQL_SELECT_KALEOINSTANCE_WHERE,
 				_SQL_COUNT_KALEOINSTANCE_WHERE,
-				KaleoInstanceModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				KaleoInstanceModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"kaleoInstance.", "className", FinderColumn.Type.STRING,
-					"=", true, false, KaleoInstance::getClassName),
+					"=", true, true, KaleoInstance::getClassName),
 				new FinderColumn<>(
 					"kaleoInstance.", "classPK", FinderColumn.Type.LONG, "=",
 					true, true, KaleoInstance::getClassPK));
 
-		_finderPathFetchByKII_C_U = new FinderPath(
+		_finderPathFetchByKII_C_U = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByKII_C_U",
 			new String[] {
 				Long.class.getName(), Long.class.getName(), Long.class.getName()
 			},
-			new String[] {"kaleoInstanceId", "companyId", "userId"}, true);
+			new String[] {"kaleoInstanceId", "companyId", "userId"}, 0, 0,
+			false, KaleoInstance::getKaleoInstanceId,
+			KaleoInstance::getCompanyId, KaleoInstance::getUserId);
 
 		_uniquePersistenceFinderByKII_C_U = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByKII_C_U, _SQL_SELECT_KALEOINSTANCE_WHERE,
+			"",
 			new FinderColumn<>(
 				"kaleoInstance.", "kaleoInstanceId", FinderColumn.Type.LONG,
-				"=", true, false, KaleoInstance::getKaleoInstanceId),
+				"=", true, true, KaleoInstance::getKaleoInstanceId),
 			new FinderColumn<>(
 				"kaleoInstance.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, KaleoInstance::getCompanyId),
+				true, true, KaleoInstance::getCompanyId),
 			new FinderColumn<>(
 				"kaleoInstance.", "userId", FinderColumn.Type.LONG, "=", true,
 				true, KaleoInstance::getUserId));
@@ -2526,7 +1883,7 @@ public class KaleoInstancePersistenceImpl
 				"companyId", "kaleoDefinitionName", "kaleoDefinitionVersion",
 				"completionDate"
 			},
-			true);
+			0, 2, true, null);
 
 		_finderPathCountByC_KDN_KDV_CD = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_KDN_KDV_CD",
@@ -2538,7 +1895,7 @@ public class KaleoInstancePersistenceImpl
 				"companyId", "kaleoDefinitionName", "kaleoDefinitionVersion",
 				"completionDate"
 			},
-			false);
+			0, 2, false, null);
 
 		_collectionPersistenceFinderByC_KDN_KDV_CD =
 			new CollectionPersistenceFinder<>(
@@ -2546,17 +1903,17 @@ public class KaleoInstancePersistenceImpl
 				_finderPathWithoutPaginationFindByC_KDN_KDV_CD,
 				_finderPathCountByC_KDN_KDV_CD, _SQL_SELECT_KALEOINSTANCE_WHERE,
 				_SQL_COUNT_KALEOINSTANCE_WHERE,
-				KaleoInstanceModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				KaleoInstanceModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"kaleoInstance.", "companyId", FinderColumn.Type.LONG, "=",
-					true, false, KaleoInstance::getCompanyId),
+					true, true, KaleoInstance::getCompanyId),
 				new FinderColumn<>(
 					"kaleoInstance.", "kaleoDefinitionName",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					KaleoInstance::getKaleoDefinitionName),
 				new FinderColumn<>(
 					"kaleoInstance.", "kaleoDefinitionVersion",
-					FinderColumn.Type.INTEGER, "=", true, false,
+					FinderColumn.Type.INTEGER, "=", true, true,
 					KaleoInstance::getKaleoDefinitionVersion),
 				new FinderColumn<>(
 					"kaleoInstance.", "completionDate", FinderColumn.Type.DATE,
@@ -2607,22 +1964,17 @@ public class KaleoInstancePersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		KaleoInstanceModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_KALEOINSTANCE =
 		"SELECT kaleoInstance FROM KaleoInstance kaleoInstance";
 
 	private static final String _SQL_SELECT_KALEOINSTANCE_WHERE =
 		"SELECT kaleoInstance FROM KaleoInstance kaleoInstance WHERE ";
 
-	private static final String _SQL_COUNT_KALEOINSTANCE =
-		"SELECT COUNT(kaleoInstance) FROM KaleoInstance kaleoInstance";
-
 	private static final String _SQL_COUNT_KALEOINSTANCE_WHERE =
 		"SELECT COUNT(kaleoInstance) FROM KaleoInstance kaleoInstance WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "kaleoInstance.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No KaleoInstance exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No KaleoInstance exists with the key {";
@@ -2639,4 +1991,4 @@ public class KaleoInstancePersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:416037189
+// LIFERAY-SERVICE-BUILDER-HASH:475984660

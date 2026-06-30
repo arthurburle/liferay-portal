@@ -36,6 +36,20 @@ public class DDMTemplateUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<DDMTemplate> ddmTemplates) {
+		getPersistence().cacheResult(ddmTemplates);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(DDMTemplate ddmTemplate) {
+		getPersistence().cacheResult(ddmTemplate);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -2897,24 +2911,6 @@ public class DDMTemplateUtil {
 	}
 
 	/**
-	 * Caches the ddm template in the entity cache if it is enabled.
-	 *
-	 * @param ddmTemplate the ddm template
-	 */
-	public static void cacheResult(DDMTemplate ddmTemplate) {
-		getPersistence().cacheResult(ddmTemplate);
-	}
-
-	/**
-	 * Caches the ddm templates in the entity cache if it is enabled.
-	 *
-	 * @param ddmTemplates the ddm templates
-	 */
-	public static void cacheResult(List<DDMTemplate> ddmTemplates) {
-		getPersistence().cacheResult(ddmTemplates);
-	}
-
-	/**
 	 * Creates a new ddm template with the primary key. Does not add the ddm template to the database.
 	 *
 	 * @param templateId the primary key for the new ddm template
@@ -2966,85 +2962,6 @@ public class DDMTemplateUtil {
 		return getPersistence().fetchByPrimaryKey(templateId);
 	}
 
-	/**
-	 * Returns all the ddm templates.
-	 *
-	 * @return the ddm templates
-	 */
-	public static List<DDMTemplate> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the ddm templates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMTemplateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm templates
-	 * @param end the upper bound of the range of ddm templates (not inclusive)
-	 * @return the range of ddm templates
-	 */
-	public static List<DDMTemplate> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm templates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMTemplateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm templates
-	 * @param end the upper bound of the range of ddm templates (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm templates
-	 */
-	public static List<DDMTemplate> findAll(
-		int start, int end, OrderByComparator<DDMTemplate> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm templates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMTemplateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm templates
-	 * @param end the upper bound of the range of ddm templates (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm templates
-	 */
-	public static List<DDMTemplate> findAll(
-		int start, int end, OrderByComparator<DDMTemplate> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the ddm templates from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of ddm templates.
-	 *
-	 * @return the number of ddm templates
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static DDMTemplatePersistence getPersistence() {
 		return _persistence;
 	}
@@ -3056,4 +2973,4 @@ public class DDMTemplateUtil {
 	private static volatile DDMTemplatePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-298721929
+// LIFERAY-SERVICE-BUILDER-HASH:249286860

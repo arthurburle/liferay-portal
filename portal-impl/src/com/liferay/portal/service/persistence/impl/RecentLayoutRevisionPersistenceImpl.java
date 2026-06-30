@@ -5,13 +5,11 @@
 
 package com.liferay.portal.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.exception.NoSuchRecentLayoutRevisionException;
@@ -26,10 +24,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.model.impl.RecentLayoutRevisionImpl;
 import com.liferay.portal.model.impl.RecentLayoutRevisionModelImpl;
@@ -40,7 +35,6 @@ import java.lang.reflect.InvocationHandler;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The persistence implementation for the recent layout revision service.
@@ -53,7 +47,8 @@ import java.util.Set;
  * @generated
  */
 public class RecentLayoutRevisionPersistenceImpl
-	extends BasePersistenceImpl<RecentLayoutRevision>
+	extends BasePersistenceImpl
+		<RecentLayoutRevision, NoSuchRecentLayoutRevisionException>
 	implements RecentLayoutRevisionPersistence {
 
 	/*
@@ -70,9 +65,6 @@ public class RecentLayoutRevisionPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByGroupId;
 	private FinderPath _finderPathWithoutPaginationFindByGroupId;
 	private FinderPath _finderPathCountByGroupId;
@@ -638,116 +630,6 @@ public class RecentLayoutRevisionPersistenceImpl
 	}
 
 	/**
-	 * Caches the recent layout revision in the entity cache if it is enabled.
-	 *
-	 * @param recentLayoutRevision the recent layout revision
-	 */
-	@Override
-	public void cacheResult(RecentLayoutRevision recentLayoutRevision) {
-		EntityCacheUtil.putResult(
-			RecentLayoutRevisionImpl.class,
-			recentLayoutRevision.getPrimaryKey(), recentLayoutRevision);
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByU_L_P,
-			new Object[] {
-				recentLayoutRevision.getUserId(),
-				recentLayoutRevision.getLayoutSetBranchId(),
-				recentLayoutRevision.getPlid()
-			},
-			recentLayoutRevision);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the recent layout revisions in the entity cache if it is enabled.
-	 *
-	 * @param recentLayoutRevisions the recent layout revisions
-	 */
-	@Override
-	public void cacheResult(List<RecentLayoutRevision> recentLayoutRevisions) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (recentLayoutRevisions.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (RecentLayoutRevision recentLayoutRevision :
-				recentLayoutRevisions) {
-
-			if (EntityCacheUtil.getResult(
-					RecentLayoutRevisionImpl.class,
-					recentLayoutRevision.getPrimaryKey()) == null) {
-
-				cacheResult(recentLayoutRevision);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all recent layout revisions.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		EntityCacheUtil.clearCache(RecentLayoutRevisionImpl.class);
-
-		FinderCacheUtil.clearCache(RecentLayoutRevisionImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the recent layout revision.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(RecentLayoutRevision recentLayoutRevision) {
-		EntityCacheUtil.removeResult(
-			RecentLayoutRevisionImpl.class, recentLayoutRevision);
-	}
-
-	@Override
-	public void clearCache(List<RecentLayoutRevision> recentLayoutRevisions) {
-		for (RecentLayoutRevision recentLayoutRevision :
-				recentLayoutRevisions) {
-
-			EntityCacheUtil.removeResult(
-				RecentLayoutRevisionImpl.class, recentLayoutRevision);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		FinderCacheUtil.clearCache(RecentLayoutRevisionImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			EntityCacheUtil.removeResult(
-				RecentLayoutRevisionImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		RecentLayoutRevisionModelImpl recentLayoutRevisionModelImpl) {
-
-		Object[] args = new Object[] {
-			recentLayoutRevisionModelImpl.getUserId(),
-			recentLayoutRevisionModelImpl.getLayoutSetBranchId(),
-			recentLayoutRevisionModelImpl.getPlid()
-		};
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByU_L_P, args, recentLayoutRevisionModelImpl);
-	}
-
-	/**
 	 * Creates a new recent layout revision with the primary key. Does not add the recent layout revision to the database.
 	 *
 	 * @param recentLayoutRevisionId the primary key for the new recent layout revision
@@ -778,48 +660,6 @@ public class RecentLayoutRevisionPersistenceImpl
 		throws NoSuchRecentLayoutRevisionException {
 
 		return remove((Serializable)recentLayoutRevisionId);
-	}
-
-	/**
-	 * Removes the recent layout revision with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the recent layout revision
-	 * @return the recent layout revision that was removed
-	 * @throws NoSuchRecentLayoutRevisionException if a recent layout revision with the primary key could not be found
-	 */
-	@Override
-	public RecentLayoutRevision remove(Serializable primaryKey)
-		throws NoSuchRecentLayoutRevisionException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			RecentLayoutRevision recentLayoutRevision =
-				(RecentLayoutRevision)session.get(
-					RecentLayoutRevisionImpl.class, primaryKey);
-
-			if (recentLayoutRevision == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchRecentLayoutRevisionException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(recentLayoutRevision);
-		}
-		catch (NoSuchRecentLayoutRevisionException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -901,43 +741,13 @@ public class RecentLayoutRevisionPersistenceImpl
 			closeSession(session);
 		}
 
-		EntityCacheUtil.putResult(
-			RecentLayoutRevisionImpl.class, recentLayoutRevisionModelImpl,
-			false, true);
-
-		cacheUniqueFindersCache(recentLayoutRevisionModelImpl);
+		cacheUniqueFindersResult(recentLayoutRevision, false);
 
 		if (isNew) {
 			recentLayoutRevision.setNew(false);
 		}
 
 		recentLayoutRevision.resetOriginalValues();
-
-		return recentLayoutRevision;
-	}
-
-	/**
-	 * Returns the recent layout revision with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the recent layout revision
-	 * @return the recent layout revision
-	 * @throws NoSuchRecentLayoutRevisionException if a recent layout revision with the primary key could not be found
-	 */
-	@Override
-	public RecentLayoutRevision findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchRecentLayoutRevisionException {
-
-		RecentLayoutRevision recentLayoutRevision = fetchByPrimaryKey(
-			primaryKey);
-
-		if (recentLayoutRevision == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchRecentLayoutRevisionException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return recentLayoutRevision;
 	}
@@ -967,188 +777,6 @@ public class RecentLayoutRevisionPersistenceImpl
 		return fetchByPrimaryKey((Serializable)recentLayoutRevisionId);
 	}
 
-	/**
-	 * Returns all the recent layout revisions.
-	 *
-	 * @return the recent layout revisions
-	 */
-	@Override
-	public List<RecentLayoutRevision> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the recent layout revisions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>RecentLayoutRevisionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of recent layout revisions
-	 * @param end the upper bound of the range of recent layout revisions (not inclusive)
-	 * @return the range of recent layout revisions
-	 */
-	@Override
-	public List<RecentLayoutRevision> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the recent layout revisions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>RecentLayoutRevisionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of recent layout revisions
-	 * @param end the upper bound of the range of recent layout revisions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of recent layout revisions
-	 */
-	@Override
-	public List<RecentLayoutRevision> findAll(
-		int start, int end,
-		OrderByComparator<RecentLayoutRevision> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the recent layout revisions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>RecentLayoutRevisionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of recent layout revisions
-	 * @param end the upper bound of the range of recent layout revisions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of recent layout revisions
-	 */
-	@Override
-	public List<RecentLayoutRevision> findAll(
-		int start, int end,
-		OrderByComparator<RecentLayoutRevision> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<RecentLayoutRevision> list = null;
-
-		if (useFinderCache) {
-			list = (List<RecentLayoutRevision>)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_RECENTLAYOUTREVISION);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_RECENTLAYOUTREVISION;
-
-				sql = sql.concat(RecentLayoutRevisionModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<RecentLayoutRevision>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the recent layout revisions from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (RecentLayoutRevision recentLayoutRevision : findAll()) {
-			remove(recentLayoutRevision);
-		}
-	}
-
-	/**
-	 * Returns the number of recent layout revisions.
-	 *
-	 * @return the number of recent layout revisions
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)FinderCacheUtil.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_RECENTLAYOUTREVISION);
-
-				count = (Long)query.uniqueResult();
-
-				FinderCacheUtil.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	protected EntityCache getEntityCache() {
 		return EntityCacheUtil.getEntityCache();
@@ -1173,21 +801,6 @@ public class RecentLayoutRevisionPersistenceImpl
 	 * Initializes the recent layout revision persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByGroupId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByGroupId",
 			new String[] {
@@ -1214,7 +827,7 @@ public class RecentLayoutRevisionPersistenceImpl
 				_SQL_SELECT_RECENTLAYOUTREVISION_WHERE,
 				_SQL_COUNT_RECENTLAYOUTREVISION_WHERE,
 				RecentLayoutRevisionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"recentLayoutRevision.", "groupId", FinderColumn.Type.LONG,
 					"=", true, true, RecentLayoutRevision::getGroupId));
@@ -1244,7 +857,7 @@ public class RecentLayoutRevisionPersistenceImpl
 				_SQL_SELECT_RECENTLAYOUTREVISION_WHERE,
 				_SQL_COUNT_RECENTLAYOUTREVISION_WHERE,
 				RecentLayoutRevisionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"recentLayoutRevision.", "userId", FinderColumn.Type.LONG,
 					"=", true, true, RecentLayoutRevision::getUserId));
@@ -1275,28 +888,31 @@ public class RecentLayoutRevisionPersistenceImpl
 				_SQL_SELECT_RECENTLAYOUTREVISION_WHERE,
 				_SQL_COUNT_RECENTLAYOUTREVISION_WHERE,
 				RecentLayoutRevisionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"recentLayoutRevision.", "layoutRevisionId",
 					FinderColumn.Type.LONG, "=", true, true,
 					RecentLayoutRevision::getLayoutRevisionId));
 
-		_finderPathFetchByU_L_P = new FinderPath(
+		_finderPathFetchByU_L_P = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByU_L_P",
 			new String[] {
 				Long.class.getName(), Long.class.getName(), Long.class.getName()
 			},
-			new String[] {"userId", "layoutSetBranchId", "plid"}, true);
+			new String[] {"userId", "layoutSetBranchId", "plid"}, 0, 0, false,
+			RecentLayoutRevision::getUserId,
+			RecentLayoutRevision::getLayoutSetBranchId,
+			RecentLayoutRevision::getPlid);
 
 		_uniquePersistenceFinderByU_L_P = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByU_L_P,
-			_SQL_SELECT_RECENTLAYOUTREVISION_WHERE,
+			_SQL_SELECT_RECENTLAYOUTREVISION_WHERE, "",
 			new FinderColumn<>(
 				"recentLayoutRevision.", "userId", FinderColumn.Type.LONG, "=",
-				true, false, RecentLayoutRevision::getUserId),
+				true, true, RecentLayoutRevision::getUserId),
 			new FinderColumn<>(
 				"recentLayoutRevision.", "layoutSetBranchId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				RecentLayoutRevision::getLayoutSetBranchId),
 			new FinderColumn<>(
 				"recentLayoutRevision.", "plid", FinderColumn.Type.LONG, "=",
@@ -1311,23 +927,17 @@ public class RecentLayoutRevisionPersistenceImpl
 		EntityCacheUtil.removeCache(RecentLayoutRevisionImpl.class.getName());
 	}
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		RecentLayoutRevisionModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_RECENTLAYOUTREVISION =
 		"SELECT recentLayoutRevision FROM RecentLayoutRevision recentLayoutRevision";
 
 	private static final String _SQL_SELECT_RECENTLAYOUTREVISION_WHERE =
 		"SELECT recentLayoutRevision FROM RecentLayoutRevision recentLayoutRevision WHERE ";
 
-	private static final String _SQL_COUNT_RECENTLAYOUTREVISION =
-		"SELECT COUNT(recentLayoutRevision) FROM RecentLayoutRevision recentLayoutRevision";
-
 	private static final String _SQL_COUNT_RECENTLAYOUTREVISION_WHERE =
 		"SELECT COUNT(recentLayoutRevision) FROM RecentLayoutRevision recentLayoutRevision WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"recentLayoutRevision.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No RecentLayoutRevision exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No RecentLayoutRevision exists with the key {";
@@ -1341,4 +951,4 @@ public class RecentLayoutRevisionPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2123043429
+// LIFERAY-SERVICE-BUILDER-HASH:-1172347549

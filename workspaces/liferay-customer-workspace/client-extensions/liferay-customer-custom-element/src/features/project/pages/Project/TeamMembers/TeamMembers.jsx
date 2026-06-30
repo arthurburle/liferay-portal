@@ -6,28 +6,34 @@
 import {useQuery} from '@apollo/client';
 import {useEffect} from 'react';
 import {useOutletContext} from 'react-router-dom';
-import SearchBuilder from '~/lib/SearchBuilder';
 import IncidentContactCard from '~/features/project/containers/IncidentContactCard';
 import {PRODUCT_TYPES} from '~/features/project/utils/constants';
-import i18n from '~/utils/I18n';
 import useCurrentKoroneikiAccount from '~/hooks/useCurrentKoroneikiAccount';
+import useHasPaaSExperience from '~/hooks/useHasPaaSExperience';
+import SearchBuilder from '~/lib/SearchBuilder';
 import {getAccountSubscriptionGroups} from '~/services/liferay/graphql/queries';
+import i18n from '~/utils/I18n';
+
 import ManageProductUsers from './components/ManageProductUsers/ManageProductUsers';
 import TeamMembersTable from './components/TeamMembersTable/TeamMembersTable';
 
 const targetProducts = [
 	'Analytics Cloud',
-	'Liferay Cloud'
+	'Liferay Cloud',
+	PRODUCT_TYPES.dxpCloud,
 ];
 
 const TeamMembers = () => {
 	const {setHasSideMenu} = useOutletContext();
-	const {data: dataCurrentKoroneikiAccount, loading: loadingCurrentKoroneikiAccount} = useCurrentKoroneikiAccount();
-	const koroneikiAccount = dataCurrentKoroneikiAccount?.koroneikiAccountByExternalReferenceCode;
+	const {
+		data: dataCurrentKoroneikiAccount,
+		loading: loadingCurrentKoroneikiAccount,
+	} = useCurrentKoroneikiAccount();
+	const koroneikiAccount =
+		dataCurrentKoroneikiAccount?.koroneikiAccountByExternalReferenceCode;
 
-	const {data: dataSubscriptionGroups, loading: loadingSubscriptionGroups} = useQuery(
-		getAccountSubscriptionGroups,
-		{
+	const {data: dataSubscriptionGroups, loading: loadingSubscriptionGroups} =
+		useQuery(getAccountSubscriptionGroups, {
 			skip: loadingCurrentKoroneikiAccount,
 			variables: {
 				filter: new SearchBuilder()
@@ -36,14 +42,13 @@ const TeamMembers = () => {
 					.eq('hasActivation', true)
 					.build(),
 			},
-		}
-	);
+		});
 
 	const accountSubscriptionGroups =
 		dataSubscriptionGroups?.c?.accountSubscriptionGroups?.items;
 
 	const accountSubscriptionGroupsNames = accountSubscriptionGroups?.map(
-		(group) => group?.name
+		(group) => group?.activationProductName
 	);
 
 	const hasActiveProduct = accountSubscriptionGroups?.some(
@@ -53,11 +58,8 @@ const TeamMembers = () => {
 			item?.activationStatus === 'Active'
 	);
 
-	const hasDXPCloudSubscription = accountSubscriptionGroups?.some(
-		(item) =>
-			item.name === PRODUCT_TYPES.liferayCloud &&
-				item.activationProductName?.split(',')
-					.includes(PRODUCT_TYPES.dxpCloud)
+	const hasPaaSExperience = useHasPaaSExperience(
+		koroneikiAccount?.accountKey
 	);
 
 	const loading = loadingCurrentKoroneikiAccount || loadingSubscriptionGroups;
@@ -88,14 +90,14 @@ const TeamMembers = () => {
 				/>
 
 				{hasActiveProduct && (
-						<IncidentContactCard
-							accountSubscriptionGroupsNames={accountSubscriptionGroupsNames}
-							hasActiveProduct={hasActiveProduct}
-							hasDXPCloudSubscription={hasDXPCloudSubscription}
-							koroneikiAccount={koroneikiAccount}
-							loading={loading}
-						/>
-					)}
+					<IncidentContactCard
+						accountSubscriptionGroupsNames={
+							accountSubscriptionGroupsNames
+						}
+						hasActiveProduct={hasActiveProduct}
+						hasPaaSExperience={hasPaaSExperience}
+					/>
+				)}
 			</div>
 		</>
 	);

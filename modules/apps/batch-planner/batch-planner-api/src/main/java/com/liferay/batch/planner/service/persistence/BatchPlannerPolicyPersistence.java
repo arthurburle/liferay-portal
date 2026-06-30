@@ -188,21 +188,6 @@ public interface BatchPlannerPolicyPersistence
 	public int countByBPPI_N(long batchPlannerPlanId, String name);
 
 	/**
-	 * Caches the batch planner policy in the entity cache if it is enabled.
-	 *
-	 * @param batchPlannerPolicy the batch planner policy
-	 */
-	public void cacheResult(BatchPlannerPolicy batchPlannerPolicy);
-
-	/**
-	 * Caches the batch planner policies in the entity cache if it is enabled.
-	 *
-	 * @param batchPlannerPolicies the batch planner policies
-	 */
-	public void cacheResult(
-		java.util.List<BatchPlannerPolicy> batchPlannerPolicies);
-
-	/**
 	 * Creates a new batch planner policy with the primary key. Does not add the batch planner policy to the database.
 	 *
 	 * @param batchPlannerPolicyId the primary key for the new batch planner policy
@@ -240,73 +225,5 @@ public interface BatchPlannerPolicyPersistence
 	 */
 	public BatchPlannerPolicy fetchByPrimaryKey(long batchPlannerPolicyId);
 
-	/**
-	 * Returns all the batch planner policies.
-	 *
-	 * @return the batch planner policies
-	 */
-	public java.util.List<BatchPlannerPolicy> findAll();
-
-	/**
-	 * Returns a range of all the batch planner policies.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.batch.planner.model.impl.BatchPlannerPolicyModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of batch planner policies
-	 * @param end the upper bound of the range of batch planner policies (not inclusive)
-	 * @return the range of batch planner policies
-	 */
-	public java.util.List<BatchPlannerPolicy> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the batch planner policies.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.batch.planner.model.impl.BatchPlannerPolicyModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of batch planner policies
-	 * @param end the upper bound of the range of batch planner policies (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of batch planner policies
-	 */
-	public java.util.List<BatchPlannerPolicy> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<BatchPlannerPolicy>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the batch planner policies.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.batch.planner.model.impl.BatchPlannerPolicyModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of batch planner policies
-	 * @param end the upper bound of the range of batch planner policies (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of batch planner policies
-	 */
-	public java.util.List<BatchPlannerPolicy> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<BatchPlannerPolicy>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the batch planner policies from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of batch planner policies.
-	 *
-	 * @return the number of batch planner policies
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:675766446
+// LIFERAY-SERVICE-BUILDER-HASH:-963181726

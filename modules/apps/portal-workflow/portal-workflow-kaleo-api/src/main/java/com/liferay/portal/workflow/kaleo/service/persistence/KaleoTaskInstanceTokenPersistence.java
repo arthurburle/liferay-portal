@@ -741,21 +741,6 @@ public interface KaleoTaskInstanceTokenPersistence
 	public int countByC_U_C(long companyId, long userId, boolean completed);
 
 	/**
-	 * Caches the kaleo task instance token in the entity cache if it is enabled.
-	 *
-	 * @param kaleoTaskInstanceToken the kaleo task instance token
-	 */
-	public void cacheResult(KaleoTaskInstanceToken kaleoTaskInstanceToken);
-
-	/**
-	 * Caches the kaleo task instance tokens in the entity cache if it is enabled.
-	 *
-	 * @param kaleoTaskInstanceTokens the kaleo task instance tokens
-	 */
-	public void cacheResult(
-		java.util.List<KaleoTaskInstanceToken> kaleoTaskInstanceTokens);
-
-	/**
 	 * Creates a new kaleo task instance token with the primary key. Does not add the kaleo task instance token to the database.
 	 *
 	 * @param kaleoTaskInstanceTokenId the primary key for the new kaleo task instance token
@@ -796,73 +781,5 @@ public interface KaleoTaskInstanceTokenPersistence
 	public KaleoTaskInstanceToken fetchByPrimaryKey(
 		long kaleoTaskInstanceTokenId);
 
-	/**
-	 * Returns all the kaleo task instance tokens.
-	 *
-	 * @return the kaleo task instance tokens
-	 */
-	public java.util.List<KaleoTaskInstanceToken> findAll();
-
-	/**
-	 * Returns a range of all the kaleo task instance tokens.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskInstanceTokenModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo task instance tokens
-	 * @param end the upper bound of the range of kaleo task instance tokens (not inclusive)
-	 * @return the range of kaleo task instance tokens
-	 */
-	public java.util.List<KaleoTaskInstanceToken> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the kaleo task instance tokens.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskInstanceTokenModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo task instance tokens
-	 * @param end the upper bound of the range of kaleo task instance tokens (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of kaleo task instance tokens
-	 */
-	public java.util.List<KaleoTaskInstanceToken> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<KaleoTaskInstanceToken>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the kaleo task instance tokens.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskInstanceTokenModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo task instance tokens
-	 * @param end the upper bound of the range of kaleo task instance tokens (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of kaleo task instance tokens
-	 */
-	public java.util.List<KaleoTaskInstanceToken> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<KaleoTaskInstanceToken>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the kaleo task instance tokens from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of kaleo task instance tokens.
-	 *
-	 * @return the number of kaleo task instance tokens
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1729834061
+// LIFERAY-SERVICE-BUILDER-HASH:1490287207

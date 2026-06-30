@@ -550,21 +550,6 @@ public interface PortletPreferenceValuePersistence
 		long portletPreferencesId, String name, String smallValue);
 
 	/**
-	 * Caches the portlet preference value in the entity cache if it is enabled.
-	 *
-	 * @param portletPreferenceValue the portlet preference value
-	 */
-	public void cacheResult(PortletPreferenceValue portletPreferenceValue);
-
-	/**
-	 * Caches the portlet preference values in the entity cache if it is enabled.
-	 *
-	 * @param portletPreferenceValues the portlet preference values
-	 */
-	public void cacheResult(
-		java.util.List<PortletPreferenceValue> portletPreferenceValues);
-
-	/**
 	 * Creates a new portlet preference value with the primary key. Does not add the portlet preference value to the database.
 	 *
 	 * @param portletPreferenceValueId the primary key for the new portlet preference value
@@ -605,73 +590,5 @@ public interface PortletPreferenceValuePersistence
 	public PortletPreferenceValue fetchByPrimaryKey(
 		long portletPreferenceValueId);
 
-	/**
-	 * Returns all the portlet preference values.
-	 *
-	 * @return the portlet preference values
-	 */
-	public java.util.List<PortletPreferenceValue> findAll();
-
-	/**
-	 * Returns a range of all the portlet preference values.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.PortletPreferenceValueModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of portlet preference values
-	 * @param end the upper bound of the range of portlet preference values (not inclusive)
-	 * @return the range of portlet preference values
-	 */
-	public java.util.List<PortletPreferenceValue> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the portlet preference values.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.PortletPreferenceValueModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of portlet preference values
-	 * @param end the upper bound of the range of portlet preference values (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of portlet preference values
-	 */
-	public java.util.List<PortletPreferenceValue> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<PortletPreferenceValue>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the portlet preference values.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.PortletPreferenceValueModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of portlet preference values
-	 * @param end the upper bound of the range of portlet preference values (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of portlet preference values
-	 */
-	public java.util.List<PortletPreferenceValue> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<PortletPreferenceValue>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the portlet preference values from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of portlet preference values.
-	 *
-	 * @return the number of portlet preference values
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1721652104
+// LIFERAY-SERVICE-BUILDER-HASH:-1971510495

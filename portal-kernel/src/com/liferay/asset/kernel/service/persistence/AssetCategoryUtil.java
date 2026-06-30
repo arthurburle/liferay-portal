@@ -36,6 +36,20 @@ public class AssetCategoryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<AssetCategory> assetCategories) {
+		getPersistence().cacheResult(assetCategories);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(AssetCategory assetCategory) {
+		getPersistence().cacheResult(assetCategory);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -2812,24 +2826,6 @@ public class AssetCategoryUtil {
 	}
 
 	/**
-	 * Caches the asset category in the entity cache if it is enabled.
-	 *
-	 * @param assetCategory the asset category
-	 */
-	public static void cacheResult(AssetCategory assetCategory) {
-		getPersistence().cacheResult(assetCategory);
-	}
-
-	/**
-	 * Caches the asset categories in the entity cache if it is enabled.
-	 *
-	 * @param assetCategories the asset categories
-	 */
-	public static void cacheResult(List<AssetCategory> assetCategories) {
-		getPersistence().cacheResult(assetCategories);
-	}
-
-	/**
 	 * Creates a new asset category with the primary key. Does not add the asset category to the database.
 	 *
 	 * @param categoryId the primary key for the new asset category
@@ -2879,86 +2875,6 @@ public class AssetCategoryUtil {
 		return getPersistence().fetchByPrimaryKey(categoryId);
 	}
 
-	/**
-	 * Returns all the asset categories.
-	 *
-	 * @return the asset categories
-	 */
-	public static List<AssetCategory> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the asset categories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.asset.model.impl.AssetCategoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset categories
-	 * @param end the upper bound of the range of asset categories (not inclusive)
-	 * @return the range of asset categories
-	 */
-	public static List<AssetCategory> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the asset categories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.asset.model.impl.AssetCategoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset categories
-	 * @param end the upper bound of the range of asset categories (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of asset categories
-	 */
-	public static List<AssetCategory> findAll(
-		int start, int end,
-		OrderByComparator<AssetCategory> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the asset categories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.asset.model.impl.AssetCategoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset categories
-	 * @param end the upper bound of the range of asset categories (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of asset categories
-	 */
-	public static List<AssetCategory> findAll(
-		int start, int end, OrderByComparator<AssetCategory> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the asset categories from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of asset categories.
-	 *
-	 * @return the number of asset categories
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static AssetCategoryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -2970,4 +2886,4 @@ public class AssetCategoryUtil {
 	private static volatile AssetCategoryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-23338593
+// LIFERAY-SERVICE-BUILDER-HASH:2110571513

@@ -37,6 +37,24 @@ public class CommerceMLForecastAlertEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CommerceMLForecastAlertEntry> commerceMLForecastAlertEntries) {
+
+		getPersistence().cacheResult(commerceMLForecastAlertEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		CommerceMLForecastAlertEntry commerceMLForecastAlertEntry) {
+
+		getPersistence().cacheResult(commerceMLForecastAlertEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1285,28 +1303,6 @@ public class CommerceMLForecastAlertEntryUtil {
 	}
 
 	/**
-	 * Caches the commerce ml forecast alert entry in the entity cache if it is enabled.
-	 *
-	 * @param commerceMLForecastAlertEntry the commerce ml forecast alert entry
-	 */
-	public static void cacheResult(
-		CommerceMLForecastAlertEntry commerceMLForecastAlertEntry) {
-
-		getPersistence().cacheResult(commerceMLForecastAlertEntry);
-	}
-
-	/**
-	 * Caches the commerce ml forecast alert entries in the entity cache if it is enabled.
-	 *
-	 * @param commerceMLForecastAlertEntries the commerce ml forecast alert entries
-	 */
-	public static void cacheResult(
-		List<CommerceMLForecastAlertEntry> commerceMLForecastAlertEntries) {
-
-		getPersistence().cacheResult(commerceMLForecastAlertEntries);
-	}
-
-	/**
 	 * Creates a new commerce ml forecast alert entry with the primary key. Does not add the commerce ml forecast alert entry to the database.
 	 *
 	 * @param commerceMLForecastAlertEntryId the primary key for the new commerce ml forecast alert entry
@@ -1368,89 +1364,6 @@ public class CommerceMLForecastAlertEntryUtil {
 			commerceMLForecastAlertEntryId);
 	}
 
-	/**
-	 * Returns all the commerce ml forecast alert entries.
-	 *
-	 * @return the commerce ml forecast alert entries
-	 */
-	public static List<CommerceMLForecastAlertEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce ml forecast alert entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.machine.learning.forecast.alert.model.impl.CommerceMLForecastAlertEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce ml forecast alert entries
-	 * @param end the upper bound of the range of commerce ml forecast alert entries (not inclusive)
-	 * @return the range of commerce ml forecast alert entries
-	 */
-	public static List<CommerceMLForecastAlertEntry> findAll(
-		int start, int end) {
-
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce ml forecast alert entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.machine.learning.forecast.alert.model.impl.CommerceMLForecastAlertEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce ml forecast alert entries
-	 * @param end the upper bound of the range of commerce ml forecast alert entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce ml forecast alert entries
-	 */
-	public static List<CommerceMLForecastAlertEntry> findAll(
-		int start, int end,
-		OrderByComparator<CommerceMLForecastAlertEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce ml forecast alert entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.machine.learning.forecast.alert.model.impl.CommerceMLForecastAlertEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce ml forecast alert entries
-	 * @param end the upper bound of the range of commerce ml forecast alert entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce ml forecast alert entries
-	 */
-	public static List<CommerceMLForecastAlertEntry> findAll(
-		int start, int end,
-		OrderByComparator<CommerceMLForecastAlertEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce ml forecast alert entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce ml forecast alert entries.
-	 *
-	 * @return the number of commerce ml forecast alert entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceMLForecastAlertEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1465,4 +1378,4 @@ public class CommerceMLForecastAlertEntryUtil {
 		_persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1887066245
+// LIFERAY-SERVICE-BUILDER-HASH:1310072368

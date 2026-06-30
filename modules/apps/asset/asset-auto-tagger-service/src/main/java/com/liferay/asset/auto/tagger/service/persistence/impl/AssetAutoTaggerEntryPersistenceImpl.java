@@ -13,15 +13,11 @@ import com.liferay.asset.auto.tagger.model.impl.AssetAutoTaggerEntryModelImpl;
 import com.liferay.asset.auto.tagger.service.persistence.AssetAutoTaggerEntryPersistence;
 import com.liferay.asset.auto.tagger.service.persistence.AssetAutoTaggerEntryUtil;
 import com.liferay.asset.auto.tagger.service.persistence.impl.constants.AssetAutoTaggerPersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -35,10 +31,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 
 import java.io.Serializable;
@@ -49,9 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,7 +66,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = AssetAutoTaggerEntryPersistence.class)
 public class AssetAutoTaggerEntryPersistenceImpl
-	extends BasePersistenceImpl<AssetAutoTaggerEntry>
+	extends BasePersistenceImpl<AssetAutoTaggerEntry, NoSuchEntryException>
 	implements AssetAutoTaggerEntryPersistence {
 
 	/*
@@ -92,9 +83,6 @@ public class AssetAutoTaggerEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByAssetEntryId;
 	private FinderPath _finderPathWithoutPaginationFindByAssetEntryId;
 	private FinderPath _finderPathCountByAssetEntryId;
@@ -174,14 +162,9 @@ public class AssetAutoTaggerEntryPersistenceImpl
 		OrderByComparator<AssetAutoTaggerEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AssetAutoTaggerEntry.class)) {
-
-			return _collectionPersistenceFinderByAssetEntryId.find(
-				finderCache, new Object[] {assetEntryId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByAssetEntryId.find(
+			finderCache, new Object[] {assetEntryId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -245,13 +228,8 @@ public class AssetAutoTaggerEntryPersistenceImpl
 	 */
 	@Override
 	public int countByAssetEntryId(long assetEntryId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AssetAutoTaggerEntry.class)) {
-
-			return _collectionPersistenceFinderByAssetEntryId.count(
-				finderCache, new Object[] {assetEntryId});
-		}
+		return _collectionPersistenceFinderByAssetEntryId.count(
+			finderCache, new Object[] {assetEntryId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByAssetTagId;
@@ -333,14 +311,9 @@ public class AssetAutoTaggerEntryPersistenceImpl
 		OrderByComparator<AssetAutoTaggerEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AssetAutoTaggerEntry.class)) {
-
-			return _collectionPersistenceFinderByAssetTagId.find(
-				finderCache, new Object[] {assetTagId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByAssetTagId.find(
+			finderCache, new Object[] {assetTagId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -404,13 +377,8 @@ public class AssetAutoTaggerEntryPersistenceImpl
 	 */
 	@Override
 	public int countByAssetTagId(long assetTagId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AssetAutoTaggerEntry.class)) {
-
-			return _collectionPersistenceFinderByAssetTagId.count(
-				finderCache, new Object[] {assetTagId});
-		}
+		return _collectionPersistenceFinderByAssetTagId.count(
+			finderCache, new Object[] {assetTagId});
 	}
 
 	private FinderPath _finderPathFetchByA_A;
@@ -472,14 +440,9 @@ public class AssetAutoTaggerEntryPersistenceImpl
 	public AssetAutoTaggerEntry fetchByA_A(
 		long assetEntryId, long assetTagId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AssetAutoTaggerEntry.class)) {
-
-			return _uniquePersistenceFinderByA_A.fetch(
-				finderCache, new Object[] {assetEntryId, assetTagId},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByA_A.fetch(
+			finderCache, new Object[] {assetEntryId, assetTagId},
+			useFinderCache);
 	}
 
 	/**
@@ -522,129 +485,6 @@ public class AssetAutoTaggerEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the asset auto tagger entry in the entity cache if it is enabled.
-	 *
-	 * @param assetAutoTaggerEntry the asset auto tagger entry
-	 */
-	@Override
-	public void cacheResult(AssetAutoTaggerEntry assetAutoTaggerEntry) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					assetAutoTaggerEntry.getCtCollectionId())) {
-
-			entityCache.putResult(
-				AssetAutoTaggerEntryImpl.class,
-				assetAutoTaggerEntry.getPrimaryKey(), assetAutoTaggerEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByA_A,
-				new Object[] {
-					assetAutoTaggerEntry.getAssetEntryId(),
-					assetAutoTaggerEntry.getAssetTagId()
-				},
-				assetAutoTaggerEntry);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the asset auto tagger entries in the entity cache if it is enabled.
-	 *
-	 * @param assetAutoTaggerEntries the asset auto tagger entries
-	 */
-	@Override
-	public void cacheResult(List<AssetAutoTaggerEntry> assetAutoTaggerEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (assetAutoTaggerEntries.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (AssetAutoTaggerEntry assetAutoTaggerEntry :
-				assetAutoTaggerEntries) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						assetAutoTaggerEntry.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						AssetAutoTaggerEntryImpl.class,
-						assetAutoTaggerEntry.getPrimaryKey()) == null) {
-
-					cacheResult(assetAutoTaggerEntry);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all asset auto tagger entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(AssetAutoTaggerEntryImpl.class);
-
-		finderCache.clearCache(AssetAutoTaggerEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the asset auto tagger entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(AssetAutoTaggerEntry assetAutoTaggerEntry) {
-		entityCache.removeResult(
-			AssetAutoTaggerEntryImpl.class, assetAutoTaggerEntry);
-	}
-
-	@Override
-	public void clearCache(List<AssetAutoTaggerEntry> assetAutoTaggerEntries) {
-		for (AssetAutoTaggerEntry assetAutoTaggerEntry :
-				assetAutoTaggerEntries) {
-
-			entityCache.removeResult(
-				AssetAutoTaggerEntryImpl.class, assetAutoTaggerEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(AssetAutoTaggerEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				AssetAutoTaggerEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		AssetAutoTaggerEntryModelImpl assetAutoTaggerEntryModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					assetAutoTaggerEntryModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				assetAutoTaggerEntryModelImpl.getAssetEntryId(),
-				assetAutoTaggerEntryModelImpl.getAssetTagId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByA_A, args, assetAutoTaggerEntryModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new asset auto tagger entry with the primary key. Does not add the asset auto tagger entry to the database.
 	 *
 	 * @param assetAutoTaggerEntryId the primary key for the new asset auto tagger entry
@@ -675,48 +515,6 @@ public class AssetAutoTaggerEntryPersistenceImpl
 		throws NoSuchEntryException {
 
 		return remove((Serializable)assetAutoTaggerEntryId);
-	}
-
-	/**
-	 * Removes the asset auto tagger entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the asset auto tagger entry
-	 * @return the asset auto tagger entry that was removed
-	 * @throws NoSuchEntryException if a asset auto tagger entry with the primary key could not be found
-	 */
-	@Override
-	public AssetAutoTaggerEntry remove(Serializable primaryKey)
-		throws NoSuchEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			AssetAutoTaggerEntry assetAutoTaggerEntry =
-				(AssetAutoTaggerEntry)session.get(
-					AssetAutoTaggerEntryImpl.class, primaryKey);
-
-			if (assetAutoTaggerEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(assetAutoTaggerEntry);
-		}
-		catch (NoSuchEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -831,43 +629,13 @@ public class AssetAutoTaggerEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			AssetAutoTaggerEntryImpl.class, assetAutoTaggerEntryModelImpl,
-			false, true);
-
-		cacheUniqueFindersCache(assetAutoTaggerEntryModelImpl);
+		cacheUniqueFindersResult(assetAutoTaggerEntry, false);
 
 		if (isNew) {
 			assetAutoTaggerEntry.setNew(false);
 		}
 
 		assetAutoTaggerEntry.resetOriginalValues();
-
-		return assetAutoTaggerEntry;
-	}
-
-	/**
-	 * Returns the asset auto tagger entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the asset auto tagger entry
-	 * @return the asset auto tagger entry
-	 * @throws NoSuchEntryException if a asset auto tagger entry with the primary key could not be found
-	 */
-	@Override
-	public AssetAutoTaggerEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchEntryException {
-
-		AssetAutoTaggerEntry assetAutoTaggerEntry = fetchByPrimaryKey(
-			primaryKey);
-
-		if (assetAutoTaggerEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return assetAutoTaggerEntry;
 	}
@@ -886,53 +654,9 @@ public class AssetAutoTaggerEntryPersistenceImpl
 		return findByPrimaryKey((Serializable)assetAutoTaggerEntryId);
 	}
 
-	/**
-	 * Returns the asset auto tagger entry with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the asset auto tagger entry
-	 * @return the asset auto tagger entry, or <code>null</code> if a asset auto tagger entry with the primary key could not be found
-	 */
 	@Override
-	public AssetAutoTaggerEntry fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				AssetAutoTaggerEntry.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		AssetAutoTaggerEntry assetAutoTaggerEntry =
-			(AssetAutoTaggerEntry)entityCache.getResult(
-				AssetAutoTaggerEntryImpl.class, primaryKey);
-
-		if (assetAutoTaggerEntry != null) {
-			return assetAutoTaggerEntry;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			assetAutoTaggerEntry = (AssetAutoTaggerEntry)session.get(
-				AssetAutoTaggerEntryImpl.class, primaryKey);
-
-			if (assetAutoTaggerEntry != null) {
-				cacheResult(assetAutoTaggerEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return assetAutoTaggerEntry;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -944,328 +668,6 @@ public class AssetAutoTaggerEntryPersistenceImpl
 	@Override
 	public AssetAutoTaggerEntry fetchByPrimaryKey(long assetAutoTaggerEntryId) {
 		return fetchByPrimaryKey((Serializable)assetAutoTaggerEntryId);
-	}
-
-	@Override
-	public Map<Serializable, AssetAutoTaggerEntry> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(AssetAutoTaggerEntry.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, AssetAutoTaggerEntry> map =
-			new HashMap<Serializable, AssetAutoTaggerEntry>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			AssetAutoTaggerEntry assetAutoTaggerEntry = fetchByPrimaryKey(
-				primaryKey);
-
-			if (assetAutoTaggerEntry != null) {
-				map.put(primaryKey, assetAutoTaggerEntry);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						AssetAutoTaggerEntry.class, primaryKey)) {
-
-				AssetAutoTaggerEntry assetAutoTaggerEntry =
-					(AssetAutoTaggerEntry)entityCache.getResult(
-						AssetAutoTaggerEntryImpl.class, primaryKey);
-
-				if (assetAutoTaggerEntry == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, assetAutoTaggerEntry);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (AssetAutoTaggerEntry assetAutoTaggerEntry :
-					(List<AssetAutoTaggerEntry>)query.list()) {
-
-				map.put(
-					assetAutoTaggerEntry.getPrimaryKeyObj(),
-					assetAutoTaggerEntry);
-
-				cacheResult(assetAutoTaggerEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the asset auto tagger entries.
-	 *
-	 * @return the asset auto tagger entries
-	 */
-	@Override
-	public List<AssetAutoTaggerEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the asset auto tagger entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>AssetAutoTaggerEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset auto tagger entries
-	 * @param end the upper bound of the range of asset auto tagger entries (not inclusive)
-	 * @return the range of asset auto tagger entries
-	 */
-	@Override
-	public List<AssetAutoTaggerEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the asset auto tagger entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>AssetAutoTaggerEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset auto tagger entries
-	 * @param end the upper bound of the range of asset auto tagger entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of asset auto tagger entries
-	 */
-	@Override
-	public List<AssetAutoTaggerEntry> findAll(
-		int start, int end,
-		OrderByComparator<AssetAutoTaggerEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the asset auto tagger entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>AssetAutoTaggerEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset auto tagger entries
-	 * @param end the upper bound of the range of asset auto tagger entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of asset auto tagger entries
-	 */
-	@Override
-	public List<AssetAutoTaggerEntry> findAll(
-		int start, int end,
-		OrderByComparator<AssetAutoTaggerEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AssetAutoTaggerEntry.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<AssetAutoTaggerEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<AssetAutoTaggerEntry>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_ASSETAUTOTAGGERENTRY);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_ASSETAUTOTAGGERENTRY;
-
-					sql = sql.concat(
-						AssetAutoTaggerEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<AssetAutoTaggerEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the asset auto tagger entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (AssetAutoTaggerEntry assetAutoTaggerEntry : findAll()) {
-			remove(assetAutoTaggerEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of asset auto tagger entries.
-	 *
-	 * @return the number of asset auto tagger entries
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					AssetAutoTaggerEntry.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_ASSETAUTOTAGGERENTRY);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1354,21 +756,6 @@ public class AssetAutoTaggerEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByAssetEntryId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByAssetEntryId",
 			new String[] {
@@ -1395,7 +782,7 @@ public class AssetAutoTaggerEntryPersistenceImpl
 				_SQL_SELECT_ASSETAUTOTAGGERENTRY_WHERE,
 				_SQL_COUNT_ASSETAUTOTAGGERENTRY_WHERE,
 				AssetAutoTaggerEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"assetAutoTaggerEntry.", "assetEntryId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1427,22 +814,25 @@ public class AssetAutoTaggerEntryPersistenceImpl
 				_SQL_SELECT_ASSETAUTOTAGGERENTRY_WHERE,
 				_SQL_COUNT_ASSETAUTOTAGGERENTRY_WHERE,
 				AssetAutoTaggerEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"assetAutoTaggerEntry.", "assetTagId",
 					FinderColumn.Type.LONG, "=", true, true,
 					AssetAutoTaggerEntry::getAssetTagId));
 
-		_finderPathFetchByA_A = new FinderPath(
+		_finderPathFetchByA_A = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByA_A",
 			new String[] {Long.class.getName(), Long.class.getName()},
-			new String[] {"assetEntryId", "assetTagId"}, true);
+			new String[] {"assetEntryId", "assetTagId"}, 0, 0, false,
+			AssetAutoTaggerEntry::getAssetEntryId,
+			AssetAutoTaggerEntry::getAssetTagId);
 
 		_uniquePersistenceFinderByA_A = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByA_A, _SQL_SELECT_ASSETAUTOTAGGERENTRY_WHERE,
+			"",
 			new FinderColumn<>(
 				"assetAutoTaggerEntry.", "assetEntryId", FinderColumn.Type.LONG,
-				"=", true, false, AssetAutoTaggerEntry::getAssetEntryId),
+				"=", true, true, AssetAutoTaggerEntry::getAssetEntryId),
 			new FinderColumn<>(
 				"assetAutoTaggerEntry.", "assetTagId", FinderColumn.Type.LONG,
 				"=", true, true, AssetAutoTaggerEntry::getAssetTagId));
@@ -1492,23 +882,17 @@ public class AssetAutoTaggerEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		AssetAutoTaggerEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_ASSETAUTOTAGGERENTRY =
 		"SELECT assetAutoTaggerEntry FROM AssetAutoTaggerEntry assetAutoTaggerEntry";
 
 	private static final String _SQL_SELECT_ASSETAUTOTAGGERENTRY_WHERE =
 		"SELECT assetAutoTaggerEntry FROM AssetAutoTaggerEntry assetAutoTaggerEntry WHERE ";
 
-	private static final String _SQL_COUNT_ASSETAUTOTAGGERENTRY =
-		"SELECT COUNT(assetAutoTaggerEntry) FROM AssetAutoTaggerEntry assetAutoTaggerEntry";
-
 	private static final String _SQL_COUNT_ASSETAUTOTAGGERENTRY_WHERE =
 		"SELECT COUNT(assetAutoTaggerEntry) FROM AssetAutoTaggerEntry assetAutoTaggerEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"assetAutoTaggerEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No AssetAutoTaggerEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No AssetAutoTaggerEntry exists with the key {";
@@ -1522,4 +906,4 @@ public class AssetAutoTaggerEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:773501524
+// LIFERAY-SERVICE-BUILDER-HASH:-1288730283

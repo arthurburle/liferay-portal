@@ -38,6 +38,24 @@ public class CommerceNotificationAttachmentUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CommerceNotificationAttachment> commerceNotificationAttachments) {
+
+		getPersistence().cacheResult(commerceNotificationAttachments);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		CommerceNotificationAttachment commerceNotificationAttachment) {
+
+		getPersistence().cacheResult(commerceNotificationAttachment);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -587,28 +605,6 @@ public class CommerceNotificationAttachmentUtil {
 	}
 
 	/**
-	 * Caches the commerce notification attachment in the entity cache if it is enabled.
-	 *
-	 * @param commerceNotificationAttachment the commerce notification attachment
-	 */
-	public static void cacheResult(
-		CommerceNotificationAttachment commerceNotificationAttachment) {
-
-		getPersistence().cacheResult(commerceNotificationAttachment);
-	}
-
-	/**
-	 * Caches the commerce notification attachments in the entity cache if it is enabled.
-	 *
-	 * @param commerceNotificationAttachments the commerce notification attachments
-	 */
-	public static void cacheResult(
-		List<CommerceNotificationAttachment> commerceNotificationAttachments) {
-
-		getPersistence().cacheResult(commerceNotificationAttachments);
-	}
-
-	/**
 	 * Creates a new commerce notification attachment with the primary key. Does not add the commerce notification attachment to the database.
 	 *
 	 * @param commerceNotificationAttachmentId the primary key for the new commerce notification attachment
@@ -670,89 +666,6 @@ public class CommerceNotificationAttachmentUtil {
 			commerceNotificationAttachmentId);
 	}
 
-	/**
-	 * Returns all the commerce notification attachments.
-	 *
-	 * @return the commerce notification attachments
-	 */
-	public static List<CommerceNotificationAttachment> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce notification attachments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.notification.model.impl.CommerceNotificationAttachmentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce notification attachments
-	 * @param end the upper bound of the range of commerce notification attachments (not inclusive)
-	 * @return the range of commerce notification attachments
-	 */
-	public static List<CommerceNotificationAttachment> findAll(
-		int start, int end) {
-
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce notification attachments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.notification.model.impl.CommerceNotificationAttachmentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce notification attachments
-	 * @param end the upper bound of the range of commerce notification attachments (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce notification attachments
-	 */
-	public static List<CommerceNotificationAttachment> findAll(
-		int start, int end,
-		OrderByComparator<CommerceNotificationAttachment> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce notification attachments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.notification.model.impl.CommerceNotificationAttachmentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce notification attachments
-	 * @param end the upper bound of the range of commerce notification attachments (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce notification attachments
-	 */
-	public static List<CommerceNotificationAttachment> findAll(
-		int start, int end,
-		OrderByComparator<CommerceNotificationAttachment> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce notification attachments from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce notification attachments.
-	 *
-	 * @return the number of commerce notification attachments
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceNotificationAttachmentPersistence getPersistence() {
 		return _persistence;
 	}
@@ -767,4 +680,4 @@ public class CommerceNotificationAttachmentUtil {
 		_persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-70160405
+// LIFERAY-SERVICE-BUILDER-HASH:-112836889

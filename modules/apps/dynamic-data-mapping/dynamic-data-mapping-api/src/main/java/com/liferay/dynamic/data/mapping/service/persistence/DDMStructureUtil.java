@@ -36,6 +36,20 @@ public class DDMStructureUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<DDMStructure> ddmStructures) {
+		getPersistence().cacheResult(ddmStructures);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(DDMStructure ddmStructure) {
+		getPersistence().cacheResult(ddmStructure);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -2514,24 +2528,6 @@ public class DDMStructureUtil {
 	}
 
 	/**
-	 * Caches the ddm structure in the entity cache if it is enabled.
-	 *
-	 * @param ddmStructure the ddm structure
-	 */
-	public static void cacheResult(DDMStructure ddmStructure) {
-		getPersistence().cacheResult(ddmStructure);
-	}
-
-	/**
-	 * Caches the ddm structures in the entity cache if it is enabled.
-	 *
-	 * @param ddmStructures the ddm structures
-	 */
-	public static void cacheResult(List<DDMStructure> ddmStructures) {
-		getPersistence().cacheResult(ddmStructures);
-	}
-
-	/**
 	 * Creates a new ddm structure with the primary key. Does not add the ddm structure to the database.
 	 *
 	 * @param structureId the primary key for the new ddm structure
@@ -2583,85 +2579,6 @@ public class DDMStructureUtil {
 		return getPersistence().fetchByPrimaryKey(structureId);
 	}
 
-	/**
-	 * Returns all the ddm structures.
-	 *
-	 * @return the ddm structures
-	 */
-	public static List<DDMStructure> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the ddm structures.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMStructureModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm structures
-	 * @param end the upper bound of the range of ddm structures (not inclusive)
-	 * @return the range of ddm structures
-	 */
-	public static List<DDMStructure> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm structures.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMStructureModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm structures
-	 * @param end the upper bound of the range of ddm structures (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm structures
-	 */
-	public static List<DDMStructure> findAll(
-		int start, int end, OrderByComparator<DDMStructure> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm structures.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMStructureModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm structures
-	 * @param end the upper bound of the range of ddm structures (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm structures
-	 */
-	public static List<DDMStructure> findAll(
-		int start, int end, OrderByComparator<DDMStructure> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the ddm structures from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of ddm structures.
-	 *
-	 * @return the number of ddm structures
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static DDMStructurePersistence getPersistence() {
 		return _persistence;
 	}
@@ -2673,4 +2590,4 @@ public class DDMStructureUtil {
 	private static volatile DDMStructurePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:163894320
+// LIFERAY-SERVICE-BUILDER-HASH:-1737629917

@@ -313,7 +313,7 @@ function _port_forward_argo_cd {
 
 	echo "Port-forwarding the ArgoCD service at http://localhost:8080."
 	echo ""
-	echo "Login with username and password \"${argocd_password}\" to continue monitoring setup."
+	echo "Login with username \"admin\" and password \"${argocd_password}\" to continue monitoring setup."
 	echo ""
 	echo "Use CTRL+C to exit when finished."
 
@@ -407,7 +407,6 @@ function _set_up_aws_grafana {
 		"${region}" \
 		"${terraform_args}" \
 		"-var=grafana_workspace_endpoint=$(terraform output -raw "grafana_workspace_endpoint")" \
-		"-var=grafana_workspace_role_arn=$(terraform output -raw "grafana_workspace_role_arn")" \
 		"-var=prometheus_workspace_endpoint=$(terraform output -raw "prometheus_workspace_endpoint")"
 
 	echo "Amazon Managed Grafana setup complete."
@@ -459,10 +458,14 @@ function _terraform_init_and_apply {
 		-backend-config="encrypt=true" \
 		-backend-config="key=${deployment_name}/${region}/${folder_separator}/terraform.tfstate" \
 		-backend-config="region=${region}" \
-		-backend-config="use_lockfile=true" \
-		-upgrade
+		-backend-config="use_lockfile=true"
 	else
-		terraform init -backend=false -upgrade
+			cat > backend_override.tf <<EOF
+terraform {
+	backend "local" {}
+}
+EOF
+			terraform init
 	fi
 
 	terraform apply ${terraform_args} "${@:7}"

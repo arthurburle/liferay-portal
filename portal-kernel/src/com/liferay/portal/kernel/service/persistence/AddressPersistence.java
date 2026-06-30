@@ -1530,20 +1530,6 @@ public interface AddressPersistence
 	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
-	 * Caches the address in the entity cache if it is enabled.
-	 *
-	 * @param address the address
-	 */
-	public void cacheResult(Address address);
-
-	/**
-	 * Caches the addresses in the entity cache if it is enabled.
-	 *
-	 * @param addresses the addresses
-	 */
-	public void cacheResult(java.util.List<Address> addresses);
-
-	/**
 	 * Creates a new address with the primary key. Does not add the address to the database.
 	 *
 	 * @param addressId the primary key for the new address
@@ -1580,73 +1566,5 @@ public interface AddressPersistence
 	 */
 	public Address fetchByPrimaryKey(long addressId);
 
-	/**
-	 * Returns all the addresses.
-	 *
-	 * @return the addresses
-	 */
-	public java.util.List<Address> findAll();
-
-	/**
-	 * Returns a range of all the addresses.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.AddressModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of addresses
-	 * @param end the upper bound of the range of addresses (not inclusive)
-	 * @return the range of addresses
-	 */
-	public java.util.List<Address> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the addresses.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.AddressModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of addresses
-	 * @param end the upper bound of the range of addresses (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of addresses
-	 */
-	public java.util.List<Address> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Address>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the addresses.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.AddressModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of addresses
-	 * @param end the upper bound of the range of addresses (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of addresses
-	 */
-	public java.util.List<Address> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Address>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the addresses from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of addresses.
-	 *
-	 * @return the number of addresses
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1907621236
+// LIFERAY-SERVICE-BUILDER-HASH:-470957858

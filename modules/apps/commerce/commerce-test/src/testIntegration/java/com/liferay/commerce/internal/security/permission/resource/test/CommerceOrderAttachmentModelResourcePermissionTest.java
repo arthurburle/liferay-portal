@@ -17,6 +17,7 @@ import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
 import com.liferay.commerce.service.CommerceOrderLocalService;
+import com.liferay.commerce.test.util.CommerceOrderAttachmentTestUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.ResourceConstants;
@@ -36,8 +37,11 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+
+import java.io.ByteArrayInputStream;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,6 +53,7 @@ import org.junit.runner.RunWith;
 /**
  * @author Stefano Motta
  */
+@FeatureFlag("LPD-6252")
 @RunWith(Arquillian.class)
 public class CommerceOrderAttachmentModelResourcePermissionTest {
 
@@ -59,6 +64,8 @@ public class CommerceOrderAttachmentModelResourcePermissionTest {
 
 	@Before
 	public void setUp() throws Exception {
+		CommerceOrderAttachmentTestUtil.initialize(getClass());
+
 		_group = GroupTestUtil.addGroup();
 
 		_commerceCurrency = CommerceCurrencyTestUtil.addCommerceCurrency(
@@ -120,9 +127,9 @@ public class CommerceOrderAttachmentModelResourcePermissionTest {
 				RandomTestUtil.randomString(), _user.getUserId(),
 				_commerceOrder.getCommerceOrderId(),
 				RandomTestUtil.nextDouble(), false,
-				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(), "invoice",
 				RandomTestUtil.randomString(),
-				getClass().getResourceAsStream("dependencies/attachment.txt"));
+				new ByteArrayInputStream("Liferay".getBytes()));
 
 		Assert.assertFalse(
 			_commerceOrderAttachmentModelResourcePermission.contains(
@@ -243,6 +250,85 @@ public class CommerceOrderAttachmentModelResourcePermissionTest {
 				CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS,
 				CommerceOrderActionKeys.
 					VIEW_RESTRICTED_COMMERCE_ORDER_ATTACHMENTS
+			});
+
+		Assert.assertTrue(
+			_commerceOrderAttachmentModelResourcePermission.contains(
+				permissionChecker,
+				commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				ActionKeys.DELETE));
+		Assert.assertTrue(
+			_commerceOrderAttachmentModelResourcePermission.contains(
+				permissionChecker,
+				commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				ActionKeys.UPDATE));
+		Assert.assertTrue(
+			_commerceOrderAttachmentModelResourcePermission.contains(
+				permissionChecker,
+				commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				ActionKeys.VIEW));
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_commerceOrder.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(_accountEntry.getAccountEntryGroupId()),
+			_role.getRoleId(),
+			new String[] {CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS});
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			commerceOrderAttachment.getCompanyId(),
+			CommerceOrderAttachment.class.getName(),
+			ResourceConstants.SCOPE_INDIVIDUAL,
+			String.valueOf(
+				commerceOrderAttachment.getCommerceOrderAttachmentId()),
+			_role.getRoleId(), new String[0]);
+
+		Assert.assertFalse(
+			_commerceOrderAttachmentModelResourcePermission.contains(
+				permissionChecker,
+				commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				ActionKeys.DELETE));
+		Assert.assertFalse(
+			_commerceOrderAttachmentModelResourcePermission.contains(
+				permissionChecker,
+				commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				ActionKeys.UPDATE));
+		Assert.assertFalse(
+			_commerceOrderAttachmentModelResourcePermission.contains(
+				permissionChecker,
+				commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				ActionKeys.VIEW));
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_commerceOrder.getCompanyId(),
+			CommerceOrderAttachment.class.getName(),
+			ResourceConstants.SCOPE_COMPANY,
+			String.valueOf(_commerceOrder.getCompanyId()), _role.getRoleId(),
+			new String[] {ActionKeys.VIEW});
+
+		Assert.assertFalse(
+			_commerceOrderAttachmentModelResourcePermission.contains(
+				permissionChecker,
+				commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				ActionKeys.DELETE));
+		Assert.assertFalse(
+			_commerceOrderAttachmentModelResourcePermission.contains(
+				permissionChecker,
+				commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				ActionKeys.UPDATE));
+		Assert.assertTrue(
+			_commerceOrderAttachmentModelResourcePermission.contains(
+				permissionChecker,
+				commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				ActionKeys.VIEW));
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_commerceOrder.getCompanyId(),
+			CommerceOrderAttachment.class.getName(),
+			ResourceConstants.SCOPE_COMPANY,
+			String.valueOf(_commerceOrder.getCompanyId()), _role.getRoleId(),
+			new String[] {
+				ActionKeys.DELETE, ActionKeys.UPDATE, ActionKeys.VIEW
 			});
 
 		Assert.assertTrue(

@@ -399,21 +399,6 @@ public interface ObjectFieldSettingPersistence
 	public int countByOFI_N(long objectFieldId, String name);
 
 	/**
-	 * Caches the object field setting in the entity cache if it is enabled.
-	 *
-	 * @param objectFieldSetting the object field setting
-	 */
-	public void cacheResult(ObjectFieldSetting objectFieldSetting);
-
-	/**
-	 * Caches the object field settings in the entity cache if it is enabled.
-	 *
-	 * @param objectFieldSettings the object field settings
-	 */
-	public void cacheResult(
-		java.util.List<ObjectFieldSetting> objectFieldSettings);
-
-	/**
 	 * Creates a new object field setting with the primary key. Does not add the object field setting to the database.
 	 *
 	 * @param objectFieldSettingId the primary key for the new object field setting
@@ -451,73 +436,5 @@ public interface ObjectFieldSettingPersistence
 	 */
 	public ObjectFieldSetting fetchByPrimaryKey(long objectFieldSettingId);
 
-	/**
-	 * Returns all the object field settings.
-	 *
-	 * @return the object field settings
-	 */
-	public java.util.List<ObjectFieldSetting> findAll();
-
-	/**
-	 * Returns a range of all the object field settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectFieldSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object field settings
-	 * @param end the upper bound of the range of object field settings (not inclusive)
-	 * @return the range of object field settings
-	 */
-	public java.util.List<ObjectFieldSetting> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the object field settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectFieldSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object field settings
-	 * @param end the upper bound of the range of object field settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object field settings
-	 */
-	public java.util.List<ObjectFieldSetting> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ObjectFieldSetting>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the object field settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectFieldSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object field settings
-	 * @param end the upper bound of the range of object field settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object field settings
-	 */
-	public java.util.List<ObjectFieldSetting> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ObjectFieldSetting>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the object field settings from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of object field settings.
-	 *
-	 * @return the number of object field settings
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1488422721
+// LIFERAY-SERVICE-BUILDER-HASH:1909160973

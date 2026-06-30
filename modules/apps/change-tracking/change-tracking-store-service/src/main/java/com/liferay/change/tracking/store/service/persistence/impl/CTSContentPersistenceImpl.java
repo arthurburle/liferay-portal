@@ -13,15 +13,11 @@ import com.liferay.change.tracking.store.model.impl.CTSContentModelImpl;
 import com.liferay.change.tracking.store.service.persistence.CTSContentPersistence;
 import com.liferay.change.tracking.store.service.persistence.CTSContentUtil;
 import com.liferay.change.tracking.store.service.persistence.impl.constants.CTSPersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -33,10 +29,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 
@@ -49,7 +42,6 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +65,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CTSContentPersistence.class)
 public class CTSContentPersistenceImpl
-	extends BasePersistenceImpl<CTSContent> implements CTSContentPersistence {
+	extends BasePersistenceImpl<CTSContent, NoSuchContentException>
+	implements CTSContentPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -89,9 +82,6 @@ public class CTSContentPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByR_P;
 	private FinderPath _finderPathWithoutPaginationFindByR_P;
 	private FinderPath _finderPathCountByR_P;
@@ -175,14 +165,9 @@ public class CTSContentPersistenceImpl
 		OrderByComparator<CTSContent> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTSContent.class)) {
-
-			return _collectionPersistenceFinderByR_P.find(
-				finderCache, new Object[] {repositoryId, path}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByR_P.find(
+			finderCache, new Object[] {repositoryId, path}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -250,13 +235,8 @@ public class CTSContentPersistenceImpl
 	 */
 	@Override
 	public int countByR_P(long repositoryId, String path) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTSContent.class)) {
-
-			return _collectionPersistenceFinderByR_P.count(
-				finderCache, new Object[] {repositoryId, path});
-		}
+		return _collectionPersistenceFinderByR_P.count(
+			finderCache, new Object[] {repositoryId, path});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_R_S;
@@ -352,14 +332,9 @@ public class CTSContentPersistenceImpl
 		OrderByComparator<CTSContent> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTSContent.class)) {
-
-			return _collectionPersistenceFinderByC_R_S.find(
-				finderCache, new Object[] {companyId, repositoryId, storeType},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_R_S.find(
+			finderCache, new Object[] {companyId, repositoryId, storeType},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -437,13 +412,8 @@ public class CTSContentPersistenceImpl
 	public int countByC_R_S(
 		long companyId, long repositoryId, String storeType) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTSContent.class)) {
-
-			return _collectionPersistenceFinderByC_R_S.count(
-				finderCache, new Object[] {companyId, repositoryId, storeType});
-		}
+		return _collectionPersistenceFinderByC_R_S.count(
+			finderCache, new Object[] {companyId, repositoryId, storeType});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_R_P_S;
@@ -543,15 +513,10 @@ public class CTSContentPersistenceImpl
 		int start, int end, OrderByComparator<CTSContent> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTSContent.class)) {
-
-			return _collectionPersistenceFinderByC_R_P_S.find(
-				finderCache,
-				new Object[] {companyId, repositoryId, path, storeType}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_R_P_S.find(
+			finderCache,
+			new Object[] {companyId, repositoryId, path, storeType}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -635,14 +600,9 @@ public class CTSContentPersistenceImpl
 	public int countByC_R_P_S(
 		long companyId, long repositoryId, String path, String storeType) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTSContent.class)) {
-
-			return _collectionPersistenceFinderByC_R_P_S.count(
-				finderCache,
-				new Object[] {companyId, repositoryId, path, storeType});
-		}
+		return _collectionPersistenceFinderByC_R_P_S.count(
+			finderCache,
+			new Object[] {companyId, repositoryId, path, storeType});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_R_LikeP_S;
@@ -741,15 +701,10 @@ public class CTSContentPersistenceImpl
 		int start, int end, OrderByComparator<CTSContent> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTSContent.class)) {
-
-			return _collectionPersistenceFinderByC_R_LikeP_S.find(
-				finderCache,
-				new Object[] {companyId, repositoryId, path, storeType}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_R_LikeP_S.find(
+			finderCache,
+			new Object[] {companyId, repositoryId, path, storeType}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -833,14 +788,9 @@ public class CTSContentPersistenceImpl
 	public int countByC_R_LikeP_S(
 		long companyId, long repositoryId, String path, String storeType) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTSContent.class)) {
-
-			return _collectionPersistenceFinderByC_R_LikeP_S.count(
-				finderCache,
-				new Object[] {companyId, repositoryId, path, storeType});
-		}
+		return _collectionPersistenceFinderByC_R_LikeP_S.count(
+			finderCache,
+			new Object[] {companyId, repositoryId, path, storeType});
 	}
 
 	private FinderPath _finderPathFetchByC_R_P_V_S;
@@ -920,17 +870,10 @@ public class CTSContentPersistenceImpl
 		long companyId, long repositoryId, String path, String version,
 		String storeType, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTSContent.class)) {
-
-			return _uniquePersistenceFinderByC_R_P_V_S.fetch(
-				finderCache,
-				new Object[] {
-					companyId, repositoryId, path, version, storeType
-				},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByC_R_P_V_S.fetch(
+			finderCache,
+			new Object[] {companyId, repositoryId, path, version, storeType},
+			useFinderCache);
 	}
 
 	/**
@@ -993,123 +936,6 @@ public class CTSContentPersistenceImpl
 	}
 
 	/**
-	 * Caches the cts content in the entity cache if it is enabled.
-	 *
-	 * @param ctsContent the cts content
-	 */
-	@Override
-	public void cacheResult(CTSContent ctsContent) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ctsContent.getCtCollectionId())) {
-
-			entityCache.putResult(
-				CTSContentImpl.class, ctsContent.getPrimaryKey(), ctsContent);
-
-			finderCache.putResult(
-				_finderPathFetchByC_R_P_V_S,
-				new Object[] {
-					ctsContent.getCompanyId(), ctsContent.getRepositoryId(),
-					ctsContent.getPath(), ctsContent.getVersion(),
-					ctsContent.getStoreType()
-				},
-				ctsContent);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the cts contents in the entity cache if it is enabled.
-	 *
-	 * @param ctsContents the cts contents
-	 */
-	@Override
-	public void cacheResult(List<CTSContent> ctsContents) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (ctsContents.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CTSContent ctsContent : ctsContents) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						ctsContent.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						CTSContentImpl.class, ctsContent.getPrimaryKey()) ==
-							null) {
-
-					cacheResult(ctsContent);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all cts contents.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CTSContentImpl.class);
-
-		finderCache.clearCache(CTSContentImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the cts content.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(CTSContent ctsContent) {
-		entityCache.removeResult(CTSContentImpl.class, ctsContent);
-	}
-
-	@Override
-	public void clearCache(List<CTSContent> ctsContents) {
-		for (CTSContent ctsContent : ctsContents) {
-			entityCache.removeResult(CTSContentImpl.class, ctsContent);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CTSContentImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(CTSContentImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CTSContentModelImpl ctsContentModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ctsContentModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				ctsContentModelImpl.getCompanyId(),
-				ctsContentModelImpl.getRepositoryId(),
-				ctsContentModelImpl.getPath(), ctsContentModelImpl.getVersion(),
-				ctsContentModelImpl.getStoreType()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByC_R_P_V_S, args, ctsContentModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new cts content with the primary key. Does not add the cts content to the database.
 	 *
 	 * @param ctsContentId the primary key for the new cts content
@@ -1137,47 +963,6 @@ public class CTSContentPersistenceImpl
 	@Override
 	public CTSContent remove(long ctsContentId) throws NoSuchContentException {
 		return remove((Serializable)ctsContentId);
-	}
-
-	/**
-	 * Removes the cts content with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the cts content
-	 * @return the cts content that was removed
-	 * @throws NoSuchContentException if a cts content with the primary key could not be found
-	 */
-	@Override
-	public CTSContent remove(Serializable primaryKey)
-		throws NoSuchContentException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CTSContent ctsContent = (CTSContent)session.get(
-				CTSContentImpl.class, primaryKey);
-
-			if (ctsContent == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchContentException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(ctsContent);
-		}
-		catch (NoSuchContentException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1265,41 +1050,13 @@ public class CTSContentPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CTSContentImpl.class, ctsContentModelImpl, false, true);
-
-		cacheUniqueFindersCache(ctsContentModelImpl);
+		cacheUniqueFindersResult(ctsContent, false);
 
 		if (isNew) {
 			ctsContent.setNew(false);
 		}
 
 		ctsContent.resetOriginalValues();
-
-		return ctsContent;
-	}
-
-	/**
-	 * Returns the cts content with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the cts content
-	 * @return the cts content
-	 * @throws NoSuchContentException if a cts content with the primary key could not be found
-	 */
-	@Override
-	public CTSContent findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchContentException {
-
-		CTSContent ctsContent = fetchByPrimaryKey(primaryKey);
-
-		if (ctsContent == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchContentException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return ctsContent;
 	}
@@ -1318,52 +1075,9 @@ public class CTSContentPersistenceImpl
 		return findByPrimaryKey((Serializable)ctsContentId);
 	}
 
-	/**
-	 * Returns the cts content with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the cts content
-	 * @return the cts content, or <code>null</code> if a cts content with the primary key could not be found
-	 */
 	@Override
-	public CTSContent fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				CTSContent.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		CTSContent ctsContent = (CTSContent)entityCache.getResult(
-			CTSContentImpl.class, primaryKey);
-
-		if (ctsContent != null) {
-			return ctsContent;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ctsContent = (CTSContent)session.get(
-				CTSContentImpl.class, primaryKey);
-
-			if (ctsContent != null) {
-				cacheResult(ctsContent);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return ctsContent;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -1375,318 +1089,6 @@ public class CTSContentPersistenceImpl
 	@Override
 	public CTSContent fetchByPrimaryKey(long ctsContentId) {
 		return fetchByPrimaryKey((Serializable)ctsContentId);
-	}
-
-	@Override
-	public Map<Serializable, CTSContent> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(CTSContent.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, CTSContent> map =
-			new HashMap<Serializable, CTSContent>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			CTSContent ctsContent = fetchByPrimaryKey(primaryKey);
-
-			if (ctsContent != null) {
-				map.put(primaryKey, ctsContent);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						CTSContent.class, primaryKey)) {
-
-				CTSContent ctsContent = (CTSContent)entityCache.getResult(
-					CTSContentImpl.class, primaryKey);
-
-				if (ctsContent == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, ctsContent);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (CTSContent ctsContent : (List<CTSContent>)query.list()) {
-				map.put(ctsContent.getPrimaryKeyObj(), ctsContent);
-
-				cacheResult(ctsContent);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the cts contents.
-	 *
-	 * @return the cts contents
-	 */
-	@Override
-	public List<CTSContent> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the cts contents.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CTSContentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cts contents
-	 * @param end the upper bound of the range of cts contents (not inclusive)
-	 * @return the range of cts contents
-	 */
-	@Override
-	public List<CTSContent> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the cts contents.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CTSContentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cts contents
-	 * @param end the upper bound of the range of cts contents (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cts contents
-	 */
-	@Override
-	public List<CTSContent> findAll(
-		int start, int end, OrderByComparator<CTSContent> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the cts contents.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CTSContentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cts contents
-	 * @param end the upper bound of the range of cts contents (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cts contents
-	 */
-	@Override
-	public List<CTSContent> findAll(
-		int start, int end, OrderByComparator<CTSContent> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTSContent.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<CTSContent> list = null;
-
-			if (useFinderCache) {
-				list = (List<CTSContent>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_CTSCONTENT);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_CTSCONTENT;
-
-					sql = sql.concat(CTSContentModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<CTSContent>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the cts contents from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CTSContent ctsContent : findAll()) {
-			remove(ctsContent);
-		}
-	}
-
-	/**
-	 * Returns the number of cts contents.
-	 *
-	 * @return the number of cts contents
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTSContent.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(_SQL_COUNT_CTSCONTENT);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1779,21 +1181,6 @@ public class CTSContentPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByR_P = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByR_P",
 			new String[] {
@@ -1806,21 +1193,21 @@ public class CTSContentPersistenceImpl
 		_finderPathWithoutPaginationFindByR_P = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByR_P",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"repositoryId", "path_"}, true);
+			new String[] {"repositoryId", "path_"}, 0, 2, true, null);
 
 		_finderPathCountByR_P = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByR_P",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"repositoryId", "path_"}, false);
+			new String[] {"repositoryId", "path_"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByR_P = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByR_P,
 			_finderPathWithoutPaginationFindByR_P, _finderPathCountByR_P,
 			_SQL_SELECT_CTSCONTENT_WHERE, _SQL_COUNT_CTSCONTENT_WHERE,
-			CTSContentModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			CTSContentModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ctsContent.", "repositoryId", FinderColumn.Type.LONG, "=",
-				true, false, CTSContent::getRepositoryId),
+				true, true, CTSContent::getRepositoryId),
 			new FinderColumn<>(
 				"ctsContent.", "path", FinderColumn.Type.STRING, "=", true,
 				true, CTSContent::getPath));
@@ -1840,7 +1227,8 @@ public class CTSContentPersistenceImpl
 				Long.class.getName(), Long.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "repositoryId", "storeType"}, true);
+			new String[] {"companyId", "repositoryId", "storeType"}, 0, 4, true,
+			null);
 
 		_finderPathCountByC_R_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_R_S",
@@ -1848,19 +1236,20 @@ public class CTSContentPersistenceImpl
 				Long.class.getName(), Long.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "repositoryId", "storeType"}, false);
+			new String[] {"companyId", "repositoryId", "storeType"}, 0, 4,
+			false, null);
 
 		_collectionPersistenceFinderByC_R_S = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_R_S,
 			_finderPathWithoutPaginationFindByC_R_S, _finderPathCountByC_R_S,
 			_SQL_SELECT_CTSCONTENT_WHERE, _SQL_COUNT_CTSCONTENT_WHERE,
-			CTSContentModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			CTSContentModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ctsContent.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, CTSContent::getCompanyId),
+				true, CTSContent::getCompanyId),
 			new FinderColumn<>(
 				"ctsContent.", "repositoryId", FinderColumn.Type.LONG, "=",
-				true, false, CTSContent::getRepositoryId),
+				true, true, CTSContent::getRepositoryId),
 			new FinderColumn<>(
 				"ctsContent.", "storeType", FinderColumn.Type.STRING, "=", true,
 				true, CTSContent::getStoreType));
@@ -1882,8 +1271,8 @@ public class CTSContentPersistenceImpl
 				Long.class.getName(), Long.class.getName(),
 				String.class.getName(), String.class.getName()
 			},
-			new String[] {"companyId", "repositoryId", "path_", "storeType"},
-			true);
+			new String[] {"companyId", "repositoryId", "path_", "storeType"}, 0,
+			12, true, null);
 
 		_finderPathCountByC_R_P_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_R_P_S",
@@ -1891,8 +1280,8 @@ public class CTSContentPersistenceImpl
 				Long.class.getName(), Long.class.getName(),
 				String.class.getName(), String.class.getName()
 			},
-			new String[] {"companyId", "repositoryId", "path_", "storeType"},
-			false);
+			new String[] {"companyId", "repositoryId", "path_", "storeType"}, 0,
+			12, false, null);
 
 		_collectionPersistenceFinderByC_R_P_S =
 			new CollectionPersistenceFinder<>(
@@ -1900,16 +1289,16 @@ public class CTSContentPersistenceImpl
 				_finderPathWithoutPaginationFindByC_R_P_S,
 				_finderPathCountByC_R_P_S, _SQL_SELECT_CTSCONTENT_WHERE,
 				_SQL_COUNT_CTSCONTENT_WHERE, CTSContentModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ctsContent.", "companyId", FinderColumn.Type.LONG, "=",
-					true, false, CTSContent::getCompanyId),
+					true, true, CTSContent::getCompanyId),
 				new FinderColumn<>(
 					"ctsContent.", "repositoryId", FinderColumn.Type.LONG, "=",
-					true, false, CTSContent::getRepositoryId),
+					true, true, CTSContent::getRepositoryId),
 				new FinderColumn<>(
 					"ctsContent.", "path", FinderColumn.Type.STRING, "=", true,
-					false, CTSContent::getPath),
+					true, CTSContent::getPath),
 				new FinderColumn<>(
 					"ctsContent.", "storeType", FinderColumn.Type.STRING, "=",
 					true, true, CTSContent::getStoreType));
@@ -1939,21 +1328,21 @@ public class CTSContentPersistenceImpl
 				this, _finderPathWithPaginationFindByC_R_LikeP_S, null,
 				_finderPathWithPaginationCountByC_R_LikeP_S,
 				_SQL_SELECT_CTSCONTENT_WHERE, _SQL_COUNT_CTSCONTENT_WHERE,
-				CTSContentModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				CTSContentModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ctsContent.", "companyId", FinderColumn.Type.LONG, "=",
-					true, false, CTSContent::getCompanyId),
+					true, true, CTSContent::getCompanyId),
 				new FinderColumn<>(
 					"ctsContent.", "repositoryId", FinderColumn.Type.LONG, "=",
-					true, false, CTSContent::getRepositoryId),
+					true, true, CTSContent::getRepositoryId),
 				new FinderColumn<>(
 					"ctsContent.", "path", FinderColumn.Type.STRING, "LIKE",
-					true, false, CTSContent::getPath),
+					true, true, CTSContent::getPath),
 				new FinderColumn<>(
 					"ctsContent.", "storeType", FinderColumn.Type.STRING, "=",
 					true, true, CTSContent::getStoreType));
 
-		_finderPathFetchByC_R_P_V_S = new FinderPath(
+		_finderPathFetchByC_R_P_V_S = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_R_P_V_S",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
@@ -1963,22 +1352,25 @@ public class CTSContentPersistenceImpl
 			new String[] {
 				"companyId", "repositoryId", "path_", "version", "storeType"
 			},
-			true);
+			0, 28, false, CTSContent::getCompanyId, CTSContent::getRepositoryId,
+			convertNullFunction(CTSContent::getPath),
+			convertNullFunction(CTSContent::getVersion),
+			convertNullFunction(CTSContent::getStoreType));
 
 		_uniquePersistenceFinderByC_R_P_V_S = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByC_R_P_V_S, _SQL_SELECT_CTSCONTENT_WHERE,
+			this, _finderPathFetchByC_R_P_V_S, _SQL_SELECT_CTSCONTENT_WHERE, "",
 			new FinderColumn<>(
 				"ctsContent.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, CTSContent::getCompanyId),
+				true, CTSContent::getCompanyId),
 			new FinderColumn<>(
 				"ctsContent.", "repositoryId", FinderColumn.Type.LONG, "=",
-				true, false, CTSContent::getRepositoryId),
+				true, true, CTSContent::getRepositoryId),
 			new FinderColumn<>(
 				"ctsContent.", "path", FinderColumn.Type.STRING, "=", true,
-				false, CTSContent::getPath),
+				true, CTSContent::getPath),
 			new FinderColumn<>(
 				"ctsContent.", "version", FinderColumn.Type.STRING, "=", true,
-				false, CTSContent::getVersion),
+				true, CTSContent::getVersion),
 			new FinderColumn<>(
 				"ctsContent.", "storeType", FinderColumn.Type.STRING, "=", true,
 				true, CTSContent::getStoreType));
@@ -2028,22 +1420,17 @@ public class CTSContentPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CTSContentModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_CTSCONTENT =
 		"SELECT ctsContent FROM CTSContent ctsContent";
 
 	private static final String _SQL_SELECT_CTSCONTENT_WHERE =
 		"SELECT ctsContent FROM CTSContent ctsContent WHERE ";
 
-	private static final String _SQL_COUNT_CTSCONTENT =
-		"SELECT COUNT(ctsContent) FROM CTSContent ctsContent";
-
 	private static final String _SQL_COUNT_CTSCONTENT_WHERE =
 		"SELECT COUNT(ctsContent) FROM CTSContent ctsContent WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "ctsContent.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CTSContent exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CTSContent exists with the key {";
@@ -2060,4 +1447,4 @@ public class CTSContentPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1786001370
+// LIFERAY-SERVICE-BUILDER-HASH:683189703

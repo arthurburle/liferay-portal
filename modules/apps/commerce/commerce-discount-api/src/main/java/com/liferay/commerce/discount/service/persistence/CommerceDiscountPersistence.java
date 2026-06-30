@@ -1307,20 +1307,6 @@ public interface CommerceDiscountPersistence
 	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
-	 * Caches the commerce discount in the entity cache if it is enabled.
-	 *
-	 * @param commerceDiscount the commerce discount
-	 */
-	public void cacheResult(CommerceDiscount commerceDiscount);
-
-	/**
-	 * Caches the commerce discounts in the entity cache if it is enabled.
-	 *
-	 * @param commerceDiscounts the commerce discounts
-	 */
-	public void cacheResult(java.util.List<CommerceDiscount> commerceDiscounts);
-
-	/**
 	 * Creates a new commerce discount with the primary key. Does not add the commerce discount to the database.
 	 *
 	 * @param commerceDiscountId the primary key for the new commerce discount
@@ -1358,73 +1344,5 @@ public interface CommerceDiscountPersistence
 	 */
 	public CommerceDiscount fetchByPrimaryKey(long commerceDiscountId);
 
-	/**
-	 * Returns all the commerce discounts.
-	 *
-	 * @return the commerce discounts
-	 */
-	public java.util.List<CommerceDiscount> findAll();
-
-	/**
-	 * Returns a range of all the commerce discounts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.discount.model.impl.CommerceDiscountModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce discounts
-	 * @param end the upper bound of the range of commerce discounts (not inclusive)
-	 * @return the range of commerce discounts
-	 */
-	public java.util.List<CommerceDiscount> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce discounts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.discount.model.impl.CommerceDiscountModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce discounts
-	 * @param end the upper bound of the range of commerce discounts (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce discounts
-	 */
-	public java.util.List<CommerceDiscount> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce discounts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.discount.model.impl.CommerceDiscountModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce discounts
-	 * @param end the upper bound of the range of commerce discounts (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce discounts
-	 */
-	public java.util.List<CommerceDiscount> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce discounts from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce discounts.
-	 *
-	 * @return the number of commerce discounts
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1640723806
+// LIFERAY-SERVICE-BUILDER-HASH:1694550543

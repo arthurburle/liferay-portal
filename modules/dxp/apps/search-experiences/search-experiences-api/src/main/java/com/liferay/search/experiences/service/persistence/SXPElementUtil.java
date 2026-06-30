@@ -36,6 +36,20 @@ public class SXPElementUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<SXPElement> sxpElements) {
+		getPersistence().cacheResult(sxpElements);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(SXPElement sxpElement) {
+		getPersistence().cacheResult(sxpElement);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1344,24 +1358,6 @@ public class SXPElementUtil {
 	}
 
 	/**
-	 * Caches the sxp element in the entity cache if it is enabled.
-	 *
-	 * @param sxpElement the sxp element
-	 */
-	public static void cacheResult(SXPElement sxpElement) {
-		getPersistence().cacheResult(sxpElement);
-	}
-
-	/**
-	 * Caches the sxp elements in the entity cache if it is enabled.
-	 *
-	 * @param sxpElements the sxp elements
-	 */
-	public static void cacheResult(List<SXPElement> sxpElements) {
-		getPersistence().cacheResult(sxpElements);
-	}
-
-	/**
 	 * Creates a new sxp element with the primary key. Does not add the sxp element to the database.
 	 *
 	 * @param sxpElementId the primary key for the new sxp element
@@ -1413,85 +1409,6 @@ public class SXPElementUtil {
 		return getPersistence().fetchByPrimaryKey(sxpElementId);
 	}
 
-	/**
-	 * Returns all the sxp elements.
-	 *
-	 * @return the sxp elements
-	 */
-	public static List<SXPElement> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the sxp elements.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.search.experiences.model.impl.SXPElementModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of sxp elements
-	 * @param end the upper bound of the range of sxp elements (not inclusive)
-	 * @return the range of sxp elements
-	 */
-	public static List<SXPElement> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the sxp elements.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.search.experiences.model.impl.SXPElementModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of sxp elements
-	 * @param end the upper bound of the range of sxp elements (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of sxp elements
-	 */
-	public static List<SXPElement> findAll(
-		int start, int end, OrderByComparator<SXPElement> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the sxp elements.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.search.experiences.model.impl.SXPElementModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of sxp elements
-	 * @param end the upper bound of the range of sxp elements (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of sxp elements
-	 */
-	public static List<SXPElement> findAll(
-		int start, int end, OrderByComparator<SXPElement> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the sxp elements from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of sxp elements.
-	 *
-	 * @return the number of sxp elements
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static SXPElementPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1503,4 +1420,4 @@ public class SXPElementUtil {
 	private static volatile SXPElementPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:189325411
+// LIFERAY-SERVICE-BUILDER-HASH:1032030378

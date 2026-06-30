@@ -13,12 +13,10 @@ import com.liferay.cookies.model.impl.CookiesConsentPreferenceModelImpl;
 import com.liferay.cookies.service.persistence.CookiesConsentPreferencePersistence;
 import com.liferay.cookies.service.persistence.CookiesConsentPreferenceUtil;
 import com.liferay.cookies.service.persistence.impl.constants.CookiesPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -29,10 +27,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 
 import java.io.Serializable;
@@ -42,7 +37,6 @@ import java.lang.reflect.InvocationHandler;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -63,7 +57,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CookiesConsentPreferencePersistence.class)
 public class CookiesConsentPreferencePersistenceImpl
-	extends BasePersistenceImpl<CookiesConsentPreference>
+	extends BasePersistenceImpl
+		<CookiesConsentPreference, NoSuchCookiesConsentPreferenceException>
 	implements CookiesConsentPreferencePersistence {
 
 	/*
@@ -80,9 +75,6 @@ public class CookiesConsentPreferencePersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUserId;
 	private FinderPath _finderPathWithoutPaginationFindByUserId;
 	private FinderPath _finderPathCountByUserId;
@@ -651,120 +643,6 @@ public class CookiesConsentPreferencePersistenceImpl
 	}
 
 	/**
-	 * Caches the cookies consent preference in the entity cache if it is enabled.
-	 *
-	 * @param cookiesConsentPreference the cookies consent preference
-	 */
-	@Override
-	public void cacheResult(CookiesConsentPreference cookiesConsentPreference) {
-		entityCache.putResult(
-			CookiesConsentPreferenceImpl.class,
-			cookiesConsentPreference.getPrimaryKey(), cookiesConsentPreference);
-
-		finderCache.putResult(
-			_finderPathFetchByU_D_N,
-			new Object[] {
-				cookiesConsentPreference.getUserId(),
-				cookiesConsentPreference.getDomain(),
-				cookiesConsentPreference.getName()
-			},
-			cookiesConsentPreference);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the cookies consent preferences in the entity cache if it is enabled.
-	 *
-	 * @param cookiesConsentPreferences the cookies consent preferences
-	 */
-	@Override
-	public void cacheResult(
-		List<CookiesConsentPreference> cookiesConsentPreferences) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (cookiesConsentPreferences.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CookiesConsentPreference cookiesConsentPreference :
-				cookiesConsentPreferences) {
-
-			if (entityCache.getResult(
-					CookiesConsentPreferenceImpl.class,
-					cookiesConsentPreference.getPrimaryKey()) == null) {
-
-				cacheResult(cookiesConsentPreference);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all cookies consent preferences.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CookiesConsentPreferenceImpl.class);
-
-		finderCache.clearCache(CookiesConsentPreferenceImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the cookies consent preference.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(CookiesConsentPreference cookiesConsentPreference) {
-		entityCache.removeResult(
-			CookiesConsentPreferenceImpl.class, cookiesConsentPreference);
-	}
-
-	@Override
-	public void clearCache(
-		List<CookiesConsentPreference> cookiesConsentPreferences) {
-
-		for (CookiesConsentPreference cookiesConsentPreference :
-				cookiesConsentPreferences) {
-
-			entityCache.removeResult(
-				CookiesConsentPreferenceImpl.class, cookiesConsentPreference);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CookiesConsentPreferenceImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CookiesConsentPreferenceImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CookiesConsentPreferenceModelImpl cookiesConsentPreferenceModelImpl) {
-
-		Object[] args = new Object[] {
-			cookiesConsentPreferenceModelImpl.getUserId(),
-			cookiesConsentPreferenceModelImpl.getDomain(),
-			cookiesConsentPreferenceModelImpl.getName()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByU_D_N, args, cookiesConsentPreferenceModelImpl);
-	}
-
-	/**
 	 * Creates a new cookies consent preference with the primary key. Does not add the cookies consent preference to the database.
 	 *
 	 * @param cookiesConsentPreferenceId the primary key for the new cookies consent preference
@@ -796,48 +674,6 @@ public class CookiesConsentPreferencePersistenceImpl
 		throws NoSuchCookiesConsentPreferenceException {
 
 		return remove((Serializable)cookiesConsentPreferenceId);
-	}
-
-	/**
-	 * Removes the cookies consent preference with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the cookies consent preference
-	 * @return the cookies consent preference that was removed
-	 * @throws NoSuchCookiesConsentPreferenceException if a cookies consent preference with the primary key could not be found
-	 */
-	@Override
-	public CookiesConsentPreference remove(Serializable primaryKey)
-		throws NoSuchCookiesConsentPreferenceException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CookiesConsentPreference cookiesConsentPreference =
-				(CookiesConsentPreference)session.get(
-					CookiesConsentPreferenceImpl.class, primaryKey);
-
-			if (cookiesConsentPreference == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchCookiesConsentPreferenceException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(cookiesConsentPreference);
-		}
-		catch (NoSuchCookiesConsentPreferenceException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -923,43 +759,13 @@ public class CookiesConsentPreferencePersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CookiesConsentPreferenceImpl.class,
-			cookiesConsentPreferenceModelImpl, false, true);
-
-		cacheUniqueFindersCache(cookiesConsentPreferenceModelImpl);
+		cacheUniqueFindersResult(cookiesConsentPreference, false);
 
 		if (isNew) {
 			cookiesConsentPreference.setNew(false);
 		}
 
 		cookiesConsentPreference.resetOriginalValues();
-
-		return cookiesConsentPreference;
-	}
-
-	/**
-	 * Returns the cookies consent preference with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the cookies consent preference
-	 * @return the cookies consent preference
-	 * @throws NoSuchCookiesConsentPreferenceException if a cookies consent preference with the primary key could not be found
-	 */
-	@Override
-	public CookiesConsentPreference findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchCookiesConsentPreferenceException {
-
-		CookiesConsentPreference cookiesConsentPreference = fetchByPrimaryKey(
-			primaryKey);
-
-		if (cookiesConsentPreference == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchCookiesConsentPreferenceException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return cookiesConsentPreference;
 	}
@@ -992,189 +798,6 @@ public class CookiesConsentPreferencePersistenceImpl
 		return fetchByPrimaryKey((Serializable)cookiesConsentPreferenceId);
 	}
 
-	/**
-	 * Returns all the cookies consent preferences.
-	 *
-	 * @return the cookies consent preferences
-	 */
-	@Override
-	public List<CookiesConsentPreference> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the cookies consent preferences.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CookiesConsentPreferenceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cookies consent preferences
-	 * @param end the upper bound of the range of cookies consent preferences (not inclusive)
-	 * @return the range of cookies consent preferences
-	 */
-	@Override
-	public List<CookiesConsentPreference> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the cookies consent preferences.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CookiesConsentPreferenceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cookies consent preferences
-	 * @param end the upper bound of the range of cookies consent preferences (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cookies consent preferences
-	 */
-	@Override
-	public List<CookiesConsentPreference> findAll(
-		int start, int end,
-		OrderByComparator<CookiesConsentPreference> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the cookies consent preferences.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CookiesConsentPreferenceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cookies consent preferences
-	 * @param end the upper bound of the range of cookies consent preferences (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cookies consent preferences
-	 */
-	@Override
-	public List<CookiesConsentPreference> findAll(
-		int start, int end,
-		OrderByComparator<CookiesConsentPreference> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<CookiesConsentPreference> list = null;
-
-		if (useFinderCache) {
-			list = (List<CookiesConsentPreference>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_COOKIESCONSENTPREFERENCE);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_COOKIESCONSENTPREFERENCE;
-
-				sql = sql.concat(
-					CookiesConsentPreferenceModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<CookiesConsentPreference>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the cookies consent preferences from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CookiesConsentPreference cookiesConsentPreference : findAll()) {
-			remove(cookiesConsentPreference);
-		}
-	}
-
-	/**
-	 * Returns the number of cookies consent preferences.
-	 *
-	 * @return the number of cookies consent preferences
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_COOKIESCONSENTPREFERENCE);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	protected EntityCache getEntityCache() {
 		return entityCache;
@@ -1200,21 +823,6 @@ public class CookiesConsentPreferencePersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUserId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUserId",
 			new String[] {
@@ -1240,7 +848,7 @@ public class CookiesConsentPreferencePersistenceImpl
 				_SQL_SELECT_COOKIESCONSENTPREFERENCE_WHERE,
 				_SQL_COUNT_COOKIESCONSENTPREFERENCE_WHERE,
 				CookiesConsentPreferenceModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"cookiesConsentPreference.", "userId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1272,7 +880,7 @@ public class CookiesConsentPreferencePersistenceImpl
 				_SQL_SELECT_COOKIESCONSENTPREFERENCE_WHERE,
 				_SQL_COUNT_COOKIESCONSENTPREFERENCE_WHERE,
 				CookiesConsentPreferenceModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"cookiesConsentPreference.", "expirationDate",
 					FinderColumn.Type.DATE, "=", true, true,
@@ -1290,12 +898,12 @@ public class CookiesConsentPreferencePersistenceImpl
 		_finderPathWithoutPaginationFindByU_D = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByU_D",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"userId", "domain"}, true);
+			new String[] {"userId", "domain"}, 0, 2, true, null);
 
 		_finderPathCountByU_D = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByU_D",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"userId", "domain"}, false);
+			new String[] {"userId", "domain"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByU_D = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByU_D,
@@ -1303,31 +911,34 @@ public class CookiesConsentPreferencePersistenceImpl
 			_SQL_SELECT_COOKIESCONSENTPREFERENCE_WHERE,
 			_SQL_COUNT_COOKIESCONSENTPREFERENCE_WHERE,
 			CookiesConsentPreferenceModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"cookiesConsentPreference.", "userId", FinderColumn.Type.LONG,
-				"=", true, false, CookiesConsentPreference::getUserId),
+				"=", true, true, CookiesConsentPreference::getUserId),
 			new FinderColumn<>(
 				"cookiesConsentPreference.", "domain", FinderColumn.Type.STRING,
 				"=", true, true, CookiesConsentPreference::getDomain));
 
-		_finderPathFetchByU_D_N = new FinderPath(
+		_finderPathFetchByU_D_N = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByU_D_N",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"userId", "domain", "name"}, true);
+			new String[] {"userId", "domain", "name"}, 0, 6, false,
+			CookiesConsentPreference::getUserId,
+			convertNullFunction(CookiesConsentPreference::getDomain),
+			convertNullFunction(CookiesConsentPreference::getName));
 
 		_uniquePersistenceFinderByU_D_N = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByU_D_N,
-			_SQL_SELECT_COOKIESCONSENTPREFERENCE_WHERE,
+			_SQL_SELECT_COOKIESCONSENTPREFERENCE_WHERE, "",
 			new FinderColumn<>(
 				"cookiesConsentPreference.", "userId", FinderColumn.Type.LONG,
-				"=", true, false, CookiesConsentPreference::getUserId),
+				"=", true, true, CookiesConsentPreference::getUserId),
 			new FinderColumn<>(
 				"cookiesConsentPreference.", "domain", FinderColumn.Type.STRING,
-				"=", true, false, CookiesConsentPreference::getDomain),
+				"=", true, true, CookiesConsentPreference::getDomain),
 			new FinderColumn<>(
 				"cookiesConsentPreference.", "name", FinderColumn.Type.STRING,
 				"=", true, true, CookiesConsentPreference::getName));
@@ -1374,23 +985,17 @@ public class CookiesConsentPreferencePersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CookiesConsentPreferenceModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_COOKIESCONSENTPREFERENCE =
 		"SELECT cookiesConsentPreference FROM CookiesConsentPreference cookiesConsentPreference";
 
 	private static final String _SQL_SELECT_COOKIESCONSENTPREFERENCE_WHERE =
 		"SELECT cookiesConsentPreference FROM CookiesConsentPreference cookiesConsentPreference WHERE ";
 
-	private static final String _SQL_COUNT_COOKIESCONSENTPREFERENCE =
-		"SELECT COUNT(cookiesConsentPreference) FROM CookiesConsentPreference cookiesConsentPreference";
-
 	private static final String _SQL_COUNT_COOKIESCONSENTPREFERENCE_WHERE =
 		"SELECT COUNT(cookiesConsentPreference) FROM CookiesConsentPreference cookiesConsentPreference WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"cookiesConsentPreference.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CookiesConsentPreference exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CookiesConsentPreference exists with the key {";
@@ -1404,4 +1009,4 @@ public class CookiesConsentPreferencePersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-456057479
+// LIFERAY-SERVICE-BUILDER-HASH:-1680330265

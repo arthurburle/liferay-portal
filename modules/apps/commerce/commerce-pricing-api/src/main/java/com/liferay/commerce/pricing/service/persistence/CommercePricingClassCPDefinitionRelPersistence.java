@@ -302,24 +302,6 @@ public interface CommercePricingClassCPDefinitionRelPersistence
 	public int countByC_C(long commercePricingClassId, long CPDefinitionId);
 
 	/**
-	 * Caches the commerce pricing class cp definition rel in the entity cache if it is enabled.
-	 *
-	 * @param commercePricingClassCPDefinitionRel the commerce pricing class cp definition rel
-	 */
-	public void cacheResult(
-		CommercePricingClassCPDefinitionRel
-			commercePricingClassCPDefinitionRel);
-
-	/**
-	 * Caches the commerce pricing class cp definition rels in the entity cache if it is enabled.
-	 *
-	 * @param commercePricingClassCPDefinitionRels the commerce pricing class cp definition rels
-	 */
-	public void cacheResult(
-		java.util.List<CommercePricingClassCPDefinitionRel>
-			commercePricingClassCPDefinitionRels);
-
-	/**
 	 * Creates a new commerce pricing class cp definition rel with the primary key. Does not add the commerce pricing class cp definition rel to the database.
 	 *
 	 * @param CommercePricingClassCPDefinitionRelId the primary key for the new commerce pricing class cp definition rel
@@ -363,74 +345,5 @@ public interface CommercePricingClassCPDefinitionRelPersistence
 	public CommercePricingClassCPDefinitionRel fetchByPrimaryKey(
 		long CommercePricingClassCPDefinitionRelId);
 
-	/**
-	 * Returns all the commerce pricing class cp definition rels.
-	 *
-	 * @return the commerce pricing class cp definition rels
-	 */
-	public java.util.List<CommercePricingClassCPDefinitionRel> findAll();
-
-	/**
-	 * Returns a range of all the commerce pricing class cp definition rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.pricing.model.impl.CommercePricingClassCPDefinitionRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce pricing class cp definition rels
-	 * @param end the upper bound of the range of commerce pricing class cp definition rels (not inclusive)
-	 * @return the range of commerce pricing class cp definition rels
-	 */
-	public java.util.List<CommercePricingClassCPDefinitionRel> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce pricing class cp definition rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.pricing.model.impl.CommercePricingClassCPDefinitionRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce pricing class cp definition rels
-	 * @param end the upper bound of the range of commerce pricing class cp definition rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce pricing class cp definition rels
-	 */
-	public java.util.List<CommercePricingClassCPDefinitionRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommercePricingClassCPDefinitionRel> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce pricing class cp definition rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.pricing.model.impl.CommercePricingClassCPDefinitionRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce pricing class cp definition rels
-	 * @param end the upper bound of the range of commerce pricing class cp definition rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce pricing class cp definition rels
-	 */
-	public java.util.List<CommercePricingClassCPDefinitionRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommercePricingClassCPDefinitionRel> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce pricing class cp definition rels from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce pricing class cp definition rels.
-	 *
-	 * @return the number of commerce pricing class cp definition rels
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1627615141
+// LIFERAY-SERVICE-BUILDER-HASH:1454127527

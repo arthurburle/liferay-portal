@@ -36,6 +36,20 @@ public class KaleoLogUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<KaleoLog> kaleoLogs) {
+		getPersistence().cacheResult(kaleoLogs);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(KaleoLog kaleoLog) {
+		getPersistence().cacheResult(kaleoLog);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -919,24 +933,6 @@ public class KaleoLogUtil {
 	}
 
 	/**
-	 * Caches the kaleo log in the entity cache if it is enabled.
-	 *
-	 * @param kaleoLog the kaleo log
-	 */
-	public static void cacheResult(KaleoLog kaleoLog) {
-		getPersistence().cacheResult(kaleoLog);
-	}
-
-	/**
-	 * Caches the kaleo logs in the entity cache if it is enabled.
-	 *
-	 * @param kaleoLogs the kaleo logs
-	 */
-	public static void cacheResult(List<KaleoLog> kaleoLogs) {
-		getPersistence().cacheResult(kaleoLogs);
-	}
-
-	/**
 	 * Creates a new kaleo log with the primary key. Does not add the kaleo log to the database.
 	 *
 	 * @param kaleoLogId the primary key for the new kaleo log
@@ -986,85 +982,6 @@ public class KaleoLogUtil {
 		return getPersistence().fetchByPrimaryKey(kaleoLogId);
 	}
 
-	/**
-	 * Returns all the kaleo logs.
-	 *
-	 * @return the kaleo logs
-	 */
-	public static List<KaleoLog> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the kaleo logs.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoLogModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo logs
-	 * @param end the upper bound of the range of kaleo logs (not inclusive)
-	 * @return the range of kaleo logs
-	 */
-	public static List<KaleoLog> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the kaleo logs.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoLogModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo logs
-	 * @param end the upper bound of the range of kaleo logs (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of kaleo logs
-	 */
-	public static List<KaleoLog> findAll(
-		int start, int end, OrderByComparator<KaleoLog> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the kaleo logs.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoLogModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo logs
-	 * @param end the upper bound of the range of kaleo logs (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of kaleo logs
-	 */
-	public static List<KaleoLog> findAll(
-		int start, int end, OrderByComparator<KaleoLog> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the kaleo logs from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of kaleo logs.
-	 *
-	 * @return the number of kaleo logs
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static KaleoLogPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1076,4 +993,4 @@ public class KaleoLogUtil {
 	private static volatile KaleoLogPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:962903476
+// LIFERAY-SERVICE-BUILDER-HASH:-1387097487

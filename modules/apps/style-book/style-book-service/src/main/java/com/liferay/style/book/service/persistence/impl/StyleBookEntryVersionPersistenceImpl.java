@@ -5,15 +5,11 @@
 
 package com.liferay.style.book.service.persistence.impl;
 
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -35,8 +31,6 @@ import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinde
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -59,7 +53,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -84,7 +77,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = StyleBookEntryVersionPersistence.class)
 public class StyleBookEntryVersionPersistenceImpl
-	extends BasePersistenceImpl<StyleBookEntryVersion>
+	extends BasePersistenceImpl
+		<StyleBookEntryVersion, NoSuchEntryVersionException>
 	implements StyleBookEntryVersionPersistence {
 
 	/*
@@ -101,9 +95,6 @@ public class StyleBookEntryVersionPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByStyleBookEntryId;
 	private FinderPath _finderPathWithoutPaginationFindByStyleBookEntryId;
 	private FinderPath _finderPathCountByStyleBookEntryId;
@@ -185,14 +176,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByStyleBookEntryId.find(
-				finderCache, new Object[] {styleBookEntryId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByStyleBookEntryId.find(
+			finderCache, new Object[] {styleBookEntryId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -257,13 +243,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByStyleBookEntryId(long styleBookEntryId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByStyleBookEntryId.count(
-				finderCache, new Object[] {styleBookEntryId});
-		}
+		return _collectionPersistenceFinderByStyleBookEntryId.count(
+			finderCache, new Object[] {styleBookEntryId});
 	}
 
 	private FinderPath _finderPathFetchByStyleBookEntryId_Version;
@@ -329,14 +310,9 @@ public class StyleBookEntryVersionPersistenceImpl
 	public StyleBookEntryVersion fetchByStyleBookEntryId_Version(
 		long styleBookEntryId, int version, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _uniquePersistenceFinderByStyleBookEntryId_Version.fetch(
-				finderCache, new Object[] {styleBookEntryId, version},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByStyleBookEntryId_Version.fetch(
+			finderCache, new Object[] {styleBookEntryId, version},
+			useFinderCache);
 	}
 
 	/**
@@ -449,14 +425,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				finderCache, new Object[] {uuid}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			finderCache, new Object[] {uuid}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -520,13 +491,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				finderCache, new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			finderCache, new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByUuid_Version;
@@ -614,14 +580,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByUuid_Version.find(
-				finderCache, new Object[] {uuid, version}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_Version.find(
+			finderCache, new Object[] {uuid, version}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -689,13 +650,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_Version(String uuid, int version) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByUuid_Version.count(
-				finderCache, new Object[] {uuid, version});
-		}
+		return _collectionPersistenceFinderByUuid_Version.count(
+			finderCache, new Object[] {uuid, version});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByUUID_G;
@@ -780,14 +736,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByUUID_G.find(
-				finderCache, new Object[] {uuid, groupId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUUID_G.find(
+			finderCache, new Object[] {uuid, groupId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -855,13 +806,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByUUID_G(String uuid, long groupId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByUUID_G.count(
-				finderCache, new Object[] {uuid, groupId});
-		}
+		return _collectionPersistenceFinderByUUID_G.count(
+			finderCache, new Object[] {uuid, groupId});
 	}
 
 	private FinderPath _finderPathFetchByUUID_G_Version;
@@ -929,14 +875,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	public StyleBookEntryVersion fetchByUUID_G_Version(
 		String uuid, long groupId, int version, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _uniquePersistenceFinderByUUID_G_Version.fetch(
-				finderCache, new Object[] {uuid, groupId, version},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByUUID_G_Version.fetch(
+			finderCache, new Object[] {uuid, groupId, version}, useFinderCache);
 	}
 
 	/**
@@ -1057,14 +997,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				finderCache, new Object[] {uuid, companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			finderCache, new Object[] {uuid, companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1132,13 +1067,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				finderCache, new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			finderCache, new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByUuid_C_Version;
@@ -1231,14 +1161,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByUuid_C_Version.find(
-				finderCache, new Object[] {uuid, companyId, version}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C_Version.find(
+			finderCache, new Object[] {uuid, companyId, version}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1315,13 +1240,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C_Version(String uuid, long companyId, int version) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByUuid_C_Version.count(
-				finderCache, new Object[] {uuid, companyId, version});
-		}
+		return _collectionPersistenceFinderByUuid_C_Version.count(
+			finderCache, new Object[] {uuid, companyId, version});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByGroupId;
@@ -1402,14 +1322,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByGroupId.find(
-				finderCache, new Object[] {groupId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByGroupId.find(
+			finderCache, new Object[] {groupId}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -1473,13 +1388,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByGroupId(long groupId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByGroupId.count(
-				finderCache, new Object[] {groupId});
-		}
+		return _collectionPersistenceFinderByGroupId.count(
+			finderCache, new Object[] {groupId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByGroupId_Version;
@@ -1567,14 +1477,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByGroupId_Version.find(
-				finderCache, new Object[] {groupId, version}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByGroupId_Version.find(
+			finderCache, new Object[] {groupId, version}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1642,13 +1547,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByGroupId_Version(long groupId, int version) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByGroupId_Version.count(
-				finderCache, new Object[] {groupId, version});
-		}
+		return _collectionPersistenceFinderByGroupId_Version.count(
+			finderCache, new Object[] {groupId, version});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_D;
@@ -1738,14 +1638,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_D.find(
-				finderCache, new Object[] {groupId, defaultStyleBookEntry},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_D.find(
+			finderCache, new Object[] {groupId, defaultStyleBookEntry}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1815,13 +1710,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByG_D(long groupId, boolean defaultStyleBookEntry) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_D.count(
-				finderCache, new Object[] {groupId, defaultStyleBookEntry});
-		}
+		return _collectionPersistenceFinderByG_D.count(
+			finderCache, new Object[] {groupId, defaultStyleBookEntry});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_D_Version;
@@ -1917,15 +1807,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		int end, OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_D_Version.find(
-				finderCache,
-				new Object[] {groupId, defaultStyleBookEntry, version}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_D_Version.find(
+			finderCache, new Object[] {groupId, defaultStyleBookEntry, version},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2004,14 +1888,9 @@ public class StyleBookEntryVersionPersistenceImpl
 	public int countByG_D_Version(
 		long groupId, boolean defaultStyleBookEntry, int version) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_D_Version.count(
-				finderCache,
-				new Object[] {groupId, defaultStyleBookEntry, version});
-		}
+		return _collectionPersistenceFinderByG_D_Version.count(
+			finderCache,
+			new Object[] {groupId, defaultStyleBookEntry, version});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_N;
@@ -2096,14 +1975,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_N.find(
-				finderCache, new Object[] {groupId, name}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_N.find(
+			finderCache, new Object[] {groupId, name}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2171,13 +2045,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByG_N(long groupId, String name) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_N.count(
-				finderCache, new Object[] {groupId, name});
-		}
+		return _collectionPersistenceFinderByG_N.count(
+			finderCache, new Object[] {groupId, name});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_N_Version;
@@ -2269,14 +2138,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_N_Version.find(
-				finderCache, new Object[] {groupId, name, version}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_N_Version.find(
+			finderCache, new Object[] {groupId, name, version}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2350,13 +2214,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByG_N_Version(long groupId, String name, int version) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_N_Version.count(
-				finderCache, new Object[] {groupId, name, version});
-		}
+		return _collectionPersistenceFinderByG_N_Version.count(
+			finderCache, new Object[] {groupId, name, version});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_LikeN;
@@ -2444,14 +2303,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_LikeN.find(
-				finderCache, new Object[] {groupId, name}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_LikeN.find(
+			finderCache, new Object[] {groupId, name}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2519,13 +2373,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByG_LikeN(long groupId, String name) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_LikeN.count(
-				finderCache, new Object[] {groupId, name});
-		}
+		return _collectionPersistenceFinderByG_LikeN.count(
+			finderCache, new Object[] {groupId, name});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_LikeN_Version;
@@ -2617,14 +2466,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_LikeN_Version.find(
-				finderCache, new Object[] {groupId, name, version}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_LikeN_Version.find(
+			finderCache, new Object[] {groupId, name, version}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2701,13 +2545,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByG_LikeN_Version(long groupId, String name, int version) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_LikeN_Version.count(
-				finderCache, new Object[] {groupId, name, version});
-		}
+		return _collectionPersistenceFinderByG_LikeN_Version.count(
+			finderCache, new Object[] {groupId, name, version});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_SBEK;
@@ -2796,14 +2635,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_SBEK.find(
-				finderCache, new Object[] {groupId, styleBookEntryKey}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_SBEK.find(
+			finderCache, new Object[] {groupId, styleBookEntryKey}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2873,13 +2707,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByG_SBEK(long groupId, String styleBookEntryKey) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_SBEK.count(
-				finderCache, new Object[] {groupId, styleBookEntryKey});
-		}
+		return _collectionPersistenceFinderByG_SBEK.count(
+			finderCache, new Object[] {groupId, styleBookEntryKey});
 	}
 
 	private FinderPath _finderPathFetchByG_SBEK_Version;
@@ -2948,14 +2777,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		long groupId, String styleBookEntryKey, int version,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _uniquePersistenceFinderByG_SBEK_Version.fetch(
-				finderCache, new Object[] {groupId, styleBookEntryKey, version},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByG_SBEK_Version.fetch(
+			finderCache, new Object[] {groupId, styleBookEntryKey, version},
+			useFinderCache);
 	}
 
 	/**
@@ -3075,14 +2899,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_T.find(
-				finderCache, new Object[] {groupId, themeId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_T.find(
+			finderCache, new Object[] {groupId, themeId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3150,13 +2969,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByG_T(long groupId, String themeId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_T.count(
-				finderCache, new Object[] {groupId, themeId});
-		}
+		return _collectionPersistenceFinderByG_T.count(
+			finderCache, new Object[] {groupId, themeId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_T_Version;
@@ -3249,14 +3063,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_T_Version.find(
-				finderCache, new Object[] {groupId, themeId, version}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_T_Version.find(
+			finderCache, new Object[] {groupId, themeId, version}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3330,13 +3139,8 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public int countByG_T_Version(long groupId, String themeId, int version) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_T_Version.count(
-				finderCache, new Object[] {groupId, themeId, version});
-		}
+		return _collectionPersistenceFinderByG_T_Version.count(
+			finderCache, new Object[] {groupId, themeId, version});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_D_T;
@@ -3432,15 +3236,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		int end, OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_D_T.find(
-				finderCache,
-				new Object[] {groupId, defaultStyleBookEntry, themeId}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_D_T.find(
+			finderCache, new Object[] {groupId, defaultStyleBookEntry, themeId},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3519,14 +3317,9 @@ public class StyleBookEntryVersionPersistenceImpl
 	public int countByG_D_T(
 		long groupId, boolean defaultStyleBookEntry, String themeId) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_D_T.count(
-				finderCache,
-				new Object[] {groupId, defaultStyleBookEntry, themeId});
-		}
+		return _collectionPersistenceFinderByG_D_T.count(
+			finderCache,
+			new Object[] {groupId, defaultStyleBookEntry, themeId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_D_T_Version;
@@ -3629,15 +3422,10 @@ public class StyleBookEntryVersionPersistenceImpl
 		OrderByComparator<StyleBookEntryVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_D_T_Version.find(
-				finderCache,
-				new Object[] {groupId, defaultStyleBookEntry, themeId, version},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_D_T_Version.find(
+			finderCache,
+			new Object[] {groupId, defaultStyleBookEntry, themeId, version},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3729,16 +3517,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		long groupId, boolean defaultStyleBookEntry, String themeId,
 		int version) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			return _collectionPersistenceFinderByG_D_T_Version.count(
-				finderCache,
-				new Object[] {
-					groupId, defaultStyleBookEntry, themeId, version
-				});
-		}
+		return _collectionPersistenceFinderByG_D_T_Version.count(
+			finderCache,
+			new Object[] {groupId, defaultStyleBookEntry, themeId, version});
 	}
 
 	public StyleBookEntryVersionPersistenceImpl() {
@@ -3754,170 +3535,6 @@ public class StyleBookEntryVersionPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(StyleBookEntryVersionTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the style book entry version in the entity cache if it is enabled.
-	 *
-	 * @param styleBookEntryVersion the style book entry version
-	 */
-	@Override
-	public void cacheResult(StyleBookEntryVersion styleBookEntryVersion) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					styleBookEntryVersion.getCtCollectionId())) {
-
-			entityCache.putResult(
-				StyleBookEntryVersionImpl.class,
-				styleBookEntryVersion.getPrimaryKey(), styleBookEntryVersion);
-
-			finderCache.putResult(
-				_finderPathFetchByStyleBookEntryId_Version,
-				new Object[] {
-					styleBookEntryVersion.getStyleBookEntryId(),
-					styleBookEntryVersion.getVersion()
-				},
-				styleBookEntryVersion);
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G_Version,
-				new Object[] {
-					styleBookEntryVersion.getUuid(),
-					styleBookEntryVersion.getGroupId(),
-					styleBookEntryVersion.getVersion()
-				},
-				styleBookEntryVersion);
-
-			finderCache.putResult(
-				_finderPathFetchByG_SBEK_Version,
-				new Object[] {
-					styleBookEntryVersion.getGroupId(),
-					styleBookEntryVersion.getStyleBookEntryKey(),
-					styleBookEntryVersion.getVersion()
-				},
-				styleBookEntryVersion);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the style book entry versions in the entity cache if it is enabled.
-	 *
-	 * @param styleBookEntryVersions the style book entry versions
-	 */
-	@Override
-	public void cacheResult(
-		List<StyleBookEntryVersion> styleBookEntryVersions) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (styleBookEntryVersions.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (StyleBookEntryVersion styleBookEntryVersion :
-				styleBookEntryVersions) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						styleBookEntryVersion.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						StyleBookEntryVersionImpl.class,
-						styleBookEntryVersion.getPrimaryKey()) == null) {
-
-					cacheResult(styleBookEntryVersion);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all style book entry versions.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(StyleBookEntryVersionImpl.class);
-
-		finderCache.clearCache(StyleBookEntryVersionImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the style book entry version.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(StyleBookEntryVersion styleBookEntryVersion) {
-		entityCache.removeResult(
-			StyleBookEntryVersionImpl.class, styleBookEntryVersion);
-	}
-
-	@Override
-	public void clearCache(List<StyleBookEntryVersion> styleBookEntryVersions) {
-		for (StyleBookEntryVersion styleBookEntryVersion :
-				styleBookEntryVersions) {
-
-			entityCache.removeResult(
-				StyleBookEntryVersionImpl.class, styleBookEntryVersion);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(StyleBookEntryVersionImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				StyleBookEntryVersionImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		StyleBookEntryVersionModelImpl styleBookEntryVersionModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					styleBookEntryVersionModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				styleBookEntryVersionModelImpl.getStyleBookEntryId(),
-				styleBookEntryVersionModelImpl.getVersion()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByStyleBookEntryId_Version, args,
-				styleBookEntryVersionModelImpl);
-
-			args = new Object[] {
-				styleBookEntryVersionModelImpl.getUuid(),
-				styleBookEntryVersionModelImpl.getGroupId(),
-				styleBookEntryVersionModelImpl.getVersion()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G_Version, args,
-				styleBookEntryVersionModelImpl);
-
-			args = new Object[] {
-				styleBookEntryVersionModelImpl.getGroupId(),
-				styleBookEntryVersionModelImpl.getStyleBookEntryKey(),
-				styleBookEntryVersionModelImpl.getVersion()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByG_SBEK_Version, args,
-				styleBookEntryVersionModelImpl);
-		}
 	}
 
 	/**
@@ -3951,48 +3568,6 @@ public class StyleBookEntryVersionPersistenceImpl
 		throws NoSuchEntryVersionException {
 
 		return remove((Serializable)styleBookEntryVersionId);
-	}
-
-	/**
-	 * Removes the style book entry version with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the style book entry version
-	 * @return the style book entry version that was removed
-	 * @throws NoSuchEntryVersionException if a style book entry version with the primary key could not be found
-	 */
-	@Override
-	public StyleBookEntryVersion remove(Serializable primaryKey)
-		throws NoSuchEntryVersionException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			StyleBookEntryVersion styleBookEntryVersion =
-				(StyleBookEntryVersion)session.get(
-					StyleBookEntryVersionImpl.class, primaryKey);
-
-			if (styleBookEntryVersion == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchEntryVersionException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(styleBookEntryVersion);
-		}
-		catch (NoSuchEntryVersionException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -4152,43 +3727,13 @@ public class StyleBookEntryVersionPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			StyleBookEntryVersionImpl.class, styleBookEntryVersionModelImpl,
-			false, true);
-
-		cacheUniqueFindersCache(styleBookEntryVersionModelImpl);
+		cacheUniqueFindersResult(styleBookEntryVersion, false);
 
 		if (isNew) {
 			styleBookEntryVersion.setNew(false);
 		}
 
 		styleBookEntryVersion.resetOriginalValues();
-
-		return styleBookEntryVersion;
-	}
-
-	/**
-	 * Returns the style book entry version with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the style book entry version
-	 * @return the style book entry version
-	 * @throws NoSuchEntryVersionException if a style book entry version with the primary key could not be found
-	 */
-	@Override
-	public StyleBookEntryVersion findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchEntryVersionException {
-
-		StyleBookEntryVersion styleBookEntryVersion = fetchByPrimaryKey(
-			primaryKey);
-
-		if (styleBookEntryVersion == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchEntryVersionException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return styleBookEntryVersion;
 	}
@@ -4207,53 +3752,9 @@ public class StyleBookEntryVersionPersistenceImpl
 		return findByPrimaryKey((Serializable)styleBookEntryVersionId);
 	}
 
-	/**
-	 * Returns the style book entry version with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the style book entry version
-	 * @return the style book entry version, or <code>null</code> if a style book entry version with the primary key could not be found
-	 */
 	@Override
-	public StyleBookEntryVersion fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				StyleBookEntryVersion.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		StyleBookEntryVersion styleBookEntryVersion =
-			(StyleBookEntryVersion)entityCache.getResult(
-				StyleBookEntryVersionImpl.class, primaryKey);
-
-		if (styleBookEntryVersion != null) {
-			return styleBookEntryVersion;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			styleBookEntryVersion = (StyleBookEntryVersion)session.get(
-				StyleBookEntryVersionImpl.class, primaryKey);
-
-			if (styleBookEntryVersion != null) {
-				cacheResult(styleBookEntryVersion);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return styleBookEntryVersion;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -4267,328 +3768,6 @@ public class StyleBookEntryVersionPersistenceImpl
 		long styleBookEntryVersionId) {
 
 		return fetchByPrimaryKey((Serializable)styleBookEntryVersionId);
-	}
-
-	@Override
-	public Map<Serializable, StyleBookEntryVersion> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(StyleBookEntryVersion.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, StyleBookEntryVersion> map =
-			new HashMap<Serializable, StyleBookEntryVersion>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			StyleBookEntryVersion styleBookEntryVersion = fetchByPrimaryKey(
-				primaryKey);
-
-			if (styleBookEntryVersion != null) {
-				map.put(primaryKey, styleBookEntryVersion);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						StyleBookEntryVersion.class, primaryKey)) {
-
-				StyleBookEntryVersion styleBookEntryVersion =
-					(StyleBookEntryVersion)entityCache.getResult(
-						StyleBookEntryVersionImpl.class, primaryKey);
-
-				if (styleBookEntryVersion == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, styleBookEntryVersion);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (StyleBookEntryVersion styleBookEntryVersion :
-					(List<StyleBookEntryVersion>)query.list()) {
-
-				map.put(
-					styleBookEntryVersion.getPrimaryKeyObj(),
-					styleBookEntryVersion);
-
-				cacheResult(styleBookEntryVersion);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the style book entry versions.
-	 *
-	 * @return the style book entry versions
-	 */
-	@Override
-	public List<StyleBookEntryVersion> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the style book entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>StyleBookEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of style book entry versions
-	 * @param end the upper bound of the range of style book entry versions (not inclusive)
-	 * @return the range of style book entry versions
-	 */
-	@Override
-	public List<StyleBookEntryVersion> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the style book entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>StyleBookEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of style book entry versions
-	 * @param end the upper bound of the range of style book entry versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of style book entry versions
-	 */
-	@Override
-	public List<StyleBookEntryVersion> findAll(
-		int start, int end,
-		OrderByComparator<StyleBookEntryVersion> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the style book entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>StyleBookEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of style book entry versions
-	 * @param end the upper bound of the range of style book entry versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of style book entry versions
-	 */
-	@Override
-	public List<StyleBookEntryVersion> findAll(
-		int start, int end,
-		OrderByComparator<StyleBookEntryVersion> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<StyleBookEntryVersion> list = null;
-
-			if (useFinderCache) {
-				list = (List<StyleBookEntryVersion>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_STYLEBOOKENTRYVERSION);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_STYLEBOOKENTRYVERSION;
-
-					sql = sql.concat(
-						StyleBookEntryVersionModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<StyleBookEntryVersion>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the style book entry versions from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (StyleBookEntryVersion styleBookEntryVersion : findAll()) {
-			remove(styleBookEntryVersion);
-		}
-	}
-
-	/**
-	 * Returns the number of style book entry versions.
-	 *
-	 * @return the number of style book entry versions
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					StyleBookEntryVersion.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_STYLEBOOKENTRYVERSION);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -4698,21 +3877,6 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByStyleBookEntryId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByStyleBookEntryId",
 			new String[] {
@@ -4739,24 +3903,26 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "styleBookEntryId",
 					FinderColumn.Type.LONG, "=", true, true,
 					StyleBookEntryVersion::getStyleBookEntryId));
 
-		_finderPathFetchByStyleBookEntryId_Version = new FinderPath(
+		_finderPathFetchByStyleBookEntryId_Version = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByStyleBookEntryId_Version",
 			new String[] {Long.class.getName(), Integer.class.getName()},
-			new String[] {"styleBookEntryId", "version"}, true);
+			new String[] {"styleBookEntryId", "version"}, 0, 0, false,
+			StyleBookEntryVersion::getStyleBookEntryId,
+			StyleBookEntryVersion::getVersion);
 
 		_uniquePersistenceFinderByStyleBookEntryId_Version =
 			new UniquePersistenceFinder<>(
 				this, _finderPathFetchByStyleBookEntryId_Version,
-				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
+				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "styleBookEntryId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					StyleBookEntryVersion::getStyleBookEntryId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "version",
@@ -4773,21 +3939,21 @@ public class StyleBookEntryVersionPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 			_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
-			StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			StyleBookEntryVersionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"styleBookEntryVersion.", "uuid", FinderColumn.Type.STRING, "=",
 				true, true, StyleBookEntryVersion::getUuid));
@@ -4804,12 +3970,12 @@ public class StyleBookEntryVersionPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_Version = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_Version",
 			new String[] {String.class.getName(), Integer.class.getName()},
-			new String[] {"uuid_", "version"}, true);
+			new String[] {"uuid_", "version"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_Version = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_Version",
 			new String[] {String.class.getName(), Integer.class.getName()},
-			new String[] {"uuid_", "version"}, false);
+			new String[] {"uuid_", "version"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_Version =
 			new CollectionPersistenceFinder<>(
@@ -4819,10 +3985,10 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "uuid", FinderColumn.Type.STRING,
-					"=", true, false, StyleBookEntryVersion::getUuid),
+					"=", true, true, StyleBookEntryVersion::getUuid),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "version",
 					FinderColumn.Type.INTEGER, "=", true, true,
@@ -4840,12 +4006,12 @@ public class StyleBookEntryVersionPersistenceImpl
 		_finderPathWithoutPaginationFindByUUID_G = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, true, null);
 
 		_finderPathCountByUUID_G = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, false);
+			new String[] {"uuid_", "groupId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUUID_G =
 			new CollectionPersistenceFinder<>(
@@ -4855,32 +4021,35 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "uuid", FinderColumn.Type.STRING,
-					"=", true, false, StyleBookEntryVersion::getUuid),
+					"=", true, true, StyleBookEntryVersion::getUuid),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
 					"=", true, true, StyleBookEntryVersion::getGroupId));
 
-		_finderPathFetchByUUID_G_Version = new FinderPath(
+		_finderPathFetchByUUID_G_Version = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G_Version",
 			new String[] {
 				String.class.getName(), Long.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"uuid_", "groupId", "version"}, true);
+			new String[] {"uuid_", "groupId", "version"}, 0, 1, false,
+			convertNullFunction(StyleBookEntryVersion::getUuid),
+			StyleBookEntryVersion::getGroupId,
+			StyleBookEntryVersion::getVersion);
 
 		_uniquePersistenceFinderByUUID_G_Version =
 			new UniquePersistenceFinder<>(
 				this, _finderPathFetchByUUID_G_Version,
-				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
+				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "uuid", FinderColumn.Type.STRING,
-					"=", true, false, StyleBookEntryVersion::getUuid),
+					"=", true, true, StyleBookEntryVersion::getUuid),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, StyleBookEntryVersion::getGroupId),
+					"=", true, true, StyleBookEntryVersion::getGroupId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "version",
 					FinderColumn.Type.INTEGER, "=", true, true,
@@ -4898,12 +4067,12 @@ public class StyleBookEntryVersionPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -4913,10 +4082,10 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "uuid", FinderColumn.Type.STRING,
-					"=", true, false, StyleBookEntryVersion::getUuid),
+					"=", true, true, StyleBookEntryVersion::getUuid),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "companyId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -4937,7 +4106,7 @@ public class StyleBookEntryVersionPersistenceImpl
 				String.class.getName(), Long.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"uuid_", "companyId", "version"}, true);
+			new String[] {"uuid_", "companyId", "version"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C_Version = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C_Version",
@@ -4945,7 +4114,7 @@ public class StyleBookEntryVersionPersistenceImpl
 				String.class.getName(), Long.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"uuid_", "companyId", "version"}, false);
+			new String[] {"uuid_", "companyId", "version"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C_Version =
 			new CollectionPersistenceFinder<>(
@@ -4955,13 +4124,13 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "uuid", FinderColumn.Type.STRING,
-					"=", true, false, StyleBookEntryVersion::getUuid),
+					"=", true, true, StyleBookEntryVersion::getUuid),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "companyId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					StyleBookEntryVersion::getCompanyId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "version",
@@ -4994,7 +4163,7 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
 					"=", true, true, StyleBookEntryVersion::getGroupId));
@@ -5026,10 +4195,10 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, StyleBookEntryVersion::getGroupId),
+					"=", true, true, StyleBookEntryVersion::getGroupId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "version",
 					FinderColumn.Type.INTEGER, "=", true, true,
@@ -5059,11 +4228,11 @@ public class StyleBookEntryVersionPersistenceImpl
 			_finderPathWithoutPaginationFindByG_D, _finderPathCountByG_D,
 			_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 			_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
-			StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			StyleBookEntryVersionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-				"=", true, false, StyleBookEntryVersion::getGroupId),
+				"=", true, true, StyleBookEntryVersion::getGroupId),
 			new FinderColumn<>(
 				"styleBookEntryVersion.", "defaultStyleBookEntry",
 				FinderColumn.Type.BOOLEAN, "=", true, true,
@@ -5103,13 +4272,13 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, StyleBookEntryVersion::getGroupId),
+					"=", true, true, StyleBookEntryVersion::getGroupId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "defaultStyleBookEntry",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					StyleBookEntryVersion::isDefaultStyleBookEntry),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "version",
@@ -5128,23 +4297,23 @@ public class StyleBookEntryVersionPersistenceImpl
 		_finderPathWithoutPaginationFindByG_N = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByG_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "name"}, true);
+			new String[] {"groupId", "name"}, 0, 2, true, null);
 
 		_finderPathCountByG_N = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "name"}, false);
+			new String[] {"groupId", "name"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByG_N = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByG_N,
 			_finderPathWithoutPaginationFindByG_N, _finderPathCountByG_N,
 			_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 			_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
-			StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			StyleBookEntryVersionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-				"=", true, false, StyleBookEntryVersion::getGroupId),
+				"=", true, true, StyleBookEntryVersion::getGroupId),
 			new FinderColumn<>(
 				"styleBookEntryVersion.", "name", FinderColumn.Type.STRING, "=",
 				true, true, StyleBookEntryVersion::getName));
@@ -5164,7 +4333,7 @@ public class StyleBookEntryVersionPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"groupId", "name", "version"}, true);
+			new String[] {"groupId", "name", "version"}, 0, 2, true, null);
 
 		_finderPathCountByG_N_Version = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_N_Version",
@@ -5172,7 +4341,7 @@ public class StyleBookEntryVersionPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"groupId", "name", "version"}, false);
+			new String[] {"groupId", "name", "version"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByG_N_Version =
 			new CollectionPersistenceFinder<>(
@@ -5182,13 +4351,13 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, StyleBookEntryVersion::getGroupId),
+					"=", true, true, StyleBookEntryVersion::getGroupId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "name", FinderColumn.Type.STRING,
-					"=", true, false, StyleBookEntryVersion::getName),
+					"=", true, true, StyleBookEntryVersion::getName),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "version",
 					FinderColumn.Type.INTEGER, "=", true, true,
@@ -5206,12 +4375,12 @@ public class StyleBookEntryVersionPersistenceImpl
 		_finderPathWithoutPaginationFindByG_LikeN = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByG_LikeN",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "name"}, true);
+			new String[] {"groupId", "name"}, 0, 2, true, null);
 
 		_finderPathCountByG_LikeN = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_LikeN",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "name"}, false);
+			new String[] {"groupId", "name"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByG_LikeN =
 			new CollectionPersistenceFinder<>(
@@ -5221,10 +4390,10 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, StyleBookEntryVersion::getGroupId),
+					"=", true, true, StyleBookEntryVersion::getGroupId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "name", FinderColumn.Type.STRING,
 					"=", true, true, StyleBookEntryVersion::getName));
@@ -5244,7 +4413,7 @@ public class StyleBookEntryVersionPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"groupId", "name", "version"}, true);
+			new String[] {"groupId", "name", "version"}, 0, 2, true, null);
 
 		_finderPathCountByG_LikeN_Version = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_LikeN_Version",
@@ -5252,7 +4421,7 @@ public class StyleBookEntryVersionPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"groupId", "name", "version"}, false);
+			new String[] {"groupId", "name", "version"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByG_LikeN_Version =
 			new CollectionPersistenceFinder<>(
@@ -5262,13 +4431,13 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, StyleBookEntryVersion::getGroupId),
+					"=", true, true, StyleBookEntryVersion::getGroupId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "name", FinderColumn.Type.STRING,
-					"=", true, false, StyleBookEntryVersion::getName),
+					"=", true, true, StyleBookEntryVersion::getName),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "version",
 					FinderColumn.Type.INTEGER, "=", true, true,
@@ -5286,12 +4455,12 @@ public class StyleBookEntryVersionPersistenceImpl
 		_finderPathWithoutPaginationFindByG_SBEK = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByG_SBEK",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "styleBookEntryKey"}, true);
+			new String[] {"groupId", "styleBookEntryKey"}, 0, 2, true, null);
 
 		_finderPathCountByG_SBEK = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_SBEK",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "styleBookEntryKey"}, false);
+			new String[] {"groupId", "styleBookEntryKey"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByG_SBEK =
 			new CollectionPersistenceFinder<>(
@@ -5301,33 +4470,36 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, StyleBookEntryVersion::getGroupId),
+					"=", true, true, StyleBookEntryVersion::getGroupId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "styleBookEntryKey",
 					FinderColumn.Type.STRING, "=", true, true,
 					StyleBookEntryVersion::getStyleBookEntryKey));
 
-		_finderPathFetchByG_SBEK_Version = new FinderPath(
+		_finderPathFetchByG_SBEK_Version = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByG_SBEK_Version",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"groupId", "styleBookEntryKey", "version"}, true);
+			new String[] {"groupId", "styleBookEntryKey", "version"}, 0, 2,
+			false, StyleBookEntryVersion::getGroupId,
+			convertNullFunction(StyleBookEntryVersion::getStyleBookEntryKey),
+			StyleBookEntryVersion::getVersion);
 
 		_uniquePersistenceFinderByG_SBEK_Version =
 			new UniquePersistenceFinder<>(
 				this, _finderPathFetchByG_SBEK_Version,
-				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
+				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, StyleBookEntryVersion::getGroupId),
+					"=", true, true, StyleBookEntryVersion::getGroupId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "styleBookEntryKey",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					StyleBookEntryVersion::getStyleBookEntryKey),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "version",
@@ -5346,23 +4518,23 @@ public class StyleBookEntryVersionPersistenceImpl
 		_finderPathWithoutPaginationFindByG_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByG_T",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "themeId"}, true);
+			new String[] {"groupId", "themeId"}, 0, 2, true, null);
 
 		_finderPathCountByG_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_T",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "themeId"}, false);
+			new String[] {"groupId", "themeId"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByG_T = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByG_T,
 			_finderPathWithoutPaginationFindByG_T, _finderPathCountByG_T,
 			_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 			_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
-			StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			StyleBookEntryVersionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-				"=", true, false, StyleBookEntryVersion::getGroupId),
+				"=", true, true, StyleBookEntryVersion::getGroupId),
 			new FinderColumn<>(
 				"styleBookEntryVersion.", "themeId", FinderColumn.Type.STRING,
 				"=", true, true, StyleBookEntryVersion::getThemeId));
@@ -5382,7 +4554,7 @@ public class StyleBookEntryVersionPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"groupId", "themeId", "version"}, true);
+			new String[] {"groupId", "themeId", "version"}, 0, 2, true, null);
 
 		_finderPathCountByG_T_Version = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_T_Version",
@@ -5390,7 +4562,7 @@ public class StyleBookEntryVersionPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"groupId", "themeId", "version"}, false);
+			new String[] {"groupId", "themeId", "version"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByG_T_Version =
 			new CollectionPersistenceFinder<>(
@@ -5400,13 +4572,13 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, StyleBookEntryVersion::getGroupId),
+					"=", true, true, StyleBookEntryVersion::getGroupId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "themeId",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					StyleBookEntryVersion::getThemeId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "version",
@@ -5428,7 +4600,8 @@ public class StyleBookEntryVersionPersistenceImpl
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"groupId", "defaultStyleBookEntry", "themeId"}, true);
+			new String[] {"groupId", "defaultStyleBookEntry", "themeId"}, 0, 4,
+			true, null);
 
 		_finderPathCountByG_D_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_D_T",
@@ -5436,22 +4609,22 @@ public class StyleBookEntryVersionPersistenceImpl
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"groupId", "defaultStyleBookEntry", "themeId"},
-			false);
+			new String[] {"groupId", "defaultStyleBookEntry", "themeId"}, 0, 4,
+			false, null);
 
 		_collectionPersistenceFinderByG_D_T = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByG_D_T,
 			_finderPathWithoutPaginationFindByG_D_T, _finderPathCountByG_D_T,
 			_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 			_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
-			StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			StyleBookEntryVersionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-				"=", true, false, StyleBookEntryVersion::getGroupId),
+				"=", true, true, StyleBookEntryVersion::getGroupId),
 			new FinderColumn<>(
 				"styleBookEntryVersion.", "defaultStyleBookEntry",
-				FinderColumn.Type.BOOLEAN, "=", true, false,
+				FinderColumn.Type.BOOLEAN, "=", true, true,
 				StyleBookEntryVersion::isDefaultStyleBookEntry),
 			new FinderColumn<>(
 				"styleBookEntryVersion.", "themeId", FinderColumn.Type.STRING,
@@ -5479,7 +4652,7 @@ public class StyleBookEntryVersionPersistenceImpl
 			new String[] {
 				"groupId", "defaultStyleBookEntry", "themeId", "version"
 			},
-			true);
+			0, 4, true, null);
 
 		_finderPathCountByG_D_T_Version = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_D_T_Version",
@@ -5490,7 +4663,7 @@ public class StyleBookEntryVersionPersistenceImpl
 			new String[] {
 				"groupId", "defaultStyleBookEntry", "themeId", "version"
 			},
-			false);
+			0, 4, false, null);
 
 		_collectionPersistenceFinderByG_D_T_Version =
 			new CollectionPersistenceFinder<>(
@@ -5500,17 +4673,17 @@ public class StyleBookEntryVersionPersistenceImpl
 				_SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE,
 				_SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE,
 				StyleBookEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, StyleBookEntryVersion::getGroupId),
+					"=", true, true, StyleBookEntryVersion::getGroupId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "defaultStyleBookEntry",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					StyleBookEntryVersion::isDefaultStyleBookEntry),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "themeId",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					StyleBookEntryVersion::getThemeId),
 				new FinderColumn<>(
 					"styleBookEntryVersion.", "version",
@@ -5562,23 +4735,17 @@ public class StyleBookEntryVersionPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		StyleBookEntryVersionModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_STYLEBOOKENTRYVERSION =
 		"SELECT styleBookEntryVersion FROM StyleBookEntryVersion styleBookEntryVersion";
 
 	private static final String _SQL_SELECT_STYLEBOOKENTRYVERSION_WHERE =
 		"SELECT styleBookEntryVersion FROM StyleBookEntryVersion styleBookEntryVersion WHERE ";
 
-	private static final String _SQL_COUNT_STYLEBOOKENTRYVERSION =
-		"SELECT COUNT(styleBookEntryVersion) FROM StyleBookEntryVersion styleBookEntryVersion";
-
 	private static final String _SQL_COUNT_STYLEBOOKENTRYVERSION_WHERE =
 		"SELECT COUNT(styleBookEntryVersion) FROM StyleBookEntryVersion styleBookEntryVersion WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"styleBookEntryVersion.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No StyleBookEntryVersion exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No StyleBookEntryVersion exists with the key {";
@@ -5595,4 +4762,4 @@ public class StyleBookEntryVersionPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:698366957
+// LIFERAY-SERVICE-BUILDER-HASH:-1139316622

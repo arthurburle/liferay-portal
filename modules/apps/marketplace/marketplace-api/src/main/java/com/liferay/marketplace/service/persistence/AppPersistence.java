@@ -485,20 +485,6 @@ public interface AppPersistence extends BasePersistence<App> {
 	public int countByCategory(String category);
 
 	/**
-	 * Caches the app in the entity cache if it is enabled.
-	 *
-	 * @param app the app
-	 */
-	public void cacheResult(App app);
-
-	/**
-	 * Caches the apps in the entity cache if it is enabled.
-	 *
-	 * @param apps the apps
-	 */
-	public void cacheResult(java.util.List<App> apps);
-
-	/**
 	 * Creates a new app with the primary key. Does not add the app to the database.
 	 *
 	 * @param appId the primary key for the new app
@@ -534,72 +520,5 @@ public interface AppPersistence extends BasePersistence<App> {
 	 */
 	public App fetchByPrimaryKey(long appId);
 
-	/**
-	 * Returns all the apps.
-	 *
-	 * @return the apps
-	 */
-	public java.util.List<App> findAll();
-
-	/**
-	 * Returns a range of all the apps.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.marketplace.model.impl.AppModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of apps
-	 * @param end the upper bound of the range of apps (not inclusive)
-	 * @return the range of apps
-	 */
-	public java.util.List<App> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the apps.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.marketplace.model.impl.AppModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of apps
-	 * @param end the upper bound of the range of apps (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of apps
-	 */
-	public java.util.List<App> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<App>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the apps.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.marketplace.model.impl.AppModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of apps
-	 * @param end the upper bound of the range of apps (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of apps
-	 */
-	public java.util.List<App> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<App> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the apps from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of apps.
-	 *
-	 * @return the number of apps
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-222342148
+// LIFERAY-SERVICE-BUILDER-HASH:-148773620

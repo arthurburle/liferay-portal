@@ -291,20 +291,6 @@ public interface ObjectStateFlowPersistence
 	public int countByObjectFieldId(long objectFieldId);
 
 	/**
-	 * Caches the object state flow in the entity cache if it is enabled.
-	 *
-	 * @param objectStateFlow the object state flow
-	 */
-	public void cacheResult(ObjectStateFlow objectStateFlow);
-
-	/**
-	 * Caches the object state flows in the entity cache if it is enabled.
-	 *
-	 * @param objectStateFlows the object state flows
-	 */
-	public void cacheResult(java.util.List<ObjectStateFlow> objectStateFlows);
-
-	/**
 	 * Creates a new object state flow with the primary key. Does not add the object state flow to the database.
 	 *
 	 * @param objectStateFlowId the primary key for the new object state flow
@@ -342,73 +328,5 @@ public interface ObjectStateFlowPersistence
 	 */
 	public ObjectStateFlow fetchByPrimaryKey(long objectStateFlowId);
 
-	/**
-	 * Returns all the object state flows.
-	 *
-	 * @return the object state flows
-	 */
-	public java.util.List<ObjectStateFlow> findAll();
-
-	/**
-	 * Returns a range of all the object state flows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectStateFlowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state flows
-	 * @param end the upper bound of the range of object state flows (not inclusive)
-	 * @return the range of object state flows
-	 */
-	public java.util.List<ObjectStateFlow> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the object state flows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectStateFlowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state flows
-	 * @param end the upper bound of the range of object state flows (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object state flows
-	 */
-	public java.util.List<ObjectStateFlow> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ObjectStateFlow>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the object state flows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectStateFlowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state flows
-	 * @param end the upper bound of the range of object state flows (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object state flows
-	 */
-	public java.util.List<ObjectStateFlow> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ObjectStateFlow>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the object state flows from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of object state flows.
-	 *
-	 * @return the number of object state flows
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1538751519
+// LIFERAY-SERVICE-BUILDER-HASH:-1397259577

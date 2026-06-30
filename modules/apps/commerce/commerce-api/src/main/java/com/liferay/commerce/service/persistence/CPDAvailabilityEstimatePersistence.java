@@ -400,21 +400,6 @@ public interface CPDAvailabilityEstimatePersistence
 	public int countByCProductId(long CProductId);
 
 	/**
-	 * Caches the cpd availability estimate in the entity cache if it is enabled.
-	 *
-	 * @param cpdAvailabilityEstimate the cpd availability estimate
-	 */
-	public void cacheResult(CPDAvailabilityEstimate cpdAvailabilityEstimate);
-
-	/**
-	 * Caches the cpd availability estimates in the entity cache if it is enabled.
-	 *
-	 * @param cpdAvailabilityEstimates the cpd availability estimates
-	 */
-	public void cacheResult(
-		java.util.List<CPDAvailabilityEstimate> cpdAvailabilityEstimates);
-
-	/**
 	 * Creates a new cpd availability estimate with the primary key. Does not add the cpd availability estimate to the database.
 	 *
 	 * @param CPDAvailabilityEstimateId the primary key for the new cpd availability estimate
@@ -455,73 +440,5 @@ public interface CPDAvailabilityEstimatePersistence
 	public CPDAvailabilityEstimate fetchByPrimaryKey(
 		long CPDAvailabilityEstimateId);
 
-	/**
-	 * Returns all the cpd availability estimates.
-	 *
-	 * @return the cpd availability estimates
-	 */
-	public java.util.List<CPDAvailabilityEstimate> findAll();
-
-	/**
-	 * Returns a range of all the cpd availability estimates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CPDAvailabilityEstimateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cpd availability estimates
-	 * @param end the upper bound of the range of cpd availability estimates (not inclusive)
-	 * @return the range of cpd availability estimates
-	 */
-	public java.util.List<CPDAvailabilityEstimate> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the cpd availability estimates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CPDAvailabilityEstimateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cpd availability estimates
-	 * @param end the upper bound of the range of cpd availability estimates (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cpd availability estimates
-	 */
-	public java.util.List<CPDAvailabilityEstimate> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CPDAvailabilityEstimate> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the cpd availability estimates.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CPDAvailabilityEstimateModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cpd availability estimates
-	 * @param end the upper bound of the range of cpd availability estimates (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cpd availability estimates
-	 */
-	public java.util.List<CPDAvailabilityEstimate> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CPDAvailabilityEstimate> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the cpd availability estimates from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of cpd availability estimates.
-	 *
-	 * @return the number of cpd availability estimates
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1821711583
+// LIFERAY-SERVICE-BUILDER-HASH:-1568152129

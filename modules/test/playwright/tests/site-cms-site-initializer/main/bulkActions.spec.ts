@@ -1833,6 +1833,123 @@ test(
 );
 
 test(
+	'Bulk Expire over a Select All expanded selection forwards the section filter',
+	{tag: '@LPD-88977'},
+	async ({apiHelpers, assetsPage, page}) => {
+		const fileCount = 21;
+		const titlePrefix = `BulkSelectAll ${getRandomString()}`;
+
+		await test.step(`Create ${fileCount} files in the Default space`, async () => {
+			for (let i = 0; i < fileCount; i++) {
+				const entry = await apiHelpers.objectEntry.postObjectEntry(
+					{
+						file: {
+							fileBase64: 'R0lGODlhAQABAAAAACw=',
+							name: `${titlePrefix}_${i}.gif`,
+						},
+						objectEntryFolderExternalReferenceCode: 'L_FILES',
+						title: `${titlePrefix}_${i}`,
+					},
+					'cms/basic-documents',
+					'Default'
+				);
+
+				apiHelpers.data.push({
+					id: entry.file.id,
+					type: 'document',
+				});
+			}
+		});
+
+		await assetsPage.gotoFiles();
+		await assetsPage.changeVisualizationMode('Table');
+
+		await page.getByTitle('Select Items').click();
+
+		const selectAllLink = page.getByRole('button', {
+			exact: true,
+			name: 'Select All',
+		});
+
+		await expect(selectAllLink).toBeVisible();
+
+		await selectAllLink.click();
+
+		await expect(page.getByText('All Selected')).toBeVisible();
+
+		await assetsPage.execBulkItemAction('Expire');
+
+		await waitForAlert(page, 'Info:Expire action started', {
+			type: 'info',
+		});
+
+		await expect(page.getByText('Filter is null')).toHaveCount(0);
+	}
+);
+
+test(
+	'Bulk Delete over a Select All expanded selection forwards the section filter',
+	{tag: '@LPD-89162'},
+	async ({apiHelpers, assetsPage, page}) => {
+		const fileCount = 21;
+		const titlePrefix = `BulkDeleteSelectAll ${getRandomString()}`;
+
+		await test.step(`Create ${fileCount} files in the Default space`, async () => {
+			for (let i = 0; i < fileCount; i++) {
+				const entry = await apiHelpers.objectEntry.postObjectEntry(
+					{
+						file: {
+							fileBase64: 'R0lGODlhAQABAAAAACw=',
+							name: `${titlePrefix}_${i}.gif`,
+						},
+						objectEntryFolderExternalReferenceCode: 'L_FILES',
+						title: `${titlePrefix}_${i}`,
+					},
+					'cms/basic-documents',
+					'Default'
+				);
+
+				apiHelpers.data.push({
+					id: entry.file.id,
+					type: 'document',
+				});
+			}
+		});
+
+		await assetsPage.gotoFiles();
+		await assetsPage.changeVisualizationMode('Table');
+
+		await page.getByTitle('Select Items').click();
+
+		const selectAllLink = page.getByRole('button', {
+			exact: true,
+			name: 'Select All',
+		});
+
+		await expect(selectAllLink).toBeVisible();
+
+		await selectAllLink.click();
+
+		await expect(page.getByText('All Selected')).toBeVisible();
+
+		await assetsPage.execBulkItemAction('Delete');
+
+		await waitForModal({page});
+
+		await page
+			.locator('.modal')
+			.getByRole('button', {name: 'Delete'})
+			.click();
+
+		await waitForAlert(page, 'Info:Delete action started', {
+			type: 'info',
+		});
+
+		await expect(page.getByText('Filter is null')).toHaveCount(0);
+	}
+);
+
+test(
 	'Export for Translation CMS assets in bulk',
 	{tag: '@LPD-85361'},
 	async ({apiHelpers, assetsPage, page}) => {
@@ -2085,6 +2202,861 @@ test(
 			await expect(
 				checkInZip(filePath, `${blogTitle}-en_US.zip`)
 			).resolves.toBe(true);
+		});
+	}
+);
+
+test(
+	'Can move multiple contents to a folder in a Space',
+	{tag: '@LPD-86776'},
+	async ({apiHelpers, assetsPage, page}) => {
+		const applicationName = 'cms/basic-web-contents';
+		const spaceName = `Space ${getRandomString()}`;
+		const destinationFolderName = `Destination ${getRandomString()}`;
+		const contentTitles = [
+			`Content ${getRandomString()}`,
+			`Content ${getRandomString()}`,
+			`Content ${getRandomString()}`,
+		];
+
+		await test.step('Create a new Space', async () => {
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: spaceName,
+				settings: {},
+				type: 'Space',
+			});
+		});
+
+		let destinationFolderId: number;
+
+		await test.step('Create a destination folder in the Space', async () => {
+			const folder =
+				await apiHelpers.objectFolder.createObjectEntryFolder({
+					parentObjectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+					scopeKey: spaceName,
+					title: destinationFolderName,
+				});
+
+			destinationFolderId = folder.id;
+		});
+
+		await test.step('Create three contents in the Space', async () => {
+			for (const title of contentTitles) {
+				await apiHelpers.objectEntry.postObjectEntry(
+					{
+						objectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+						title,
+					},
+					applicationName,
+					spaceName
+				);
+			}
+		});
+
+		await test.step('Select the three contents and move them to the destination folder', async () => {
+			await assetsPage.gotoAll();
+
+			await assetsPage.selectItems(contentTitles);
+
+			await assetsPage.bulkMoveTo({
+				destinationFolder: destinationFolderName,
+				destinationSpace: spaceName,
+			});
+		});
+
+		await test.step('Info alert for the bulk move is displayed', async () => {
+			await waitForAlert(
+				page,
+				`Info:Moving 3 assets to ${destinationFolderName}.`,
+				{type: 'info'}
+			);
+		});
+
+		await test.step('Success alert for the bulk move is displayed', async () => {
+			await waitForAlert(
+				page,
+				`Success:3 assets were successfully moved to ${destinationFolderName}.`,
+				{first: true}
+			);
+		});
+
+		await test.step('The three contents are in the destination folder', async () => {
+			const response =
+				await apiHelpers.objectEntry.getObjectDefinitionObjectEntriesByScope(
+					applicationName,
+					encodeURIComponent(spaceName),
+					new URLSearchParams({pageSize: '100'})
+				);
+
+			const movedItems = response.items.filter(
+				(item: {objectEntryFolderId: number}) =>
+					item.objectEntryFolderId === destinationFolderId
+			);
+
+			expect(movedItems).toHaveLength(3);
+		});
+	}
+);
+
+test(
+	'Can copy multiple files across Spaces',
+	{tag: '@LPD-86776'},
+	async ({apiHelpers, assetsPage, page}) => {
+		const applicationName = 'cms/basic-documents';
+		const sourceSpaceName = `Space ${getRandomString()}`;
+		const destinationSpaceName = `Space ${getRandomString()}`;
+		const destinationFolderName = `Destination ${getRandomString()}`;
+		const fileTitles = [
+			`File ${getRandomString()}`,
+			`File ${getRandomString()}`,
+			`File ${getRandomString()}`,
+		];
+
+		await test.step('Create source and destination Spaces', async () => {
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: sourceSpaceName,
+				settings: {},
+				type: 'Space',
+			});
+
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: destinationSpaceName,
+				settings: {},
+				type: 'Space',
+			});
+		});
+
+		let destinationFolderId: number;
+
+		await test.step('Create a destination folder in the destination Space', async () => {
+			const folder =
+				await apiHelpers.objectFolder.createObjectEntryFolder({
+					parentObjectEntryFolderExternalReferenceCode: 'L_FILES',
+					scopeKey: destinationSpaceName,
+					title: destinationFolderName,
+				});
+
+			destinationFolderId = folder.id;
+		});
+
+		await test.step('Create three files in the source Space', async () => {
+			for (const title of fileTitles) {
+				await apiHelpers.objectEntry.postObjectEntry(
+					{
+						file: {
+							fileBase64: 'R0lGODlhAQABAAAAACw=',
+							name: `file_${getRandomString()}.png`,
+						},
+						objectEntryFolderExternalReferenceCode: 'L_FILES',
+						title,
+					},
+					applicationName,
+					sourceSpaceName
+				);
+			}
+		});
+
+		await test.step('Select the three files and copy them to the destination folder', async () => {
+			await assetsPage.gotoAll();
+
+			await assetsPage.selectItems(fileTitles);
+
+			await assetsPage.bulkCopyTo({
+				destinationFolder: destinationFolderName,
+				destinationSpace: destinationSpaceName,
+			});
+		});
+
+		await test.step('Info alert for the bulk copy is displayed', async () => {
+			await waitForAlert(
+				page,
+				`Info:Copying 3 assets to ${destinationFolderName}.`,
+				{type: 'info'}
+			);
+		});
+
+		await test.step('Success alert for the bulk copy is displayed', async () => {
+			await waitForAlert(
+				page,
+				`Success:3 assets were successfully copied to ${destinationFolderName}.`,
+				{first: true}
+			);
+		});
+
+		await test.step('The three files are in the destination folder in the destination Space', async () => {
+			const response =
+				await apiHelpers.objectEntry.getObjectDefinitionObjectEntriesByScope(
+					applicationName,
+					encodeURIComponent(destinationSpaceName),
+					new URLSearchParams({pageSize: '100'})
+				);
+
+			const copiedItems = response.items.filter(
+				(item: {objectEntryFolderId: number}) =>
+					item.objectEntryFolderId === destinationFolderId
+			);
+
+			expect(copiedItems).toHaveLength(3);
+		});
+
+		await test.step('The three files are still present in the source Space', async () => {
+			const response =
+				await apiHelpers.objectEntry.getObjectDefinitionObjectEntriesByScope(
+					applicationName,
+					encodeURIComponent(sourceSpaceName),
+					new URLSearchParams({pageSize: '100'})
+				);
+
+			const sourceItems = response.items.filter(
+				(item: {objectEntryFolderExternalReferenceCode: string}) =>
+					item.objectEntryFolderExternalReferenceCode === 'L_FILES'
+			);
+
+			expect(sourceItems).toHaveLength(3);
+		});
+	}
+);
+
+test(
+	'Warn users about limitations when bulk moving or copying',
+	{tag: '@LPD-86776'},
+	async ({apiHelpers, assetsPage, page}) => {
+		const spaceName = `Space ${getRandomString()}`;
+		const contentTitles = [
+			`Content ${getRandomString()}`,
+			`Content ${getRandomString()}`,
+		];
+		const fileTitle = `File ${getRandomString()}`;
+
+		await test.step('Create a Space with two contents and one file', async () => {
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: spaceName,
+				settings: {},
+				type: 'Space',
+			});
+
+			for (const title of contentTitles) {
+				await apiHelpers.objectEntry.postObjectEntry(
+					{
+						objectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+						title,
+					},
+					'cms/basic-web-contents',
+					spaceName
+				);
+			}
+
+			await apiHelpers.objectEntry.postObjectEntry(
+				{
+					file: {
+						fileBase64: 'R0lGODlhAQABAAAAACw=',
+						name: `file_${getRandomString()}.png`,
+					},
+					objectEntryFolderExternalReferenceCode: 'L_FILES',
+					title: fileTitle,
+				},
+				'cms/basic-documents',
+				spaceName
+			);
+		});
+
+		await test.step('Select the two contents', async () => {
+			await assetsPage.gotoAll();
+
+			await assetsPage.selectItems(contentTitles);
+		});
+
+		const pickerDialog = assetsPage.getCopyOrMoveDestinationDialog();
+		const notAllowedDialog = page.getByRole('dialog', {
+			name: 'Action not allowed',
+		});
+
+		await test.step('Move To destination picker shows the warning for same-type selection', async () => {
+			await page
+				.getByRole('button', {exact: true, name: 'Move To'})
+				.click();
+
+			await expect(
+				pickerDialog.getByText(/will be retained/i)
+			).toBeVisible();
+
+			await pickerDialog
+				.getByRole('button', {exact: true, name: 'Cancel'})
+				.click();
+
+			await expect(pickerDialog).toBeHidden();
+		});
+
+		await test.step('Copy To destination picker shows the warning for same-type selection', async () => {
+			await page
+				.getByRole('button', {exact: true, name: 'Copy To'})
+				.click();
+
+			await expect(
+				pickerDialog.getByText(/will be copied/i)
+			).toBeVisible();
+
+			await pickerDialog
+				.getByRole('button', {exact: true, name: 'Cancel'})
+				.click();
+
+			await expect(pickerDialog).toBeHidden();
+		});
+
+		await test.step('Also select the file for a mixed-type selection', async () => {
+			await assetsPage.selectItems([fileTitle]);
+		});
+
+		await test.step('Move To blocks a mixed-type selection with a not-allowed modal', async () => {
+			await page
+				.getByRole('button', {exact: true, name: 'Move To'})
+				.click();
+
+			await expect(
+				notAllowedDialog.getByText(/cannot be moved together/i)
+			).toBeVisible();
+
+			await notAllowedDialog
+				.getByRole('button', {exact: true, name: 'OK'})
+				.click();
+
+			await expect(notAllowedDialog).toBeHidden();
+		});
+
+		await test.step('Copy To blocks a mixed-type selection with a not-allowed modal', async () => {
+			await page
+				.getByRole('button', {exact: true, name: 'Copy To'})
+				.click();
+
+			await expect(
+				notAllowedDialog.getByText(/cannot be copied together/i)
+			).toBeVisible();
+
+			await notAllowedDialog
+				.getByRole('button', {exact: true, name: 'OK'})
+				.click();
+
+			await expect(notAllowedDialog).toBeHidden();
+		});
+	}
+);
+
+test(
+	'Selected folders are hidden from the destination picker on bulk move',
+	{tag: '@LPD-86776'},
+	async ({apiHelpers, assetsPage, page}) => {
+		const spaceName = `Space ${getRandomString()}`;
+		const folderAName = `Folder A ${getRandomString()}`;
+		const folderBName = `Folder B ${getRandomString()}`;
+
+		await test.step('Create a Space with two content folders', async () => {
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: spaceName,
+				settings: {},
+				type: 'Space',
+			});
+
+			for (const title of [folderAName, folderBName]) {
+				await apiHelpers.objectFolder.createObjectEntryFolder({
+					parentObjectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+					scopeKey: spaceName,
+					title,
+				});
+			}
+		});
+
+		await test.step("Navigate to the Space's Contents", async () => {
+			await assetsPage.gotoSpaceContents(spaceName);
+		});
+
+		await test.step('Select both folders and open Move To', async () => {
+			await assetsPage.selectItems([folderAName, folderBName]);
+
+			await page
+				.getByRole('button', {exact: true, name: 'Move To'})
+				.click();
+		});
+
+		await test.step('Selected folders are hidden in the destination picker', async () => {
+			const dialog = assetsPage.getCopyOrMoveDestinationDialog();
+
+			await dialog.getByLabel(spaceName).click();
+
+			await expect(
+				dialog.getByRole('radio', {
+					exact: true,
+					name: `Select ${folderAName}`,
+				})
+			).toBeHidden();
+
+			await expect(
+				dialog.getByRole('radio', {
+					exact: true,
+					name: `Select ${folderBName}`,
+				})
+			).toBeHidden();
+		});
+	}
+);
+
+test(
+	'Bulk move shows an error when the destination Space lacks the content structure',
+	{tag: '@LPD-86776'},
+	async ({apiHelpers, assetsPage, page}) => {
+		const sourceSpaceName = `Space ${getRandomString()}`;
+		const destinationSpaceName = `Space ${getRandomString()}`;
+		const destinationFolderName = `Destination ${getRandomString()}`;
+		const contentTitles = [
+			`Content ${getRandomString()}`,
+			`Content ${getRandomString()}`,
+		];
+
+		let sourceSpaceERC: string;
+
+		await test.step('Create source and destination Spaces', async () => {
+			const sourceSpace =
+				await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+					name: sourceSpaceName,
+					settings: {},
+					type: 'Space',
+				});
+
+			sourceSpaceERC = sourceSpace.externalReferenceCode;
+
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: destinationSpaceName,
+				settings: {},
+				type: 'Space',
+			});
+		});
+
+		await test.step('Create a destination folder in the destination Space', async () => {
+			await apiHelpers.objectFolder.createObjectEntryFolder({
+				parentObjectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+				scopeKey: destinationSpaceName,
+				title: destinationFolderName,
+			});
+		});
+
+		let applicationName: string;
+
+		await test.step('Create a content structure available only in the source Space', async () => {
+			const definition =
+				await apiHelpers.objectAdmin.postRandomObjectDefinition({
+					objectDefinitionSettings: [
+						{
+							name: 'acceptedGroupExternalReferenceCodes',
+							value: sourceSpaceERC as unknown as object,
+						},
+					],
+					objectFields: [
+						{
+							DBType: 'String',
+							businessType: 'Text',
+							externalReferenceCode: getRandomString(),
+							indexed: true,
+							indexedAsKeyword: false,
+							indexedLanguageId: 'en_US',
+							label: {en_US: 'Title'},
+							localized: true,
+							name: 'title',
+							required: true,
+						},
+					],
+					objectFolderExternalReferenceCode:
+						'L_CMS_CONTENT_STRUCTURES',
+					scope: 'depot',
+					status: {code: 0},
+					titleObjectFieldName: 'title',
+				});
+
+			expect(
+				definition.id,
+				'object definition was created'
+			).toBeDefined();
+			expect(
+				definition.restContextPath,
+				'object definition has a REST context path'
+			).toBeDefined();
+
+			apiHelpers.data.push({
+				id: definition.id as number,
+				type: 'objectDefinition',
+			});
+
+			applicationName = (definition.restContextPath as string).replace(
+				/^\/o\//,
+				''
+			);
+		});
+
+		await test.step('Seed two contents in the source Space', async () => {
+			for (const title of contentTitles) {
+				await apiHelpers.objectEntry.postObjectEntry(
+					{
+						objectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+						title,
+					},
+					applicationName,
+					sourceSpaceName
+				);
+			}
+		});
+
+		await test.step('Try to bulk move the contents to the destination Space', async () => {
+			await assetsPage.gotoAll();
+
+			await assetsPage.selectItems(contentTitles);
+
+			await assetsPage.bulkMoveTo({
+				destinationFolder: destinationFolderName,
+				destinationSpace: destinationSpaceName,
+			});
+		});
+
+		await test.step('Error toast informs the asset cannot be moved', async () => {
+			await waitForAlert(
+				page,
+				'Error:The asset cannot be moved because its content type is not available in the destination space.',
+				{type: 'danger'}
+			);
+		});
+	}
+);
+
+test(
+	'Destination picker shows folder hierarchy via drill-down',
+	{tag: '@LPD-86776'},
+	async ({apiHelpers, assetsPage, page}) => {
+		const sourceSpaceName = `Source ${getRandomString()}`;
+		const destinationSpaceName = `Destination ${getRandomString()}`;
+		const folder1Name = `Folder1 ${getRandomString()}`;
+		const folder2Name = `Folder2 ${getRandomString()}`;
+		const contentTitle = `Content ${getRandomString()}`;
+
+		await test.step('Create source and destination Spaces', async () => {
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: sourceSpaceName,
+				settings: {},
+				type: 'Space',
+			});
+
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: destinationSpaceName,
+				settings: {},
+				type: 'Space',
+			});
+		});
+
+		await test.step('Create a nested folder hierarchy in the destination Space', async () => {
+			const folder1 =
+				await apiHelpers.objectFolder.createObjectEntryFolder({
+					parentObjectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+					scopeKey: destinationSpaceName,
+					title: folder1Name,
+				});
+
+			await apiHelpers.objectFolder.createObjectEntryFolder({
+				parentObjectEntryFolderExternalReferenceCode:
+					folder1.externalReferenceCode,
+				scopeKey: destinationSpaceName,
+				title: folder2Name,
+			});
+		});
+
+		await test.step('Create a content in the source Space', async () => {
+			await apiHelpers.objectEntry.postObjectEntry(
+				{
+					objectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+					title: contentTitle,
+				},
+				'cms/basic-web-contents',
+				sourceSpaceName
+			);
+		});
+
+		await test.step('Open the Move To picker', async () => {
+			await assetsPage.gotoAll();
+
+			await assetsPage.selectItems([contentTitle]);
+
+			await page
+				.getByRole('button', {exact: true, name: 'Move To'})
+				.click();
+		});
+
+		const dialog = assetsPage.getCopyOrMoveDestinationDialog();
+
+		await test.step('Inside the destination Space the picker only shows the top-level folder', async () => {
+			await dialog.getByLabel(destinationSpaceName).click();
+
+			await expect(
+				dialog.getByRole('radio', {
+					exact: true,
+					name: `Select ${folder1Name}`,
+				})
+			).toBeVisible();
+
+			await expect(
+				dialog.getByRole('radio', {
+					exact: true,
+					name: `Select ${folder2Name}`,
+				})
+			).toBeHidden();
+		});
+
+		await test.step('Drilling into the top-level folder reveals the nested folder and updates breadcrumbs', async () => {
+			await dialog
+				.getByRole('link', {exact: true, name: folder1Name})
+				.click();
+
+			await expect(
+				dialog
+					.getByRole('navigation', {name: 'Breadcrumb'})
+					.getByText(folder1Name)
+			).toBeVisible();
+
+			await expect(
+				dialog.getByRole('radio', {
+					exact: true,
+					name: `Select ${folder2Name}`,
+				})
+			).toBeVisible();
+		});
+	}
+);
+
+test(
+	'Bulk move shows an error when the destination already has a same-named content',
+	{tag: '@LPD-86776'},
+	async ({apiHelpers, assetsPage, page}) => {
+		const applicationName = 'cms/basic-web-contents';
+		const sourceSpaceName = `Source ${getRandomString()}`;
+		const destinationSpaceName = `Destination ${getRandomString()}`;
+		const destinationFolderName = `Destination ${getRandomString()}`;
+		const sharedTitle = `Content ${getRandomString()}`;
+		const otherTitle = `Content ${getRandomString()}`;
+
+		await test.step('Create source and destination Spaces', async () => {
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: sourceSpaceName,
+				settings: {},
+				type: 'Space',
+			});
+
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: destinationSpaceName,
+				settings: {},
+				type: 'Space',
+			});
+		});
+
+		let destinationFolderERC: string;
+
+		await test.step('Create a destination folder in the destination Space', async () => {
+			const folder =
+				await apiHelpers.objectFolder.createObjectEntryFolder({
+					parentObjectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+					scopeKey: destinationSpaceName,
+					title: destinationFolderName,
+				});
+
+			destinationFolderERC = folder.externalReferenceCode;
+		});
+
+		await test.step('Seed contents in both Spaces with one shared title', async () => {
+			await apiHelpers.objectEntry.postObjectEntry(
+				{
+					objectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+					title: sharedTitle,
+				},
+				applicationName,
+				sourceSpaceName
+			);
+
+			await apiHelpers.objectEntry.postObjectEntry(
+				{
+					objectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+					title: otherTitle,
+				},
+				applicationName,
+				sourceSpaceName
+			);
+
+			await apiHelpers.objectEntry.postObjectEntry(
+				{
+					objectEntryFolderExternalReferenceCode:
+						destinationFolderERC,
+					title: sharedTitle,
+				},
+				applicationName,
+				destinationSpaceName
+			);
+		});
+
+		await test.step('Try to bulk move the source contents to the destination folder', async () => {
+			await assetsPage.gotoSpaceContents(sourceSpaceName);
+
+			await assetsPage.selectItems([sharedTitle, otherTitle]);
+
+			await assetsPage.bulkMoveTo({
+				destinationFolder: destinationFolderName,
+				destinationSpace: destinationSpaceName,
+			});
+		});
+
+		await test.step('Error toast informs the assets could not be moved', async () => {
+			await waitForAlert(
+				page,
+				'Error:Assets could not be moved. Please ensure the name is unique in the destination.',
+				{type: 'danger'}
+			);
+		});
+	}
+);
+
+test(
+	'Bulk Duplicate creates draft copies in the same Space',
+	{tag: '@LPD-88656'},
+	async ({apiHelpers, assetsPage, page}) => {
+		const applicationName = 'cms/basic-web-contents';
+		const contentTitles = [
+			`Content ${getRandomString()}`,
+			`Content ${getRandomString()}`,
+		];
+		const spaceName = `Space ${getRandomString()}`;
+
+		await test.step('Create a Space with two contents', async () => {
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: spaceName,
+				settings: {},
+				type: 'Space',
+			});
+
+			for (const title of contentTitles) {
+				await apiHelpers.objectEntry.postObjectEntry(
+					{
+						objectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+						title,
+					},
+					applicationName,
+					spaceName
+				);
+			}
+		});
+
+		await test.step('Bulk duplicate both contents', async () => {
+			await assetsPage.gotoSpaceContents(spaceName);
+
+			await assetsPage.selectItems(contentTitles);
+
+			await assetsPage.execBulkItemAction('Duplicate');
+		});
+
+		await test.step('Info alert for the bulk duplicate is displayed', async () => {
+			await waitForAlert(
+				page,
+				'Info:Duplicate action started for 2 assets.',
+				{type: 'info'}
+			);
+		});
+
+		await test.step('Success alert for the bulk duplicate is displayed', async () => {
+			await waitForAlert(
+				page,
+				'Success:2 assets were successfully duplicated.',
+				{first: true}
+			);
+		});
+
+		await test.step('Both copies appear with (Copy) suffix in Draft state', async () => {
+			for (const originalTitle of contentTitles) {
+				await expect(
+					page.getByRole('link', {
+						exact: true,
+						name: `${originalTitle} (Copy)`,
+					})
+				).toBeVisible();
+			}
+
+			await expect(
+				assetsPage.table.bodyRows
+					.filter({
+						has: page.getByRole('link', {
+							exact: true,
+							name: `${contentTitles[0]} (Copy)`,
+						}),
+					})
+					.getByText('Draft')
+			).toBeVisible();
+		});
+	}
+);
+
+test(
+	'Bulk Duplicate handles a mixed entry and folder selection in the same Space',
+	{tag: '@LPD-88656'},
+	async ({apiHelpers, assetsPage, page}) => {
+		const contentTitle = `Content ${getRandomString()}`;
+		const folderTitle = `Folder ${getRandomString()}`;
+		const spaceName = `Space ${getRandomString()}`;
+
+		await test.step('Create a Space with one content and one folder', async () => {
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: spaceName,
+				settings: {},
+				type: 'Space',
+			});
+
+			await apiHelpers.objectEntry.postObjectEntry(
+				{
+					objectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+					title: contentTitle,
+				},
+				'cms/basic-web-contents',
+				spaceName
+			);
+
+			await apiHelpers.objectFolder.createObjectEntryFolder({
+				parentObjectEntryFolderExternalReferenceCode: 'L_CONTENTS',
+				scopeKey: spaceName,
+				title: folderTitle,
+			});
+		});
+
+		await test.step('Bulk duplicate the content and folder', async () => {
+			await assetsPage.gotoSpaceContents(spaceName);
+
+			await assetsPage.selectItems([contentTitle, folderTitle]);
+
+			await assetsPage.execBulkItemAction('Duplicate');
+		});
+
+		await test.step('Info alert for the bulk duplicate is displayed', async () => {
+			await waitForAlert(
+				page,
+				'Info:Duplicate action started for 2 assets.',
+				{type: 'info'}
+			);
+		});
+
+		await test.step('Success alert for the bulk duplicate is displayed', async () => {
+			await waitForAlert(
+				page,
+				'Success:2 assets were successfully duplicated.',
+				{first: true}
+			);
+		});
+
+		await test.step('Both copies appear with (Copy) suffix', async () => {
+			for (const title of [contentTitle, folderTitle]) {
+				await expect(
+					page.getByRole('link', {
+						exact: true,
+						name: `${title} (Copy)`,
+					})
+				).toBeVisible();
+			}
 		});
 	}
 );

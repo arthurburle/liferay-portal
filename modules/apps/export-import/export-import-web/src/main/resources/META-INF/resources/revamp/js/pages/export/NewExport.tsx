@@ -3,108 +3,190 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
+import ClayAlert from '@clayui/alert';
 import ClayButton from '@clayui/button';
 import ClayIcon from '@clayui/icon';
-import {FormikValues} from 'formik';
-import React from 'react';
+import {Form, Formik, FormikValues} from 'formik';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
-import {Wizard, WizardStep} from '../../components/Wizard';
-import {DateFilterValues} from '../../components/date_filter';
-import {flattenContentSelection} from '../../utils/flattenContentSelection';
+import Footer from '../../components/Footer';
 import {
-	PortletDataHandlerSection,
-	mockPortletDataHandlerSections,
-} from '../../utils/mockPortletDataHandlerSections';
-import DataSelectionStep from './steps/DataSelectionStep';
-import SettingsStep from './steps/SettingsStep';
-import SetupStep from './steps/SetupStep';
+	DateFilterValues,
+	FilterType,
+	HOURS_BY_MODIFIED_LAST,
+} from '../../components/date_filter';
+import {FormikDebug} from '../../components/forms/formik';
+import {
+	ExportPreviewParams,
+	ExportPreviewQuery,
+	getExportPreview,
+} from '../../services/getExportPreview';
+import {ExportPreview} from '../../types/exportImportPreview';
+import {flattenContentSelection} from '../../utils/flattenContentSelection';
+import DataSelection from './components/DataSelection';
+import Setup from './components/Setup';
 
-interface NewExportProps {
-	backURL: string;
-	sections?: PortletDataHandlerSection[];
+function dateFilterToQuery(values: DateFilterValues): ExportPreviewQuery {
+	if (values.filterType === FilterType.Last) {
+		return {
+			last: HOURS_BY_MODIFIED_LAST[values.modifiedLast],
+			range: 'last',
+		};
+	}
+
+	if (values.filterType === FilterType.Range) {
+		return {
+			endDate: new Date(values.toDate).toISOString(),
+			range: 'dateRange',
+			startDate: new Date(values.fromDate).toISOString(),
+		};
+	}
+
+	return {range: 'all'};
 }
 
 export function NewExport({
 	backURL,
-	sections = mockPortletDataHandlerSections,
-}: NewExportProps) {
-	const handleApplyFilter = (filterValues: DateFilterValues) => {
+	exportPreview,
+	exportPreviewAPIURL,
+}: {
+	backURL: string;
+	exportPreview?: ExportPreview;
+	exportPreviewAPIURL: string;
+}) {
+	const [preview, setPreview] = useState<ExportPreview | undefined>(
+		exportPreview
+	);
+	const [error, setError] = useState<string | null>(null);
+	const [loading, setLoading] = useState(!exportPreview);
+	const initialPreviewRef = useRef<ExportPreview | undefined>(exportPreview);
 
-		// eslint-disable-next-line no-console
-		console.log('Filtering by:', filterValues);
+	const getPreview = useCallback(
+		(exportPreviewParams: ExportPreviewParams) => {
+			setLoading(true);
+			setError(null);
+
+			getExportPreview(exportPreviewParams).then((result) => {
+				if (result.error !== null) {
+					setError(result.error);
+				}
+				else {
+					setPreview(result.data);
+
+					if (!initialPreviewRef.current) {
+						initialPreviewRef.current = result.data;
+					}
+				}
+
+				setLoading(false);
+			});
+		},
+		[]
+	);
+
+	useEffect(() => {
+		if (exportPreview) {
+			return;
+		}
+
+		getPreview({url: exportPreviewAPIURL});
+	}, [exportPreview, exportPreviewAPIURL, getPreview]);
+
+	if (error) {
+		return <ClayAlert displayType="danger">{error}</ClayAlert>;
+	}
+
+	const sections = preview?.portletDataHandlerSections ?? [];
+
+	const handleApplyFilter = (filterValues: DateFilterValues) => {
+		if (
+			filterValues.filterType === FilterType.All &&
+			initialPreviewRef.current
+		) {
+			setPreview(initialPreviewRef.current);
+
+			return;
+		}
+
+		getPreview({
+			query: dateFilterToQuery(filterValues),
+			url: exportPreviewAPIURL,
+		});
 	};
 
 	return (
-		<Wizard backURL={backURL}>
-			<WizardStep
-				description={Liferay.Language.get(
-					'name-your-export-and-make-an-initial-data-selection-to-narrow-down-in-the-next-step'
-				)}
-				initialValues={{
-					filename: '',
-					selectedSectionIds: [],
-				}}
-				title={Liferay.Language.get('setup')}
-				validate={(values: FormikValues) => {
-					const errors: {[key: string]: string} = {};
+		<Formik
+			initialValues={{
+				contentSelection: undefined,
+				filename: '',
+			}}
+			onSubmit={async (values) => {
+				const flatValues = flattenContentSelection({
+					contentSelection: values.contentSelection,
+					sections,
+				});
 
-					if (!values?.selectedSectionIds?.length) {
-						errors.selectedSectionIds = Liferay.Language.get(
-							'please-select-at-least-one-entity-type-to-continue'
-						);
-					}
+				// eslint-disable-next-line no-console
+				console.log({
+					contentSelection: values.contentSelection,
+					filename: values.filename,
+					flatValues,
+				});
+			}}
+			validate={(values: FormikValues) => {
+				const errors: {[key: string]: string} = {};
 
-					return errors;
-				}}
-			>
-				<SetupStep sections={sections} />
-			</WizardStep>
-
-			<WizardStep
-				description={Liferay.Language.get(
-					'select-and-filter-the-data-you-want-to-include-in-your-export'
-				)}
-				initialValues={{
-					contentSelection: undefined,
-				}}
-				title={Liferay.Language.get('data-selection')}
-			>
-				<DataSelectionStep
-					itemsCount={0}
-					onApplyFilter={handleApplyFilter}
-					sections={sections}
-				/>
-			</WizardStep>
-
-			<WizardStep
-				actionButton={
-					<ClayButton type="submit">
-						<span className="inline-item inline-item-before">
-							<ClayIcon className="mr-1" symbol="export" />
-						</span>
-
-						{Liferay.Language.get('export')}
-					</ClayButton>
+				if (!values?.filename) {
+					errors.filename = Liferay.Language.get(
+						'this-field-is-required'
+					);
 				}
-				description={Liferay.Language.get(
-					'configure-your-export-settings'
-				)}
-				onSubmit={async (values) => {
-					const flatValues = flattenContentSelection({
-						contentSelection: values.contentSelection,
-						sections,
-					});
 
-					// eslint-disable-next-line no-console
-					console.log({
-						contentSelection: values.contentSelection,
-						flatValues,
-					});
-				}}
-				title={Liferay.Language.get('settings')}
-			>
-				<SettingsStep />
-			</WizardStep>
-		</Wizard>
+				if (!values?.contentSelection) {
+					errors.contentSelection = Liferay.Language.get(
+						'please-select-at-least-one-entity-type-to-continue'
+					);
+				}
+
+				return errors;
+			}}
+			validateOnMount
+		>
+			{(formik) => (
+				<Form noValidate>
+					<Setup />
+
+					<DataSelection
+						itemsCount={preview?.additionCount}
+						loading={loading}
+						onApplyFilter={handleApplyFilter}
+						sections={sections}
+					/>
+
+					<Footer
+						actionButton={
+							<ClayButton
+								disabled={
+									formik.isSubmitting || !formik.isValid
+								}
+								type="submit"
+							>
+								<span className="inline-item inline-item-before">
+									<ClayIcon
+										className="mr-1"
+										symbol="export"
+									/>
+								</span>
+
+								{Liferay.Language.get('export')}
+							</ClayButton>
+						}
+						backURL={backURL}
+					/>
+
+					{process.env.NODE_ENV === 'development' && <FormikDebug />}
+				</Form>
+			)}
+		</Formik>
 	);
 }

@@ -217,20 +217,6 @@ public interface OAuth2ScopeGrantPersistence
 		String applicationName, String bundleSymbolicName, String scope);
 
 	/**
-	 * Caches the o auth2 scope grant in the entity cache if it is enabled.
-	 *
-	 * @param oAuth2ScopeGrant the o auth2 scope grant
-	 */
-	public void cacheResult(OAuth2ScopeGrant oAuth2ScopeGrant);
-
-	/**
-	 * Caches the o auth2 scope grants in the entity cache if it is enabled.
-	 *
-	 * @param oAuth2ScopeGrants the o auth2 scope grants
-	 */
-	public void cacheResult(java.util.List<OAuth2ScopeGrant> oAuth2ScopeGrants);
-
-	/**
 	 * Creates a new o auth2 scope grant with the primary key. Does not add the o auth2 scope grant to the database.
 	 *
 	 * @param oAuth2ScopeGrantId the primary key for the new o auth2 scope grant
@@ -267,74 +253,6 @@ public interface OAuth2ScopeGrantPersistence
 	 * @return the o auth2 scope grant, or <code>null</code> if a o auth2 scope grant with the primary key could not be found
 	 */
 	public OAuth2ScopeGrant fetchByPrimaryKey(long oAuth2ScopeGrantId);
-
-	/**
-	 * Returns all the o auth2 scope grants.
-	 *
-	 * @return the o auth2 scope grants
-	 */
-	public java.util.List<OAuth2ScopeGrant> findAll();
-
-	/**
-	 * Returns a range of all the o auth2 scope grants.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.oauth2.provider.model.impl.OAuth2ScopeGrantModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth2 scope grants
-	 * @param end the upper bound of the range of o auth2 scope grants (not inclusive)
-	 * @return the range of o auth2 scope grants
-	 */
-	public java.util.List<OAuth2ScopeGrant> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the o auth2 scope grants.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.oauth2.provider.model.impl.OAuth2ScopeGrantModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth2 scope grants
-	 * @param end the upper bound of the range of o auth2 scope grants (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of o auth2 scope grants
-	 */
-	public java.util.List<OAuth2ScopeGrant> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<OAuth2ScopeGrant>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the o auth2 scope grants.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.oauth2.provider.model.impl.OAuth2ScopeGrantModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth2 scope grants
-	 * @param end the upper bound of the range of o auth2 scope grants (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of o auth2 scope grants
-	 */
-	public java.util.List<OAuth2ScopeGrant> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<OAuth2ScopeGrant>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the o auth2 scope grants from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of o auth2 scope grants.
-	 *
-	 * @return the number of o auth2 scope grants
-	 */
-	public int countAll();
 
 	/**
 	 * Returns the primaryKeys of o auth2 authorizations associated with the o auth2 scope grant.
@@ -522,4 +440,4 @@ public interface OAuth2ScopeGrantPersistence
 			oAuth2Authorizations);
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1196539928
+// LIFERAY-SERVICE-BUILDER-HASH:-1116897201

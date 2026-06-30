@@ -5,16 +5,12 @@
 
 package com.liferay.portal.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
-import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.dao.orm.SQLQuery;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.exception.NoSuchLayoutSetBranchException;
 import com.liferay.portal.kernel.log.Log;
@@ -22,19 +18,15 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.LayoutSetBranch;
 import com.liferay.portal.kernel.model.LayoutSetBranchTable;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
-import com.liferay.portal.kernel.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.LayoutSetBranchPersistence;
 import com.liferay.portal.kernel.service.persistence.LayoutSetBranchUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
-import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
+import com.liferay.portal.kernel.service.persistence.impl.FilterCollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.model.impl.LayoutSetBranchImpl;
@@ -61,7 +53,7 @@ import java.util.Set;
  * @generated
  */
 public class LayoutSetBranchPersistenceImpl
-	extends BasePersistenceImpl<LayoutSetBranch>
+	extends BasePersistenceImpl<LayoutSetBranch, NoSuchLayoutSetBranchException>
 	implements LayoutSetBranchPersistence {
 
 	/*
@@ -78,13 +70,10 @@ public class LayoutSetBranchPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByGroupId;
 	private FinderPath _finderPathWithoutPaginationFindByGroupId;
 	private FinderPath _finderPathCountByGroupId;
-	private CollectionPersistenceFinder<LayoutSetBranch>
+	private FilterCollectionPersistenceFinder<LayoutSetBranch>
 		_collectionPersistenceFinderByGroupId;
 
 	/**
@@ -254,98 +243,9 @@ public class LayoutSetBranchPersistenceImpl
 		long groupId, int start, int end,
 		OrderByComparator<LayoutSetBranch> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByGroupId(groupId, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByGroupId(
-					groupId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				3 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(4);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUTSETBRANCH_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					LayoutSetBranchModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutSetBranchModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), LayoutSetBranch.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, LayoutSetBranchImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, LayoutSetBranchImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			return (List<LayoutSetBranch>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByGroupId.filterFind(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId}, start,
+			end, orderByComparator, groupId);
 	}
 
 	/**
@@ -379,62 +279,14 @@ public class LayoutSetBranchPersistenceImpl
 	 */
 	@Override
 	public int filterCountByGroupId(long groupId) {
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByGroupId(groupId);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<LayoutSetBranch> layoutSetBranchs = findByGroupId(groupId);
-
-			layoutSetBranchs = InlineSQLHelperUtil.filter(
-				layoutSetBranchs, groupId);
-
-			return layoutSetBranchs.size();
-		}
-
-		StringBundler sb = new StringBundler(2);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUTSETBRANCH_WHERE);
-
-		sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), LayoutSetBranch.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByGroupId.filterCount(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_GROUPID_GROUPID_2 =
-		"layoutSetBranch.groupId = ?";
 
 	private FinderPath _finderPathWithPaginationFindByG_P;
 	private FinderPath _finderPathWithoutPaginationFindByG_P;
 	private FinderPath _finderPathCountByG_P;
-	private CollectionPersistenceFinder<LayoutSetBranch>
+	private FilterCollectionPersistenceFinder<LayoutSetBranch>
 		_collectionPersistenceFinderByG_P;
 
 	/**
@@ -622,103 +474,10 @@ public class LayoutSetBranchPersistenceImpl
 		long groupId, boolean privateLayout, int start, int end,
 		OrderByComparator<LayoutSetBranch> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_P(
-				groupId, privateLayout, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_P(
-					groupId, privateLayout, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				4 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(5);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUTSETBRANCH_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_P_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_P_PRIVATELAYOUT_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					LayoutSetBranchModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutSetBranchModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), LayoutSetBranch.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, LayoutSetBranchImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, LayoutSetBranchImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			return (List<LayoutSetBranch>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P.filterFind(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout}, start, end,
+			orderByComparator, groupId);
 	}
 
 	/**
@@ -757,65 +516,10 @@ public class LayoutSetBranchPersistenceImpl
 	 */
 	@Override
 	public int filterCountByG_P(long groupId, boolean privateLayout) {
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_P(groupId, privateLayout);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<LayoutSetBranch> layoutSetBranchs = findByG_P(
-				groupId, privateLayout);
-
-			layoutSetBranchs = InlineSQLHelperUtil.filter(
-				layoutSetBranchs, groupId);
-
-			return layoutSetBranchs.size();
-		}
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUTSETBRANCH_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_P_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_P_PRIVATELAYOUT_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), LayoutSetBranch.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P.filterCount(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_P_GROUPID_2 =
-		"layoutSetBranch.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_PRIVATELAYOUT_2 =
-		"layoutSetBranch.privateLayout = ?";
 
 	private FinderPath _finderPathFetchByG_P_N;
 	private UniquePersistenceFinder<LayoutSetBranch>
@@ -925,7 +629,7 @@ public class LayoutSetBranchPersistenceImpl
 	private FinderPath _finderPathWithPaginationFindByG_P_M;
 	private FinderPath _finderPathWithoutPaginationFindByG_P_M;
 	private FinderPath _finderPathCountByG_P_M;
-	private CollectionPersistenceFinder<LayoutSetBranch>
+	private FilterCollectionPersistenceFinder<LayoutSetBranch>
 		_collectionPersistenceFinderByG_P_M;
 
 	/**
@@ -1128,107 +832,10 @@ public class LayoutSetBranchPersistenceImpl
 		long groupId, boolean privateLayout, boolean master, int start, int end,
 		OrderByComparator<LayoutSetBranch> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_P_M(
-				groupId, privateLayout, master, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_P_M(
-					groupId, privateLayout, master, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				5 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(6);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUTSETBRANCH_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_P_M_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_P_M_PRIVATELAYOUT_2);
-
-		sb.append(_FINDER_COLUMN_G_P_M_MASTER_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					LayoutSetBranchModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutSetBranchModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), LayoutSetBranch.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, LayoutSetBranchImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, LayoutSetBranchImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			queryPos.add(master);
-
-			return (List<LayoutSetBranch>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_M.filterFind(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, master}, start, end,
+			orderByComparator, groupId);
 	}
 
 	/**
@@ -1276,72 +883,10 @@ public class LayoutSetBranchPersistenceImpl
 	public int filterCountByG_P_M(
 		long groupId, boolean privateLayout, boolean master) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_P_M(groupId, privateLayout, master);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<LayoutSetBranch> layoutSetBranchs = findByG_P_M(
-				groupId, privateLayout, master);
-
-			layoutSetBranchs = InlineSQLHelperUtil.filter(
-				layoutSetBranchs, groupId);
-
-			return layoutSetBranchs.size();
-		}
-
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUTSETBRANCH_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_P_M_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_P_M_PRIVATELAYOUT_2);
-
-		sb.append(_FINDER_COLUMN_G_P_M_MASTER_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), LayoutSetBranch.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			queryPos.add(master);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_M.filterCount(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, master}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_P_M_GROUPID_2 =
-		"layoutSetBranch.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_M_PRIVATELAYOUT_2 =
-		"layoutSetBranch.privateLayout = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_M_MASTER_2 =
-		"layoutSetBranch.master = ?";
 
 	public LayoutSetBranchPersistenceImpl() {
 		Map<String, String> dbColumnNames = new HashMap<String, String>();
@@ -1356,110 +901,6 @@ public class LayoutSetBranchPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(LayoutSetBranchTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the layout set branch in the entity cache if it is enabled.
-	 *
-	 * @param layoutSetBranch the layout set branch
-	 */
-	@Override
-	public void cacheResult(LayoutSetBranch layoutSetBranch) {
-		EntityCacheUtil.putResult(
-			LayoutSetBranchImpl.class, layoutSetBranch.getPrimaryKey(),
-			layoutSetBranch);
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByG_P_N,
-			new Object[] {
-				layoutSetBranch.getGroupId(), layoutSetBranch.isPrivateLayout(),
-				layoutSetBranch.getName()
-			},
-			layoutSetBranch);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the layout set branches in the entity cache if it is enabled.
-	 *
-	 * @param layoutSetBranchs the layout set branches
-	 */
-	@Override
-	public void cacheResult(List<LayoutSetBranch> layoutSetBranchs) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (layoutSetBranchs.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (LayoutSetBranch layoutSetBranch : layoutSetBranchs) {
-			if (EntityCacheUtil.getResult(
-					LayoutSetBranchImpl.class,
-					layoutSetBranch.getPrimaryKey()) == null) {
-
-				cacheResult(layoutSetBranch);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all layout set branches.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		EntityCacheUtil.clearCache(LayoutSetBranchImpl.class);
-
-		FinderCacheUtil.clearCache(LayoutSetBranchImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the layout set branch.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(LayoutSetBranch layoutSetBranch) {
-		EntityCacheUtil.removeResult(
-			LayoutSetBranchImpl.class, layoutSetBranch);
-	}
-
-	@Override
-	public void clearCache(List<LayoutSetBranch> layoutSetBranchs) {
-		for (LayoutSetBranch layoutSetBranch : layoutSetBranchs) {
-			EntityCacheUtil.removeResult(
-				LayoutSetBranchImpl.class, layoutSetBranch);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		FinderCacheUtil.clearCache(LayoutSetBranchImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			EntityCacheUtil.removeResult(LayoutSetBranchImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		LayoutSetBranchModelImpl layoutSetBranchModelImpl) {
-
-		Object[] args = new Object[] {
-			layoutSetBranchModelImpl.getGroupId(),
-			layoutSetBranchModelImpl.isPrivateLayout(),
-			layoutSetBranchModelImpl.getName()
-		};
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByG_P_N, args, layoutSetBranchModelImpl);
 	}
 
 	/**
@@ -1492,47 +933,6 @@ public class LayoutSetBranchPersistenceImpl
 		throws NoSuchLayoutSetBranchException {
 
 		return remove((Serializable)layoutSetBranchId);
-	}
-
-	/**
-	 * Removes the layout set branch with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the layout set branch
-	 * @return the layout set branch that was removed
-	 * @throws NoSuchLayoutSetBranchException if a layout set branch with the primary key could not be found
-	 */
-	@Override
-	public LayoutSetBranch remove(Serializable primaryKey)
-		throws NoSuchLayoutSetBranchException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			LayoutSetBranch layoutSetBranch = (LayoutSetBranch)session.get(
-				LayoutSetBranchImpl.class, primaryKey);
-
-			if (layoutSetBranch == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchLayoutSetBranchException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(layoutSetBranch);
-		}
-		catch (NoSuchLayoutSetBranchException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1635,41 +1035,13 @@ public class LayoutSetBranchPersistenceImpl
 			closeSession(session);
 		}
 
-		EntityCacheUtil.putResult(
-			LayoutSetBranchImpl.class, layoutSetBranchModelImpl, false, true);
-
-		cacheUniqueFindersCache(layoutSetBranchModelImpl);
+		cacheUniqueFindersResult(layoutSetBranch, false);
 
 		if (isNew) {
 			layoutSetBranch.setNew(false);
 		}
 
 		layoutSetBranch.resetOriginalValues();
-
-		return layoutSetBranch;
-	}
-
-	/**
-	 * Returns the layout set branch with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the layout set branch
-	 * @return the layout set branch
-	 * @throws NoSuchLayoutSetBranchException if a layout set branch with the primary key could not be found
-	 */
-	@Override
-	public LayoutSetBranch findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchLayoutSetBranchException {
-
-		LayoutSetBranch layoutSetBranch = fetchByPrimaryKey(primaryKey);
-
-		if (layoutSetBranch == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchLayoutSetBranchException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return layoutSetBranch;
 	}
@@ -1697,187 +1069,6 @@ public class LayoutSetBranchPersistenceImpl
 	@Override
 	public LayoutSetBranch fetchByPrimaryKey(long layoutSetBranchId) {
 		return fetchByPrimaryKey((Serializable)layoutSetBranchId);
-	}
-
-	/**
-	 * Returns all the layout set branches.
-	 *
-	 * @return the layout set branches
-	 */
-	@Override
-	public List<LayoutSetBranch> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the layout set branches.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LayoutSetBranchModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout set branches
-	 * @param end the upper bound of the range of layout set branches (not inclusive)
-	 * @return the range of layout set branches
-	 */
-	@Override
-	public List<LayoutSetBranch> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the layout set branches.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LayoutSetBranchModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout set branches
-	 * @param end the upper bound of the range of layout set branches (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of layout set branches
-	 */
-	@Override
-	public List<LayoutSetBranch> findAll(
-		int start, int end,
-		OrderByComparator<LayoutSetBranch> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the layout set branches.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LayoutSetBranchModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout set branches
-	 * @param end the upper bound of the range of layout set branches (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of layout set branches
-	 */
-	@Override
-	public List<LayoutSetBranch> findAll(
-		int start, int end,
-		OrderByComparator<LayoutSetBranch> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<LayoutSetBranch> list = null;
-
-		if (useFinderCache) {
-			list = (List<LayoutSetBranch>)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_LAYOUTSETBRANCH);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_LAYOUTSETBRANCH;
-
-				sql = sql.concat(LayoutSetBranchModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<LayoutSetBranch>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the layout set branches from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (LayoutSetBranch layoutSetBranch : findAll()) {
-			remove(layoutSetBranch);
-		}
-	}
-
-	/**
-	 * Returns the number of layout set branches.
-	 *
-	 * @return the number of layout set branches
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)FinderCacheUtil.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_LAYOUTSETBRANCH);
-
-				count = (Long)query.uniqueResult();
-
-				FinderCacheUtil.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -1909,21 +1100,6 @@ public class LayoutSetBranchPersistenceImpl
 	 * Initializes the layout set branch persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByGroupId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByGroupId",
 			new String[] {
@@ -1943,12 +1119,23 @@ public class LayoutSetBranchPersistenceImpl
 			false);
 
 		_collectionPersistenceFinderByGroupId =
-			new CollectionPersistenceFinder<>(
+			new FilterCollectionPersistenceFinder<>(
 				this, _finderPathWithPaginationFindByGroupId,
 				_finderPathWithoutPaginationFindByGroupId,
 				_finderPathCountByGroupId, _SQL_SELECT_LAYOUTSETBRANCH_WHERE,
 				_SQL_COUNT_LAYOUTSETBRANCH_WHERE,
-				LayoutSetBranchModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				LayoutSetBranchModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutSetBranchImpl.class, LayoutSetBranch.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUTSETBRANCH_WHERE,
+					_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUTSETBRANCH_WHERE,
+					LayoutSetBranchModelImpl.ORDER_BY_SQL,
+					LayoutSetBranchModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
 				new FinderColumn<>(
 					"layoutSetBranch.", "groupId", FinderColumn.Type.LONG, "=",
 					true, true, LayoutSetBranch::getGroupId));
@@ -1972,34 +1159,51 @@ public class LayoutSetBranchPersistenceImpl
 			new String[] {Long.class.getName(), Boolean.class.getName()},
 			new String[] {"groupId", "privateLayout"}, false);
 
-		_collectionPersistenceFinderByG_P = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByG_P,
-			_finderPathWithoutPaginationFindByG_P, _finderPathCountByG_P,
-			_SQL_SELECT_LAYOUTSETBRANCH_WHERE, _SQL_COUNT_LAYOUTSETBRANCH_WHERE,
-			LayoutSetBranchModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"layoutSetBranch.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, LayoutSetBranch::getGroupId),
-			new FinderColumn<>(
-				"layoutSetBranch.", "privateLayout", FinderColumn.Type.BOOLEAN,
-				"=", true, true, LayoutSetBranch::isPrivateLayout));
+		_collectionPersistenceFinderByG_P =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_P,
+				_finderPathWithoutPaginationFindByG_P, _finderPathCountByG_P,
+				_SQL_SELECT_LAYOUTSETBRANCH_WHERE,
+				_SQL_COUNT_LAYOUTSETBRANCH_WHERE,
+				LayoutSetBranchModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutSetBranchImpl.class, LayoutSetBranch.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUTSETBRANCH_WHERE,
+					_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUTSETBRANCH_WHERE,
+					LayoutSetBranchModelImpl.ORDER_BY_SQL,
+					LayoutSetBranchModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"layoutSetBranch.", "groupId", FinderColumn.Type.LONG, "=",
+					true, true, LayoutSetBranch::getGroupId),
+				new FinderColumn<>(
+					"layoutSetBranch.", "privateLayout",
+					FinderColumn.Type.BOOLEAN, "=", true, true,
+					LayoutSetBranch::isPrivateLayout));
 
-		_finderPathFetchByG_P_N = new FinderPath(
+		_finderPathFetchByG_P_N = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByG_P_N",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"groupId", "privateLayout", "name"}, true);
+			new String[] {"groupId", "privateLayout", "name"}, 0, 4, false,
+			LayoutSetBranch::getGroupId, LayoutSetBranch::isPrivateLayout,
+			convertNullFunction(LayoutSetBranch::getName));
 
 		_uniquePersistenceFinderByG_P_N = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByG_P_N, _SQL_SELECT_LAYOUTSETBRANCH_WHERE,
+			"",
 			new FinderColumn<>(
 				"layoutSetBranch.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, LayoutSetBranch::getGroupId),
+				true, true, LayoutSetBranch::getGroupId),
 			new FinderColumn<>(
 				"layoutSetBranch.", "privateLayout", FinderColumn.Type.BOOLEAN,
-				"=", true, false, LayoutSetBranch::isPrivateLayout),
+				"=", true, true, LayoutSetBranch::isPrivateLayout),
 			new FinderColumn<>(
 				"layoutSetBranch.", "name", FinderColumn.Type.STRING, "=", true,
 				true, LayoutSetBranch::getName));
@@ -2029,20 +1233,34 @@ public class LayoutSetBranchPersistenceImpl
 			},
 			new String[] {"groupId", "privateLayout", "master"}, false);
 
-		_collectionPersistenceFinderByG_P_M = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByG_P_M,
-			_finderPathWithoutPaginationFindByG_P_M, _finderPathCountByG_P_M,
-			_SQL_SELECT_LAYOUTSETBRANCH_WHERE, _SQL_COUNT_LAYOUTSETBRANCH_WHERE,
-			LayoutSetBranchModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"layoutSetBranch.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, LayoutSetBranch::getGroupId),
-			new FinderColumn<>(
-				"layoutSetBranch.", "privateLayout", FinderColumn.Type.BOOLEAN,
-				"=", true, false, LayoutSetBranch::isPrivateLayout),
-			new FinderColumn<>(
-				"layoutSetBranch.", "master", FinderColumn.Type.BOOLEAN, "=",
-				true, true, LayoutSetBranch::isMaster));
+		_collectionPersistenceFinderByG_P_M =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_P_M,
+				_finderPathWithoutPaginationFindByG_P_M,
+				_finderPathCountByG_P_M, _SQL_SELECT_LAYOUTSETBRANCH_WHERE,
+				_SQL_COUNT_LAYOUTSETBRANCH_WHERE,
+				LayoutSetBranchModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutSetBranchImpl.class, LayoutSetBranch.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUTSETBRANCH_WHERE,
+					_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUTSETBRANCH_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUTSETBRANCH_WHERE,
+					LayoutSetBranchModelImpl.ORDER_BY_SQL,
+					LayoutSetBranchModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"layoutSetBranch.", "groupId", FinderColumn.Type.LONG, "=",
+					true, true, LayoutSetBranch::getGroupId),
+				new FinderColumn<>(
+					"layoutSetBranch.", "privateLayout",
+					FinderColumn.Type.BOOLEAN, "=", true, true,
+					LayoutSetBranch::isPrivateLayout),
+				new FinderColumn<>(
+					"layoutSetBranch.", "master", FinderColumn.Type.BOOLEAN,
+					"=", true, true, LayoutSetBranch::isMaster));
 
 		LayoutSetBranchUtil.setPersistence(this);
 	}
@@ -2053,14 +1271,14 @@ public class LayoutSetBranchPersistenceImpl
 		EntityCacheUtil.removeCache(LayoutSetBranchImpl.class.getName());
 	}
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		LayoutSetBranchModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_LAYOUTSETBRANCH =
 		"SELECT layoutSetBranch FROM LayoutSetBranch layoutSetBranch";
 
 	private static final String _SQL_SELECT_LAYOUTSETBRANCH_WHERE =
 		"SELECT layoutSetBranch FROM LayoutSetBranch layoutSetBranch WHERE ";
-
-	private static final String _SQL_COUNT_LAYOUTSETBRANCH =
-		"SELECT COUNT(layoutSetBranch) FROM LayoutSetBranch layoutSetBranch";
 
 	private static final String _SQL_COUNT_LAYOUTSETBRANCH_WHERE =
 		"SELECT COUNT(layoutSetBranch) FROM LayoutSetBranch layoutSetBranch WHERE ";
@@ -2086,13 +1304,6 @@ public class LayoutSetBranchPersistenceImpl
 
 	private static final String _FILTER_ENTITY_TABLE = "LayoutSetBranch";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS = "layoutSetBranch.";
-
-	private static final String _ORDER_BY_ENTITY_TABLE = "LayoutSetBranch.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No LayoutSetBranch exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No LayoutSetBranch exists with the key {";
 
@@ -2108,4 +1319,4 @@ public class LayoutSetBranchPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-3806325
+// LIFERAY-SERVICE-BUILDER-HASH:1576025667

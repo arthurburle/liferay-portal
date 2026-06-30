@@ -13,12 +13,10 @@ import com.liferay.object.model.impl.ObjectActionModelImpl;
 import com.liferay.object.service.persistence.ObjectActionPersistence;
 import com.liferay.object.service.persistence.ObjectActionUtil;
 import com.liferay.object.service.persistence.impl.constants.ObjectPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -39,8 +37,6 @@ import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinde
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -76,7 +72,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ObjectActionPersistence.class)
 public class ObjectActionPersistenceImpl
-	extends BasePersistenceImpl<ObjectAction>
+	extends BasePersistenceImpl<ObjectAction, NoSuchObjectActionException>
 	implements ObjectActionPersistence {
 
 	/*
@@ -93,9 +89,6 @@ public class ObjectActionPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -1430,139 +1423,6 @@ public class ObjectActionPersistenceImpl
 	}
 
 	/**
-	 * Caches the object action in the entity cache if it is enabled.
-	 *
-	 * @param objectAction the object action
-	 */
-	@Override
-	public void cacheResult(ObjectAction objectAction) {
-		entityCache.putResult(
-			ObjectActionImpl.class, objectAction.getPrimaryKey(), objectAction);
-
-		finderCache.putResult(
-			_finderPathFetchByODI_N,
-			new Object[] {
-				objectAction.getObjectDefinitionId(), objectAction.getName()
-			},
-			objectAction);
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C_ODI,
-			new Object[] {
-				objectAction.getExternalReferenceCode(),
-				objectAction.getCompanyId(),
-				objectAction.getObjectDefinitionId()
-			},
-			objectAction);
-
-		finderCache.putResult(
-			_finderPathFetchByODI_A_N_OATK,
-			new Object[] {
-				objectAction.getObjectDefinitionId(), objectAction.isActive(),
-				objectAction.getName(), objectAction.getObjectActionTriggerKey()
-			},
-			objectAction);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the object actions in the entity cache if it is enabled.
-	 *
-	 * @param objectActions the object actions
-	 */
-	@Override
-	public void cacheResult(List<ObjectAction> objectActions) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (objectActions.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ObjectAction objectAction : objectActions) {
-			if (entityCache.getResult(
-					ObjectActionImpl.class, objectAction.getPrimaryKey()) ==
-						null) {
-
-				cacheResult(objectAction);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all object actions.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ObjectActionImpl.class);
-
-		finderCache.clearCache(ObjectActionImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the object action.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ObjectAction objectAction) {
-		entityCache.removeResult(ObjectActionImpl.class, objectAction);
-	}
-
-	@Override
-	public void clearCache(List<ObjectAction> objectActions) {
-		for (ObjectAction objectAction : objectActions) {
-			entityCache.removeResult(ObjectActionImpl.class, objectAction);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ObjectActionImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(ObjectActionImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		ObjectActionModelImpl objectActionModelImpl) {
-
-		Object[] args = new Object[] {
-			objectActionModelImpl.getObjectDefinitionId(),
-			objectActionModelImpl.getName()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByODI_N, args, objectActionModelImpl);
-
-		args = new Object[] {
-			objectActionModelImpl.getExternalReferenceCode(),
-			objectActionModelImpl.getCompanyId(),
-			objectActionModelImpl.getObjectDefinitionId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C_ODI, args, objectActionModelImpl);
-
-		args = new Object[] {
-			objectActionModelImpl.getObjectDefinitionId(),
-			objectActionModelImpl.isActive(), objectActionModelImpl.getName(),
-			objectActionModelImpl.getObjectActionTriggerKey()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByODI_A_N_OATK, args, objectActionModelImpl);
-	}
-
-	/**
 	 * Creates a new object action with the primary key. Does not add the object action to the database.
 	 *
 	 * @param objectActionId the primary key for the new object action
@@ -1596,47 +1456,6 @@ public class ObjectActionPersistenceImpl
 		throws NoSuchObjectActionException {
 
 		return remove((Serializable)objectActionId);
-	}
-
-	/**
-	 * Removes the object action with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the object action
-	 * @return the object action that was removed
-	 * @throws NoSuchObjectActionException if a object action with the primary key could not be found
-	 */
-	@Override
-	public ObjectAction remove(Serializable primaryKey)
-		throws NoSuchObjectActionException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ObjectAction objectAction = (ObjectAction)session.get(
-				ObjectActionImpl.class, primaryKey);
-
-			if (objectAction == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchObjectActionException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(objectAction);
-		}
-		catch (NoSuchObjectActionException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1780,41 +1599,13 @@ public class ObjectActionPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ObjectActionImpl.class, objectActionModelImpl, false, true);
-
-		cacheUniqueFindersCache(objectActionModelImpl);
+		cacheUniqueFindersResult(objectAction, false);
 
 		if (isNew) {
 			objectAction.setNew(false);
 		}
 
 		objectAction.resetOriginalValues();
-
-		return objectAction;
-	}
-
-	/**
-	 * Returns the object action with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the object action
-	 * @return the object action
-	 * @throws NoSuchObjectActionException if a object action with the primary key could not be found
-	 */
-	@Override
-	public ObjectAction findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchObjectActionException {
-
-		ObjectAction objectAction = fetchByPrimaryKey(primaryKey);
-
-		if (objectAction == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchObjectActionException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return objectAction;
 	}
@@ -1842,185 +1633,6 @@ public class ObjectActionPersistenceImpl
 	@Override
 	public ObjectAction fetchByPrimaryKey(long objectActionId) {
 		return fetchByPrimaryKey((Serializable)objectActionId);
-	}
-
-	/**
-	 * Returns all the object actions.
-	 *
-	 * @return the object actions
-	 */
-	@Override
-	public List<ObjectAction> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the object actions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectActionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object actions
-	 * @param end the upper bound of the range of object actions (not inclusive)
-	 * @return the range of object actions
-	 */
-	@Override
-	public List<ObjectAction> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the object actions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectActionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object actions
-	 * @param end the upper bound of the range of object actions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object actions
-	 */
-	@Override
-	public List<ObjectAction> findAll(
-		int start, int end, OrderByComparator<ObjectAction> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the object actions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectActionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object actions
-	 * @param end the upper bound of the range of object actions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object actions
-	 */
-	@Override
-	public List<ObjectAction> findAll(
-		int start, int end, OrderByComparator<ObjectAction> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ObjectAction> list = null;
-
-		if (useFinderCache) {
-			list = (List<ObjectAction>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_OBJECTACTION);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_OBJECTACTION;
-
-				sql = sql.concat(ObjectActionModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ObjectAction>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the object actions from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ObjectAction objectAction : findAll()) {
-			remove(objectAction);
-		}
-	}
-
-	/**
-	 * Returns the number of object actions.
-	 *
-	 * @return the number of object actions
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_OBJECTACTION);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -2053,21 +1665,6 @@ public class ObjectActionPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -2078,19 +1675,19 @@ public class ObjectActionPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_OBJECTACTION_WHERE, _SQL_COUNT_OBJECTACTION_WHERE,
-			ObjectActionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectActionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"objectAction.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, ObjectAction::getUuid));
@@ -2107,12 +1704,12 @@ public class ObjectActionPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -2120,10 +1717,10 @@ public class ObjectActionPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_OBJECTACTION_WHERE,
 				_SQL_COUNT_OBJECTACTION_WHERE,
-				ObjectActionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ObjectActionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectAction.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, ObjectAction::getUuid),
+					true, true, ObjectAction::getUuid),
 				new FinderColumn<>(
 					"objectAction.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, ObjectAction::getCompanyId));
@@ -2152,22 +1749,24 @@ public class ObjectActionPersistenceImpl
 				_finderPathWithoutPaginationFindByObjectDefinitionId,
 				_finderPathCountByObjectDefinitionId,
 				_SQL_SELECT_OBJECTACTION_WHERE, _SQL_COUNT_OBJECTACTION_WHERE,
-				ObjectActionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ObjectActionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectAction.", "objectDefinitionId",
 					FinderColumn.Type.LONG, "=", true, true,
 					ObjectAction::getObjectDefinitionId));
 
-		_finderPathFetchByODI_N = new FinderPath(
+		_finderPathFetchByODI_N = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByODI_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"objectDefinitionId", "name"}, true);
+			new String[] {"objectDefinitionId", "name"}, 0, 2, false,
+			ObjectAction::getObjectDefinitionId,
+			convertNullFunction(ObjectAction::getName));
 
 		_uniquePersistenceFinderByODI_N = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByODI_N, _SQL_SELECT_OBJECTACTION_WHERE,
+			this, _finderPathFetchByODI_N, _SQL_SELECT_OBJECTACTION_WHERE, "",
 			new FinderColumn<>(
 				"objectAction.", "objectDefinitionId", FinderColumn.Type.LONG,
-				"=", true, false, ObjectAction::getObjectDefinitionId),
+				"=", true, true, ObjectAction::getObjectDefinitionId),
 			new FinderColumn<>(
 				"objectAction.", "name", FinderColumn.Type.STRING, "=", true,
 				true, ObjectAction::getName));
@@ -2184,12 +1783,14 @@ public class ObjectActionPersistenceImpl
 		_finderPathWithoutPaginationFindByA_OAEK = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByA_OAEK",
 			new String[] {Boolean.class.getName(), String.class.getName()},
-			new String[] {"active_", "objectActionExecutorKey"}, true);
+			new String[] {"active_", "objectActionExecutorKey"}, 0, 2, true,
+			null);
 
 		_finderPathCountByA_OAEK = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByA_OAEK",
 			new String[] {Boolean.class.getName(), String.class.getName()},
-			new String[] {"active_", "objectActionExecutorKey"}, false);
+			new String[] {"active_", "objectActionExecutorKey"}, 0, 2, false,
+			null);
 
 		_collectionPersistenceFinderByA_OAEK =
 			new CollectionPersistenceFinder<>(
@@ -2197,16 +1798,16 @@ public class ObjectActionPersistenceImpl
 				_finderPathWithoutPaginationFindByA_OAEK,
 				_finderPathCountByA_OAEK, _SQL_SELECT_OBJECTACTION_WHERE,
 				_SQL_COUNT_OBJECTACTION_WHERE,
-				ObjectActionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ObjectActionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectAction.", "active", FinderColumn.Type.BOOLEAN, "=",
-					true, false, ObjectAction::isActive),
+					true, true, ObjectAction::isActive),
 				new FinderColumn<>(
 					"objectAction.", "objectActionExecutorKey",
 					FinderColumn.Type.STRING, "=", true, true,
 					ObjectAction::getObjectActionExecutorKey));
 
-		_finderPathFetchByERC_C_ODI = new FinderPath(
+		_finderPathFetchByERC_C_ODI = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_C_ODI",
 			new String[] {
 				String.class.getName(), Long.class.getName(),
@@ -2215,17 +1816,20 @@ public class ObjectActionPersistenceImpl
 			new String[] {
 				"externalReferenceCode", "companyId", "objectDefinitionId"
 			},
-			true);
+			0, 1, false,
+			convertNullFunction(ObjectAction::getExternalReferenceCode),
+			ObjectAction::getCompanyId, ObjectAction::getObjectDefinitionId);
 
 		_uniquePersistenceFinderByERC_C_ODI = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByERC_C_ODI, _SQL_SELECT_OBJECTACTION_WHERE,
+			"",
 			new FinderColumn<>(
 				"objectAction.", "externalReferenceCode",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				ObjectAction::getExternalReferenceCode),
 			new FinderColumn<>(
 				"objectAction.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, ObjectAction::getCompanyId),
+				true, ObjectAction::getCompanyId),
 			new FinderColumn<>(
 				"objectAction.", "objectDefinitionId", FinderColumn.Type.LONG,
 				"=", true, true, ObjectAction::getObjectDefinitionId));
@@ -2246,8 +1850,8 @@ public class ObjectActionPersistenceImpl
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "active_", "objectActionTriggerKey"},
-			true);
+			new String[] {"companyId", "active_", "objectActionTriggerKey"}, 0,
+			4, true, null);
 
 		_finderPathCountByC_A_OATK = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_A_OATK",
@@ -2255,8 +1859,8 @@ public class ObjectActionPersistenceImpl
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "active_", "objectActionTriggerKey"},
-			false);
+			new String[] {"companyId", "active_", "objectActionTriggerKey"}, 0,
+			4, false, null);
 
 		_collectionPersistenceFinderByC_A_OATK =
 			new CollectionPersistenceFinder<>(
@@ -2264,13 +1868,13 @@ public class ObjectActionPersistenceImpl
 				_finderPathWithoutPaginationFindByC_A_OATK,
 				_finderPathCountByC_A_OATK, _SQL_SELECT_OBJECTACTION_WHERE,
 				_SQL_COUNT_OBJECTACTION_WHERE,
-				ObjectActionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ObjectActionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectAction.", "companyId", FinderColumn.Type.LONG, "=",
-					true, false, ObjectAction::getCompanyId),
+					true, true, ObjectAction::getCompanyId),
 				new FinderColumn<>(
 					"objectAction.", "active", FinderColumn.Type.BOOLEAN, "=",
-					true, false, ObjectAction::isActive),
+					true, true, ObjectAction::isActive),
 				new FinderColumn<>(
 					"objectAction.", "objectActionTriggerKey",
 					FinderColumn.Type.STRING, "=", true, true,
@@ -2297,7 +1901,7 @@ public class ObjectActionPersistenceImpl
 			new String[] {
 				"objectDefinitionId", "active_", "objectActionTriggerKey"
 			},
-			true);
+			0, 4, true, null);
 
 		_finderPathCountByO_A_OATK = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByO_A_OATK",
@@ -2308,7 +1912,7 @@ public class ObjectActionPersistenceImpl
 			new String[] {
 				"objectDefinitionId", "active_", "objectActionTriggerKey"
 			},
-			false);
+			0, 4, false, null);
 
 		_collectionPersistenceFinderByO_A_OATK =
 			new CollectionPersistenceFinder<>(
@@ -2316,20 +1920,20 @@ public class ObjectActionPersistenceImpl
 				_finderPathWithoutPaginationFindByO_A_OATK,
 				_finderPathCountByO_A_OATK, _SQL_SELECT_OBJECTACTION_WHERE,
 				_SQL_COUNT_OBJECTACTION_WHERE,
-				ObjectActionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ObjectActionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectAction.", "objectDefinitionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ObjectAction::getObjectDefinitionId),
 				new FinderColumn<>(
 					"objectAction.", "active", FinderColumn.Type.BOOLEAN, "=",
-					true, false, ObjectAction::isActive),
+					true, true, ObjectAction::isActive),
 				new FinderColumn<>(
 					"objectAction.", "objectActionTriggerKey",
 					FinderColumn.Type.STRING, "=", true, true,
 					ObjectAction::getObjectActionTriggerKey));
 
-		_finderPathFetchByODI_A_N_OATK = new FinderPath(
+		_finderPathFetchByODI_A_N_OATK = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByODI_A_N_OATK",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
@@ -2339,20 +1943,22 @@ public class ObjectActionPersistenceImpl
 				"objectDefinitionId", "active_", "name",
 				"objectActionTriggerKey"
 			},
-			true);
+			0, 12, false, ObjectAction::getObjectDefinitionId,
+			ObjectAction::isActive, convertNullFunction(ObjectAction::getName),
+			convertNullFunction(ObjectAction::getObjectActionTriggerKey));
 
 		_uniquePersistenceFinderByODI_A_N_OATK = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByODI_A_N_OATK,
-			_SQL_SELECT_OBJECTACTION_WHERE,
+			_SQL_SELECT_OBJECTACTION_WHERE, "",
 			new FinderColumn<>(
 				"objectAction.", "objectDefinitionId", FinderColumn.Type.LONG,
-				"=", true, false, ObjectAction::getObjectDefinitionId),
+				"=", true, true, ObjectAction::getObjectDefinitionId),
 			new FinderColumn<>(
 				"objectAction.", "active", FinderColumn.Type.BOOLEAN, "=", true,
-				false, ObjectAction::isActive),
+				true, ObjectAction::isActive),
 			new FinderColumn<>(
 				"objectAction.", "name", FinderColumn.Type.STRING, "=", true,
-				false, ObjectAction::getName),
+				true, ObjectAction::getName),
 			new FinderColumn<>(
 				"objectAction.", "objectActionTriggerKey",
 				FinderColumn.Type.STRING, "=", true, true,
@@ -2400,22 +2006,17 @@ public class ObjectActionPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ObjectActionModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_OBJECTACTION =
 		"SELECT objectAction FROM ObjectAction objectAction";
 
 	private static final String _SQL_SELECT_OBJECTACTION_WHERE =
 		"SELECT objectAction FROM ObjectAction objectAction WHERE ";
 
-	private static final String _SQL_COUNT_OBJECTACTION =
-		"SELECT COUNT(objectAction) FROM ObjectAction objectAction";
-
 	private static final String _SQL_COUNT_OBJECTACTION_WHERE =
 		"SELECT COUNT(objectAction) FROM ObjectAction objectAction WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "objectAction.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ObjectAction exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ObjectAction exists with the key {";
@@ -2432,4 +2033,4 @@ public class ObjectActionPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:96719797
+// LIFERAY-SERVICE-BUILDER-HASH:-488015593

@@ -172,9 +172,9 @@ resource "kubernetes_manifest" "infrastructure_appproject" {
 				},
 			]
 			sourceRepos=[
-				"${var.infrastructure_helm_chart_config.chart_url}",
+				var.infrastructure_helm_chart_config.chart_url,
 				"${var.infrastructure_helm_chart_config.chart_url}/*",
-				"${var.infrastructure_provider_helm_chart_config.chart_url}",
+				var.infrastructure_provider_helm_chart_config.chart_url,
 				"${var.infrastructure_provider_helm_chart_config.chart_url}/*",
 				local.infrastructure_git_repo_url,
 			]
@@ -374,6 +374,10 @@ resource "kubernetes_manifest" "liferay_applicationset" {
 											value=local.gateway_name
 										},
 										{
+											name="${local.liferay_helm_chart_config.values_scope_prefix}networkPolicy.cluster.kubernetesEndpointCidrs"
+											value=join(",", local.eks_endpoint_cidrs)
+										},
+										{
 											name="global.aws.accountId"
 											value=local.account_id
 										},
@@ -486,7 +490,7 @@ resource "kubernetes_manifest" "liferay_appproject" {
 				},
 			]
 			sourceRepos=[
-				"${local.liferay_helm_chart_config.chart_url}",
+				local.liferay_helm_chart_config.chart_url,
 				"${local.liferay_helm_chart_config.chart_url}/*",
 				var.liferay_git_repo_url,
 			]

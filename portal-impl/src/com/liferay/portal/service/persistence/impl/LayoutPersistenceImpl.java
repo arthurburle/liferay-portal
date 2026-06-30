@@ -7,7 +7,6 @@ package com.liferay.portal.service.persistence.impl;
 
 import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
@@ -36,17 +35,18 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.LayoutPersistence;
 import com.liferay.portal.kernel.service.persistence.LayoutUtil;
+import com.liferay.portal.kernel.service.persistence.change.tracking.helper.CTPersistenceHelper;
 import com.liferay.portal.kernel.service.persistence.change.tracking.helper.CTPersistenceHelperUtil;
+import com.liferay.portal.kernel.service.persistence.impl.ArrayableFinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
+import com.liferay.portal.kernel.service.persistence.impl.FilterCollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -65,7 +65,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -82,7 +81,8 @@ import java.util.Set;
  * @generated
  */
 public class LayoutPersistenceImpl
-	extends BasePersistenceImpl<Layout> implements LayoutPersistence {
+	extends BasePersistenceImpl<Layout, NoSuchLayoutException>
+	implements LayoutPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -98,9 +98,6 @@ public class LayoutPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -175,14 +172,9 @@ public class LayoutPersistenceImpl
 		String uuid, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				FinderCacheUtil.getFinderCache(), new Object[] {uuid}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {uuid}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -244,13 +236,8 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				FinderCacheUtil.getFinderCache(), new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathFetchByUUID_G_P;
@@ -317,14 +304,9 @@ public class LayoutPersistenceImpl
 		String uuid, long groupId, boolean privateLayout,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _uniquePersistenceFinderByUUID_G_P.fetch(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {uuid, groupId, privateLayout}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByUUID_G_P.fetch(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {uuid, groupId, privateLayout}, useFinderCache);
 	}
 
 	/**
@@ -444,15 +426,9 @@ public class LayoutPersistenceImpl
 		String uuid, long companyId, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {uuid, companyId}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {uuid, companyId},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -520,19 +496,15 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByGroupId;
 	private FinderPath _finderPathWithoutPaginationFindByGroupId;
 	private FinderPath _finderPathCountByGroupId;
+	private FilterCollectionPersistenceFinder<Layout>
+		_collectionPersistenceFinderByGroupId;
 
 	/**
 	 * Returns all the layouts where groupId = &#63;.
@@ -603,100 +575,9 @@ public class LayoutPersistenceImpl
 		long groupId, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindByGroupId;
-					finderArgs = new Object[] {groupId};
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindByGroupId;
-				finderArgs = new Object[] {
-					groupId, start, end, orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if (groupId != layout.getGroupId()) {
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						3 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(3);
-				}
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2);
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByGroupId.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -718,16 +599,9 @@ public class LayoutPersistenceImpl
 			return layout;
 		}
 
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-		sb.append("groupId=");
-		sb.append(groupId);
-
-		sb.append("}");
-
-		throw new NoSuchLayoutException(sb.toString());
+		throw new NoSuchLayoutException(
+			_collectionPersistenceFinderByGroupId.buildNoSuchKeyMessage(
+				_NO_SUCH_ENTITY_WITH_KEY, new Object[] {groupId}));
 	}
 
 	/**
@@ -741,13 +615,9 @@ public class LayoutPersistenceImpl
 	public Layout fetchByGroupId_First(
 		long groupId, OrderByComparator<Layout> orderByComparator) {
 
-		List<Layout> list = findByGroupId(groupId, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByGroupId.fetchFirst(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId},
+			orderByComparator);
 	}
 
 	/**
@@ -797,93 +667,9 @@ public class LayoutPersistenceImpl
 		long groupId, int start, int end,
 		OrderByComparator<Layout> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByGroupId(groupId, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByGroupId(
-					groupId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				3 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(4);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_WHERE);
-		}
-		else {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2_SQL);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(_FILTER_ENTITY_ALIAS, LayoutImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(_FILTER_ENTITY_TABLE, LayoutImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			return (List<Layout>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByGroupId.filterFind(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId}, start,
+			end, orderByComparator, groupId);
 	}
 
 	/**
@@ -893,12 +679,8 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public void removeByGroupId(long groupId) {
-		for (Layout layout :
-				findByGroupId(
-					groupId, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
-
-			remove(layout);
-		}
+		_collectionPersistenceFinderByGroupId.remove(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId});
 	}
 
 	/**
@@ -909,51 +691,8 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByGroupId(long groupId) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = _finderPathCountByGroupId;
-
-			Object[] finderArgs = new Object[] {groupId};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(2);
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByGroupId.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId});
 	}
 
 	/**
@@ -964,63 +703,15 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int filterCountByGroupId(long groupId) {
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByGroupId(groupId);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<Layout> layouts = findByGroupId(groupId);
-
-			layouts = InlineSQLHelperUtil.filter(layouts, groupId);
-
-			return layouts.size();
-		}
-
-		StringBundler sb = new StringBundler(2);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUT_WHERE);
-
-		sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2_SQL);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByGroupId.filterCount(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_GROUPID_GROUPID_2 =
-		"layout.groupId = ? AND layout.system = [$FALSE$]";
-
-	private static final String _FINDER_COLUMN_GROUPID_GROUPID_2_SQL =
-		"layout.groupId = ? AND layout.system_ = [$FALSE$]";
 
 	private FinderPath _finderPathWithPaginationFindByCompanyId;
 	private FinderPath _finderPathWithoutPaginationFindByCompanyId;
 	private FinderPath _finderPathCountByCompanyId;
+	private CollectionPersistenceFinder<Layout>
+		_collectionPersistenceFinderByCompanyId;
 
 	/**
 	 * Returns all the layouts where companyId = &#63;.
@@ -1091,100 +782,9 @@ public class LayoutPersistenceImpl
 		long companyId, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindByCompanyId;
-					finderArgs = new Object[] {companyId};
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindByCompanyId;
-				finderArgs = new Object[] {
-					companyId, start, end, orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if (companyId != layout.getCompanyId()) {
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						3 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(3);
-				}
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_COMPANYID_COMPANYID_2);
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(companyId);
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByCompanyId.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {companyId}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1206,16 +806,9 @@ public class LayoutPersistenceImpl
 			return layout;
 		}
 
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-		sb.append("companyId=");
-		sb.append(companyId);
-
-		sb.append("}");
-
-		throw new NoSuchLayoutException(sb.toString());
+		throw new NoSuchLayoutException(
+			_collectionPersistenceFinderByCompanyId.buildNoSuchKeyMessage(
+				_NO_SUCH_ENTITY_WITH_KEY, new Object[] {companyId}));
 	}
 
 	/**
@@ -1229,13 +822,9 @@ public class LayoutPersistenceImpl
 	public Layout fetchByCompanyId_First(
 		long companyId, OrderByComparator<Layout> orderByComparator) {
 
-		List<Layout> list = findByCompanyId(companyId, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByCompanyId.fetchFirst(
+			FinderCacheUtil.getFinderCache(), new Object[] {companyId},
+			orderByComparator);
 	}
 
 	/**
@@ -1245,12 +834,8 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public void removeByCompanyId(long companyId) {
-		for (Layout layout :
-				findByCompanyId(
-					companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
-
-			remove(layout);
-		}
+		_collectionPersistenceFinderByCompanyId.remove(
+			FinderCacheUtil.getFinderCache(), new Object[] {companyId});
 	}
 
 	/**
@@ -1261,59 +846,15 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByCompanyId(long companyId) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = _finderPathCountByCompanyId;
-
-			Object[] finderArgs = new Object[] {companyId};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(2);
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_COMPANYID_COMPANYID_2);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(companyId);
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByCompanyId.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {companyId});
 	}
-
-	private static final String _FINDER_COLUMN_COMPANYID_COMPANYID_2 =
-		"layout.companyId = ? AND layout.system = [$FALSE$]";
 
 	private FinderPath _finderPathWithPaginationFindByParentPlid;
 	private FinderPath _finderPathWithoutPaginationFindByParentPlid;
 	private FinderPath _finderPathCountByParentPlid;
+	private CollectionPersistenceFinder<Layout>
+		_collectionPersistenceFinderByParentPlid;
 
 	/**
 	 * Returns all the layouts where parentPlid = &#63;.
@@ -1385,100 +926,9 @@ public class LayoutPersistenceImpl
 		long parentPlid, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindByParentPlid;
-					finderArgs = new Object[] {parentPlid};
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindByParentPlid;
-				finderArgs = new Object[] {
-					parentPlid, start, end, orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if (parentPlid != layout.getParentPlid()) {
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						3 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(3);
-				}
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_PARENTPLID_PARENTPLID_2);
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(parentPlid);
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByParentPlid.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {parentPlid}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1500,16 +950,9 @@ public class LayoutPersistenceImpl
 			return layout;
 		}
 
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-		sb.append("parentPlid=");
-		sb.append(parentPlid);
-
-		sb.append("}");
-
-		throw new NoSuchLayoutException(sb.toString());
+		throw new NoSuchLayoutException(
+			_collectionPersistenceFinderByParentPlid.buildNoSuchKeyMessage(
+				_NO_SUCH_ENTITY_WITH_KEY, new Object[] {parentPlid}));
 	}
 
 	/**
@@ -1523,14 +966,9 @@ public class LayoutPersistenceImpl
 	public Layout fetchByParentPlid_First(
 		long parentPlid, OrderByComparator<Layout> orderByComparator) {
 
-		List<Layout> list = findByParentPlid(
-			parentPlid, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByParentPlid.fetchFirst(
+			FinderCacheUtil.getFinderCache(), new Object[] {parentPlid},
+			orderByComparator);
 	}
 
 	/**
@@ -1540,12 +978,8 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public void removeByParentPlid(long parentPlid) {
-		for (Layout layout :
-				findByParentPlid(
-					parentPlid, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
-
-			remove(layout);
-		}
+		_collectionPersistenceFinderByParentPlid.remove(
+			FinderCacheUtil.getFinderCache(), new Object[] {parentPlid});
 	}
 
 	/**
@@ -1556,55 +990,9 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByParentPlid(long parentPlid) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = _finderPathCountByParentPlid;
-
-			Object[] finderArgs = new Object[] {parentPlid};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(2);
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_PARENTPLID_PARENTPLID_2);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(parentPlid);
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByParentPlid.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {parentPlid});
 	}
-
-	private static final String _FINDER_COLUMN_PARENTPLID_PARENTPLID_2 =
-		"layout.parentPlid = ? AND layout.system = [$FALSE$]";
 
 	private FinderPath _finderPathWithPaginationFindByIconImageId;
 	private FinderPath _finderPathWithoutPaginationFindByIconImageId;
@@ -1684,14 +1072,9 @@ public class LayoutPersistenceImpl
 		long iconImageId, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByIconImageId.find(
-				FinderCacheUtil.getFinderCache(), new Object[] {iconImageId},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByIconImageId.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {iconImageId}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1754,13 +1137,8 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByIconImageId(long iconImageId) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByIconImageId.count(
-				FinderCacheUtil.getFinderCache(), new Object[] {iconImageId});
-		}
+		return _collectionPersistenceFinderByIconImageId.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {iconImageId});
 	}
 
 	private FinderPath
@@ -1768,6 +1146,8 @@ public class LayoutPersistenceImpl
 	private FinderPath
 		_finderPathWithoutPaginationFindByLayoutSetPrototypeLayoutERC;
 	private FinderPath _finderPathCountByLayoutSetPrototypeLayoutERC;
+	private CollectionPersistenceFinder<Layout>
+		_collectionPersistenceFinderByLayoutSetPrototypeLayoutERC;
 
 	/**
 	 * Returns all the layouts where layoutSetPrototypeLayoutERC = &#63;.
@@ -1845,120 +1225,10 @@ public class LayoutPersistenceImpl
 		String layoutSetPrototypeLayoutERC, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			layoutSetPrototypeLayoutERC = Objects.toString(
-				layoutSetPrototypeLayoutERC, "");
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath =
-						_finderPathWithoutPaginationFindByLayoutSetPrototypeLayoutERC;
-					finderArgs = new Object[] {layoutSetPrototypeLayoutERC};
-				}
-			}
-			else if (useFinderCache) {
-				finderPath =
-					_finderPathWithPaginationFindByLayoutSetPrototypeLayoutERC;
-				finderArgs = new Object[] {
-					layoutSetPrototypeLayoutERC, start, end, orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if (!layoutSetPrototypeLayoutERC.equals(
-								layout.getLayoutSetPrototypeLayoutERC())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						3 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(3);
-				}
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				boolean bindLayoutSetPrototypeLayoutERC = false;
-
-				if (layoutSetPrototypeLayoutERC.isEmpty()) {
-					sb.append(
-						_FINDER_COLUMN_LAYOUTSETPROTOTYPELAYOUTERC_LAYOUTSETPROTOTYPELAYOUTERC_3);
-				}
-				else {
-					bindLayoutSetPrototypeLayoutERC = true;
-
-					sb.append(
-						_FINDER_COLUMN_LAYOUTSETPROTOTYPELAYOUTERC_LAYOUTSETPROTOTYPELAYOUTERC_2);
-				}
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					if (bindLayoutSetPrototypeLayoutERC) {
-						queryPos.add(layoutSetPrototypeLayoutERC);
-					}
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByLayoutSetPrototypeLayoutERC.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {layoutSetPrototypeLayoutERC}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1982,16 +1252,11 @@ public class LayoutPersistenceImpl
 			return layout;
 		}
 
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-		sb.append("layoutSetPrototypeLayoutERC=");
-		sb.append(layoutSetPrototypeLayoutERC);
-
-		sb.append("}");
-
-		throw new NoSuchLayoutException(sb.toString());
+		throw new NoSuchLayoutException(
+			_collectionPersistenceFinderByLayoutSetPrototypeLayoutERC.
+				buildNoSuchKeyMessage(
+					_NO_SUCH_ENTITY_WITH_KEY,
+					new Object[] {layoutSetPrototypeLayoutERC}));
 	}
 
 	/**
@@ -2006,14 +1271,10 @@ public class LayoutPersistenceImpl
 		String layoutSetPrototypeLayoutERC,
 		OrderByComparator<Layout> orderByComparator) {
 
-		List<Layout> list = findByLayoutSetPrototypeLayoutERC(
-			layoutSetPrototypeLayoutERC, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByLayoutSetPrototypeLayoutERC.
+			fetchFirst(
+				FinderCacheUtil.getFinderCache(),
+				new Object[] {layoutSetPrototypeLayoutERC}, orderByComparator);
 	}
 
 	/**
@@ -2025,13 +1286,9 @@ public class LayoutPersistenceImpl
 	public void removeByLayoutSetPrototypeLayoutERC(
 		String layoutSetPrototypeLayoutERC) {
 
-		for (Layout layout :
-				findByLayoutSetPrototypeLayoutERC(
-					layoutSetPrototypeLayoutERC, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, null)) {
-
-			remove(layout);
-		}
+		_collectionPersistenceFinderByLayoutSetPrototypeLayoutERC.remove(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {layoutSetPrototypeLayoutERC});
 	}
 
 	/**
@@ -2044,82 +1301,15 @@ public class LayoutPersistenceImpl
 	public int countByLayoutSetPrototypeLayoutERC(
 		String layoutSetPrototypeLayoutERC) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			layoutSetPrototypeLayoutERC = Objects.toString(
-				layoutSetPrototypeLayoutERC, "");
-
-			FinderPath finderPath =
-				_finderPathCountByLayoutSetPrototypeLayoutERC;
-
-			Object[] finderArgs = new Object[] {layoutSetPrototypeLayoutERC};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(2);
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				boolean bindLayoutSetPrototypeLayoutERC = false;
-
-				if (layoutSetPrototypeLayoutERC.isEmpty()) {
-					sb.append(
-						_FINDER_COLUMN_LAYOUTSETPROTOTYPELAYOUTERC_LAYOUTSETPROTOTYPELAYOUTERC_3);
-				}
-				else {
-					bindLayoutSetPrototypeLayoutERC = true;
-
-					sb.append(
-						_FINDER_COLUMN_LAYOUTSETPROTOTYPELAYOUTERC_LAYOUTSETPROTOTYPELAYOUTERC_2);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					if (bindLayoutSetPrototypeLayoutERC) {
-						queryPos.add(layoutSetPrototypeLayoutERC);
-					}
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByLayoutSetPrototypeLayoutERC.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {layoutSetPrototypeLayoutERC});
 	}
-
-	private static final String
-		_FINDER_COLUMN_LAYOUTSETPROTOTYPELAYOUTERC_LAYOUTSETPROTOTYPELAYOUTERC_2 =
-			"layout.layoutSetPrototypeLayoutERC = ? AND layout.system = [$FALSE$]";
-
-	private static final String
-		_FINDER_COLUMN_LAYOUTSETPROTOTYPELAYOUTERC_LAYOUTSETPROTOTYPELAYOUTERC_3 =
-			"(layout.layoutSetPrototypeLayoutERC IS NULL OR layout.layoutSetPrototypeLayoutERC = '') AND layout.system = [$FALSE$]";
 
 	private FinderPath _finderPathWithPaginationFindByG_P;
 	private FinderPath _finderPathWithoutPaginationFindByG_P;
 	private FinderPath _finderPathCountByG_P;
-	private CollectionPersistenceFinder<Layout>
+	private FilterCollectionPersistenceFinder<Layout>
 		_collectionPersistenceFinderByG_P;
 
 	/**
@@ -2198,15 +1388,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByG_P.find(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, privateLayout}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_P.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2307,98 +1492,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, int start, int end,
 		OrderByComparator<Layout> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_P(
-				groupId, privateLayout, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_P(
-					groupId, privateLayout, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				4 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(5);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_WHERE);
-		}
-		else {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_P_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_P_PRIVATELAYOUT_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(_FILTER_ENTITY_ALIAS, LayoutImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(_FILTER_ENTITY_TABLE, LayoutImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			return (List<Layout>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P.filterFind(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout}, start, end,
+			orderByComparator, groupId);
 	}
 
 	/**
@@ -2423,14 +1520,9 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByG_P(long groupId, boolean privateLayout) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByG_P.count(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, privateLayout});
-		}
+		return _collectionPersistenceFinderByG_P.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout});
 	}
 
 	/**
@@ -2442,67 +1534,16 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int filterCountByG_P(long groupId, boolean privateLayout) {
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_P(groupId, privateLayout);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<Layout> layouts = findByG_P(groupId, privateLayout);
-
-			layouts = InlineSQLHelperUtil.filter(layouts, groupId);
-
-			return layouts.size();
-		}
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUT_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_P_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_P_PRIVATELAYOUT_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P.filterCount(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_P_GROUPID_2 =
-		"layout.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_PRIVATELAYOUT_2 =
-		"layout.privateLayout = ?";
 
 	private FinderPath _finderPathWithPaginationFindByG_T;
 	private FinderPath _finderPathWithoutPaginationFindByG_T;
 	private FinderPath _finderPathCountByG_T;
+	private FilterCollectionPersistenceFinder<Layout>
+		_collectionPersistenceFinderByG_T;
 
 	/**
 	 * Returns all the layouts where groupId = &#63; and type = &#63;.
@@ -2579,119 +1620,9 @@ public class LayoutPersistenceImpl
 		long groupId, String type, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			type = Objects.toString(type, "");
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindByG_T;
-					finderArgs = new Object[] {groupId, type};
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindByG_T;
-				finderArgs = new Object[] {
-					groupId, type, start, end, orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if ((groupId != layout.getGroupId()) ||
-							!type.equals(layout.getType())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						4 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(4);
-				}
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_T_GROUPID_2);
-
-				boolean bindType = false;
-
-				if (type.isEmpty()) {
-					sb.append(_FINDER_COLUMN_G_T_TYPE_3);
-				}
-				else {
-					bindType = true;
-
-					sb.append(_FINDER_COLUMN_G_T_TYPE_2);
-				}
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					if (bindType) {
-						queryPos.add(type);
-					}
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByG_T.find(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId, type},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2715,19 +1646,9 @@ public class LayoutPersistenceImpl
 			return layout;
 		}
 
-		StringBundler sb = new StringBundler(6);
-
-		sb.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-		sb.append("groupId=");
-		sb.append(groupId);
-
-		sb.append(", type=");
-		sb.append(type);
-
-		sb.append("}");
-
-		throw new NoSuchLayoutException(sb.toString());
+		throw new NoSuchLayoutException(
+			_collectionPersistenceFinderByG_T.buildNoSuchKeyMessage(
+				_NO_SUCH_ENTITY_WITH_KEY, new Object[] {groupId, type}));
 	}
 
 	/**
@@ -2743,13 +1664,9 @@ public class LayoutPersistenceImpl
 		long groupId, String type,
 		OrderByComparator<Layout> orderByComparator) {
 
-		List<Layout> list = findByG_T(groupId, type, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByG_T.fetchFirst(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId, type},
+			orderByComparator);
 	}
 
 	/**
@@ -2804,110 +1721,9 @@ public class LayoutPersistenceImpl
 		long groupId, String type, int start, int end,
 		OrderByComparator<Layout> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_T(groupId, type, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_T(
-					groupId, type, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator),
-				groupId);
-		}
-
-		type = Objects.toString(type, "");
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				4 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(5);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_WHERE);
-		}
-		else {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_T_GROUPID_2_SQL);
-
-		boolean bindType = false;
-
-		if (type.isEmpty()) {
-			sb.append(_FINDER_COLUMN_G_T_TYPE_3_SQL);
-		}
-		else {
-			bindType = true;
-
-			sb.append(_FINDER_COLUMN_G_T_TYPE_2_SQL);
-		}
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(_FILTER_ENTITY_ALIAS, LayoutImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(_FILTER_ENTITY_TABLE, LayoutImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			if (bindType) {
-				queryPos.add(type);
-			}
-
-			return (List<Layout>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_T.filterFind(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId, type},
+			start, end, orderByComparator, groupId);
 	}
 
 	/**
@@ -2918,13 +1734,8 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public void removeByG_T(long groupId, String type) {
-		for (Layout layout :
-				findByG_T(
-					groupId, type, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					null)) {
-
-			remove(layout);
-		}
+		_collectionPersistenceFinderByG_T.remove(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId, type});
 	}
 
 	/**
@@ -2936,68 +1747,8 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByG_T(long groupId, String type) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			type = Objects.toString(type, "");
-
-			FinderPath finderPath = _finderPathCountByG_T;
-
-			Object[] finderArgs = new Object[] {groupId, type};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(3);
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_T_GROUPID_2);
-
-				boolean bindType = false;
-
-				if (type.isEmpty()) {
-					sb.append(_FINDER_COLUMN_G_T_TYPE_3);
-				}
-				else {
-					bindType = true;
-
-					sb.append(_FINDER_COLUMN_G_T_TYPE_2);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					if (bindType) {
-						queryPos.add(type);
-					}
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByG_T.count(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId, type});
 	}
 
 	/**
@@ -3009,93 +1760,15 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int filterCountByG_T(long groupId, String type) {
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_T(groupId, type);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<Layout> layouts = findByG_T(groupId, type);
-
-			layouts = InlineSQLHelperUtil.filter(layouts, groupId);
-
-			return layouts.size();
-		}
-
-		type = Objects.toString(type, "");
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUT_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_T_GROUPID_2_SQL);
-
-		boolean bindType = false;
-
-		if (type.isEmpty()) {
-			sb.append(_FINDER_COLUMN_G_T_TYPE_3_SQL);
-		}
-		else {
-			bindType = true;
-
-			sb.append(_FINDER_COLUMN_G_T_TYPE_2_SQL);
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			if (bindType) {
-				queryPos.add(type);
-			}
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_T.filterCount(
+			FinderCacheUtil.getFinderCache(), new Object[] {groupId, type},
+			groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_T_GROUPID_2 =
-		"layout.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_T_GROUPID_2_SQL =
-		"layout.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_T_TYPE_2 =
-		"layout.type = ? AND layout.system = [$FALSE$]";
-
-	private static final String _FINDER_COLUMN_G_T_TYPE_3 =
-		"(layout.type IS NULL OR layout.type = '') AND layout.system = [$FALSE$]";
-
-	private static final String _FINDER_COLUMN_G_T_TYPE_2_SQL =
-		"layout.type_ = ? AND layout.system_ = [$FALSE$]";
-
-	private static final String _FINDER_COLUMN_G_T_TYPE_3_SQL =
-		"(layout.type_ IS NULL OR layout.type_ = '') AND layout.system_ = [$FALSE$]";
 
 	private FinderPath _finderPathWithPaginationFindByG_MLPTEERC;
 	private FinderPath _finderPathWithoutPaginationFindByG_MLPTEERC;
 	private FinderPath _finderPathCountByG_MLPTEERC;
-	private CollectionPersistenceFinder<Layout>
+	private FilterCollectionPersistenceFinder<Layout>
 		_collectionPersistenceFinderByG_MLPTEERC;
 
 	/**
@@ -3181,15 +1854,10 @@ public class LayoutPersistenceImpl
 		int end, OrderByComparator<Layout> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByG_MLPTEERC.find(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, masterLayoutPageTemplateEntryERC}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_MLPTEERC.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, masterLayoutPageTemplateEntryERC}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3296,115 +1964,10 @@ public class LayoutPersistenceImpl
 		long groupId, String masterLayoutPageTemplateEntryERC, int start,
 		int end, OrderByComparator<Layout> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_MLPTEERC(
-				groupId, masterLayoutPageTemplateEntryERC, start, end,
-				orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_MLPTEERC(
-					groupId, masterLayoutPageTemplateEntryERC,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		masterLayoutPageTemplateEntryERC = Objects.toString(
-			masterLayoutPageTemplateEntryERC, "");
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				4 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(5);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_WHERE);
-		}
-		else {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_MLPTEERC_GROUPID_2);
-
-		boolean bindMasterLayoutPageTemplateEntryERC = false;
-
-		if (masterLayoutPageTemplateEntryERC.isEmpty()) {
-			sb.append(
-				_FINDER_COLUMN_G_MLPTEERC_MASTERLAYOUTPAGETEMPLATEENTRYERC_3_SQL);
-		}
-		else {
-			bindMasterLayoutPageTemplateEntryERC = true;
-
-			sb.append(
-				_FINDER_COLUMN_G_MLPTEERC_MASTERLAYOUTPAGETEMPLATEENTRYERC_2_SQL);
-		}
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(_FILTER_ENTITY_ALIAS, LayoutImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(_FILTER_ENTITY_TABLE, LayoutImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			if (bindMasterLayoutPageTemplateEntryERC) {
-				queryPos.add(masterLayoutPageTemplateEntryERC);
-			}
-
-			return (List<Layout>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_MLPTEERC.filterFind(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, masterLayoutPageTemplateEntryERC}, start,
+			end, orderByComparator, groupId);
 	}
 
 	/**
@@ -3433,14 +1996,9 @@ public class LayoutPersistenceImpl
 	public int countByG_MLPTEERC(
 		long groupId, String masterLayoutPageTemplateEntryERC) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByG_MLPTEERC.count(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, masterLayoutPageTemplateEntryERC});
-		}
+		return _collectionPersistenceFinderByG_MLPTEERC.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, masterLayoutPageTemplateEntryERC});
 	}
 
 	/**
@@ -3454,85 +2012,10 @@ public class LayoutPersistenceImpl
 	public int filterCountByG_MLPTEERC(
 		long groupId, String masterLayoutPageTemplateEntryERC) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_MLPTEERC(groupId, masterLayoutPageTemplateEntryERC);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<Layout> layouts = findByG_MLPTEERC(
-				groupId, masterLayoutPageTemplateEntryERC);
-
-			layouts = InlineSQLHelperUtil.filter(layouts, groupId);
-
-			return layouts.size();
-		}
-
-		masterLayoutPageTemplateEntryERC = Objects.toString(
-			masterLayoutPageTemplateEntryERC, "");
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUT_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_MLPTEERC_GROUPID_2);
-
-		boolean bindMasterLayoutPageTemplateEntryERC = false;
-
-		if (masterLayoutPageTemplateEntryERC.isEmpty()) {
-			sb.append(
-				_FINDER_COLUMN_G_MLPTEERC_MASTERLAYOUTPAGETEMPLATEENTRYERC_3_SQL);
-		}
-		else {
-			bindMasterLayoutPageTemplateEntryERC = true;
-
-			sb.append(
-				_FINDER_COLUMN_G_MLPTEERC_MASTERLAYOUTPAGETEMPLATEENTRYERC_2_SQL);
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			if (bindMasterLayoutPageTemplateEntryERC) {
-				queryPos.add(masterLayoutPageTemplateEntryERC);
-			}
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_MLPTEERC.filterCount(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, masterLayoutPageTemplateEntryERC}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_MLPTEERC_GROUPID_2 =
-		"layout.groupId = ? AND ";
-
-	private static final String
-		_FINDER_COLUMN_G_MLPTEERC_MASTERLAYOUTPAGETEMPLATEENTRYERC_2_SQL =
-			"layout.masterLPTEERC = ?";
-
-	private static final String
-		_FINDER_COLUMN_G_MLPTEERC_MASTERLAYOUTPAGETEMPLATEENTRYERC_3_SQL =
-			"(layout.masterLPTEERC IS NULL OR layout.masterLPTEERC = '')";
 
 	private FinderPath _finderPathWithPaginationFindByP_I;
 	private FinderPath _finderPathWithoutPaginationFindByP_I;
@@ -3617,15 +2100,10 @@ public class LayoutPersistenceImpl
 		boolean privateLayout, long iconImageId, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByP_I.find(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {privateLayout, iconImageId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByP_I.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {privateLayout, iconImageId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3696,20 +2174,16 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByP_I(boolean privateLayout, long iconImageId) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByP_I.count(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {privateLayout, iconImageId});
-		}
+		return _collectionPersistenceFinderByP_I.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {privateLayout, iconImageId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_C;
 	private FinderPath _finderPathWithoutPaginationFindByC_C;
 	private FinderPath _finderPathCountByC_C;
-	private FinderPath _finderPathWithPaginationCountByC_C;
+	private CollectionPersistenceFinder<Layout>
+		_collectionPersistenceFinderByC_C;
 
 	/**
 	 * Returns all the layouts where classNameId = &#63; and classPK = &#63;.
@@ -3787,106 +2261,10 @@ public class LayoutPersistenceImpl
 		long classNameId, long classPK, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindByC_C;
-					finderArgs = new Object[] {classNameId, classPK};
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindByC_C;
-				finderArgs = new Object[] {
-					classNameId, classPK, start, end, orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if ((classNameId != layout.getClassNameId()) ||
-							(classPK != layout.getClassPK())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						4 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(4);
-				}
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_C_C_CLASSNAMEID_2);
-
-				sb.append(_FINDER_COLUMN_C_C_CLASSPK_2);
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(classNameId);
-
-					queryPos.add(classPK);
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByC_C.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {classNameId, new long[] {classPK}}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3939,14 +2317,10 @@ public class LayoutPersistenceImpl
 		long classNameId, long classPK,
 		OrderByComparator<Layout> orderByComparator) {
 
-		List<Layout> list = findByC_C(
-			classNameId, classPK, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByC_C.fetchFirst(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {classNameId, new long[] {classPK}},
+			orderByComparator);
 	}
 
 	/**
@@ -4029,125 +2403,10 @@ public class LayoutPersistenceImpl
 		long classNameId, long[] classPKs, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		if (classPKs == null) {
-			classPKs = new long[0];
-		}
-		else if (classPKs.length > 1) {
-			classPKs = ArrayUtil.sortedUnique(classPKs);
-		}
-
-		if (classPKs.length == 1) {
-			return findByC_C(
-				classNameId, classPKs[0], start, end, orderByComparator);
-		}
-
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderArgs = new Object[] {
-						classNameId, StringUtil.merge(classPKs)
-					};
-				}
-			}
-			else if (useFinderCache) {
-				finderArgs = new Object[] {
-					classNameId, StringUtil.merge(classPKs), start, end,
-					orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					_finderPathWithPaginationFindByC_C, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if ((classNameId != layout.getClassNameId()) ||
-							!ArrayUtil.contains(
-								classPKs, layout.getClassPK())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_C_C_CLASSNAMEID_2);
-
-				if (classPKs.length > 0) {
-					sb.append("(");
-
-					sb.append(_FINDER_COLUMN_C_C_CLASSPK_7);
-
-					sb.append(StringUtil.merge(classPKs));
-
-					sb.append(")");
-
-					sb.append(")");
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(classNameId);
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(
-							_finderPathWithPaginationFindByC_C, finderArgs,
-							list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByC_C.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {classNameId, ArrayUtil.sortedUnique(classPKs)}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -4158,13 +2417,9 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public void removeByC_C(long classNameId, long classPK) {
-		for (Layout layout :
-				findByC_C(
-					classNameId, classPK, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					null)) {
-
-			remove(layout);
-		}
+		_collectionPersistenceFinderByC_C.remove(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {classNameId, new long[] {classPK}});
 	}
 
 	/**
@@ -4176,55 +2431,9 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByC_C(long classNameId, long classPK) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = _finderPathCountByC_C;
-
-			Object[] finderArgs = new Object[] {classNameId, classPK};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(3);
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_C_C_CLASSNAMEID_2);
-
-				sb.append(_FINDER_COLUMN_C_C_CLASSPK_2);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(classNameId);
-
-					queryPos.add(classPK);
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByC_C.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {classNameId, new long[] {classPK}});
 	}
 
 	/**
@@ -4236,89 +2445,16 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByC_C(long classNameId, long[] classPKs) {
-		if (classPKs == null) {
-			classPKs = new long[0];
-		}
-		else if (classPKs.length > 1) {
-			classPKs = ArrayUtil.sortedUnique(classPKs);
-		}
-
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			Object[] finderArgs = new Object[] {
-				classNameId, StringUtil.merge(classPKs)
-			};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				_finderPathWithPaginationCountByC_C, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_C_C_CLASSNAMEID_2);
-
-				if (classPKs.length > 0) {
-					sb.append("(");
-
-					sb.append(_FINDER_COLUMN_C_C_CLASSPK_7);
-
-					sb.append(StringUtil.merge(classPKs));
-
-					sb.append(")");
-
-					sb.append(")");
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(classNameId);
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(
-						_finderPathWithPaginationCountByC_C, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByC_C.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {classNameId, ArrayUtil.sortedUnique(classPKs)});
 	}
-
-	private static final String _FINDER_COLUMN_C_C_CLASSNAMEID_2 =
-		"layout.classNameId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_C_CLASSPK_2 =
-		"layout.classPK = ?";
-
-	private static final String _FINDER_COLUMN_C_C_CLASSPK_7 =
-		"layout.classPK IN (";
 
 	private FinderPath _finderPathWithPaginationFindByPLPTEERC_PLPTESERC;
 	private FinderPath _finderPathWithoutPaginationFindByPLPTEERC_PLPTESERC;
 	private FinderPath _finderPathCountByPLPTEERC_PLPTESERC;
+	private CollectionPersistenceFinder<Layout>
+		_collectionPersistenceFinderByPLPTEERC_PLPTESERC;
 
 	/**
 	 * Returns all the layouts where portletLayoutPageTemplateEntryERC = &#63; and portletLayoutPageTemplateEntryScopeERC = &#63;.
@@ -4408,147 +2544,13 @@ public class LayoutPersistenceImpl
 		String portletLayoutPageTemplateEntryScopeERC, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			portletLayoutPageTemplateEntryERC = Objects.toString(
-				portletLayoutPageTemplateEntryERC, "");
-			portletLayoutPageTemplateEntryScopeERC = Objects.toString(
-				portletLayoutPageTemplateEntryScopeERC, "");
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath =
-						_finderPathWithoutPaginationFindByPLPTEERC_PLPTESERC;
-					finderArgs = new Object[] {
-						portletLayoutPageTemplateEntryERC,
-						portletLayoutPageTemplateEntryScopeERC
-					};
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindByPLPTEERC_PLPTESERC;
-				finderArgs = new Object[] {
-					portletLayoutPageTemplateEntryERC,
-					portletLayoutPageTemplateEntryScopeERC, start, end,
-					orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if (!portletLayoutPageTemplateEntryERC.equals(
-								layout.
-									getPortletLayoutPageTemplateEntryERC()) ||
-							!portletLayoutPageTemplateEntryScopeERC.equals(
-								layout.
-									getPortletLayoutPageTemplateEntryScopeERC())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						4 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(4);
-				}
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				boolean bindPortletLayoutPageTemplateEntryERC = false;
-
-				if (portletLayoutPageTemplateEntryERC.isEmpty()) {
-					sb.append(
-						_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYERC_3);
-				}
-				else {
-					bindPortletLayoutPageTemplateEntryERC = true;
-
-					sb.append(
-						_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYERC_2);
-				}
-
-				boolean bindPortletLayoutPageTemplateEntryScopeERC = false;
-
-				if (portletLayoutPageTemplateEntryScopeERC.isEmpty()) {
-					sb.append(
-						_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYSCOPEERC_3);
-				}
-				else {
-					bindPortletLayoutPageTemplateEntryScopeERC = true;
-
-					sb.append(
-						_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYSCOPEERC_2);
-				}
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					if (bindPortletLayoutPageTemplateEntryERC) {
-						queryPos.add(portletLayoutPageTemplateEntryERC);
-					}
-
-					if (bindPortletLayoutPageTemplateEntryScopeERC) {
-						queryPos.add(portletLayoutPageTemplateEntryScopeERC);
-					}
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByPLPTEERC_PLPTESERC.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
+				portletLayoutPageTemplateEntryERC,
+				portletLayoutPageTemplateEntryScopeERC
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -4575,19 +2577,14 @@ public class LayoutPersistenceImpl
 			return layout;
 		}
 
-		StringBundler sb = new StringBundler(6);
-
-		sb.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-		sb.append("portletLayoutPageTemplateEntryERC=");
-		sb.append(portletLayoutPageTemplateEntryERC);
-
-		sb.append(", portletLayoutPageTemplateEntryScopeERC=");
-		sb.append(portletLayoutPageTemplateEntryScopeERC);
-
-		sb.append("}");
-
-		throw new NoSuchLayoutException(sb.toString());
+		throw new NoSuchLayoutException(
+			_collectionPersistenceFinderByPLPTEERC_PLPTESERC.
+				buildNoSuchKeyMessage(
+					_NO_SUCH_ENTITY_WITH_KEY,
+					new Object[] {
+						portletLayoutPageTemplateEntryERC,
+						portletLayoutPageTemplateEntryScopeERC
+					}));
 	}
 
 	/**
@@ -4604,15 +2601,13 @@ public class LayoutPersistenceImpl
 		String portletLayoutPageTemplateEntryScopeERC,
 		OrderByComparator<Layout> orderByComparator) {
 
-		List<Layout> list = findByPLPTEERC_PLPTESERC(
-			portletLayoutPageTemplateEntryERC,
-			portletLayoutPageTemplateEntryScopeERC, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByPLPTEERC_PLPTESERC.fetchFirst(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
+				portletLayoutPageTemplateEntryERC,
+				portletLayoutPageTemplateEntryScopeERC
+			},
+			orderByComparator);
 	}
 
 	/**
@@ -4626,14 +2621,12 @@ public class LayoutPersistenceImpl
 		String portletLayoutPageTemplateEntryERC,
 		String portletLayoutPageTemplateEntryScopeERC) {
 
-		for (Layout layout :
-				findByPLPTEERC_PLPTESERC(
-					portletLayoutPageTemplateEntryERC,
-					portletLayoutPageTemplateEntryScopeERC, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, null)) {
-
-			remove(layout);
-		}
+		_collectionPersistenceFinderByPLPTEERC_PLPTESERC.remove(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
+				portletLayoutPageTemplateEntryERC,
+				portletLayoutPageTemplateEntryScopeERC
+			});
 	}
 
 	/**
@@ -4648,106 +2641,13 @@ public class LayoutPersistenceImpl
 		String portletLayoutPageTemplateEntryERC,
 		String portletLayoutPageTemplateEntryScopeERC) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			portletLayoutPageTemplateEntryERC = Objects.toString(
-				portletLayoutPageTemplateEntryERC, "");
-			portletLayoutPageTemplateEntryScopeERC = Objects.toString(
-				portletLayoutPageTemplateEntryScopeERC, "");
-
-			FinderPath finderPath = _finderPathCountByPLPTEERC_PLPTESERC;
-
-			Object[] finderArgs = new Object[] {
+		return _collectionPersistenceFinderByPLPTEERC_PLPTESERC.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
 				portletLayoutPageTemplateEntryERC,
 				portletLayoutPageTemplateEntryScopeERC
-			};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(3);
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				boolean bindPortletLayoutPageTemplateEntryERC = false;
-
-				if (portletLayoutPageTemplateEntryERC.isEmpty()) {
-					sb.append(
-						_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYERC_3);
-				}
-				else {
-					bindPortletLayoutPageTemplateEntryERC = true;
-
-					sb.append(
-						_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYERC_2);
-				}
-
-				boolean bindPortletLayoutPageTemplateEntryScopeERC = false;
-
-				if (portletLayoutPageTemplateEntryScopeERC.isEmpty()) {
-					sb.append(
-						_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYSCOPEERC_3);
-				}
-				else {
-					bindPortletLayoutPageTemplateEntryScopeERC = true;
-
-					sb.append(
-						_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYSCOPEERC_2);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					if (bindPortletLayoutPageTemplateEntryERC) {
-						queryPos.add(portletLayoutPageTemplateEntryERC);
-					}
-
-					if (bindPortletLayoutPageTemplateEntryScopeERC) {
-						queryPos.add(portletLayoutPageTemplateEntryScopeERC);
-					}
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+			});
 	}
-
-	private static final String
-		_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYERC_2 =
-			"layout.portletLayoutPageTemplateEntryERC = ? AND ";
-
-	private static final String
-		_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYERC_3 =
-			"(layout.portletLayoutPageTemplateEntryERC IS NULL OR layout.portletLayoutPageTemplateEntryERC = '') AND ";
-
-	private static final String
-		_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYSCOPEERC_2 =
-			"layout.portletLayoutPageTemplateEntryScopeERC = ? AND layout.system = [$FALSE$]";
-
-	private static final String
-		_FINDER_COLUMN_PLPTEERC_PLPTESERC_PORTLETLAYOUTPAGETEMPLATEENTRYSCOPEERC_3 =
-			"(layout.portletLayoutPageTemplateEntryScopeERC IS NULL OR layout.portletLayoutPageTemplateEntryScopeERC = '') AND layout.system = [$FALSE$]";
 
 	private FinderPath _finderPathFetchByG_P_L;
 	private UniquePersistenceFinder<Layout> _uniquePersistenceFinderByG_P_L;
@@ -4813,15 +2713,9 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, long layoutId,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _uniquePersistenceFinderByG_P_L.fetch(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, privateLayout, layoutId},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByG_P_L.fetch(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, layoutId}, useFinderCache);
 	}
 
 	/**
@@ -5017,7 +2911,7 @@ public class LayoutPersistenceImpl
 
 				if (orderByComparator != null) {
 					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
+						sb, _ENTITY_ALIAS_PREFIX, orderByComparator);
 				}
 				else {
 					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
@@ -5232,7 +3126,7 @@ public class LayoutPersistenceImpl
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
 				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
+					sb, _ENTITY_ALIAS_PREFIX, orderByComparator, true);
 			}
 			else {
 				appendOrderByComparator(
@@ -5405,7 +3299,7 @@ public class LayoutPersistenceImpl
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
 				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
+					sb, _ENTITY_ALIAS_PREFIX, orderByComparator, true);
 			}
 			else {
 				appendOrderByComparator(
@@ -5686,7 +3580,7 @@ public class LayoutPersistenceImpl
 
 		if (orderByComparator != null) {
 			appendOrderByComparator(
-				sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
+				sb, _ENTITY_ALIAS_PREFIX, orderByComparator);
 		}
 		else {
 			sb.append(LayoutModelImpl.ORDER_BY_JPQL);
@@ -6118,7 +4012,8 @@ public class LayoutPersistenceImpl
 	private FinderPath _finderPathWithPaginationFindByG_P_T;
 	private FinderPath _finderPathWithoutPaginationFindByG_P_T;
 	private FinderPath _finderPathCountByG_P_T;
-	private FinderPath _finderPathWithPaginationCountByG_P_T;
+	private FilterCollectionPersistenceFinder<Layout>
+		_collectionPersistenceFinderByG_P_T;
 
 	/**
 	 * Returns all the layouts where groupId = &#63; and privateLayout = &#63; and type = &#63;.
@@ -6203,124 +4098,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, String type, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			type = Objects.toString(type, "");
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindByG_P_T;
-					finderArgs = new Object[] {groupId, privateLayout, type};
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindByG_P_T;
-				finderArgs = new Object[] {
-					groupId, privateLayout, type, start, end, orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if ((groupId != layout.getGroupId()) ||
-							(privateLayout != layout.isPrivateLayout()) ||
-							!type.equals(layout.getType())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						5 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(5);
-				}
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_P_T_GROUPID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_T_PRIVATELAYOUT_2);
-
-				boolean bindType = false;
-
-				if (type.isEmpty()) {
-					sb.append(_FINDER_COLUMN_G_P_T_TYPE_3);
-				}
-				else {
-					bindType = true;
-
-					sb.append(_FINDER_COLUMN_G_P_T_TYPE_2);
-				}
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					queryPos.add(privateLayout);
-
-					if (bindType) {
-						queryPos.add(type);
-					}
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByG_P_T.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new String[] {type}}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -6378,14 +4159,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, String type,
 		OrderByComparator<Layout> orderByComparator) {
 
-		List<Layout> list = findByG_P_T(
-			groupId, privateLayout, type, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByG_P_T.fetchFirst(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new String[] {type}},
+			orderByComparator);
 	}
 
 	/**
@@ -6447,115 +4224,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, String type, int start, int end,
 		OrderByComparator<Layout> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_P_T(
-				groupId, privateLayout, type, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_P_T(
-					groupId, privateLayout, type, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		type = Objects.toString(type, "");
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				5 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(6);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_WHERE);
-		}
-		else {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_P_T_GROUPID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_T_PRIVATELAYOUT_2_SQL);
-
-		boolean bindType = false;
-
-		if (type.isEmpty()) {
-			sb.append(_FINDER_COLUMN_G_P_T_TYPE_3_SQL);
-		}
-		else {
-			bindType = true;
-
-			sb.append(_FINDER_COLUMN_G_P_T_TYPE_2_SQL);
-		}
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(_FILTER_ENTITY_ALIAS, LayoutImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(_FILTER_ENTITY_TABLE, LayoutImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			if (bindType) {
-				queryPos.add(type);
-			}
-
-			return (List<Layout>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_T.filterFind(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new String[] {type}}, start,
+			end, orderByComparator, groupId);
 	}
 
 	/**
@@ -6618,133 +4290,12 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, String[] types, int start, int end,
 		OrderByComparator<Layout> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_P_T(
-				groupId, privateLayout, types, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_P_T(
-					groupId, privateLayout, types, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		if (types == null) {
-			types = new String[0];
-		}
-		else if (types.length > 1) {
-			for (int i = 0; i < types.length; i++) {
-				types[i] = Objects.toString(types[i], "");
-			}
-
-			types = ArrayUtil.sortedUnique(types);
-		}
-
-		StringBundler sb = new StringBundler();
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_WHERE);
-		}
-		else {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_P_T_GROUPID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_T_PRIVATELAYOUT_2_SQL);
-
-		if (types.length > 0) {
-			sb.append("(");
-
-			for (int i = 0; i < types.length; i++) {
-				String type = types[i];
-
-				if (type.isEmpty()) {
-					sb.append(_FINDER_COLUMN_G_P_T_TYPE_6_SQL);
-				}
-				else {
-					sb.append(_FINDER_COLUMN_G_P_T_TYPE_5_SQL);
-				}
-
-				if ((i + 1) < types.length) {
-					sb.append(WHERE_OR);
-				}
-			}
-
-			sb.append(")");
-		}
-
-		sb.setStringAt(
-			removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-		sb.append(" AND layout.system_ = [$FALSE$]");
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(_FILTER_ENTITY_ALIAS, LayoutImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(_FILTER_ENTITY_TABLE, LayoutImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			for (String type : types) {
-				if ((type != null) && !type.isEmpty()) {
-					queryPos.add(type);
-				}
-			}
-
-			return (List<Layout>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_T.filterFind(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
+				groupId, privateLayout, ArrayUtil.sortedUnique(types)
+			},
+			start, end, orderByComparator, groupId);
 	}
 
 	/**
@@ -6835,151 +4386,12 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, String[] types, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		if (types == null) {
-			types = new String[0];
-		}
-		else if (types.length > 1) {
-			for (int i = 0; i < types.length; i++) {
-				types[i] = Objects.toString(types[i], "");
-			}
-
-			types = ArrayUtil.sortedUnique(types);
-		}
-
-		if (types.length == 1) {
-			return findByG_P_T(
-				groupId, privateLayout, types[0], start, end,
-				orderByComparator);
-		}
-
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderArgs = new Object[] {
-						groupId, privateLayout, StringUtil.merge(types)
-					};
-				}
-			}
-			else if (useFinderCache) {
-				finderArgs = new Object[] {
-					groupId, privateLayout, StringUtil.merge(types), start, end,
-					orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					_finderPathWithPaginationFindByG_P_T, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if ((groupId != layout.getGroupId()) ||
-							(privateLayout != layout.isPrivateLayout()) ||
-							!ArrayUtil.contains(types, layout.getType())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_P_T_GROUPID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_T_PRIVATELAYOUT_2);
-
-				if (types.length > 0) {
-					sb.append("(");
-
-					for (int i = 0; i < types.length; i++) {
-						String type = types[i];
-
-						if (type.isEmpty()) {
-							sb.append(_FINDER_COLUMN_G_P_T_TYPE_6);
-						}
-						else {
-							sb.append(_FINDER_COLUMN_G_P_T_TYPE_5);
-						}
-
-						if ((i + 1) < types.length) {
-							sb.append(WHERE_OR);
-						}
-					}
-
-					sb.append(")");
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				sb.append(" AND layout.system = [$FALSE$]");
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					queryPos.add(privateLayout);
-
-					for (String type : types) {
-						if ((type != null) && !type.isEmpty()) {
-							queryPos.add(type);
-						}
-					}
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(
-							_finderPathWithPaginationFindByG_P_T, finderArgs,
-							list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByG_P_T.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
+				groupId, privateLayout, ArrayUtil.sortedUnique(types)
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -6993,13 +4405,9 @@ public class LayoutPersistenceImpl
 	public void removeByG_P_T(
 		long groupId, boolean privateLayout, String type) {
 
-		for (Layout layout :
-				findByG_P_T(
-					groupId, privateLayout, type, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, null)) {
-
-			remove(layout);
-		}
+		_collectionPersistenceFinderByG_P_T.remove(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new String[] {type}});
 	}
 
 	/**
@@ -7012,72 +4420,9 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByG_P_T(long groupId, boolean privateLayout, String type) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			type = Objects.toString(type, "");
-
-			FinderPath finderPath = _finderPathCountByG_P_T;
-
-			Object[] finderArgs = new Object[] {groupId, privateLayout, type};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(4);
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_P_T_GROUPID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_T_PRIVATELAYOUT_2);
-
-				boolean bindType = false;
-
-				if (type.isEmpty()) {
-					sb.append(_FINDER_COLUMN_G_P_T_TYPE_3);
-				}
-				else {
-					bindType = true;
-
-					sb.append(_FINDER_COLUMN_G_P_T_TYPE_2);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					queryPos.add(privateLayout);
-
-					if (bindType) {
-						queryPos.add(type);
-					}
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByG_P_T.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new String[] {type}});
 	}
 
 	/**
@@ -7092,101 +4437,11 @@ public class LayoutPersistenceImpl
 	public int countByG_P_T(
 		long groupId, boolean privateLayout, String[] types) {
 
-		if (types == null) {
-			types = new String[0];
-		}
-		else if (types.length > 1) {
-			for (int i = 0; i < types.length; i++) {
-				types[i] = Objects.toString(types[i], "");
-			}
-
-			types = ArrayUtil.sortedUnique(types);
-		}
-
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			Object[] finderArgs = new Object[] {
-				groupId, privateLayout, StringUtil.merge(types)
-			};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				_finderPathWithPaginationCountByG_P_T, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_P_T_GROUPID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_T_PRIVATELAYOUT_2);
-
-				if (types.length > 0) {
-					sb.append("(");
-
-					for (int i = 0; i < types.length; i++) {
-						String type = types[i];
-
-						if (type.isEmpty()) {
-							sb.append(_FINDER_COLUMN_G_P_T_TYPE_6);
-						}
-						else {
-							sb.append(_FINDER_COLUMN_G_P_T_TYPE_5);
-						}
-
-						if ((i + 1) < types.length) {
-							sb.append(WHERE_OR);
-						}
-					}
-
-					sb.append(")");
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				sb.append(" AND layout.system = [$FALSE$]");
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					queryPos.add(privateLayout);
-
-					for (String type : types) {
-						if ((type != null) && !type.isEmpty()) {
-							queryPos.add(type);
-						}
-					}
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(
-						_finderPathWithPaginationCountByG_P_T, finderArgs,
-						count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByG_P_T.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
+				groupId, privateLayout, ArrayUtil.sortedUnique(types)
+			});
 	}
 
 	/**
@@ -7201,73 +4456,10 @@ public class LayoutPersistenceImpl
 	public int filterCountByG_P_T(
 		long groupId, boolean privateLayout, String type) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_P_T(groupId, privateLayout, type);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<Layout> layouts = findByG_P_T(groupId, privateLayout, type);
-
-			layouts = InlineSQLHelperUtil.filter(layouts, groupId);
-
-			return layouts.size();
-		}
-
-		type = Objects.toString(type, "");
-
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUT_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_P_T_GROUPID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_T_PRIVATELAYOUT_2_SQL);
-
-		boolean bindType = false;
-
-		if (type.isEmpty()) {
-			sb.append(_FINDER_COLUMN_G_P_T_TYPE_3_SQL);
-		}
-		else {
-			bindType = true;
-
-			sb.append(_FINDER_COLUMN_G_P_T_TYPE_2_SQL);
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			if (bindType) {
-				queryPos.add(type);
-			}
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_T.filterCount(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new String[] {type}},
+			groupId);
 	}
 
 	/**
@@ -7282,140 +4474,18 @@ public class LayoutPersistenceImpl
 	public int filterCountByG_P_T(
 		long groupId, boolean privateLayout, String[] types) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_P_T(groupId, privateLayout, types);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<Layout> layouts = InlineSQLHelperUtil.filter(
-				findByG_P_T(groupId, privateLayout, types), groupId);
-
-			return layouts.size();
-		}
-
-		if (types == null) {
-			types = new String[0];
-		}
-		else if (types.length > 1) {
-			for (int i = 0; i < types.length; i++) {
-				types[i] = Objects.toString(types[i], "");
-			}
-
-			types = ArrayUtil.sortedUnique(types);
-		}
-
-		StringBundler sb = new StringBundler();
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUT_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_P_T_GROUPID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_T_PRIVATELAYOUT_2_SQL);
-
-		if (types.length > 0) {
-			sb.append("(");
-
-			for (int i = 0; i < types.length; i++) {
-				String type = types[i];
-
-				if (type.isEmpty()) {
-					sb.append(_FINDER_COLUMN_G_P_T_TYPE_6_SQL);
-				}
-				else {
-					sb.append(_FINDER_COLUMN_G_P_T_TYPE_5_SQL);
-				}
-
-				if ((i + 1) < types.length) {
-					sb.append(WHERE_OR);
-				}
-			}
-
-			sb.append(")");
-		}
-
-		sb.setStringAt(
-			removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-		sb.append(" AND layout.system_ = [$FALSE$]");
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			for (String type : types) {
-				if ((type != null) && !type.isEmpty()) {
-					queryPos.add(type);
-				}
-			}
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_T.filterCount(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
+				groupId, privateLayout, ArrayUtil.sortedUnique(types)
+			},
+			groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_P_T_GROUPID_2 =
-		"layout.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_T_GROUPID_2_SQL =
-		"layout.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_T_PRIVATELAYOUT_2 =
-		"layout.privateLayout = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_T_PRIVATELAYOUT_2_SQL =
-		"layout.privateLayout = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_T_TYPE_2 =
-		"layout.type = ? AND layout.system = [$FALSE$]";
-
-	private static final String _FINDER_COLUMN_G_P_T_TYPE_3 =
-		"(layout.type IS NULL OR layout.type = '') AND layout.system = [$FALSE$]";
-
-	private static final String _FINDER_COLUMN_G_P_T_TYPE_5 =
-		"(" + removeConjunction(_FINDER_COLUMN_G_P_T_TYPE_2) + ")";
-
-	private static final String _FINDER_COLUMN_G_P_T_TYPE_6 =
-		"(" + removeConjunction(_FINDER_COLUMN_G_P_T_TYPE_3) + ")";
-
-	private static final String _FINDER_COLUMN_G_P_T_TYPE_2_SQL =
-		"layout.type_ = ? AND layout.system_ = [$FALSE$]";
-
-	private static final String _FINDER_COLUMN_G_P_T_TYPE_3_SQL =
-		"(layout.type_ IS NULL OR layout.type_ = '') AND layout.system_ = [$FALSE$]";
-
-	private static final String _FINDER_COLUMN_G_P_T_TYPE_5_SQL =
-		"(" + removeConjunction(_FINDER_COLUMN_G_P_T_TYPE_2) + ")";
-
-	private static final String _FINDER_COLUMN_G_P_T_TYPE_6_SQL =
-		"(" + removeConjunction(_FINDER_COLUMN_G_P_T_TYPE_3) + ")";
 
 	private FinderPath _finderPathWithPaginationFindByG_P_S;
 	private FinderPath _finderPathWithoutPaginationFindByG_P_S;
 	private FinderPath _finderPathCountByG_P_S;
-	private CollectionPersistenceFinder<Layout>
+	private FilterCollectionPersistenceFinder<Layout>
 		_collectionPersistenceFinderByG_P_S;
 
 	/**
@@ -7503,15 +4573,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, boolean system, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByG_P_S.find(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, privateLayout, system}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_P_S.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, system}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -7622,102 +4687,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, boolean system, int start, int end,
 		OrderByComparator<Layout> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_P_S(
-				groupId, privateLayout, system, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_P_S(
-					groupId, privateLayout, system, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				5 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(6);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_WHERE);
-		}
-		else {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_P_S_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_P_S_PRIVATELAYOUT_2);
-
-		sb.append(_FINDER_COLUMN_G_P_S_SYSTEM_2_SQL);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(_FILTER_ENTITY_ALIAS, LayoutImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(_FILTER_ENTITY_TABLE, LayoutImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			queryPos.add(system);
-
-			return (List<Layout>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_S.filterFind(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, system}, start, end,
+			orderByComparator, groupId);
 	}
 
 	/**
@@ -7748,14 +4721,9 @@ public class LayoutPersistenceImpl
 	public int countByG_P_S(
 		long groupId, boolean privateLayout, boolean system) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByG_P_S.count(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, privateLayout, system});
-		}
+		return _collectionPersistenceFinderByG_P_S.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, system});
 	}
 
 	/**
@@ -7770,70 +4738,10 @@ public class LayoutPersistenceImpl
 	public int filterCountByG_P_S(
 		long groupId, boolean privateLayout, boolean system) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_P_S(groupId, privateLayout, system);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<Layout> layouts = findByG_P_S(groupId, privateLayout, system);
-
-			layouts = InlineSQLHelperUtil.filter(layouts, groupId);
-
-			return layouts.size();
-		}
-
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUT_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_P_S_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_P_S_PRIVATELAYOUT_2);
-
-		sb.append(_FINDER_COLUMN_G_P_S_SYSTEM_2_SQL);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			queryPos.add(system);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_S.filterCount(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, system}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_P_S_GROUPID_2 =
-		"layout.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_S_PRIVATELAYOUT_2 =
-		"layout.privateLayout = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_S_SYSTEM_2_SQL =
-		"layout.system_ = ?";
 
 	private FinderPath _finderPathFetchByG_P_F;
 	private UniquePersistenceFinder<Layout> _uniquePersistenceFinderByG_P_F;
@@ -7899,15 +4807,9 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, String friendlyURL,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _uniquePersistenceFinderByG_P_F.fetch(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, privateLayout, friendlyURL},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByG_P_F.fetch(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, friendlyURL}, useFinderCache);
 	}
 
 	/**
@@ -7948,7 +4850,7 @@ public class LayoutPersistenceImpl
 	private FinderPath _finderPathWithPaginationFindByG_P_LSPLE;
 	private FinderPath _finderPathWithoutPaginationFindByG_P_LSPLE;
 	private FinderPath _finderPathCountByG_P_LSPLE;
-	private CollectionPersistenceFinder<Layout>
+	private FilterCollectionPersistenceFinder<Layout>
 		_collectionPersistenceFinderByG_P_LSPLE;
 
 	/**
@@ -8040,17 +4942,10 @@ public class LayoutPersistenceImpl
 		int start, int end, OrderByComparator<Layout> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByG_P_LSPLE.find(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {
-					groupId, privateLayout, layoutSetPrototypeLayoutERC
-				},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_P_LSPLE.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, layoutSetPrototypeLayoutERC},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -8168,117 +5063,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, String layoutSetPrototypeLayoutERC,
 		int start, int end, OrderByComparator<Layout> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_P_LSPLE(
-				groupId, privateLayout, layoutSetPrototypeLayoutERC, start, end,
-				orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_P_LSPLE(
-					groupId, privateLayout, layoutSetPrototypeLayoutERC,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		layoutSetPrototypeLayoutERC = Objects.toString(
-			layoutSetPrototypeLayoutERC, "");
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				5 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(6);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_WHERE);
-		}
-		else {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_P_LSPLE_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_P_LSPLE_PRIVATELAYOUT_2);
-
-		boolean bindLayoutSetPrototypeLayoutERC = false;
-
-		if (layoutSetPrototypeLayoutERC.isEmpty()) {
-			sb.append(_FINDER_COLUMN_G_P_LSPLE_LAYOUTSETPROTOTYPELAYOUTERC_3);
-		}
-		else {
-			bindLayoutSetPrototypeLayoutERC = true;
-
-			sb.append(_FINDER_COLUMN_G_P_LSPLE_LAYOUTSETPROTOTYPELAYOUTERC_2);
-		}
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(_FILTER_ENTITY_ALIAS, LayoutImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(_FILTER_ENTITY_TABLE, LayoutImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			if (bindLayoutSetPrototypeLayoutERC) {
-				queryPos.add(layoutSetPrototypeLayoutERC);
-			}
-
-			return (List<Layout>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_LSPLE.filterFind(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, layoutSetPrototypeLayoutERC},
+			start, end, orderByComparator, groupId);
 	}
 
 	/**
@@ -8311,16 +5099,9 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout,
 		String layoutSetPrototypeLayoutERC) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _collectionPersistenceFinderByG_P_LSPLE.count(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {
-					groupId, privateLayout, layoutSetPrototypeLayoutERC
-				});
-		}
+		return _collectionPersistenceFinderByG_P_LSPLE.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, layoutSetPrototypeLayoutERC});
 	}
 
 	/**
@@ -8336,96 +5117,17 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout,
 		String layoutSetPrototypeLayoutERC) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_P_LSPLE(
-				groupId, privateLayout, layoutSetPrototypeLayoutERC);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<Layout> layouts = findByG_P_LSPLE(
-				groupId, privateLayout, layoutSetPrototypeLayoutERC);
-
-			layouts = InlineSQLHelperUtil.filter(layouts, groupId);
-
-			return layouts.size();
-		}
-
-		layoutSetPrototypeLayoutERC = Objects.toString(
-			layoutSetPrototypeLayoutERC, "");
-
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUT_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_P_LSPLE_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_P_LSPLE_PRIVATELAYOUT_2);
-
-		boolean bindLayoutSetPrototypeLayoutERC = false;
-
-		if (layoutSetPrototypeLayoutERC.isEmpty()) {
-			sb.append(_FINDER_COLUMN_G_P_LSPLE_LAYOUTSETPROTOTYPELAYOUTERC_3);
-		}
-		else {
-			bindLayoutSetPrototypeLayoutERC = true;
-
-			sb.append(_FINDER_COLUMN_G_P_LSPLE_LAYOUTSETPROTOTYPELAYOUTERC_2);
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			if (bindLayoutSetPrototypeLayoutERC) {
-				queryPos.add(layoutSetPrototypeLayoutERC);
-			}
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_LSPLE.filterCount(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, layoutSetPrototypeLayoutERC},
+			groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_P_LSPLE_GROUPID_2 =
-		"layout.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_LSPLE_PRIVATELAYOUT_2 =
-		"layout.privateLayout = ? AND ";
-
-	private static final String
-		_FINDER_COLUMN_G_P_LSPLE_LAYOUTSETPROTOTYPELAYOUTERC_2 =
-			"layout.layoutSetPrototypeLayoutERC = ?";
-
-	private static final String
-		_FINDER_COLUMN_G_P_LSPLE_LAYOUTSETPROTOTYPELAYOUTERC_3 =
-			"(layout.layoutSetPrototypeLayoutERC IS NULL OR layout.layoutSetPrototypeLayoutERC = '')";
 
 	private FinderPath _finderPathWithPaginationFindByG_P_ST;
 	private FinderPath _finderPathWithoutPaginationFindByG_P_ST;
 	private FinderPath _finderPathCountByG_P_ST;
-	private FinderPath _finderPathWithPaginationCountByG_P_ST;
+	private FilterCollectionPersistenceFinder<Layout>
+		_collectionPersistenceFinderByG_P_ST;
 
 	/**
 	 * Returns all the layouts where groupId = &#63; and privateLayout = &#63; and status = &#63;.
@@ -8511,112 +5213,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, int status, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindByG_P_ST;
-					finderArgs = new Object[] {groupId, privateLayout, status};
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindByG_P_ST;
-				finderArgs = new Object[] {
-					groupId, privateLayout, status, start, end,
-					orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if ((groupId != layout.getGroupId()) ||
-							(privateLayout != layout.isPrivateLayout()) ||
-							(status != layout.getStatus())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						5 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(5);
-				}
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_P_ST_GROUPID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_ST_PRIVATELAYOUT_2);
-
-				sb.append(_FINDER_COLUMN_G_P_ST_STATUS_2);
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					queryPos.add(privateLayout);
-
-					queryPos.add(status);
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByG_P_ST.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new int[] {status}}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -8674,14 +5274,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, int status,
 		OrderByComparator<Layout> orderByComparator) {
 
-		List<Layout> list = findByG_P_ST(
-			groupId, privateLayout, status, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByG_P_ST.fetchFirst(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new int[] {status}},
+			orderByComparator);
 	}
 
 	/**
@@ -8743,102 +5339,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, int status, int start, int end,
 		OrderByComparator<Layout> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_P_ST(
-				groupId, privateLayout, status, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_P_ST(
-					groupId, privateLayout, status, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				5 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(6);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_WHERE);
-		}
-		else {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_P_ST_GROUPID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_ST_PRIVATELAYOUT_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_ST_STATUS_2_SQL);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(_FILTER_ENTITY_ALIAS, LayoutImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(_FILTER_ENTITY_TABLE, LayoutImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			queryPos.add(status);
-
-			return (List<Layout>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_ST.filterFind(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new int[] {status}}, start,
+			end, orderByComparator, groupId);
 	}
 
 	/**
@@ -8901,115 +5405,12 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, int[] statuses, int start, int end,
 		OrderByComparator<Layout> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_P_ST(
-				groupId, privateLayout, statuses, start, end,
-				orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_P_ST(
-					groupId, privateLayout, statuses, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		if (statuses == null) {
-			statuses = new int[0];
-		}
-		else if (statuses.length > 1) {
-			statuses = ArrayUtil.sortedUnique(statuses);
-		}
-
-		StringBundler sb = new StringBundler();
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_WHERE);
-		}
-		else {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_P_ST_GROUPID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_ST_PRIVATELAYOUT_2_SQL);
-
-		if (statuses.length > 0) {
-			sb.append("(");
-
-			sb.append(_FINDER_COLUMN_G_P_ST_STATUS_7_SQL);
-
-			sb.append(StringUtil.merge(statuses));
-
-			sb.append(")");
-
-			sb.append(")");
-		}
-
-		sb.setStringAt(
-			removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-		sb.append(" AND layout.system_ = [$FALSE$]");
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(_FILTER_ENTITY_ALIAS, LayoutImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(_FILTER_ENTITY_TABLE, LayoutImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			return (List<Layout>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_ST.filterFind(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
+				groupId, privateLayout, ArrayUtil.sortedUnique(statuses)
+			},
+			start, end, orderByComparator, groupId);
 	}
 
 	/**
@@ -9101,132 +5502,12 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, int[] statuses, int start, int end,
 		OrderByComparator<Layout> orderByComparator, boolean useFinderCache) {
 
-		if (statuses == null) {
-			statuses = new int[0];
-		}
-		else if (statuses.length > 1) {
-			statuses = ArrayUtil.sortedUnique(statuses);
-		}
-
-		if (statuses.length == 1) {
-			return findByG_P_ST(
-				groupId, privateLayout, statuses[0], start, end,
-				orderByComparator);
-		}
-
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderArgs = new Object[] {
-						groupId, privateLayout, StringUtil.merge(statuses)
-					};
-				}
-			}
-			else if (useFinderCache) {
-				finderArgs = new Object[] {
-					groupId, privateLayout, StringUtil.merge(statuses), start,
-					end, orderByComparator
-				};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					_finderPathWithPaginationFindByG_P_ST, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if ((groupId != layout.getGroupId()) ||
-							(privateLayout != layout.isPrivateLayout()) ||
-							!ArrayUtil.contains(statuses, layout.getStatus())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_P_ST_GROUPID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_ST_PRIVATELAYOUT_2);
-
-				if (statuses.length > 0) {
-					sb.append("(");
-
-					sb.append(_FINDER_COLUMN_G_P_ST_STATUS_7);
-
-					sb.append(StringUtil.merge(statuses));
-
-					sb.append(")");
-
-					sb.append(")");
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				sb.append(" AND layout.system = [$FALSE$]");
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					queryPos.add(privateLayout);
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(
-							_finderPathWithPaginationFindByG_P_ST, finderArgs,
-							list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByG_P_ST.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
+				groupId, privateLayout, ArrayUtil.sortedUnique(statuses)
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -9240,13 +5521,9 @@ public class LayoutPersistenceImpl
 	public void removeByG_P_ST(
 		long groupId, boolean privateLayout, int status) {
 
-		for (Layout layout :
-				findByG_P_ST(
-					groupId, privateLayout, status, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, null)) {
-
-			remove(layout);
-		}
+		_collectionPersistenceFinderByG_P_ST.remove(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new int[] {status}});
 	}
 
 	/**
@@ -9259,59 +5536,9 @@ public class LayoutPersistenceImpl
 	 */
 	@Override
 	public int countByG_P_ST(long groupId, boolean privateLayout, int status) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = _finderPathCountByG_P_ST;
-
-			Object[] finderArgs = new Object[] {groupId, privateLayout, status};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(4);
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_P_ST_GROUPID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_ST_PRIVATELAYOUT_2);
-
-				sb.append(_FINDER_COLUMN_G_P_ST_STATUS_2);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					queryPos.add(privateLayout);
-
-					queryPos.add(status);
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByG_P_ST.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new int[] {status}});
 	}
 
 	/**
@@ -9326,82 +5553,11 @@ public class LayoutPersistenceImpl
 	public int countByG_P_ST(
 		long groupId, boolean privateLayout, int[] statuses) {
 
-		if (statuses == null) {
-			statuses = new int[0];
-		}
-		else if (statuses.length > 1) {
-			statuses = ArrayUtil.sortedUnique(statuses);
-		}
-
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			Object[] finderArgs = new Object[] {
-				groupId, privateLayout, StringUtil.merge(statuses)
-			};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				_finderPathWithPaginationCountByG_P_ST, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_P_ST_GROUPID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_ST_PRIVATELAYOUT_2);
-
-				if (statuses.length > 0) {
-					sb.append("(");
-
-					sb.append(_FINDER_COLUMN_G_P_ST_STATUS_7);
-
-					sb.append(StringUtil.merge(statuses));
-
-					sb.append(")");
-
-					sb.append(")");
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				sb.append(" AND layout.system = [$FALSE$]");
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					queryPos.add(privateLayout);
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(
-						_finderPathWithPaginationCountByG_P_ST, finderArgs,
-						count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByG_P_ST.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
+				groupId, privateLayout, ArrayUtil.sortedUnique(statuses)
+			});
 	}
 
 	/**
@@ -9416,60 +5572,9 @@ public class LayoutPersistenceImpl
 	public int filterCountByG_P_ST(
 		long groupId, boolean privateLayout, int status) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_P_ST(groupId, privateLayout, status);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<Layout> layouts = findByG_P_ST(groupId, privateLayout, status);
-
-			layouts = InlineSQLHelperUtil.filter(layouts, groupId);
-
-			return layouts.size();
-		}
-
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUT_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_P_ST_GROUPID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_ST_PRIVATELAYOUT_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_ST_STATUS_2_SQL);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			queryPos.add(status);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_ST.filterCount(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, new int[] {status}}, groupId);
 	}
 
 	/**
@@ -9484,104 +5589,13 @@ public class LayoutPersistenceImpl
 	public int filterCountByG_P_ST(
 		long groupId, boolean privateLayout, int[] statuses) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_P_ST(groupId, privateLayout, statuses);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<Layout> layouts = InlineSQLHelperUtil.filter(
-				findByG_P_ST(groupId, privateLayout, statuses), groupId);
-
-			return layouts.size();
-		}
-
-		if (statuses == null) {
-			statuses = new int[0];
-		}
-		else if (statuses.length > 1) {
-			statuses = ArrayUtil.sortedUnique(statuses);
-		}
-
-		StringBundler sb = new StringBundler();
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUT_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_P_ST_GROUPID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_ST_PRIVATELAYOUT_2_SQL);
-
-		if (statuses.length > 0) {
-			sb.append("(");
-
-			sb.append(_FINDER_COLUMN_G_P_ST_STATUS_7_SQL);
-
-			sb.append(StringUtil.merge(statuses));
-
-			sb.append(")");
-
-			sb.append(")");
-		}
-
-		sb.setStringAt(
-			removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-		sb.append(" AND layout.system_ = [$FALSE$]");
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_ST.filterCount(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {
+				groupId, privateLayout, ArrayUtil.sortedUnique(statuses)
+			},
+			groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_P_ST_GROUPID_2 =
-		"layout.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_ST_GROUPID_2_SQL =
-		"layout.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_ST_PRIVATELAYOUT_2 =
-		"layout.privateLayout = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_ST_PRIVATELAYOUT_2_SQL =
-		"layout.privateLayout = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_ST_STATUS_2 =
-		"layout.status = ? AND layout.system = [$FALSE$]";
-
-	private static final String _FINDER_COLUMN_G_P_ST_STATUS_7 =
-		"layout.status IN (";
-
-	private static final String _FINDER_COLUMN_G_P_ST_STATUS_2_SQL =
-		"layout.status = ? AND layout.system_ = [$FALSE$]";
-
-	private static final String _FINDER_COLUMN_G_P_ST_STATUS_7_SQL =
-		"layout.status IN (";
 
 	private FinderPath _finderPathWithPaginationFindByG_P_P_H;
 	private FinderPath _finderPathWithoutPaginationFindByG_P_P_H;
@@ -9750,7 +5764,7 @@ public class LayoutPersistenceImpl
 
 				if (orderByComparator != null) {
 					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
+						sb, _ENTITY_ALIAS_PREFIX, orderByComparator);
 				}
 				else {
 					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
@@ -9980,7 +5994,7 @@ public class LayoutPersistenceImpl
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
 				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
+					sb, _ENTITY_ALIAS_PREFIX, orderByComparator, true);
 			}
 			else {
 				appendOrderByComparator(
@@ -10164,7 +6178,7 @@ public class LayoutPersistenceImpl
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
 				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
+					sb, _ENTITY_ALIAS_PREFIX, orderByComparator, true);
 			}
 			else {
 				appendOrderByComparator(
@@ -10459,7 +6473,7 @@ public class LayoutPersistenceImpl
 
 		if (orderByComparator != null) {
 			appendOrderByComparator(
-				sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
+				sb, _ENTITY_ALIAS_PREFIX, orderByComparator);
 		}
 		else {
 			sb.append(LayoutModelImpl.ORDER_BY_JPQL);
@@ -11099,7 +7113,7 @@ public class LayoutPersistenceImpl
 
 				if (orderByComparator != null) {
 					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
+						sb, _ENTITY_ALIAS_PREFIX, orderByComparator);
 				}
 				else {
 					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
@@ -11329,7 +7343,7 @@ public class LayoutPersistenceImpl
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
 				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
+					sb, _ENTITY_ALIAS_PREFIX, orderByComparator, true);
 			}
 			else {
 				appendOrderByComparator(
@@ -11511,7 +7525,7 @@ public class LayoutPersistenceImpl
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
 				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
+					sb, _ENTITY_ALIAS_PREFIX, orderByComparator, true);
 			}
 			else {
 				appendOrderByComparator(
@@ -11804,7 +7818,7 @@ public class LayoutPersistenceImpl
 
 		if (orderByComparator != null) {
 			appendOrderByComparator(
-				sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
+				sb, _ENTITY_ALIAS_PREFIX, orderByComparator);
 		}
 		else {
 			sb.append(LayoutModelImpl.ORDER_BY_JPQL);
@@ -12263,6 +8277,8 @@ public class LayoutPersistenceImpl
 
 	private FinderPath _finderPathWithPaginationFindByG_P_P_LteP;
 	private FinderPath _finderPathWithPaginationCountByG_P_P_LteP;
+	private FilterCollectionPersistenceFinder<Layout>
+		_collectionPersistenceFinderByG_P_P_LteP;
 
 	/**
 	 * Returns all the layouts where groupId = &#63; and privateLayout = &#63; and parentLayoutId = &#63; and priority &le; &#63;.
@@ -12356,107 +8372,10 @@ public class LayoutPersistenceImpl
 		int start, int end, OrderByComparator<Layout> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			finderPath = _finderPathWithPaginationFindByG_P_P_LteP;
-			finderArgs = new Object[] {
-				groupId, privateLayout, parentLayoutId, priority, start, end,
-				orderByComparator
-			};
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (Layout layout : list) {
-						if ((groupId != layout.getGroupId()) ||
-							(privateLayout != layout.isPrivateLayout()) ||
-							(parentLayoutId != layout.getParentLayoutId()) ||
-							(priority < layout.getPriority())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						6 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(6);
-				}
-
-				sb.append(_SQL_SELECT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_P_P_LTEP_GROUPID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_P_LTEP_PRIVATELAYOUT_2);
-
-				sb.append(_FINDER_COLUMN_G_P_P_LTEP_PARENTLAYOUTID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_P_LTEP_PRIORITY_2);
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					queryPos.add(privateLayout);
-
-					queryPos.add(parentLayoutId);
-
-					queryPos.add(priority);
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByG_P_P_LteP.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, parentLayoutId, priority},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -12484,25 +8403,12 @@ public class LayoutPersistenceImpl
 			return layout;
 		}
 
-		StringBundler sb = new StringBundler(10);
-
-		sb.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-		sb.append("groupId=");
-		sb.append(groupId);
-
-		sb.append(", privateLayout=");
-		sb.append(privateLayout);
-
-		sb.append(", parentLayoutId=");
-		sb.append(parentLayoutId);
-
-		sb.append(", priority<=");
-		sb.append(priority);
-
-		sb.append("}");
-
-		throw new NoSuchLayoutException(sb.toString());
+		throw new NoSuchLayoutException(
+			_collectionPersistenceFinderByG_P_P_LteP.buildNoSuchKeyMessage(
+				_NO_SUCH_ENTITY_WITH_KEY,
+				new Object[] {
+					groupId, privateLayout, parentLayoutId, priority
+				}));
 	}
 
 	/**
@@ -12520,15 +8426,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, long parentLayoutId, int priority,
 		OrderByComparator<Layout> orderByComparator) {
 
-		List<Layout> list = findByG_P_P_LteP(
-			groupId, privateLayout, parentLayoutId, priority, 0, 1,
+		return _collectionPersistenceFinderByG_P_P_LteP.fetchFirst(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, parentLayoutId, priority},
 			orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
 	}
 
 	/**
@@ -12595,107 +8496,10 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, long parentLayoutId, int priority,
 		int start, int end, OrderByComparator<Layout> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_P_P_LteP(
-				groupId, privateLayout, parentLayoutId, priority, start, end,
-				orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_P_P_LteP(
-					groupId, privateLayout, parentLayoutId, priority,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				6 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(7);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_WHERE);
-		}
-		else {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_P_P_LTEP_GROUPID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_P_LTEP_PRIVATELAYOUT_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_P_LTEP_PARENTLAYOUTID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_P_LTEP_PRIORITY_2_SQL);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(LayoutModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(_FILTER_ENTITY_ALIAS, LayoutImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(_FILTER_ENTITY_TABLE, LayoutImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			queryPos.add(parentLayoutId);
-
-			queryPos.add(priority);
-
-			return (List<Layout>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_P_LteP.filterFind(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, parentLayoutId, priority},
+			start, end, orderByComparator, groupId);
 	}
 
 	/**
@@ -12711,13 +8515,9 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, long parentLayoutId,
 		int priority) {
 
-		for (Layout layout :
-				findByG_P_P_LteP(
-					groupId, privateLayout, parentLayoutId, priority,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
-
-			remove(layout);
-		}
+		_collectionPersistenceFinderByG_P_P_LteP.remove(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, parentLayoutId, priority});
 	}
 
 	/**
@@ -12734,65 +8534,9 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, long parentLayoutId,
 		int priority) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = _finderPathWithPaginationCountByG_P_P_LteP;
-
-			Object[] finderArgs = new Object[] {
-				groupId, privateLayout, parentLayoutId, priority
-			};
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(5);
-
-				sb.append(_SQL_COUNT_LAYOUT_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_P_P_LTEP_GROUPID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_P_LTEP_PRIVATELAYOUT_2);
-
-				sb.append(_FINDER_COLUMN_G_P_P_LTEP_PARENTLAYOUTID_2);
-
-				sb.append(_FINDER_COLUMN_G_P_P_LTEP_PRIORITY_2);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					queryPos.add(privateLayout);
-
-					queryPos.add(parentLayoutId);
-
-					queryPos.add(priority);
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByG_P_P_LteP.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, parentLayoutId, priority});
 	}
 
 	/**
@@ -12809,91 +8553,11 @@ public class LayoutPersistenceImpl
 		long groupId, boolean privateLayout, long parentLayoutId,
 		int priority) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_P_P_LteP(
-				groupId, privateLayout, parentLayoutId, priority);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<Layout> layouts = findByG_P_P_LteP(
-				groupId, privateLayout, parentLayoutId, priority);
-
-			layouts = InlineSQLHelperUtil.filter(layouts, groupId);
-
-			return layouts.size();
-		}
-
-		StringBundler sb = new StringBundler(5);
-
-		sb.append(_FILTER_SQL_COUNT_LAYOUT_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_P_P_LTEP_GROUPID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_P_LTEP_PRIVATELAYOUT_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_P_LTEP_PARENTLAYOUTID_2_SQL);
-
-		sb.append(_FINDER_COLUMN_G_P_P_LTEP_PRIORITY_2_SQL);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), Layout.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(privateLayout);
-
-			queryPos.add(parentLayoutId);
-
-			queryPos.add(priority);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_P_P_LteP.filterCount(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, privateLayout, parentLayoutId, priority},
+			groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_P_P_LTEP_GROUPID_2 =
-		"layout.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_P_LTEP_GROUPID_2_SQL =
-		"layout.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_P_LTEP_PRIVATELAYOUT_2 =
-		"layout.privateLayout = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_P_LTEP_PRIVATELAYOUT_2_SQL =
-		"layout.privateLayout = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_P_LTEP_PARENTLAYOUTID_2 =
-		"layout.parentLayoutId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_P_LTEP_PARENTLAYOUTID_2_SQL =
-		"layout.parentLayoutId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_P_P_LTEP_PRIORITY_2 =
-		"layout.priority <= ? AND layout.system = [$FALSE$]";
-
-	private static final String _FINDER_COLUMN_G_P_P_LTEP_PRIORITY_2_SQL =
-		"layout.priority <= ? AND layout.system_ = [$FALSE$]";
 
 	private FinderPath _finderPathFetchByERC_G;
 	private UniquePersistenceFinder<Layout> _uniquePersistenceFinderByERC_G;
@@ -12952,14 +8616,9 @@ public class LayoutPersistenceImpl
 	public Layout fetchByERC_G(
 		String externalReferenceCode, long groupId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			return _uniquePersistenceFinderByERC_G.fetch(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {externalReferenceCode, groupId}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByERC_G.fetch(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {externalReferenceCode, groupId}, useFinderCache);
 	}
 
 	/**
@@ -13018,164 +8677,6 @@ public class LayoutPersistenceImpl
 	}
 
 	/**
-	 * Caches the layout in the entity cache if it is enabled.
-	 *
-	 * @param layout the layout
-	 */
-	@Override
-	public void cacheResult(Layout layout) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					layout.getCtCollectionId())) {
-
-			EntityCacheUtil.putResult(
-				LayoutImpl.class, layout.getPrimaryKey(), layout);
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByUUID_G_P,
-				new Object[] {
-					layout.getUuid(), layout.getGroupId(),
-					layout.isPrivateLayout()
-				},
-				layout);
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByG_P_L,
-				new Object[] {
-					layout.getGroupId(), layout.isPrivateLayout(),
-					layout.getLayoutId()
-				},
-				layout);
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByG_P_F,
-				new Object[] {
-					layout.getGroupId(), layout.isPrivateLayout(),
-					layout.getFriendlyURL()
-				},
-				layout);
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByERC_G,
-				new Object[] {
-					layout.getExternalReferenceCode(), layout.getGroupId()
-				},
-				layout);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the layouts in the entity cache if it is enabled.
-	 *
-	 * @param layouts the layouts
-	 */
-	@Override
-	public void cacheResult(List<Layout> layouts) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (layouts.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (Layout layout : layouts) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						layout.getCtCollectionId())) {
-
-				if (EntityCacheUtil.getResult(
-						LayoutImpl.class, layout.getPrimaryKey()) == null) {
-
-					cacheResult(layout);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all layouts.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		EntityCacheUtil.clearCache(LayoutImpl.class);
-
-		FinderCacheUtil.clearCache(LayoutImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the layout.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(Layout layout) {
-		EntityCacheUtil.removeResult(LayoutImpl.class, layout);
-	}
-
-	@Override
-	public void clearCache(List<Layout> layouts) {
-		for (Layout layout : layouts) {
-			EntityCacheUtil.removeResult(LayoutImpl.class, layout);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		FinderCacheUtil.clearCache(LayoutImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			EntityCacheUtil.removeResult(LayoutImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(LayoutModelImpl layoutModelImpl) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					layoutModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				layoutModelImpl.getUuid(), layoutModelImpl.getGroupId(),
-				layoutModelImpl.isPrivateLayout()
-			};
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByUUID_G_P, args, layoutModelImpl);
-
-			args = new Object[] {
-				layoutModelImpl.getGroupId(), layoutModelImpl.isPrivateLayout(),
-				layoutModelImpl.getLayoutId()
-			};
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByG_P_L, args, layoutModelImpl);
-
-			args = new Object[] {
-				layoutModelImpl.getGroupId(), layoutModelImpl.isPrivateLayout(),
-				layoutModelImpl.getFriendlyURL()
-			};
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByG_P_F, args, layoutModelImpl);
-
-			args = new Object[] {
-				layoutModelImpl.getExternalReferenceCode(),
-				layoutModelImpl.getGroupId()
-			};
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByERC_G, args, layoutModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new layout with the primary key. Does not add the layout to the database.
 	 *
 	 * @param plid the primary key for the new layout
@@ -13207,44 +8708,6 @@ public class LayoutPersistenceImpl
 	@Override
 	public Layout remove(long plid) throws NoSuchLayoutException {
 		return remove((Serializable)plid);
-	}
-
-	/**
-	 * Removes the layout with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the layout
-	 * @return the layout that was removed
-	 * @throws NoSuchLayoutException if a layout with the primary key could not be found
-	 */
-	@Override
-	public Layout remove(Serializable primaryKey) throws NoSuchLayoutException {
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Layout layout = (Layout)session.get(LayoutImpl.class, primaryKey);
-
-			if (layout == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchLayoutException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(layout);
-		}
-		catch (NoSuchLayoutException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -13411,41 +8874,13 @@ public class LayoutPersistenceImpl
 			closeSession(session);
 		}
 
-		EntityCacheUtil.putResult(
-			LayoutImpl.class, layoutModelImpl, false, true);
-
-		cacheUniqueFindersCache(layoutModelImpl);
+		cacheUniqueFindersResult(layout, false);
 
 		if (isNew) {
 			layout.setNew(false);
 		}
 
 		layout.resetOriginalValues();
-
-		return layout;
-	}
-
-	/**
-	 * Returns the layout with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the layout
-	 * @return the layout
-	 * @throws NoSuchLayoutException if a layout with the primary key could not be found
-	 */
-	@Override
-	public Layout findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchLayoutException {
-
-		Layout layout = fetchByPrimaryKey(primaryKey);
-
-		if (layout == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchLayoutException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return layout;
 	}
@@ -13462,51 +8897,9 @@ public class LayoutPersistenceImpl
 		return findByPrimaryKey((Serializable)plid);
 	}
 
-	/**
-	 * Returns the layout with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the layout
-	 * @return the layout, or <code>null</code> if a layout with the primary key could not be found
-	 */
 	@Override
-	public Layout fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(
-				Layout.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		Layout layout = (Layout)EntityCacheUtil.getResult(
-			LayoutImpl.class, primaryKey);
-
-		if (layout != null) {
-			return layout;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			layout = (Layout)session.get(LayoutImpl.class, primaryKey);
-
-			if (layout != null) {
-				cacheResult(layout);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return layout;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return CTPersistenceHelperUtil.getCTPersistenceHelper();
 	}
 
 	/**
@@ -13518,317 +8911,6 @@ public class LayoutPersistenceImpl
 	@Override
 	public Layout fetchByPrimaryKey(long plid) {
 		return fetchByPrimaryKey((Serializable)plid);
-	}
-
-	@Override
-	public Map<Serializable, Layout> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (CTPersistenceHelperUtil.isProductionMode(Layout.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, Layout> map = new HashMap<Serializable, Layout>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			Layout layout = fetchByPrimaryKey(primaryKey);
-
-			if (layout != null) {
-				map.put(primaryKey, layout);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-						Layout.class, primaryKey)) {
-
-				Layout layout = (Layout)EntityCacheUtil.getResult(
-					LayoutImpl.class, primaryKey);
-
-				if (layout == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, layout);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (Layout layout : (List<Layout>)query.list()) {
-				map.put(layout.getPrimaryKeyObj(), layout);
-
-				cacheResult(layout);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the layouts.
-	 *
-	 * @return the layouts
-	 */
-	@Override
-	public List<Layout> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the layouts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LayoutModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layouts
-	 * @param end the upper bound of the range of layouts (not inclusive)
-	 * @return the range of layouts
-	 */
-	@Override
-	public List<Layout> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the layouts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LayoutModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layouts
-	 * @param end the upper bound of the range of layouts (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of layouts
-	 */
-	@Override
-	public List<Layout> findAll(
-		int start, int end, OrderByComparator<Layout> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the layouts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LayoutModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layouts
-	 * @param end the upper bound of the range of layouts (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of layouts
-	 */
-	@Override
-	public List<Layout> findAll(
-		int start, int end, OrderByComparator<Layout> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<Layout> list = null;
-
-			if (useFinderCache) {
-				list = (List<Layout>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_LAYOUT);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_LAYOUT;
-
-					sql = sql.concat(LayoutModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<Layout>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the layouts from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (Layout layout : findAll()) {
-			remove(layout);
-		}
-	}
-
-	/**
-	 * Returns the number of layouts.
-	 *
-	 * @return the number of layouts
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					Layout.class)) {
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(_SQL_COUNT_LAYOUT);
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -13966,21 +9048,6 @@ public class LayoutPersistenceImpl
 	 * Initializes the layout persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -13991,38 +9058,40 @@ public class LayoutPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_LAYOUT_WHERE, _SQL_COUNT_LAYOUT_WHERE,
-			LayoutModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			LayoutModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"layout.", "uuid", FinderColumn.Type.STRING, "=", true, true,
 				Layout::getUuid));
 
-		_finderPathFetchByUUID_G_P = new FinderPath(
+		_finderPathFetchByUUID_G_P = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G_P",
 			new String[] {
 				String.class.getName(), Long.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"uuid_", "groupId", "privateLayout"}, true);
+			new String[] {"uuid_", "groupId", "privateLayout"}, 0, 1, false,
+			convertNullFunction(Layout::getUuid), Layout::getGroupId,
+			Layout::isPrivateLayout);
 
 		_uniquePersistenceFinderByUUID_G_P = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByUUID_G_P, _SQL_SELECT_LAYOUT_WHERE,
+			this, _finderPathFetchByUUID_G_P, _SQL_SELECT_LAYOUT_WHERE, "",
 			new FinderColumn<>(
-				"layout.", "uuid", FinderColumn.Type.STRING, "=", true, false,
+				"layout.", "uuid", FinderColumn.Type.STRING, "=", true, true,
 				Layout::getUuid),
 			new FinderColumn<>(
-				"layout.", "groupId", FinderColumn.Type.LONG, "=", true, false,
+				"layout.", "groupId", FinderColumn.Type.LONG, "=", true, true,
 				Layout::getGroupId),
 			new FinderColumn<>(
 				"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
@@ -14040,12 +9109,12 @@ public class LayoutPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -14053,10 +9122,10 @@ public class LayoutPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_LAYOUT_WHERE,
 				_SQL_COUNT_LAYOUT_WHERE, LayoutModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"layout.", "uuid", FinderColumn.Type.STRING, "=", true,
-					false, Layout::getUuid),
+					true, Layout::getUuid),
 				new FinderColumn<>(
 					"layout.", "companyId", FinderColumn.Type.LONG, "=", true,
 					true, Layout::getCompanyId));
@@ -14079,6 +9148,26 @@ public class LayoutPersistenceImpl
 			new String[] {Long.class.getName()}, new String[] {"groupId"},
 			false);
 
+		_collectionPersistenceFinderByGroupId =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByGroupId,
+				_finderPathWithoutPaginationFindByGroupId,
+				_finderPathCountByGroupId, _SQL_SELECT_LAYOUT_WHERE,
+				_SQL_COUNT_LAYOUT_WHERE, LayoutModelImpl.ORDER_BY_JPQL,
+				_ENTITY_ALIAS_PREFIX, "layout.system = [$FALSE$]",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutImpl.class, Layout.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUT_WHERE,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUT_WHERE,
+					LayoutModelImpl.ORDER_BY_SQL,
+					LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"layout.", "groupId", FinderColumn.Type.LONG, "=", true,
+					true, Layout::getGroupId));
+
 		_finderPathWithPaginationFindByCompanyId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByCompanyId",
 			new String[] {
@@ -14097,6 +9186,17 @@ public class LayoutPersistenceImpl
 			new String[] {Long.class.getName()}, new String[] {"companyId"},
 			false);
 
+		_collectionPersistenceFinderByCompanyId =
+			new CollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByCompanyId,
+				_finderPathWithoutPaginationFindByCompanyId,
+				_finderPathCountByCompanyId, _SQL_SELECT_LAYOUT_WHERE,
+				_SQL_COUNT_LAYOUT_WHERE, LayoutModelImpl.ORDER_BY_JPQL,
+				_ENTITY_ALIAS_PREFIX, "layout.system = [$FALSE$]",
+				new FinderColumn<>(
+					"layout.", "companyId", FinderColumn.Type.LONG, "=", true,
+					true, Layout::getCompanyId));
+
 		_finderPathWithPaginationFindByParentPlid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByParentPlid",
 			new String[] {
@@ -14114,6 +9214,17 @@ public class LayoutPersistenceImpl
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByParentPlid",
 			new String[] {Long.class.getName()}, new String[] {"parentPlid"},
 			false);
+
+		_collectionPersistenceFinderByParentPlid =
+			new CollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByParentPlid,
+				_finderPathWithoutPaginationFindByParentPlid,
+				_finderPathCountByParentPlid, _SQL_SELECT_LAYOUT_WHERE,
+				_SQL_COUNT_LAYOUT_WHERE, LayoutModelImpl.ORDER_BY_JPQL,
+				_ENTITY_ALIAS_PREFIX, "layout.system = [$FALSE$]",
+				new FinderColumn<>(
+					"layout.", "parentPlid", FinderColumn.Type.LONG, "=", true,
+					true, Layout::getParentPlid));
 
 		_finderPathWithPaginationFindByIconImageId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByIconImageId",
@@ -14139,7 +9250,7 @@ public class LayoutPersistenceImpl
 				_finderPathWithoutPaginationFindByIconImageId,
 				_finderPathCountByIconImageId, _SQL_SELECT_LAYOUT_WHERE,
 				_SQL_COUNT_LAYOUT_WHERE, LayoutModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"layout.", "iconImageId", FinderColumn.Type.LONG, "=", true,
 					true, Layout::getIconImageId));
@@ -14159,13 +9270,27 @@ public class LayoutPersistenceImpl
 				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 				"findByLayoutSetPrototypeLayoutERC",
 				new String[] {String.class.getName()},
-				new String[] {"layoutSetPrototypeLayoutERC"}, true);
+				new String[] {"layoutSetPrototypeLayoutERC"}, 0, 1, true, null);
 
 		_finderPathCountByLayoutSetPrototypeLayoutERC = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"countByLayoutSetPrototypeLayoutERC",
 			new String[] {String.class.getName()},
-			new String[] {"layoutSetPrototypeLayoutERC"}, false);
+			new String[] {"layoutSetPrototypeLayoutERC"}, 0, 1, false, null);
+
+		_collectionPersistenceFinderByLayoutSetPrototypeLayoutERC =
+			new CollectionPersistenceFinder<>(
+				this,
+				_finderPathWithPaginationFindByLayoutSetPrototypeLayoutERC,
+				_finderPathWithoutPaginationFindByLayoutSetPrototypeLayoutERC,
+				_finderPathCountByLayoutSetPrototypeLayoutERC,
+				_SQL_SELECT_LAYOUT_WHERE, _SQL_COUNT_LAYOUT_WHERE,
+				LayoutModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"layout.system = [$FALSE$]",
+				new FinderColumn<>(
+					"layout.", "layoutSetPrototypeLayoutERC",
+					FinderColumn.Type.STRING, "=", true, true,
+					Layout::getLayoutSetPrototypeLayoutERC));
 
 		_finderPathWithPaginationFindByG_P = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_P",
@@ -14186,17 +9311,27 @@ public class LayoutPersistenceImpl
 			new String[] {Long.class.getName(), Boolean.class.getName()},
 			new String[] {"groupId", "privateLayout"}, false);
 
-		_collectionPersistenceFinderByG_P = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByG_P,
-			_finderPathWithoutPaginationFindByG_P, _finderPathCountByG_P,
-			_SQL_SELECT_LAYOUT_WHERE, _SQL_COUNT_LAYOUT_WHERE,
-			LayoutModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"layout.", "groupId", FinderColumn.Type.LONG, "=", true, false,
-				Layout::getGroupId),
-			new FinderColumn<>(
-				"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
-				true, true, Layout::isPrivateLayout));
+		_collectionPersistenceFinderByG_P =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_P,
+				_finderPathWithoutPaginationFindByG_P, _finderPathCountByG_P,
+				_SQL_SELECT_LAYOUT_WHERE, _SQL_COUNT_LAYOUT_WHERE,
+				LayoutModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutImpl.class, Layout.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUT_WHERE,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUT_WHERE,
+					LayoutModelImpl.ORDER_BY_SQL,
+					LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"layout.", "groupId", FinderColumn.Type.LONG, "=", true,
+					true, Layout::getGroupId),
+				new FinderColumn<>(
+					"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
+					true, true, Layout::isPrivateLayout));
 
 		_finderPathWithPaginationFindByG_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_T",
@@ -14210,12 +9345,35 @@ public class LayoutPersistenceImpl
 		_finderPathWithoutPaginationFindByG_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByG_T",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "type_"}, true);
+			new String[] {"groupId", "type_"}, 0, 2, true, null);
 
 		_finderPathCountByG_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_T",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "type_"}, false);
+			new String[] {"groupId", "type_"}, 0, 2, false, null);
+
+		_collectionPersistenceFinderByG_T =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_T,
+				_finderPathWithoutPaginationFindByG_T, _finderPathCountByG_T,
+				_SQL_SELECT_LAYOUT_WHERE, _SQL_COUNT_LAYOUT_WHERE,
+				LayoutModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"layout.system = [$FALSE$]",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutImpl.class, Layout.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUT_WHERE,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUT_WHERE,
+					LayoutModelImpl.ORDER_BY_SQL,
+					LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"layout.", "groupId", FinderColumn.Type.LONG, "=", true,
+					true, Layout::getGroupId),
+				new FinderColumn<>(
+					"layout.", "type", FinderColumn.Type.STRING, "=", true,
+					true, Layout::getType));
 
 		_finderPathWithPaginationFindByG_MLPTEERC = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_MLPTEERC",
@@ -14229,23 +9387,32 @@ public class LayoutPersistenceImpl
 		_finderPathWithoutPaginationFindByG_MLPTEERC = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByG_MLPTEERC",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "masterLPTEERC"}, true);
+			new String[] {"groupId", "masterLPTEERC"}, 0, 2, true, null);
 
 		_finderPathCountByG_MLPTEERC = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_MLPTEERC",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "masterLPTEERC"}, false);
+			new String[] {"groupId", "masterLPTEERC"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByG_MLPTEERC =
-			new CollectionPersistenceFinder<>(
+			new FilterCollectionPersistenceFinder<>(
 				this, _finderPathWithPaginationFindByG_MLPTEERC,
 				_finderPathWithoutPaginationFindByG_MLPTEERC,
 				_finderPathCountByG_MLPTEERC, _SQL_SELECT_LAYOUT_WHERE,
 				_SQL_COUNT_LAYOUT_WHERE, LayoutModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutImpl.class, Layout.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUT_WHERE,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUT_WHERE,
+					LayoutModelImpl.ORDER_BY_SQL,
+					LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
 				new FinderColumn<>(
 					"layout.", "groupId", FinderColumn.Type.LONG, "=", true,
-					false, Layout::getGroupId),
+					true, Layout::getGroupId),
 				new FinderColumn<>(
 					"layout.", "masterLayoutPageTemplateEntryERC",
 					FinderColumn.Type.STRING, "=", true, true,
@@ -14274,10 +9441,10 @@ public class LayoutPersistenceImpl
 			this, _finderPathWithPaginationFindByP_I,
 			_finderPathWithoutPaginationFindByP_I, _finderPathCountByP_I,
 			_SQL_SELECT_LAYOUT_WHERE, _SQL_COUNT_LAYOUT_WHERE,
-			LayoutModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			LayoutModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
-				true, false, Layout::isPrivateLayout),
+				true, true, Layout::isPrivateLayout),
 			new FinderColumn<>(
 				"layout.", "iconImageId", FinderColumn.Type.LONG, "=", true,
 				true, Layout::getIconImageId));
@@ -14297,14 +9464,21 @@ public class LayoutPersistenceImpl
 			new String[] {"classNameId", "classPK"}, true);
 
 		_finderPathCountByC_C = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_C",
-			new String[] {Long.class.getName(), Long.class.getName()},
-			new String[] {"classNameId", "classPK"}, false);
-
-		_finderPathWithPaginationCountByC_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByC_C",
 			new String[] {Long.class.getName(), Long.class.getName()},
 			new String[] {"classNameId", "classPK"}, false);
+
+		_collectionPersistenceFinderByC_C = new CollectionPersistenceFinder<>(
+			this, _finderPathWithPaginationFindByC_C,
+			_finderPathWithoutPaginationFindByC_C, _finderPathCountByC_C,
+			_SQL_SELECT_LAYOUT_WHERE, _SQL_COUNT_LAYOUT_WHERE,
+			LayoutModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+			new FinderColumn<>(
+				"layout.", "classNameId", FinderColumn.Type.LONG, "=", true,
+				true, Layout::getClassNameId),
+			new ArrayableFinderColumn<>(
+				"layout.", "classPK", FinderColumn.Type.LONG, "=", false, true,
+				true, Layout::getClassPK));
 
 		_finderPathWithPaginationFindByPLPTEERC_PLPTESERC = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByPLPTEERC_PLPTESERC",
@@ -14319,30 +9493,49 @@ public class LayoutPersistenceImpl
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"findByPLPTEERC_PLPTESERC",
 			new String[] {String.class.getName(), String.class.getName()},
-			new String[] {"portletLPTEERC", "portletLPTESERC"}, true);
+			new String[] {"portletLPTEERC", "portletLPTESERC"}, 0, 3, true,
+			null);
 
 		_finderPathCountByPLPTEERC_PLPTESERC = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"countByPLPTEERC_PLPTESERC",
 			new String[] {String.class.getName(), String.class.getName()},
-			new String[] {"portletLPTEERC", "portletLPTESERC"}, false);
+			new String[] {"portletLPTEERC", "portletLPTESERC"}, 0, 3, false,
+			null);
 
-		_finderPathFetchByG_P_L = new FinderPath(
+		_collectionPersistenceFinderByPLPTEERC_PLPTESERC =
+			new CollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByPLPTEERC_PLPTESERC,
+				_finderPathWithoutPaginationFindByPLPTEERC_PLPTESERC,
+				_finderPathCountByPLPTEERC_PLPTESERC, _SQL_SELECT_LAYOUT_WHERE,
+				_SQL_COUNT_LAYOUT_WHERE, LayoutModelImpl.ORDER_BY_JPQL,
+				_ENTITY_ALIAS_PREFIX, "layout.system = [$FALSE$]",
+				new FinderColumn<>(
+					"layout.", "portletLayoutPageTemplateEntryERC",
+					FinderColumn.Type.STRING, "=", true, true,
+					Layout::getPortletLayoutPageTemplateEntryERC),
+				new FinderColumn<>(
+					"layout.", "portletLayoutPageTemplateEntryScopeERC",
+					FinderColumn.Type.STRING, "=", true, true,
+					Layout::getPortletLayoutPageTemplateEntryScopeERC));
+
+		_finderPathFetchByG_P_L = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByG_P_L",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				Long.class.getName()
 			},
-			new String[] {"groupId", "privateLayout", "layoutId"}, true);
+			new String[] {"groupId", "privateLayout", "layoutId"}, 0, 0, false,
+			Layout::getGroupId, Layout::isPrivateLayout, Layout::getLayoutId);
 
 		_uniquePersistenceFinderByG_P_L = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByG_P_L, _SQL_SELECT_LAYOUT_WHERE,
+			this, _finderPathFetchByG_P_L, _SQL_SELECT_LAYOUT_WHERE, "",
 			new FinderColumn<>(
-				"layout.", "groupId", FinderColumn.Type.LONG, "=", true, false,
+				"layout.", "groupId", FinderColumn.Type.LONG, "=", true, true,
 				Layout::getGroupId),
 			new FinderColumn<>(
 				"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
-				true, false, Layout::isPrivateLayout),
+				true, true, Layout::isPrivateLayout),
 			new FinderColumn<>(
 				"layout.", "layoutId", FinderColumn.Type.LONG, "=", true, true,
 				Layout::getLayoutId));
@@ -14365,7 +9558,7 @@ public class LayoutPersistenceImpl
 			new String[] {"groupId", "privateLayout", "parentLayoutId"}, true);
 
 		_finderPathCountByG_P_P = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_P_P",
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByG_P_P",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				Long.class.getName()
@@ -14395,23 +9588,43 @@ public class LayoutPersistenceImpl
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"groupId", "privateLayout", "type_"}, true);
+			new String[] {"groupId", "privateLayout", "type_"}, 0, 4, true,
+			null);
 
 		_finderPathCountByG_P_T = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_P_T",
-			new String[] {
-				Long.class.getName(), Boolean.class.getName(),
-				String.class.getName()
-			},
-			new String[] {"groupId", "privateLayout", "type_"}, false);
-
-		_finderPathWithPaginationCountByG_P_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByG_P_T",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"groupId", "privateLayout", "type_"}, false);
+			new String[] {"groupId", "privateLayout", "type_"}, 0, 4, false,
+			null);
+
+		_collectionPersistenceFinderByG_P_T =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_P_T,
+				_finderPathWithoutPaginationFindByG_P_T,
+				_finderPathCountByG_P_T, _SQL_SELECT_LAYOUT_WHERE,
+				_SQL_COUNT_LAYOUT_WHERE, LayoutModelImpl.ORDER_BY_JPQL,
+				_ENTITY_ALIAS_PREFIX, "layout.system = [$FALSE$]",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutImpl.class, Layout.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUT_WHERE,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUT_WHERE,
+					LayoutModelImpl.ORDER_BY_SQL,
+					LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"layout.", "groupId", FinderColumn.Type.LONG, "=", true,
+					true, Layout::getGroupId),
+				new FinderColumn<>(
+					"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
+					true, true, Layout::isPrivateLayout),
+				new ArrayableFinderColumn<>(
+					"layout.", "type", FinderColumn.Type.STRING, "=", false,
+					true, true, Layout::getType));
 
 		_finderPathWithPaginationFindByG_P_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_P_S",
@@ -14438,37 +9651,50 @@ public class LayoutPersistenceImpl
 			},
 			new String[] {"groupId", "privateLayout", "system_"}, false);
 
-		_collectionPersistenceFinderByG_P_S = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByG_P_S,
-			_finderPathWithoutPaginationFindByG_P_S, _finderPathCountByG_P_S,
-			_SQL_SELECT_LAYOUT_WHERE, _SQL_COUNT_LAYOUT_WHERE,
-			LayoutModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"layout.", "groupId", FinderColumn.Type.LONG, "=", true, false,
-				Layout::getGroupId),
-			new FinderColumn<>(
-				"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
-				true, false, Layout::isPrivateLayout),
-			new FinderColumn<>(
-				"layout.", "system", FinderColumn.Type.BOOLEAN, "=", true, true,
-				Layout::isSystem));
+		_collectionPersistenceFinderByG_P_S =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_P_S,
+				_finderPathWithoutPaginationFindByG_P_S,
+				_finderPathCountByG_P_S, _SQL_SELECT_LAYOUT_WHERE,
+				_SQL_COUNT_LAYOUT_WHERE, LayoutModelImpl.ORDER_BY_JPQL,
+				_ENTITY_ALIAS_PREFIX, "",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutImpl.class, Layout.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUT_WHERE,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUT_WHERE,
+					LayoutModelImpl.ORDER_BY_SQL,
+					LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"layout.", "groupId", FinderColumn.Type.LONG, "=", true,
+					true, Layout::getGroupId),
+				new FinderColumn<>(
+					"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
+					true, true, Layout::isPrivateLayout),
+				new FinderColumn<>(
+					"layout.", "system", FinderColumn.Type.BOOLEAN, "=", true,
+					true, Layout::isSystem));
 
-		_finderPathFetchByG_P_F = new FinderPath(
+		_finderPathFetchByG_P_F = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByG_P_F",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"groupId", "privateLayout", "friendlyURL"}, true);
+			new String[] {"groupId", "privateLayout", "friendlyURL"}, 0, 4,
+			false, Layout::getGroupId, Layout::isPrivateLayout,
+			convertNullFunction(Layout::getFriendlyURL));
 
 		_uniquePersistenceFinderByG_P_F = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByG_P_F, _SQL_SELECT_LAYOUT_WHERE,
+			this, _finderPathFetchByG_P_F, _SQL_SELECT_LAYOUT_WHERE, "",
 			new FinderColumn<>(
-				"layout.", "groupId", FinderColumn.Type.LONG, "=", true, false,
+				"layout.", "groupId", FinderColumn.Type.LONG, "=", true, true,
 				Layout::getGroupId),
 			new FinderColumn<>(
 				"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
-				true, false, Layout::isPrivateLayout),
+				true, true, Layout::isPrivateLayout),
 			new FinderColumn<>(
 				"layout.", "friendlyURL", FinderColumn.Type.STRING, "=", true,
 				true, Layout::getFriendlyURL));
@@ -14494,7 +9720,7 @@ public class LayoutPersistenceImpl
 			new String[] {
 				"groupId", "privateLayout", "layoutSetPrototypeLayoutERC"
 			},
-			true);
+			0, 4, true, null);
 
 		_finderPathCountByG_P_LSPLE = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_P_LSPLE",
@@ -14505,21 +9731,30 @@ public class LayoutPersistenceImpl
 			new String[] {
 				"groupId", "privateLayout", "layoutSetPrototypeLayoutERC"
 			},
-			false);
+			0, 4, false, null);
 
 		_collectionPersistenceFinderByG_P_LSPLE =
-			new CollectionPersistenceFinder<>(
+			new FilterCollectionPersistenceFinder<>(
 				this, _finderPathWithPaginationFindByG_P_LSPLE,
 				_finderPathWithoutPaginationFindByG_P_LSPLE,
 				_finderPathCountByG_P_LSPLE, _SQL_SELECT_LAYOUT_WHERE,
 				_SQL_COUNT_LAYOUT_WHERE, LayoutModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutImpl.class, Layout.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUT_WHERE,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUT_WHERE,
+					LayoutModelImpl.ORDER_BY_SQL,
+					LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
 				new FinderColumn<>(
 					"layout.", "groupId", FinderColumn.Type.LONG, "=", true,
-					false, Layout::getGroupId),
+					true, Layout::getGroupId),
 				new FinderColumn<>(
 					"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
-					true, false, Layout::isPrivateLayout),
+					true, true, Layout::isPrivateLayout),
 				new FinderColumn<>(
 					"layout.", "layoutSetPrototypeLayoutERC",
 					FinderColumn.Type.STRING, "=", true, true,
@@ -14543,20 +9778,38 @@ public class LayoutPersistenceImpl
 			new String[] {"groupId", "privateLayout", "status"}, true);
 
 		_finderPathCountByG_P_ST = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_P_ST",
-			new String[] {
-				Long.class.getName(), Boolean.class.getName(),
-				Integer.class.getName()
-			},
-			new String[] {"groupId", "privateLayout", "status"}, false);
-
-		_finderPathWithPaginationCountByG_P_ST = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByG_P_ST",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				Integer.class.getName()
 			},
 			new String[] {"groupId", "privateLayout", "status"}, false);
+
+		_collectionPersistenceFinderByG_P_ST =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_P_ST,
+				_finderPathWithoutPaginationFindByG_P_ST,
+				_finderPathCountByG_P_ST, _SQL_SELECT_LAYOUT_WHERE,
+				_SQL_COUNT_LAYOUT_WHERE, LayoutModelImpl.ORDER_BY_JPQL,
+				_ENTITY_ALIAS_PREFIX, "layout.system = [$FALSE$]",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutImpl.class, Layout.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUT_WHERE,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUT_WHERE,
+					LayoutModelImpl.ORDER_BY_SQL,
+					LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"layout.", "groupId", FinderColumn.Type.LONG, "=", true,
+					true, Layout::getGroupId),
+				new FinderColumn<>(
+					"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
+					true, true, Layout::isPrivateLayout),
+				new ArrayableFinderColumn<>(
+					"layout.", "status", FinderColumn.Type.INTEGER, "=", false,
+					true, true, Layout::getStatus));
 
 		_finderPathWithPaginationFindByG_P_P_H = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_P_P_H",
@@ -14583,7 +9836,7 @@ public class LayoutPersistenceImpl
 			true);
 
 		_finderPathCountByG_P_P_H = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_P_P_H",
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByG_P_P_H",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				Long.class.getName(), Boolean.class.getName()
@@ -14629,7 +9882,7 @@ public class LayoutPersistenceImpl
 			true);
 
 		_finderPathCountByG_P_P_S = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_P_P_S",
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByG_P_P_S",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				Long.class.getName(), Boolean.class.getName()
@@ -14674,16 +9927,47 @@ public class LayoutPersistenceImpl
 			},
 			false);
 
-		_finderPathFetchByERC_G = new FinderPath(
+		_collectionPersistenceFinderByG_P_P_LteP =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_P_P_LteP, null,
+				_finderPathWithPaginationCountByG_P_P_LteP,
+				_SQL_SELECT_LAYOUT_WHERE, _SQL_COUNT_LAYOUT_WHERE,
+				LayoutModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"layout.system = [$FALSE$]",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					LayoutImpl.class, Layout.class, _FILTER_ENTITY_ALIAS,
+					_FILTER_ENTITY_TABLE, _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_LAYOUT_WHERE,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_LAYOUT_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_LAYOUT_WHERE,
+					LayoutModelImpl.ORDER_BY_SQL,
+					LayoutModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"layout.", "groupId", FinderColumn.Type.LONG, "=", true,
+					true, Layout::getGroupId),
+				new FinderColumn<>(
+					"layout.", "privateLayout", FinderColumn.Type.BOOLEAN, "=",
+					true, true, Layout::isPrivateLayout),
+				new FinderColumn<>(
+					"layout.", "parentLayoutId", FinderColumn.Type.LONG, "=",
+					true, true, Layout::getParentLayoutId),
+				new FinderColumn<>(
+					"layout.", "priority", FinderColumn.Type.INTEGER, "<=",
+					true, true, Layout::getPriority));
+
+		_finderPathFetchByERC_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"externalReferenceCode", "groupId"}, true);
+			new String[] {"externalReferenceCode", "groupId"}, 0, 1, false,
+			convertNullFunction(Layout::getExternalReferenceCode),
+			Layout::getGroupId);
 
 		_uniquePersistenceFinderByERC_G = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByERC_G, _SQL_SELECT_LAYOUT_WHERE,
+			this, _finderPathFetchByERC_G, _SQL_SELECT_LAYOUT_WHERE, "",
 			new FinderColumn<>(
 				"layout.", "externalReferenceCode", FinderColumn.Type.STRING,
-				"=", true, false, Layout::getExternalReferenceCode),
+				"=", true, true, Layout::getExternalReferenceCode),
 			new FinderColumn<>(
 				"layout.", "groupId", FinderColumn.Type.LONG, "=", true, true,
 				Layout::getGroupId));
@@ -14697,14 +9981,14 @@ public class LayoutPersistenceImpl
 		EntityCacheUtil.removeCache(LayoutImpl.class.getName());
 	}
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		LayoutModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_LAYOUT =
 		"SELECT layout FROM Layout layout";
 
 	private static final String _SQL_SELECT_LAYOUT_WHERE =
 		"SELECT layout FROM Layout layout WHERE ";
-
-	private static final String _SQL_COUNT_LAYOUT =
-		"SELECT COUNT(layout) FROM Layout layout";
 
 	private static final String _SQL_COUNT_LAYOUT_WHERE =
 		"SELECT COUNT(layout) FROM Layout layout WHERE ";
@@ -14730,12 +10014,7 @@ public class LayoutPersistenceImpl
 
 	private static final String _FILTER_ENTITY_TABLE = "Layout";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS = "layout.";
-
 	private static final String _ORDER_BY_ENTITY_TABLE = "Layout.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No Layout exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No Layout exists with the key {";
@@ -14758,4 +10037,4 @@ public class LayoutPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-455670070
+// LIFERAY-SERVICE-BUILDER-HASH:-1008653395

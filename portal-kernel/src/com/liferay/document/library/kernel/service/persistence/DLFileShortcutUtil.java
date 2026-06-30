@@ -36,6 +36,20 @@ public class DLFileShortcutUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<DLFileShortcut> dlFileShortcuts) {
+		getPersistence().cacheResult(dlFileShortcuts);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(DLFileShortcut dlFileShortcut) {
+		getPersistence().cacheResult(dlFileShortcut);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1714,24 +1728,6 @@ public class DLFileShortcutUtil {
 	}
 
 	/**
-	 * Caches the document library file shortcut in the entity cache if it is enabled.
-	 *
-	 * @param dlFileShortcut the document library file shortcut
-	 */
-	public static void cacheResult(DLFileShortcut dlFileShortcut) {
-		getPersistence().cacheResult(dlFileShortcut);
-	}
-
-	/**
-	 * Caches the document library file shortcuts in the entity cache if it is enabled.
-	 *
-	 * @param dlFileShortcuts the document library file shortcuts
-	 */
-	public static void cacheResult(List<DLFileShortcut> dlFileShortcuts) {
-		getPersistence().cacheResult(dlFileShortcuts);
-	}
-
-	/**
 	 * Creates a new document library file shortcut with the primary key. Does not add the document library file shortcut to the database.
 	 *
 	 * @param fileShortcutId the primary key for the new document library file shortcut
@@ -1783,86 +1779,6 @@ public class DLFileShortcutUtil {
 		return getPersistence().fetchByPrimaryKey(fileShortcutId);
 	}
 
-	/**
-	 * Returns all the document library file shortcuts.
-	 *
-	 * @return the document library file shortcuts
-	 */
-	public static List<DLFileShortcut> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the document library file shortcuts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.documentlibrary.model.impl.DLFileShortcutModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of document library file shortcuts
-	 * @param end the upper bound of the range of document library file shortcuts (not inclusive)
-	 * @return the range of document library file shortcuts
-	 */
-	public static List<DLFileShortcut> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the document library file shortcuts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.documentlibrary.model.impl.DLFileShortcutModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of document library file shortcuts
-	 * @param end the upper bound of the range of document library file shortcuts (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of document library file shortcuts
-	 */
-	public static List<DLFileShortcut> findAll(
-		int start, int end,
-		OrderByComparator<DLFileShortcut> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the document library file shortcuts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.documentlibrary.model.impl.DLFileShortcutModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of document library file shortcuts
-	 * @param end the upper bound of the range of document library file shortcuts (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of document library file shortcuts
-	 */
-	public static List<DLFileShortcut> findAll(
-		int start, int end, OrderByComparator<DLFileShortcut> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the document library file shortcuts from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of document library file shortcuts.
-	 *
-	 * @return the number of document library file shortcuts
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static DLFileShortcutPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1874,4 +1790,4 @@ public class DLFileShortcutUtil {
 	private static volatile DLFileShortcutPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1752315587
+// LIFERAY-SERVICE-BUILDER-HASH:1333841753

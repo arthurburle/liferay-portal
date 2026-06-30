@@ -39,6 +39,7 @@ import {
 	addNestedSegmentField,
 	addSegmentField,
 	addStaticMember,
+	createBatchSegment,
 	createDynamicSegment,
 	createStaticSegment,
 	editCriteriaAttributeValue,
@@ -75,7 +76,7 @@ let channelName;
 let project;
 
 test(
-	'Add a dynamic segment using an individual property',
+	'Add a Batch segment using an individual property',
 	{
 		tag: '@LRAC-11460',
 	},
@@ -128,11 +129,11 @@ test(
 			projectID: project.groupId,
 		});
 
-		await createDynamicSegment(page);
+		await createBatchSegment(page);
 
 		await test.step('Add email criteria and fill in', async () => {
 			await addSegmentField({
-				criterionName: 'email',
+				criterionName: 'Email Address',
 				criterionType: 'Individual Attributes',
 				page,
 			});
@@ -148,17 +149,12 @@ test(
 				page,
 			});
 
-			await page.waitForTimeout(3000);
+			const dropdownItems = page.locator(
+				'.dropdown-menu.dropdown-menu-select.show .dropdown-item'
+			);
 
-			const dropdownItems = await page
-				.locator(
-					'.dropdown-menu.dropdown-menu-select.show .dropdown-item'
-				)
-				.all();
-
-			expect(dropdownItems.length).toBe(1);
-
-			expect(await dropdownItems[0].textContent()).toBe(
+			await expect(dropdownItems).toHaveCount(1);
+			await expect(dropdownItems).toHaveText(
 				`${individualName}@liferay.com`
 			);
 		});

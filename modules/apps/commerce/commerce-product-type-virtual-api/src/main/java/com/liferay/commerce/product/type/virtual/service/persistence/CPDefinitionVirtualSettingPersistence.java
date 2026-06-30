@@ -348,22 +348,6 @@ public interface CPDefinitionVirtualSettingPersistence
 	public int countByC_C(long classNameId, long classPK);
 
 	/**
-	 * Caches the cp definition virtual setting in the entity cache if it is enabled.
-	 *
-	 * @param cpDefinitionVirtualSetting the cp definition virtual setting
-	 */
-	public void cacheResult(
-		CPDefinitionVirtualSetting cpDefinitionVirtualSetting);
-
-	/**
-	 * Caches the cp definition virtual settings in the entity cache if it is enabled.
-	 *
-	 * @param cpDefinitionVirtualSettings the cp definition virtual settings
-	 */
-	public void cacheResult(
-		java.util.List<CPDefinitionVirtualSetting> cpDefinitionVirtualSettings);
-
-	/**
 	 * Creates a new cp definition virtual setting with the primary key. Does not add the cp definition virtual setting to the database.
 	 *
 	 * @param CPDefinitionVirtualSettingId the primary key for the new cp definition virtual setting
@@ -404,74 +388,5 @@ public interface CPDefinitionVirtualSettingPersistence
 	public CPDefinitionVirtualSetting fetchByPrimaryKey(
 		long CPDefinitionVirtualSettingId);
 
-	/**
-	 * Returns all the cp definition virtual settings.
-	 *
-	 * @return the cp definition virtual settings
-	 */
-	public java.util.List<CPDefinitionVirtualSetting> findAll();
-
-	/**
-	 * Returns a range of all the cp definition virtual settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.type.virtual.model.impl.CPDefinitionVirtualSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definition virtual settings
-	 * @param end the upper bound of the range of cp definition virtual settings (not inclusive)
-	 * @return the range of cp definition virtual settings
-	 */
-	public java.util.List<CPDefinitionVirtualSetting> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the cp definition virtual settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.type.virtual.model.impl.CPDefinitionVirtualSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definition virtual settings
-	 * @param end the upper bound of the range of cp definition virtual settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cp definition virtual settings
-	 */
-	public java.util.List<CPDefinitionVirtualSetting> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CPDefinitionVirtualSetting> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the cp definition virtual settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.type.virtual.model.impl.CPDefinitionVirtualSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definition virtual settings
-	 * @param end the upper bound of the range of cp definition virtual settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cp definition virtual settings
-	 */
-	public java.util.List<CPDefinitionVirtualSetting> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CPDefinitionVirtualSetting> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the cp definition virtual settings from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of cp definition virtual settings.
-	 *
-	 * @return the number of cp definition virtual settings
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:404806615
+// LIFERAY-SERVICE-BUILDER-HASH:-2118051545

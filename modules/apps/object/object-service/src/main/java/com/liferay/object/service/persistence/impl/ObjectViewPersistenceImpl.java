@@ -13,27 +13,20 @@ import com.liferay.object.model.impl.ObjectViewModelImpl;
 import com.liferay.object.service.persistence.ObjectViewPersistence;
 import com.liferay.object.service.persistence.ObjectViewUtil;
 import com.liferay.object.service.persistence.impl.constants.ObjectPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -68,7 +61,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ObjectViewPersistence.class)
 public class ObjectViewPersistenceImpl
-	extends BasePersistenceImpl<ObjectView> implements ObjectViewPersistence {
+	extends BasePersistenceImpl<ObjectView, NoSuchObjectViewException>
+	implements ObjectViewPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -84,9 +78,6 @@ public class ObjectViewPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -722,84 +713,6 @@ public class ObjectViewPersistenceImpl
 	}
 
 	/**
-	 * Caches the object view in the entity cache if it is enabled.
-	 *
-	 * @param objectView the object view
-	 */
-	@Override
-	public void cacheResult(ObjectView objectView) {
-		entityCache.putResult(
-			ObjectViewImpl.class, objectView.getPrimaryKey(), objectView);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the object views in the entity cache if it is enabled.
-	 *
-	 * @param objectViews the object views
-	 */
-	@Override
-	public void cacheResult(List<ObjectView> objectViews) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (objectViews.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ObjectView objectView : objectViews) {
-			if (entityCache.getResult(
-					ObjectViewImpl.class, objectView.getPrimaryKey()) == null) {
-
-				cacheResult(objectView);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all object views.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ObjectViewImpl.class);
-
-		finderCache.clearCache(ObjectViewImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the object view.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ObjectView objectView) {
-		entityCache.removeResult(ObjectViewImpl.class, objectView);
-	}
-
-	@Override
-	public void clearCache(List<ObjectView> objectViews) {
-		for (ObjectView objectView : objectViews) {
-			entityCache.removeResult(ObjectViewImpl.class, objectView);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ObjectViewImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(ObjectViewImpl.class, primaryKey);
-		}
-	}
-
-	/**
 	 * Creates a new object view with the primary key. Does not add the object view to the database.
 	 *
 	 * @param objectViewId the primary key for the new object view
@@ -833,47 +746,6 @@ public class ObjectViewPersistenceImpl
 		throws NoSuchObjectViewException {
 
 		return remove((Serializable)objectViewId);
-	}
-
-	/**
-	 * Removes the object view with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the object view
-	 * @return the object view that was removed
-	 * @throws NoSuchObjectViewException if a object view with the primary key could not be found
-	 */
-	@Override
-	public ObjectView remove(Serializable primaryKey)
-		throws NoSuchObjectViewException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ObjectView objectView = (ObjectView)session.get(
-				ObjectViewImpl.class, primaryKey);
-
-			if (objectView == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchObjectViewException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(objectView);
-		}
-		catch (NoSuchObjectViewException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -978,39 +850,13 @@ public class ObjectViewPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ObjectViewImpl.class, objectViewModelImpl, false, true);
+		cacheUniqueFindersResult(objectView, false);
 
 		if (isNew) {
 			objectView.setNew(false);
 		}
 
 		objectView.resetOriginalValues();
-
-		return objectView;
-	}
-
-	/**
-	 * Returns the object view with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the object view
-	 * @return the object view
-	 * @throws NoSuchObjectViewException if a object view with the primary key could not be found
-	 */
-	@Override
-	public ObjectView findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchObjectViewException {
-
-		ObjectView objectView = fetchByPrimaryKey(primaryKey);
-
-		if (objectView == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchObjectViewException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return objectView;
 	}
@@ -1038,185 +884,6 @@ public class ObjectViewPersistenceImpl
 	@Override
 	public ObjectView fetchByPrimaryKey(long objectViewId) {
 		return fetchByPrimaryKey((Serializable)objectViewId);
-	}
-
-	/**
-	 * Returns all the object views.
-	 *
-	 * @return the object views
-	 */
-	@Override
-	public List<ObjectView> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the object views.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectViewModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object views
-	 * @param end the upper bound of the range of object views (not inclusive)
-	 * @return the range of object views
-	 */
-	@Override
-	public List<ObjectView> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the object views.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectViewModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object views
-	 * @param end the upper bound of the range of object views (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object views
-	 */
-	@Override
-	public List<ObjectView> findAll(
-		int start, int end, OrderByComparator<ObjectView> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the object views.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectViewModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object views
-	 * @param end the upper bound of the range of object views (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object views
-	 */
-	@Override
-	public List<ObjectView> findAll(
-		int start, int end, OrderByComparator<ObjectView> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ObjectView> list = null;
-
-		if (useFinderCache) {
-			list = (List<ObjectView>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_OBJECTVIEW);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_OBJECTVIEW;
-
-				sql = sql.concat(ObjectViewModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ObjectView>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the object views from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ObjectView objectView : findAll()) {
-			remove(objectView);
-		}
-	}
-
-	/**
-	 * Returns the number of object views.
-	 *
-	 * @return the number of object views
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_OBJECTVIEW);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -1249,21 +916,6 @@ public class ObjectViewPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1274,19 +926,19 @@ public class ObjectViewPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_OBJECTVIEW_WHERE, _SQL_COUNT_OBJECTVIEW_WHERE,
-			ObjectViewModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectViewModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"objectView.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, ObjectView::getUuid));
@@ -1303,12 +955,12 @@ public class ObjectViewPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1316,10 +968,10 @@ public class ObjectViewPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_OBJECTVIEW_WHERE,
 				_SQL_COUNT_OBJECTVIEW_WHERE, ObjectViewModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectView.", "uuid", FinderColumn.Type.STRING, "=", true,
-					false, ObjectView::getUuid),
+					true, ObjectView::getUuid),
 				new FinderColumn<>(
 					"objectView.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, ObjectView::getCompanyId));
@@ -1348,7 +1000,7 @@ public class ObjectViewPersistenceImpl
 				_finderPathWithoutPaginationFindByObjectDefinitionId,
 				_finderPathCountByObjectDefinitionId,
 				_SQL_SELECT_OBJECTVIEW_WHERE, _SQL_COUNT_OBJECTVIEW_WHERE,
-				ObjectViewModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ObjectViewModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectView.", "objectDefinitionId", FinderColumn.Type.LONG,
 					"=", true, true, ObjectView::getObjectDefinitionId));
@@ -1378,10 +1030,10 @@ public class ObjectViewPersistenceImpl
 				_finderPathWithoutPaginationFindByODI_DOV,
 				_finderPathCountByODI_DOV, _SQL_SELECT_OBJECTVIEW_WHERE,
 				_SQL_COUNT_OBJECTVIEW_WHERE, ObjectViewModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectView.", "objectDefinitionId", FinderColumn.Type.LONG,
-					"=", true, false, ObjectView::getObjectDefinitionId),
+					"=", true, true, ObjectView::getObjectDefinitionId),
 				new FinderColumn<>(
 					"objectView.", "defaultObjectView",
 					FinderColumn.Type.BOOLEAN, "=", true, true,
@@ -1429,28 +1081,20 @@ public class ObjectViewPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ObjectViewModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_OBJECTVIEW =
 		"SELECT objectView FROM ObjectView objectView";
 
 	private static final String _SQL_SELECT_OBJECTVIEW_WHERE =
 		"SELECT objectView FROM ObjectView objectView WHERE ";
 
-	private static final String _SQL_COUNT_OBJECTVIEW =
-		"SELECT COUNT(objectView) FROM ObjectView objectView";
-
 	private static final String _SQL_COUNT_OBJECTVIEW_WHERE =
 		"SELECT COUNT(objectView) FROM ObjectView objectView WHERE ";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS = "objectView.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ObjectView exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ObjectView exists with the key {";
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		ObjectViewPersistenceImpl.class);
 
 	private static final Set<String> _badColumnNames = SetUtil.fromArray(
 		new String[] {"uuid"});
@@ -1461,4 +1105,4 @@ public class ObjectViewPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:339670303
+// LIFERAY-SERVICE-BUILDER-HASH:873428106

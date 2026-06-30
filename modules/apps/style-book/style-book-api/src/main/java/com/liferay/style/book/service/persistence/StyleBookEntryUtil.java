@@ -36,6 +36,20 @@ public class StyleBookEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<StyleBookEntry> styleBookEntries) {
+		getPersistence().cacheResult(styleBookEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(StyleBookEntry styleBookEntry) {
+		getPersistence().cacheResult(styleBookEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -3026,24 +3040,6 @@ public class StyleBookEntryUtil {
 	}
 
 	/**
-	 * Caches the style book entry in the entity cache if it is enabled.
-	 *
-	 * @param styleBookEntry the style book entry
-	 */
-	public static void cacheResult(StyleBookEntry styleBookEntry) {
-		getPersistence().cacheResult(styleBookEntry);
-	}
-
-	/**
-	 * Caches the style book entries in the entity cache if it is enabled.
-	 *
-	 * @param styleBookEntries the style book entries
-	 */
-	public static void cacheResult(List<StyleBookEntry> styleBookEntries) {
-		getPersistence().cacheResult(styleBookEntries);
-	}
-
-	/**
 	 * Creates a new style book entry with the primary key. Does not add the style book entry to the database.
 	 *
 	 * @param styleBookEntryId the primary key for the new style book entry
@@ -3093,86 +3089,6 @@ public class StyleBookEntryUtil {
 		return getPersistence().fetchByPrimaryKey(styleBookEntryId);
 	}
 
-	/**
-	 * Returns all the style book entries.
-	 *
-	 * @return the style book entries
-	 */
-	public static List<StyleBookEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the style book entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.style.book.model.impl.StyleBookEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of style book entries
-	 * @param end the upper bound of the range of style book entries (not inclusive)
-	 * @return the range of style book entries
-	 */
-	public static List<StyleBookEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the style book entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.style.book.model.impl.StyleBookEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of style book entries
-	 * @param end the upper bound of the range of style book entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of style book entries
-	 */
-	public static List<StyleBookEntry> findAll(
-		int start, int end,
-		OrderByComparator<StyleBookEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the style book entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.style.book.model.impl.StyleBookEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of style book entries
-	 * @param end the upper bound of the range of style book entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of style book entries
-	 */
-	public static List<StyleBookEntry> findAll(
-		int start, int end, OrderByComparator<StyleBookEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the style book entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of style book entries.
-	 *
-	 * @return the number of style book entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static StyleBookEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -3184,4 +3100,4 @@ public class StyleBookEntryUtil {
 	private static volatile StyleBookEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1889865484
+// LIFERAY-SERVICE-BUILDER-HASH:-1158123414

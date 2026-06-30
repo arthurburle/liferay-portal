@@ -36,6 +36,20 @@ public class PatcherAccountUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<PatcherAccount> patcherAccounts) {
+		getPersistence().cacheResult(patcherAccounts);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(PatcherAccount patcherAccount) {
+		getPersistence().cacheResult(patcherAccount);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -560,24 +574,6 @@ public class PatcherAccountUtil {
 	}
 
 	/**
-	 * Caches the patcher account in the entity cache if it is enabled.
-	 *
-	 * @param patcherAccount the patcher account
-	 */
-	public static void cacheResult(PatcherAccount patcherAccount) {
-		getPersistence().cacheResult(patcherAccount);
-	}
-
-	/**
-	 * Caches the patcher accounts in the entity cache if it is enabled.
-	 *
-	 * @param patcherAccounts the patcher accounts
-	 */
-	public static void cacheResult(List<PatcherAccount> patcherAccounts) {
-		getPersistence().cacheResult(patcherAccounts);
-	}
-
-	/**
 	 * Creates a new patcher account with the primary key. Does not add the patcher account to the database.
 	 *
 	 * @param patcherAccountId the primary key for the new patcher account
@@ -625,86 +621,6 @@ public class PatcherAccountUtil {
 	 */
 	public static PatcherAccount fetchByPrimaryKey(long patcherAccountId) {
 		return getPersistence().fetchByPrimaryKey(patcherAccountId);
-	}
-
-	/**
-	 * Returns all the patcher accounts.
-	 *
-	 * @return the patcher accounts
-	 */
-	public static List<PatcherAccount> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the patcher accounts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.patcher.model.impl.PatcherAccountModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of patcher accounts
-	 * @param end the upper bound of the range of patcher accounts (not inclusive)
-	 * @return the range of patcher accounts
-	 */
-	public static List<PatcherAccount> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the patcher accounts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.patcher.model.impl.PatcherAccountModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of patcher accounts
-	 * @param end the upper bound of the range of patcher accounts (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of patcher accounts
-	 */
-	public static List<PatcherAccount> findAll(
-		int start, int end,
-		OrderByComparator<PatcherAccount> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the patcher accounts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.patcher.model.impl.PatcherAccountModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of patcher accounts
-	 * @param end the upper bound of the range of patcher accounts (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of patcher accounts
-	 */
-	public static List<PatcherAccount> findAll(
-		int start, int end, OrderByComparator<PatcherAccount> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the patcher accounts from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of patcher accounts.
-	 *
-	 * @return the number of patcher accounts
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
 	}
 
 	/**
@@ -934,4 +850,4 @@ public class PatcherAccountUtil {
 	private static volatile PatcherAccountPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1918219920
+// LIFERAY-SERVICE-BUILDER-HASH:803436155

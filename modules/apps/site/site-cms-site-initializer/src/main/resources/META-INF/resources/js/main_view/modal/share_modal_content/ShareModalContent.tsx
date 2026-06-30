@@ -14,7 +14,7 @@ import ClayPanel from '@clayui/panel';
 import ClaySticker from '@clayui/sticker';
 import {openToast} from 'frontend-js-components-web';
 import {sub} from 'frontend-js-web';
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 
 import ExpirationDateSelector, {
 	formatDateForView,
@@ -24,12 +24,17 @@ import PermissionSelector from './PermissionSelector';
 
 import '../../../../css/components/ShareModalContent.scss';
 import CollaboratorService from '../../../common/services/CollaboratorService';
-import {UserAccount, UserGroup} from '../../../common/types/UserAccount';
-
-const COLLABORATOR_TYPE = {
-	USER: 'User',
-	USER_GROUP: 'UserGroup',
-};
+import {
+	ExternalUser,
+	UserAccount,
+	UserGroup,
+} from '../../../common/types/UserAccount';
+import {
+	COLLABORATOR_TYPE,
+	CollaboratorType,
+	OBJECT_ENTRY_FOLDER_CLASS_NAME,
+} from '../../../common/utils/constants';
+import isEmailAddressValid from '../../../common/utils/isEmailAddressValid';
 
 export interface Collaborator {
 	actionIds: string;
@@ -37,8 +42,36 @@ export interface Collaborator {
 	error?: string;
 	share: boolean;
 	toBeShared?: boolean;
-	type: typeof COLLABORATOR_TYPE.USER | typeof COLLABORATOR_TYPE.USER_GROUP;
-	user: UserAccount | UserGroup;
+	type: CollaboratorType;
+	user: ExternalUser | UserAccount | UserGroup;
+}
+
+function CollaboratorStickerIcon({
+	type,
+	user,
+}: {
+	type: string;
+	user: ExternalUser | UserAccount | UserGroup;
+}) {
+	if (type === COLLABORATOR_TYPE.EXTERNAL_USER) {
+		return <ClayIcon symbol="envelope-closed" />;
+	}
+
+	if (type === COLLABORATOR_TYPE.USER_GROUP) {
+		return <ClayIcon symbol="users" />;
+	}
+
+	if ('image' in user && user.image) {
+		return (
+			<img
+				alt={user.name}
+				className="sticker-img"
+				src={(user as UserAccount).image}
+			/>
+		);
+	}
+
+	return <ClayIcon symbol="user" />;
 }
 
 function CollaboratorListItem({
@@ -47,6 +80,7 @@ function CollaboratorListItem({
 	dateExpired,
 	entryClassName,
 	error,
+	externalUserSharingEnabled = false,
 	onChangeUser,
 	onRemoveUser,
 	share,
@@ -59,16 +93,23 @@ function CollaboratorListItem({
 	dateExpired?: string;
 	entryClassName: string;
 	error?: string;
-	onChangeUser: (user: UserAccount | UserGroup, property: object) => void;
-	onRemoveUser: (user: UserAccount | UserGroup) => void;
+	externalUserSharingEnabled?: boolean;
+	onChangeUser: (
+		user: ExternalUser | UserAccount | UserGroup,
+		property: object
+	) => void;
+	onRemoveUser: (user: ExternalUser | UserAccount | UserGroup) => void;
 	share: boolean;
 	toBeShared?: boolean;
-	type: typeof COLLABORATOR_TYPE.USER | typeof COLLABORATOR_TYPE.USER_GROUP;
-	user: UserAccount | UserGroup;
+	type: CollaboratorType;
+	user: ExternalUser | UserAccount | UserGroup;
 }) {
 	const handleChangeUserProperties = (propertyObj: object) => {
 		onChangeUser(user, propertyObj);
 	};
+
+	const isExternalUser =
+		externalUserSharingEnabled && type === COLLABORATOR_TYPE.EXTERNAL_USER;
 
 	return (
 		<li
@@ -77,19 +118,7 @@ function CollaboratorListItem({
 		>
 			<div className="autofit-col pl-0">
 				<ClaySticker displayType="secondary" shape="circle" size="sm">
-					{type === COLLABORATOR_TYPE.USER ? (
-						'image' in user && user.image ? (
-							<img
-								alt={user.name}
-								className="sticker-img"
-								src={(user as UserAccount).image}
-							/>
-						) : (
-							<ClayIcon symbol="user" />
-						)
-					) : (
-						<ClayIcon symbol="users" />
-					)}
+					<CollaboratorStickerIcon type={type} user={user} />
 				</ClaySticker>
 			</div>
 
@@ -100,7 +129,17 @@ function CollaboratorListItem({
 							{user.name}
 						</span>
 
-						{toBeShared && (
+						{isExternalUser && (
+							<span className="inline-item inline-item-after label label-inverse-light">
+								<span className="label-item label-item-expand text-nowrap">
+									{toBeShared
+										? Liferay.Language.get('pending')
+										: Liferay.Language.get('invited')}
+								</span>
+							</span>
+						)}
+
+						{toBeShared && !isExternalUser && (
 							<span className="inline-item inline-item-after label label-inverse-light">
 								<span className="label-item label-item-expand text-nowrap">
 									{Liferay.Language.get('to-be-shared')}
@@ -113,6 +152,7 @@ function CollaboratorListItem({
 						<PermissionSelector
 							actionIds={actionIds}
 							entryClassName={entryClassName}
+							isExternalUser={isExternalUser}
 							onChange={handleChangeUserProperties}
 						/>
 					</div>
@@ -214,6 +254,7 @@ export default function ShareModalContent({
 	collaboratorURL = '',
 	creator,
 	entryClassName = '',
+	externalUserSharingEnabled = false,
 	initialCollaborators = [],
 	itemId,
 	title = '',
@@ -229,6 +270,7 @@ export default function ShareModalContent({
 		name: string;
 	};
 	entryClassName?: string;
+	externalUserSharingEnabled?: boolean;
 	initialCollaborators: Collaborator[];
 	itemId: number;
 	title: string;
@@ -236,8 +278,13 @@ export default function ShareModalContent({
 	const [autocompleteValue, setAutocompleteValue] = useState('');
 	const [autocompleteNetworkStatus, setAutocompleteNetworkStatus] =
 		useState(4);
-	const [collaborators, setCollaborators] =
-		useState<Collaborator[]>(initialCollaborators);
+	const [collaborators, setCollaborators] = useState<Collaborator[]>(
+		externalUserSharingEnabled
+			? initialCollaborators
+			: initialCollaborators.filter(
+					({type}) => type !== COLLABORATOR_TYPE.EXTERNAL_USER
+				)
+	);
 	const [loading, setLoading] = useState(false);
 
 	const {resource: users} = useResource({
@@ -254,7 +301,10 @@ export default function ShareModalContent({
 		variables: {search: autocompleteValue},
 	});
 
-	const handleAddUser = (user: UserAccount | UserGroup, type: string) => {
+	const handleAddUser = (
+		user: ExternalUser | UserAccount | UserGroup,
+		type: CollaboratorType
+	) => {
 		setCollaborators((collaborators) => {
 			return collaborators.every(
 				(collaborator) => collaborator.user.id !== user.id
@@ -276,7 +326,7 @@ export default function ShareModalContent({
 	};
 
 	const handleRemoveUser = async (
-		user: UserAccount | UserGroup
+		user: ExternalUser | UserAccount | UserGroup
 	): Promise<void> => {
 		setCollaborators((collaborator) =>
 			collaborator.filter(
@@ -286,7 +336,7 @@ export default function ShareModalContent({
 	};
 
 	const handleChangeUser = (
-		user: UserAccount | UserGroup,
+		user: ExternalUser | UserAccount | UserGroup,
 		property: object
 	) => {
 		setCollaborators((collaborator) =>
@@ -315,17 +365,25 @@ export default function ShareModalContent({
 		const {error} = await CollaboratorService.updateCollaborators(
 			collaboratorURL,
 			itemId,
-			collaborators.map(
-				({actionIds, dateExpired, share, type, user}) => ({
+			collaborators
+				.filter(
+					({type}) =>
+						externalUserSharingEnabled ||
+						type !== COLLABORATOR_TYPE.EXTERNAL_USER
+				)
+				.map(({actionIds, dateExpired, share, type, user}) => ({
 					actionIds: actionIds.split(','),
 					...(!!dateExpired && {
 						dateExpired: formatDateToISO(dateExpired),
 					}),
-					id: user.id,
+					...(type === COLLABORATOR_TYPE.EXTERNAL_USER
+						? {emailAddress: (user as ExternalUser).emailAddress}
+						: user.id
+							? {id: Number(user.id)}
+							: {}),
 					share,
 					type,
-				})
-			)
+				}))
 		);
 
 		setLoading(false);
@@ -356,6 +414,64 @@ export default function ShareModalContent({
 	const _isCollaboratorsUpdated = () =>
 		JSON.stringify(collaborators) !== JSON.stringify(initialCollaborators);
 
+	const _isFolder = entryClassName === OBJECT_ENTRY_FOLDER_CLASS_NAME;
+
+	const sourceItems = useMemo(() => {
+		const resultItems = users?.items?.length
+			? users.items.map((item: any) => {
+					if (
+						item.entryClassName?.includes(
+							COLLABORATOR_TYPE.USER_GROUP
+						)
+					) {
+						return {
+							type: COLLABORATOR_TYPE.USER_GROUP,
+							user: {
+								id: item.embedded.id.toString(),
+								name: item.embedded.name,
+							},
+						};
+					}
+
+					return {
+						type: COLLABORATOR_TYPE.USER,
+						user: {
+							emailAddress: item.embedded.emailAddress,
+							id: item.embedded.id.toString(),
+							image: item.embedded.image,
+							name: item.embedded.name,
+						},
+					};
+				})
+			: [];
+
+		const trimmedValue = autocompleteValue.trim();
+
+		const shouldOfferExternalUserInvite =
+			externalUserSharingEnabled &&
+			!_isFolder &&
+			isEmailAddressValid(trimmedValue) &&
+			!resultItems.some(
+				({user}: {user: {emailAddress?: string; id: string}}) =>
+					user.emailAddress?.toLowerCase() ===
+						trimmedValue.toLowerCase() ||
+					user.id.toLowerCase() === trimmedValue.toLowerCase()
+			);
+
+		if (shouldOfferExternalUserInvite) {
+			resultItems.push({
+				type: COLLABORATOR_TYPE.EXTERNAL_USER,
+				user: {
+					emailAddress: trimmedValue,
+					id: trimmedValue,
+					name: trimmedValue,
+				},
+			});
+		}
+
+		return resultItems;
+	}, [autocompleteValue, externalUserSharingEnabled, users, _isFolder]);
+
 	return (
 		<div className="share-modal-content">
 			<ClayModal.Header
@@ -379,51 +495,45 @@ export default function ShareModalContent({
 								items={[]}
 								loadingState={autocompleteNetworkStatus}
 								onChange={setAutocompleteValue}
+								onItemsChange={(items) => {
+									const lastItem = items[items.length - 1] as
+										| {
+												type: CollaboratorType;
+												user:
+													| ExternalUser
+													| UserAccount
+													| UserGroup;
+										  }
+										| undefined;
+
+									if (
+										lastItem?.type &&
+										lastItem.user &&
+										(externalUserSharingEnabled ||
+											lastItem.type !==
+												COLLABORATOR_TYPE.EXTERNAL_USER)
+									) {
+										handleAddUser(
+											lastItem.user,
+											lastItem.type
+										);
+									}
+								}}
 								placeholder={Liferay.Language.get(
 									'enter-name-email-or-groups'
 								)}
-								sourceItems={
-									users?.items?.length
-										? users.items?.map((item: any) => {
-												if (
-													item.entryClassName?.includes(
-														COLLABORATOR_TYPE.USER_GROUP
-													)
-												) {
-													return {
-														type: COLLABORATOR_TYPE.USER_GROUP,
-														user: {
-															id: item.embedded.id.toString(),
-															name: item.embedded
-																.name,
-														},
-													};
-												}
-
-												return {
-													type: COLLABORATOR_TYPE.USER,
-													user: {
-														emailAddress:
-															item.embedded
-																.emailAddress,
-														id: item.embedded.id.toString(),
-														image: item.embedded
-															.image,
-														name: item.embedded
-															.name,
-													},
-												};
-											})
-										: []
-								}
+								sourceItems={sourceItems}
 								value={autocompleteValue}
 							>
 								{({
 									type,
 									user,
 								}: {
-									type: string;
-									user: UserAccount | UserGroup;
+									type: CollaboratorType;
+									user:
+										| ExternalUser
+										| UserAccount
+										| UserGroup;
 								}) => (
 									<ClayMultiSelect.Item
 										key={`autocomplete-${type}-${user.id}`}
@@ -453,6 +563,9 @@ export default function ShareModalContent({
 														) : (
 															<ClayIcon symbol="user" />
 														)
+													) : type ===
+													  COLLABORATOR_TYPE.EXTERNAL_USER ? (
+														<ClayIcon symbol="envelope-closed" />
 													) : (
 														<ClayIcon symbol="users" />
 													)}
@@ -461,12 +574,30 @@ export default function ShareModalContent({
 
 											<div className="autofit-col">
 												<span className="text-weight-semibold">
-													<span className="c-mr-1">
-														{user.name}
-													</span>
+													{type ===
+													COLLABORATOR_TYPE.EXTERNAL_USER ? (
+														<>
+															<span className="c-mr-1">
+																{Liferay.Language.get(
+																	'invite-external-user'
+																)}
+															</span>
 
-													{'emailAddress' in user &&
-														`(${user.emailAddress})`}
+															<span className="text-secondary text-weight-normal">
+																{user.name}
+															</span>
+														</>
+													) : (
+														<>
+															<span className="c-mr-1">
+																{user.name}
+															</span>
+
+															{'emailAddress' in
+																user &&
+																`(${user.emailAddress})`}
+														</>
+													)}
 												</span>
 											</div>
 										</div>
@@ -503,6 +634,9 @@ export default function ShareModalContent({
 											canManageCollaborators
 										}
 										entryClassName={entryClassName}
+										externalUserSharingEnabled={
+											externalUserSharingEnabled
+										}
 										key={`listItem-${item.type}-${item.user.id}`}
 										onChangeUser={handleChangeUser}
 										onRemoveUser={handleRemoveUser}

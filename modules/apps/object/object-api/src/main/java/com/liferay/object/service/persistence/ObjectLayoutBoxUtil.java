@@ -36,6 +36,20 @@ public class ObjectLayoutBoxUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<ObjectLayoutBox> objectLayoutBoxes) {
+		getPersistence().cacheResult(objectLayoutBoxes);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(ObjectLayoutBox objectLayoutBox) {
+		getPersistence().cacheResult(objectLayoutBox);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -488,24 +502,6 @@ public class ObjectLayoutBoxUtil {
 	}
 
 	/**
-	 * Caches the object layout box in the entity cache if it is enabled.
-	 *
-	 * @param objectLayoutBox the object layout box
-	 */
-	public static void cacheResult(ObjectLayoutBox objectLayoutBox) {
-		getPersistence().cacheResult(objectLayoutBox);
-	}
-
-	/**
-	 * Caches the object layout boxes in the entity cache if it is enabled.
-	 *
-	 * @param objectLayoutBoxes the object layout boxes
-	 */
-	public static void cacheResult(List<ObjectLayoutBox> objectLayoutBoxes) {
-		getPersistence().cacheResult(objectLayoutBoxes);
-	}
-
-	/**
 	 * Creates a new object layout box with the primary key. Does not add the object layout box to the database.
 	 *
 	 * @param objectLayoutBoxId the primary key for the new object layout box
@@ -555,87 +551,6 @@ public class ObjectLayoutBoxUtil {
 		return getPersistence().fetchByPrimaryKey(objectLayoutBoxId);
 	}
 
-	/**
-	 * Returns all the object layout boxes.
-	 *
-	 * @return the object layout boxes
-	 */
-	public static List<ObjectLayoutBox> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the object layout boxes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectLayoutBoxModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object layout boxes
-	 * @param end the upper bound of the range of object layout boxes (not inclusive)
-	 * @return the range of object layout boxes
-	 */
-	public static List<ObjectLayoutBox> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the object layout boxes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectLayoutBoxModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object layout boxes
-	 * @param end the upper bound of the range of object layout boxes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object layout boxes
-	 */
-	public static List<ObjectLayoutBox> findAll(
-		int start, int end,
-		OrderByComparator<ObjectLayoutBox> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the object layout boxes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectLayoutBoxModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object layout boxes
-	 * @param end the upper bound of the range of object layout boxes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object layout boxes
-	 */
-	public static List<ObjectLayoutBox> findAll(
-		int start, int end,
-		OrderByComparator<ObjectLayoutBox> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the object layout boxes from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of object layout boxes.
-	 *
-	 * @return the number of object layout boxes
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static ObjectLayoutBoxPersistence getPersistence() {
 		return _persistence;
 	}
@@ -647,4 +562,4 @@ public class ObjectLayoutBoxUtil {
 	private static volatile ObjectLayoutBoxPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1182888472
+// LIFERAY-SERVICE-BUILDER-HASH:674588143

@@ -36,6 +36,20 @@ public class ConvertNullEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<ConvertNullEntry> convertNullEntries) {
+		getPersistence().cacheResult(convertNullEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(ConvertNullEntry convertNullEntry) {
+		getPersistence().cacheResult(convertNullEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -171,24 +185,6 @@ public class ConvertNullEntryUtil {
 	}
 
 	/**
-	 * Caches the convert null entry in the entity cache if it is enabled.
-	 *
-	 * @param convertNullEntry the convert null entry
-	 */
-	public static void cacheResult(ConvertNullEntry convertNullEntry) {
-		getPersistence().cacheResult(convertNullEntry);
-	}
-
-	/**
-	 * Caches the convert null entries in the entity cache if it is enabled.
-	 *
-	 * @param convertNullEntries the convert null entries
-	 */
-	public static void cacheResult(List<ConvertNullEntry> convertNullEntries) {
-		getPersistence().cacheResult(convertNullEntries);
-	}
-
-	/**
 	 * Creates a new convert null entry with the primary key. Does not add the convert null entry to the database.
 	 *
 	 * @param convertNullEntryId the primary key for the new convert null entry
@@ -242,87 +238,6 @@ public class ConvertNullEntryUtil {
 		return getPersistence().fetchByPrimaryKey(convertNullEntryId);
 	}
 
-	/**
-	 * Returns all the convert null entries.
-	 *
-	 * @return the convert null entries
-	 */
-	public static List<ConvertNullEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the convert null entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.ConvertNullEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of convert null entries
-	 * @param end the upper bound of the range of convert null entries (not inclusive)
-	 * @return the range of convert null entries
-	 */
-	public static List<ConvertNullEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the convert null entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.ConvertNullEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of convert null entries
-	 * @param end the upper bound of the range of convert null entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of convert null entries
-	 */
-	public static List<ConvertNullEntry> findAll(
-		int start, int end,
-		OrderByComparator<ConvertNullEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the convert null entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.ConvertNullEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of convert null entries
-	 * @param end the upper bound of the range of convert null entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of convert null entries
-	 */
-	public static List<ConvertNullEntry> findAll(
-		int start, int end,
-		OrderByComparator<ConvertNullEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the convert null entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of convert null entries.
-	 *
-	 * @return the number of convert null entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static ConvertNullEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -334,4 +249,4 @@ public class ConvertNullEntryUtil {
 	private static volatile ConvertNullEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:707892673
+// LIFERAY-SERVICE-BUILDER-HASH:-196204301

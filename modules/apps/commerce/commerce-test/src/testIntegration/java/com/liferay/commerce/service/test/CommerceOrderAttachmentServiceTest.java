@@ -38,9 +38,12 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+
+import java.io.ByteArrayInputStream;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -52,6 +55,7 @@ import org.junit.runner.RunWith;
 /**
  * @author Stefano Motta
  */
+@FeatureFlag("LPD-6252")
 @RunWith(Arquillian.class)
 public class CommerceOrderAttachmentServiceTest {
 
@@ -64,8 +68,7 @@ public class CommerceOrderAttachmentServiceTest {
 
 	@Before
 	public void setUp() throws Exception {
-		CommerceOrderAttachmentTestUtil.initialize(
-			CommerceOrderAttachmentServiceTest.class);
+		CommerceOrderAttachmentTestUtil.initialize(getClass());
 
 		_group = GroupTestUtil.addGroup();
 
@@ -108,7 +111,7 @@ public class CommerceOrderAttachmentServiceTest {
 				RandomTestUtil.nextDouble(), false,
 				RandomTestUtil.randomString(), _TYPE_KEY,
 				RandomTestUtil.randomString(),
-				getClass().getResourceAsStream("dependencies/attachment.txt"));
+				new ByteArrayInputStream("Liferay".getBytes()));
 
 			Assert.fail();
 		}
@@ -133,7 +136,7 @@ public class CommerceOrderAttachmentServiceTest {
 				RandomTestUtil.nextDouble(), false,
 				RandomTestUtil.randomString(), _TYPE_KEY,
 				RandomTestUtil.randomString(),
-				getClass().getResourceAsStream("dependencies/attachment.txt"));
+				new ByteArrayInputStream("Liferay".getBytes()));
 		}
 	}
 
@@ -364,7 +367,7 @@ public class CommerceOrderAttachmentServiceTest {
 			_commerceOrder.getCommerceOrderId(), RandomTestUtil.nextDouble(),
 			restricted, RandomTestUtil.randomString(), _TYPE_KEY,
 			RandomTestUtil.randomString(),
-			getClass().getResourceAsStream("dependencies/attachment.txt"));
+			new ByteArrayInputStream("Liferay".getBytes()));
 	}
 
 	private void _assertMessage(String actionKey, String message, long userId) {

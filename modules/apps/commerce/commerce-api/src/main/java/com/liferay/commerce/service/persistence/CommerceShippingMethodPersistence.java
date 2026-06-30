@@ -296,21 +296,6 @@ public interface CommerceShippingMethodPersistence
 	public int countByG_E(long groupId, String engineKey);
 
 	/**
-	 * Caches the commerce shipping method in the entity cache if it is enabled.
-	 *
-	 * @param commerceShippingMethod the commerce shipping method
-	 */
-	public void cacheResult(CommerceShippingMethod commerceShippingMethod);
-
-	/**
-	 * Caches the commerce shipping methods in the entity cache if it is enabled.
-	 *
-	 * @param commerceShippingMethods the commerce shipping methods
-	 */
-	public void cacheResult(
-		java.util.List<CommerceShippingMethod> commerceShippingMethods);
-
-	/**
 	 * Creates a new commerce shipping method with the primary key. Does not add the commerce shipping method to the database.
 	 *
 	 * @param commerceShippingMethodId the primary key for the new commerce shipping method
@@ -351,73 +336,5 @@ public interface CommerceShippingMethodPersistence
 	public CommerceShippingMethod fetchByPrimaryKey(
 		long commerceShippingMethodId);
 
-	/**
-	 * Returns all the commerce shipping methods.
-	 *
-	 * @return the commerce shipping methods
-	 */
-	public java.util.List<CommerceShippingMethod> findAll();
-
-	/**
-	 * Returns a range of all the commerce shipping methods.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceShippingMethodModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce shipping methods
-	 * @param end the upper bound of the range of commerce shipping methods (not inclusive)
-	 * @return the range of commerce shipping methods
-	 */
-	public java.util.List<CommerceShippingMethod> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce shipping methods.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceShippingMethodModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce shipping methods
-	 * @param end the upper bound of the range of commerce shipping methods (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce shipping methods
-	 */
-	public java.util.List<CommerceShippingMethod> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CommerceShippingMethod>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce shipping methods.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceShippingMethodModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce shipping methods
-	 * @param end the upper bound of the range of commerce shipping methods (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce shipping methods
-	 */
-	public java.util.List<CommerceShippingMethod> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CommerceShippingMethod>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce shipping methods from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce shipping methods.
-	 *
-	 * @return the number of commerce shipping methods
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-619199645
+// LIFERAY-SERVICE-BUILDER-HASH:1504894303

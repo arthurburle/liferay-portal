@@ -36,6 +36,20 @@ public class SiteFriendlyURLUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<SiteFriendlyURL> siteFriendlyURLs) {
+		getPersistence().cacheResult(siteFriendlyURLs);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(SiteFriendlyURL siteFriendlyURL) {
+		getPersistence().cacheResult(siteFriendlyURL);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -780,24 +794,6 @@ public class SiteFriendlyURLUtil {
 	}
 
 	/**
-	 * Caches the site friendly url in the entity cache if it is enabled.
-	 *
-	 * @param siteFriendlyURL the site friendly url
-	 */
-	public static void cacheResult(SiteFriendlyURL siteFriendlyURL) {
-		getPersistence().cacheResult(siteFriendlyURL);
-	}
-
-	/**
-	 * Caches the site friendly urls in the entity cache if it is enabled.
-	 *
-	 * @param siteFriendlyURLs the site friendly urls
-	 */
-	public static void cacheResult(List<SiteFriendlyURL> siteFriendlyURLs) {
-		getPersistence().cacheResult(siteFriendlyURLs);
-	}
-
-	/**
 	 * Creates a new site friendly url with the primary key. Does not add the site friendly url to the database.
 	 *
 	 * @param siteFriendlyURLId the primary key for the new site friendly url
@@ -847,87 +843,6 @@ public class SiteFriendlyURLUtil {
 		return getPersistence().fetchByPrimaryKey(siteFriendlyURLId);
 	}
 
-	/**
-	 * Returns all the site friendly urls.
-	 *
-	 * @return the site friendly urls
-	 */
-	public static List<SiteFriendlyURL> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the site friendly urls.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.site.model.impl.SiteFriendlyURLModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of site friendly urls
-	 * @param end the upper bound of the range of site friendly urls (not inclusive)
-	 * @return the range of site friendly urls
-	 */
-	public static List<SiteFriendlyURL> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the site friendly urls.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.site.model.impl.SiteFriendlyURLModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of site friendly urls
-	 * @param end the upper bound of the range of site friendly urls (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of site friendly urls
-	 */
-	public static List<SiteFriendlyURL> findAll(
-		int start, int end,
-		OrderByComparator<SiteFriendlyURL> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the site friendly urls.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.site.model.impl.SiteFriendlyURLModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of site friendly urls
-	 * @param end the upper bound of the range of site friendly urls (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of site friendly urls
-	 */
-	public static List<SiteFriendlyURL> findAll(
-		int start, int end,
-		OrderByComparator<SiteFriendlyURL> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the site friendly urls from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of site friendly urls.
-	 *
-	 * @return the number of site friendly urls
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static SiteFriendlyURLPersistence getPersistence() {
 		return _persistence;
 	}
@@ -939,4 +854,4 @@ public class SiteFriendlyURLUtil {
 	private static volatile SiteFriendlyURLPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1341464610
+// LIFERAY-SERVICE-BUILDER-HASH:-1355756693

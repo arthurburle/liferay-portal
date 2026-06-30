@@ -887,21 +887,6 @@ public interface DepotEntryGroupRelPersistence
 	public int countByTGI_T(long toGroupId, int type);
 
 	/**
-	 * Caches the depot entry group rel in the entity cache if it is enabled.
-	 *
-	 * @param depotEntryGroupRel the depot entry group rel
-	 */
-	public void cacheResult(DepotEntryGroupRel depotEntryGroupRel);
-
-	/**
-	 * Caches the depot entry group rels in the entity cache if it is enabled.
-	 *
-	 * @param depotEntryGroupRels the depot entry group rels
-	 */
-	public void cacheResult(
-		java.util.List<DepotEntryGroupRel> depotEntryGroupRels);
-
-	/**
 	 * Creates a new depot entry group rel with the primary key. Does not add the depot entry group rel to the database.
 	 *
 	 * @param depotEntryGroupRelId the primary key for the new depot entry group rel
@@ -939,73 +924,5 @@ public interface DepotEntryGroupRelPersistence
 	 */
 	public DepotEntryGroupRel fetchByPrimaryKey(long depotEntryGroupRelId);
 
-	/**
-	 * Returns all the depot entry group rels.
-	 *
-	 * @return the depot entry group rels
-	 */
-	public java.util.List<DepotEntryGroupRel> findAll();
-
-	/**
-	 * Returns a range of all the depot entry group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.depot.model.impl.DepotEntryGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of depot entry group rels
-	 * @param end the upper bound of the range of depot entry group rels (not inclusive)
-	 * @return the range of depot entry group rels
-	 */
-	public java.util.List<DepotEntryGroupRel> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the depot entry group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.depot.model.impl.DepotEntryGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of depot entry group rels
-	 * @param end the upper bound of the range of depot entry group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of depot entry group rels
-	 */
-	public java.util.List<DepotEntryGroupRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DepotEntryGroupRel>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the depot entry group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.depot.model.impl.DepotEntryGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of depot entry group rels
-	 * @param end the upper bound of the range of depot entry group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of depot entry group rels
-	 */
-	public java.util.List<DepotEntryGroupRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DepotEntryGroupRel>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the depot entry group rels from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of depot entry group rels.
-	 *
-	 * @return the number of depot entry group rels
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1281981095
+// LIFERAY-SERVICE-BUILDER-HASH:1040172196

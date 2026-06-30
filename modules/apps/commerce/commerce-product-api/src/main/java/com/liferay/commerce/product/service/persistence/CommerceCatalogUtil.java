@@ -36,6 +36,20 @@ public class CommerceCatalogUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<CommerceCatalog> commerceCatalogs) {
+		getPersistence().cacheResult(commerceCatalogs);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CommerceCatalog commerceCatalog) {
+		getPersistence().cacheResult(commerceCatalog);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1123,24 +1137,6 @@ public class CommerceCatalogUtil {
 	}
 
 	/**
-	 * Caches the commerce catalog in the entity cache if it is enabled.
-	 *
-	 * @param commerceCatalog the commerce catalog
-	 */
-	public static void cacheResult(CommerceCatalog commerceCatalog) {
-		getPersistence().cacheResult(commerceCatalog);
-	}
-
-	/**
-	 * Caches the commerce catalogs in the entity cache if it is enabled.
-	 *
-	 * @param commerceCatalogs the commerce catalogs
-	 */
-	public static void cacheResult(List<CommerceCatalog> commerceCatalogs) {
-		getPersistence().cacheResult(commerceCatalogs);
-	}
-
-	/**
 	 * Creates a new commerce catalog with the primary key. Does not add the commerce catalog to the database.
 	 *
 	 * @param commerceCatalogId the primary key for the new commerce catalog
@@ -1190,87 +1186,6 @@ public class CommerceCatalogUtil {
 		return getPersistence().fetchByPrimaryKey(commerceCatalogId);
 	}
 
-	/**
-	 * Returns all the commerce catalogs.
-	 *
-	 * @return the commerce catalogs
-	 */
-	public static List<CommerceCatalog> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce catalogs.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CommerceCatalogModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce catalogs
-	 * @param end the upper bound of the range of commerce catalogs (not inclusive)
-	 * @return the range of commerce catalogs
-	 */
-	public static List<CommerceCatalog> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce catalogs.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CommerceCatalogModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce catalogs
-	 * @param end the upper bound of the range of commerce catalogs (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce catalogs
-	 */
-	public static List<CommerceCatalog> findAll(
-		int start, int end,
-		OrderByComparator<CommerceCatalog> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce catalogs.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CommerceCatalogModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce catalogs
-	 * @param end the upper bound of the range of commerce catalogs (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce catalogs
-	 */
-	public static List<CommerceCatalog> findAll(
-		int start, int end,
-		OrderByComparator<CommerceCatalog> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce catalogs from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce catalogs.
-	 *
-	 * @return the number of commerce catalogs
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceCatalogPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1282,4 +1197,4 @@ public class CommerceCatalogUtil {
 	private static volatile CommerceCatalogPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-902384298
+// LIFERAY-SERVICE-BUILDER-HASH:-966963730

@@ -21,6 +21,7 @@ import {compose} from 'shared/hoc';
 import {connect, ConnectedProps} from 'react-redux';
 import {individualsListColumns} from 'shared/util/table-columns';
 import {isNil} from 'lodash';
+import {ProfileTypes} from 'segment/segment-editor/dynamic/utils/constants';
 import {Routes, toRoute} from 'shared/util/router';
 import {Sizes} from 'shared/util/constants';
 import {useCurrentUser} from 'shared/hooks/useCurrentUser';
@@ -50,9 +51,7 @@ const KnownIndividuals: React.FC<IKnownIndividualsProps> = () => {
 	});
 
 	const {data: dataSourceData, loading: dataSourceLoading} = useRequest({
-		dataSourceFn: API.dataSource.search as (params: {
-			[key: string]: any;
-		}) => Promise<any>,
+		dataSourceFn: API.dataSource.search,
 		variables: {
 			delta: 1,
 			groupId
@@ -170,6 +169,7 @@ const KnownIndividuals: React.FC<IKnownIndividualsProps> = () => {
 			groupId,
 			orderIOMap,
 			page,
+			profileTypes: [ProfileTypes.KNOWN],
 			query
 		}
 	});

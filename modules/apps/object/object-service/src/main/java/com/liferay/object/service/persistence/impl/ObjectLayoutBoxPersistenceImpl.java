@@ -13,27 +13,20 @@ import com.liferay.object.model.impl.ObjectLayoutBoxModelImpl;
 import com.liferay.object.service.persistence.ObjectLayoutBoxPersistence;
 import com.liferay.object.service.persistence.ObjectLayoutBoxUtil;
 import com.liferay.object.service.persistence.impl.constants.ObjectPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -68,7 +61,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ObjectLayoutBoxPersistence.class)
 public class ObjectLayoutBoxPersistenceImpl
-	extends BasePersistenceImpl<ObjectLayoutBox>
+	extends BasePersistenceImpl<ObjectLayoutBox, NoSuchObjectLayoutBoxException>
 	implements ObjectLayoutBoxPersistence {
 
 	/*
@@ -85,9 +78,6 @@ public class ObjectLayoutBoxPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -558,88 +548,6 @@ public class ObjectLayoutBoxPersistenceImpl
 	}
 
 	/**
-	 * Caches the object layout box in the entity cache if it is enabled.
-	 *
-	 * @param objectLayoutBox the object layout box
-	 */
-	@Override
-	public void cacheResult(ObjectLayoutBox objectLayoutBox) {
-		entityCache.putResult(
-			ObjectLayoutBoxImpl.class, objectLayoutBox.getPrimaryKey(),
-			objectLayoutBox);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the object layout boxes in the entity cache if it is enabled.
-	 *
-	 * @param objectLayoutBoxes the object layout boxes
-	 */
-	@Override
-	public void cacheResult(List<ObjectLayoutBox> objectLayoutBoxes) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (objectLayoutBoxes.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ObjectLayoutBox objectLayoutBox : objectLayoutBoxes) {
-			if (entityCache.getResult(
-					ObjectLayoutBoxImpl.class,
-					objectLayoutBox.getPrimaryKey()) == null) {
-
-				cacheResult(objectLayoutBox);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all object layout boxes.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ObjectLayoutBoxImpl.class);
-
-		finderCache.clearCache(ObjectLayoutBoxImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the object layout box.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ObjectLayoutBox objectLayoutBox) {
-		entityCache.removeResult(ObjectLayoutBoxImpl.class, objectLayoutBox);
-	}
-
-	@Override
-	public void clearCache(List<ObjectLayoutBox> objectLayoutBoxes) {
-		for (ObjectLayoutBox objectLayoutBox : objectLayoutBoxes) {
-			entityCache.removeResult(
-				ObjectLayoutBoxImpl.class, objectLayoutBox);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ObjectLayoutBoxImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(ObjectLayoutBoxImpl.class, primaryKey);
-		}
-	}
-
-	/**
 	 * Creates a new object layout box with the primary key. Does not add the object layout box to the database.
 	 *
 	 * @param objectLayoutBoxId the primary key for the new object layout box
@@ -673,47 +581,6 @@ public class ObjectLayoutBoxPersistenceImpl
 		throws NoSuchObjectLayoutBoxException {
 
 		return remove((Serializable)objectLayoutBoxId);
-	}
-
-	/**
-	 * Removes the object layout box with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the object layout box
-	 * @return the object layout box that was removed
-	 * @throws NoSuchObjectLayoutBoxException if a object layout box with the primary key could not be found
-	 */
-	@Override
-	public ObjectLayoutBox remove(Serializable primaryKey)
-		throws NoSuchObjectLayoutBoxException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ObjectLayoutBox objectLayoutBox = (ObjectLayoutBox)session.get(
-				ObjectLayoutBoxImpl.class, primaryKey);
-
-			if (objectLayoutBox == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchObjectLayoutBoxException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(objectLayoutBox);
-		}
-		catch (NoSuchObjectLayoutBoxException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -822,39 +689,13 @@ public class ObjectLayoutBoxPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ObjectLayoutBoxImpl.class, objectLayoutBoxModelImpl, false, true);
+		cacheUniqueFindersResult(objectLayoutBox, false);
 
 		if (isNew) {
 			objectLayoutBox.setNew(false);
 		}
 
 		objectLayoutBox.resetOriginalValues();
-
-		return objectLayoutBox;
-	}
-
-	/**
-	 * Returns the object layout box with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the object layout box
-	 * @return the object layout box
-	 * @throws NoSuchObjectLayoutBoxException if a object layout box with the primary key could not be found
-	 */
-	@Override
-	public ObjectLayoutBox findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchObjectLayoutBoxException {
-
-		ObjectLayoutBox objectLayoutBox = fetchByPrimaryKey(primaryKey);
-
-		if (objectLayoutBox == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchObjectLayoutBoxException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return objectLayoutBox;
 	}
@@ -882,187 +723,6 @@ public class ObjectLayoutBoxPersistenceImpl
 	@Override
 	public ObjectLayoutBox fetchByPrimaryKey(long objectLayoutBoxId) {
 		return fetchByPrimaryKey((Serializable)objectLayoutBoxId);
-	}
-
-	/**
-	 * Returns all the object layout boxes.
-	 *
-	 * @return the object layout boxes
-	 */
-	@Override
-	public List<ObjectLayoutBox> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the object layout boxes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectLayoutBoxModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object layout boxes
-	 * @param end the upper bound of the range of object layout boxes (not inclusive)
-	 * @return the range of object layout boxes
-	 */
-	@Override
-	public List<ObjectLayoutBox> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the object layout boxes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectLayoutBoxModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object layout boxes
-	 * @param end the upper bound of the range of object layout boxes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object layout boxes
-	 */
-	@Override
-	public List<ObjectLayoutBox> findAll(
-		int start, int end,
-		OrderByComparator<ObjectLayoutBox> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the object layout boxes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectLayoutBoxModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object layout boxes
-	 * @param end the upper bound of the range of object layout boxes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object layout boxes
-	 */
-	@Override
-	public List<ObjectLayoutBox> findAll(
-		int start, int end,
-		OrderByComparator<ObjectLayoutBox> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ObjectLayoutBox> list = null;
-
-		if (useFinderCache) {
-			list = (List<ObjectLayoutBox>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_OBJECTLAYOUTBOX);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_OBJECTLAYOUTBOX;
-
-				sql = sql.concat(ObjectLayoutBoxModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ObjectLayoutBox>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the object layout boxes from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ObjectLayoutBox objectLayoutBox : findAll()) {
-			remove(objectLayoutBox);
-		}
-	}
-
-	/**
-	 * Returns the number of object layout boxes.
-	 *
-	 * @return the number of object layout boxes
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_OBJECTLAYOUTBOX);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -1095,21 +755,6 @@ public class ObjectLayoutBoxPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1120,19 +765,19 @@ public class ObjectLayoutBoxPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_OBJECTLAYOUTBOX_WHERE, _SQL_COUNT_OBJECTLAYOUTBOX_WHERE,
-			ObjectLayoutBoxModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectLayoutBoxModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"objectLayoutBox.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, ObjectLayoutBox::getUuid));
@@ -1149,12 +794,12 @@ public class ObjectLayoutBoxPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1162,10 +807,11 @@ public class ObjectLayoutBoxPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_OBJECTLAYOUTBOX_WHERE,
 				_SQL_COUNT_OBJECTLAYOUTBOX_WHERE,
-				ObjectLayoutBoxModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ObjectLayoutBoxModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectLayoutBox.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, ObjectLayoutBox::getUuid),
+					true, true, ObjectLayoutBox::getUuid),
 				new FinderColumn<>(
 					"objectLayoutBox.", "companyId", FinderColumn.Type.LONG,
 					"=", true, true, ObjectLayoutBox::getCompanyId));
@@ -1195,7 +841,8 @@ public class ObjectLayoutBoxPersistenceImpl
 				_finderPathCountByObjectLayoutTabId,
 				_SQL_SELECT_OBJECTLAYOUTBOX_WHERE,
 				_SQL_COUNT_OBJECTLAYOUTBOX_WHERE,
-				ObjectLayoutBoxModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ObjectLayoutBoxModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectLayoutBox.", "objectLayoutTabId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1243,28 +890,20 @@ public class ObjectLayoutBoxPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ObjectLayoutBoxModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_OBJECTLAYOUTBOX =
 		"SELECT objectLayoutBox FROM ObjectLayoutBox objectLayoutBox";
 
 	private static final String _SQL_SELECT_OBJECTLAYOUTBOX_WHERE =
 		"SELECT objectLayoutBox FROM ObjectLayoutBox objectLayoutBox WHERE ";
 
-	private static final String _SQL_COUNT_OBJECTLAYOUTBOX =
-		"SELECT COUNT(objectLayoutBox) FROM ObjectLayoutBox objectLayoutBox";
-
 	private static final String _SQL_COUNT_OBJECTLAYOUTBOX_WHERE =
 		"SELECT COUNT(objectLayoutBox) FROM ObjectLayoutBox objectLayoutBox WHERE ";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS = "objectLayoutBox.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ObjectLayoutBox exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ObjectLayoutBox exists with the key {";
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		ObjectLayoutBoxPersistenceImpl.class);
 
 	private static final Set<String> _badColumnNames = SetUtil.fromArray(
 		new String[] {"uuid", "type"});
@@ -1275,4 +914,4 @@ public class ObjectLayoutBoxPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1890324602
+// LIFERAY-SERVICE-BUILDER-HASH:1617155789

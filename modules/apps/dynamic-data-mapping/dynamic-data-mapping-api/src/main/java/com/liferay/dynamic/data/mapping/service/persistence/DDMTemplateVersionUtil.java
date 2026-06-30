@@ -36,6 +36,22 @@ public class DDMTemplateVersionUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<DDMTemplateVersion> ddmTemplateVersions) {
+
+		getPersistence().cacheResult(ddmTemplateVersions);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(DDMTemplateVersion ddmTemplateVersion) {
+		getPersistence().cacheResult(ddmTemplateVersion);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -439,26 +455,6 @@ public class DDMTemplateVersionUtil {
 	}
 
 	/**
-	 * Caches the ddm template version in the entity cache if it is enabled.
-	 *
-	 * @param ddmTemplateVersion the ddm template version
-	 */
-	public static void cacheResult(DDMTemplateVersion ddmTemplateVersion) {
-		getPersistence().cacheResult(ddmTemplateVersion);
-	}
-
-	/**
-	 * Caches the ddm template versions in the entity cache if it is enabled.
-	 *
-	 * @param ddmTemplateVersions the ddm template versions
-	 */
-	public static void cacheResult(
-		List<DDMTemplateVersion> ddmTemplateVersions) {
-
-		getPersistence().cacheResult(ddmTemplateVersions);
-	}
-
-	/**
 	 * Creates a new ddm template version with the primary key. Does not add the ddm template version to the database.
 	 *
 	 * @param templateVersionId the primary key for the new ddm template version
@@ -512,87 +508,6 @@ public class DDMTemplateVersionUtil {
 		return getPersistence().fetchByPrimaryKey(templateVersionId);
 	}
 
-	/**
-	 * Returns all the ddm template versions.
-	 *
-	 * @return the ddm template versions
-	 */
-	public static List<DDMTemplateVersion> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the ddm template versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMTemplateVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm template versions
-	 * @param end the upper bound of the range of ddm template versions (not inclusive)
-	 * @return the range of ddm template versions
-	 */
-	public static List<DDMTemplateVersion> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm template versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMTemplateVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm template versions
-	 * @param end the upper bound of the range of ddm template versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm template versions
-	 */
-	public static List<DDMTemplateVersion> findAll(
-		int start, int end,
-		OrderByComparator<DDMTemplateVersion> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm template versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMTemplateVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm template versions
-	 * @param end the upper bound of the range of ddm template versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm template versions
-	 */
-	public static List<DDMTemplateVersion> findAll(
-		int start, int end,
-		OrderByComparator<DDMTemplateVersion> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the ddm template versions from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of ddm template versions.
-	 *
-	 * @return the number of ddm template versions
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static DDMTemplateVersionPersistence getPersistence() {
 		return _persistence;
 	}
@@ -606,4 +521,4 @@ public class DDMTemplateVersionUtil {
 	private static volatile DDMTemplateVersionPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1375762554
+// LIFERAY-SERVICE-BUILDER-HASH:-119572133

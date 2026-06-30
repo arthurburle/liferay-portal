@@ -322,24 +322,6 @@ public interface CommercePaymentMethodGroupRelQualifierPersistence
 		long classNameId, long classPK, long commercePaymentMethodGroupRelId);
 
 	/**
-	 * Caches the commerce payment method group rel qualifier in the entity cache if it is enabled.
-	 *
-	 * @param commercePaymentMethodGroupRelQualifier the commerce payment method group rel qualifier
-	 */
-	public void cacheResult(
-		CommercePaymentMethodGroupRelQualifier
-			commercePaymentMethodGroupRelQualifier);
-
-	/**
-	 * Caches the commerce payment method group rel qualifiers in the entity cache if it is enabled.
-	 *
-	 * @param commercePaymentMethodGroupRelQualifiers the commerce payment method group rel qualifiers
-	 */
-	public void cacheResult(
-		java.util.List<CommercePaymentMethodGroupRelQualifier>
-			commercePaymentMethodGroupRelQualifiers);
-
-	/**
 	 * Creates a new commerce payment method group rel qualifier with the primary key. Does not add the commerce payment method group rel qualifier to the database.
 	 *
 	 * @param commercePaymentMethodGroupRelQualifierId the primary key for the new commerce payment method group rel qualifier
@@ -383,74 +365,5 @@ public interface CommercePaymentMethodGroupRelQualifierPersistence
 	public CommercePaymentMethodGroupRelQualifier fetchByPrimaryKey(
 		long commercePaymentMethodGroupRelQualifierId);
 
-	/**
-	 * Returns all the commerce payment method group rel qualifiers.
-	 *
-	 * @return the commerce payment method group rel qualifiers
-	 */
-	public java.util.List<CommercePaymentMethodGroupRelQualifier> findAll();
-
-	/**
-	 * Returns a range of all the commerce payment method group rel qualifiers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.payment.model.impl.CommercePaymentMethodGroupRelQualifierModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce payment method group rel qualifiers
-	 * @param end the upper bound of the range of commerce payment method group rel qualifiers (not inclusive)
-	 * @return the range of commerce payment method group rel qualifiers
-	 */
-	public java.util.List<CommercePaymentMethodGroupRelQualifier> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce payment method group rel qualifiers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.payment.model.impl.CommercePaymentMethodGroupRelQualifierModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce payment method group rel qualifiers
-	 * @param end the upper bound of the range of commerce payment method group rel qualifiers (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce payment method group rel qualifiers
-	 */
-	public java.util.List<CommercePaymentMethodGroupRelQualifier> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommercePaymentMethodGroupRelQualifier> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce payment method group rel qualifiers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.payment.model.impl.CommercePaymentMethodGroupRelQualifierModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce payment method group rel qualifiers
-	 * @param end the upper bound of the range of commerce payment method group rel qualifiers (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce payment method group rel qualifiers
-	 */
-	public java.util.List<CommercePaymentMethodGroupRelQualifier> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommercePaymentMethodGroupRelQualifier> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce payment method group rel qualifiers from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce payment method group rel qualifiers.
-	 *
-	 * @return the number of commerce payment method group rel qualifiers
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-683445138
+// LIFERAY-SERVICE-BUILDER-HASH:237887464

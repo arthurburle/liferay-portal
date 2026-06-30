@@ -143,7 +143,7 @@ public class DLAppHelperLocalServiceImpl
 				DLFileEntryConstants.getClassName(), fileEntry.getFileEntryId(),
 				fileEntry.getUuid(), fileEntryTypeId, assetCategoryIds,
 				assetTagNames, true, false, null, null,
-				fileEntry.getDisplayDate(), fileEntry.getExpirationDate(),
+				_getPublishDate(fileEntry), fileEntry.getExpirationDate(),
 				fileEntry.getMimeType(), fileEntry.getTitle(),
 				fileEntry.getDescription(), null, null, null, 0, 0, null);
 		}
@@ -172,7 +172,7 @@ public class DLAppHelperLocalServiceImpl
 			fileEntry.getModifiedDate(), DLFileEntryConstants.getClassName(),
 			fileVersion.getFileVersionId(), fileEntry.getUuid(),
 			fileEntryTypeId, assetCategoryIds, assetTagNames, true, false, null,
-			null, fileEntry.getDisplayDate(), fileEntry.getExpirationDate(),
+			null, _getPublishDate(fileEntry), fileEntry.getExpirationDate(),
 			fileEntry.getMimeType(), fileEntry.getTitle(),
 			fileEntry.getDescription(), null, null, null, 0, 0, null);
 
@@ -527,7 +527,7 @@ public class DLAppHelperLocalServiceImpl
 			Date publishDate = null;
 
 			if (visible) {
-				publishDate = fileEntry.getDisplayDate();
+				publishDate = _getPublishDate(fileEntry);
 			}
 
 			assetEntry = _assetEntryLocalService.updateEntry(
@@ -717,7 +717,7 @@ public class DLAppHelperLocalServiceImpl
 								fileEntry.getFileEntryId(), fileEntry.getUuid(),
 								fileEntryTypeId, assetCategoryIds,
 								assetTagNames, true, true, null, null,
-								fileEntry.getDisplayDate(),
+								_getPublishDate(fileEntry),
 								fileEntry.getExpirationDate(),
 								draftAssetEntry.getMimeType(),
 								fileEntry.getTitle(),
@@ -740,7 +740,7 @@ public class DLAppHelperLocalServiceImpl
 				if (assetEntry != null) {
 					_assetEntryLocalService.updateEntry(
 						assetEntry.getClassName(), assetEntry.getClassPK(),
-						fileEntry.getDisplayDate(),
+						_getPublishDate(fileEntry),
 						assetEntry.getExpirationDate(), assetEntry.isListable(),
 						true);
 				}
@@ -903,6 +903,16 @@ public class DLAppHelperLocalServiceImpl
 
 		_ratingsStatsLocalService.deleteStats(
 			DLFileEntryConstants.getClassName(), fileEntryId);
+	}
+
+	private Date _getPublishDate(FileEntry fileEntry) {
+		Date displayDate = fileEntry.getDisplayDate();
+
+		if (displayDate == null) {
+			return fileEntry.getCreateDate();
+		}
+
+		return displayDate;
 	}
 
 	@BeanReference(type = AssetCategoryLocalService.class)

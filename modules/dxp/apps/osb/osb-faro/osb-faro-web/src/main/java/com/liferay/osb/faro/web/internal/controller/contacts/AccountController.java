@@ -6,15 +6,18 @@
 package com.liferay.osb.faro.web.internal.controller.contacts;
 
 import com.liferay.osb.faro.engine.client.model.Account;
+import com.liferay.osb.faro.engine.client.model.AccountLifecycleStatus;
 import com.liferay.osb.faro.engine.client.model.AccountMetric;
-import com.liferay.osb.faro.engine.client.model.Results;
+import com.liferay.osb.faro.engine.client.model.Individual;
 import com.liferay.osb.faro.engine.client.util.OrderByField;
 import com.liferay.osb.faro.web.internal.constants.FaroConstants;
 import com.liferay.osb.faro.web.internal.controller.BaseFaroController;
 import com.liferay.osb.faro.web.internal.controller.FaroController;
 import com.liferay.osb.faro.web.internal.model.display.FaroFDSResultsDisplay;
 import com.liferay.osb.faro.web.internal.model.display.FaroResultsDisplay;
+import com.liferay.osb.faro.web.internal.model.display.contacts.AccountDetailsDisplay;
 import com.liferay.osb.faro.web.internal.model.display.contacts.AccountDisplay;
+import com.liferay.osb.faro.web.internal.model.display.contacts.IndividualDisplay;
 import com.liferay.osb.faro.web.internal.param.FaroParam;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.RoleConstants;
@@ -31,8 +34,6 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -45,6 +46,18 @@ import org.osgi.service.component.annotations.Component;
 public class AccountController extends BaseFaroController {
 
 	@GET
+	@Path("/{id}/details")
+	@RolesAllowed(RoleConstants.SITE_MEMBER)
+	public AccountDetailsDisplay getAccountDetailsDisplay(
+			@PathParam("groupId") long groupId, @PathParam("id") String id)
+		throws Exception {
+
+		return new AccountDetailsDisplay(
+			contactsEngineClient.getAccountDetails(
+				faroProjectLocalService.getFaroProjectByGroupId(groupId), id));
+	}
+
+	@GET
 	@Path("/{id}")
 	@RolesAllowed(RoleConstants.SITE_MEMBER)
 	public AccountDisplay getAccountDisplay(
@@ -54,6 +67,36 @@ public class AccountController extends BaseFaroController {
 		return new AccountDisplay(
 			contactsEngineClient.getAccount(
 				faroProjectLocalService.getFaroProjectByGroupId(groupId), id));
+	}
+
+	@GET
+	@Path("/{id}/individuals")
+	@RolesAllowed(RoleConstants.SITE_MEMBER)
+	public FaroFDSResultsDisplay<Individual> getAccountIndividuals(
+			@PathParam("groupId") long groupId, @PathParam("id") String id,
+			@QueryParam("page") int page, @QueryParam("pageSize") int pageSize,
+			@DefaultValue(StringPool.BLANK) @QueryParam("sort") String
+				sortString)
+		throws Exception {
+
+		return new FaroFDSResultsDisplay<>(
+			contactsEngineClient.getAccountIndividuals(
+				faroProjectLocalService.getFaroProjectByGroupId(groupId), id,
+				page, pageSize, sortString),
+			IndividualDisplay::new, page, pageSize);
+	}
+
+	@GET
+	@Path("/{id}/account-lifecycles/{accountLifecycleId}")
+	@RolesAllowed(RoleConstants.SITE_MEMBER)
+	public AccountLifecycleStatus getAccountLifecycleStatus(
+			@PathParam("groupId") long groupId, @PathParam("id") String id,
+			@PathParam("accountLifecycleId") String accountLifecycleId)
+		throws Exception {
+
+		return contactsEngineClient.getAccountLifecycleStatus(
+			faroProjectLocalService.getFaroProjectByGroupId(groupId),
+			accountLifecycleId, id);
 	}
 
 	@GET
@@ -100,7 +143,7 @@ public class AccountController extends BaseFaroController {
 	@GET
 	@Path("/search")
 	@RolesAllowed(RoleConstants.SITE_MEMBER)
-	public FaroFDSResultsDisplay search(
+	public FaroFDSResultsDisplay<Account> search(
 			@PathParam("groupId") long groupId,
 			@QueryParam("channelId") String channelId,
 			@QueryParam("filter") String filterString,
@@ -110,13 +153,11 @@ public class AccountController extends BaseFaroController {
 				sortString)
 		throws Exception {
 
-		Results<Account> results = contactsEngineClient.getAccounts(
-			faroProjectLocalService.getFaroProjectByGroupId(groupId), channelId,
-			filterString, search, page, pageSize, sortString);
-
-		Function<Account, AccountDisplay> function = AccountDisplay::new;
-
-		return new FaroFDSResultsDisplay(results, function, page, pageSize);
+		return new FaroFDSResultsDisplay<>(
+			contactsEngineClient.getAccounts(
+				faroProjectLocalService.getFaroProjectByGroupId(groupId),
+				channelId, filterString, search, page, pageSize, sortString),
+			AccountDisplay::new, page, pageSize);
 	}
 
 	@GET
@@ -130,14 +171,12 @@ public class AccountController extends BaseFaroController {
 			@QueryParam("pageSize") int pageSize)
 		throws Exception {
 
-		Results<Object> results = contactsEngineClient.getAccountFieldValues(
-			faroProjectLocalService.getFaroProjectByGroupId(groupId), channelId,
-			fieldMappingFieldName, query, page, pageSize);
-
-		Function<Object, Map<String, String>> function =
-			object -> Collections.singletonMap("name", String.valueOf(object));
-
-		return new FaroFDSResultsDisplay<>(results, function, page, pageSize);
+		return new FaroFDSResultsDisplay<>(
+			contactsEngineClient.getAccountFieldValues(
+				faroProjectLocalService.getFaroProjectByGroupId(groupId),
+				channelId, fieldMappingFieldName, query, page, pageSize),
+			object -> Collections.singletonMap("name", String.valueOf(object)),
+			page, pageSize);
 	}
 
 	@GET

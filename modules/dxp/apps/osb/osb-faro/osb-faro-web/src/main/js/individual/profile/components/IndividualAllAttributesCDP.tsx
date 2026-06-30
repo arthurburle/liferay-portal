@@ -11,7 +11,7 @@ import {
 	SourceCell
 } from 'shared/components/table/cell-components';
 import {formatDateToTimeZone} from 'shared/util/date';
-import {SectionHeader} from './SectionHeader';
+import {SectionHeader} from 'shared/components/SectionHeader';
 import {useQueryParams} from 'shared/hooks/useQueryParams';
 import {useRequest} from 'shared/hooks/useRequest';
 import {withEmpty} from 'cerebro-shared/hocs/utils';
@@ -96,9 +96,7 @@ const IndividualDetailsCDP = ({
 	const {query} = useQueryParams();
 
 	const response = useRequest({
-		dataSourceFn: API.individuals.fetchDetails as (params: {
-			[key: string]: any;
-		}) => Promise<any>,
+		dataSourceFn: API.individuals.fetchDetails,
 		variables: {groupId, individualId}
 	});
 

@@ -36,6 +36,20 @@ public class AccountGroupRelUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<AccountGroupRel> accountGroupRels) {
+		getPersistence().cacheResult(accountGroupRels);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(AccountGroupRel accountGroupRel) {
+		getPersistence().cacheResult(accountGroupRel);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -586,24 +600,6 @@ public class AccountGroupRelUtil {
 	}
 
 	/**
-	 * Caches the account group rel in the entity cache if it is enabled.
-	 *
-	 * @param accountGroupRel the account group rel
-	 */
-	public static void cacheResult(AccountGroupRel accountGroupRel) {
-		getPersistence().cacheResult(accountGroupRel);
-	}
-
-	/**
-	 * Caches the account group rels in the entity cache if it is enabled.
-	 *
-	 * @param accountGroupRels the account group rels
-	 */
-	public static void cacheResult(List<AccountGroupRel> accountGroupRels) {
-		getPersistence().cacheResult(accountGroupRels);
-	}
-
-	/**
 	 * Creates a new account group rel with the primary key. Does not add the account group rel to the database.
 	 *
 	 * @param accountGroupRelId the primary key for the new account group rel
@@ -653,87 +649,6 @@ public class AccountGroupRelUtil {
 		return getPersistence().fetchByPrimaryKey(accountGroupRelId);
 	}
 
-	/**
-	 * Returns all the account group rels.
-	 *
-	 * @return the account group rels
-	 */
-	public static List<AccountGroupRel> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the account group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.account.model.impl.AccountGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of account group rels
-	 * @param end the upper bound of the range of account group rels (not inclusive)
-	 * @return the range of account group rels
-	 */
-	public static List<AccountGroupRel> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the account group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.account.model.impl.AccountGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of account group rels
-	 * @param end the upper bound of the range of account group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of account group rels
-	 */
-	public static List<AccountGroupRel> findAll(
-		int start, int end,
-		OrderByComparator<AccountGroupRel> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the account group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.account.model.impl.AccountGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of account group rels
-	 * @param end the upper bound of the range of account group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of account group rels
-	 */
-	public static List<AccountGroupRel> findAll(
-		int start, int end,
-		OrderByComparator<AccountGroupRel> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the account group rels from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of account group rels.
-	 *
-	 * @return the number of account group rels
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static AccountGroupRelPersistence getPersistence() {
 		return _persistence;
 	}
@@ -745,4 +660,4 @@ public class AccountGroupRelUtil {
 	private static volatile AccountGroupRelPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:810885256
+// LIFERAY-SERVICE-BUILDER-HASH:1994586925

@@ -554,20 +554,6 @@ public interface CPTaxCategoryPersistence
 	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
-	 * Caches the cp tax category in the entity cache if it is enabled.
-	 *
-	 * @param cpTaxCategory the cp tax category
-	 */
-	public void cacheResult(CPTaxCategory cpTaxCategory);
-
-	/**
-	 * Caches the cp tax categories in the entity cache if it is enabled.
-	 *
-	 * @param cpTaxCategories the cp tax categories
-	 */
-	public void cacheResult(java.util.List<CPTaxCategory> cpTaxCategories);
-
-	/**
 	 * Creates a new cp tax category with the primary key. Does not add the cp tax category to the database.
 	 *
 	 * @param CPTaxCategoryId the primary key for the new cp tax category
@@ -605,73 +591,5 @@ public interface CPTaxCategoryPersistence
 	 */
 	public CPTaxCategory fetchByPrimaryKey(long CPTaxCategoryId);
 
-	/**
-	 * Returns all the cp tax categories.
-	 *
-	 * @return the cp tax categories
-	 */
-	public java.util.List<CPTaxCategory> findAll();
-
-	/**
-	 * Returns a range of all the cp tax categories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPTaxCategoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp tax categories
-	 * @param end the upper bound of the range of cp tax categories (not inclusive)
-	 * @return the range of cp tax categories
-	 */
-	public java.util.List<CPTaxCategory> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the cp tax categories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPTaxCategoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp tax categories
-	 * @param end the upper bound of the range of cp tax categories (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cp tax categories
-	 */
-	public java.util.List<CPTaxCategory> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CPTaxCategory>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the cp tax categories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPTaxCategoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp tax categories
-	 * @param end the upper bound of the range of cp tax categories (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cp tax categories
-	 */
-	public java.util.List<CPTaxCategory> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CPTaxCategory>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the cp tax categories from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of cp tax categories.
-	 *
-	 * @return the number of cp tax categories
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1647024170
+// LIFERAY-SERVICE-BUILDER-HASH:1027148412

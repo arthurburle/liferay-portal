@@ -19,8 +19,6 @@ import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
-import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -34,6 +32,7 @@ import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
+import com.liferay.portal.kernel.service.persistence.impl.ArrayableFinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
@@ -42,11 +41,8 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 
@@ -80,7 +76,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = LaunchSetPersistence.class)
 public class LaunchSetPersistenceImpl
-	extends BasePersistenceImpl<LaunchSet> implements LaunchSetPersistence {
+	extends BasePersistenceImpl<LaunchSet, NoSuchLaunchSetException>
+	implements LaunchSetPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -96,9 +93,6 @@ public class LaunchSetPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -702,7 +696,8 @@ public class LaunchSetPersistenceImpl
 	private FinderPath _finderPathWithPaginationFindByC_S;
 	private FinderPath _finderPathWithoutPaginationFindByC_S;
 	private FinderPath _finderPathCountByC_S;
-	private FinderPath _finderPathWithPaginationCountByC_S;
+	private CollectionPersistenceFinder<LaunchSet>
+		_collectionPersistenceFinderByC_S;
 
 	/**
 	 * Returns all the launch sets where companyId = &#63; and status = &#63;.
@@ -781,101 +776,9 @@ public class LaunchSetPersistenceImpl
 		OrderByComparator<LaunchSet> orderByComparator,
 		boolean useFinderCache) {
 
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindByC_S;
-				finderArgs = new Object[] {companyId, status};
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindByC_S;
-			finderArgs = new Object[] {
-				companyId, status, start, end, orderByComparator
-			};
-		}
-
-		List<LaunchSet> list = null;
-
-		if (useFinderCache) {
-			list = (List<LaunchSet>)finderCache.getResult(
-				finderPath, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (LaunchSet launchSet : list) {
-					if ((companyId != launchSet.getCompanyId()) ||
-						(status != launchSet.getStatus())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					4 + (orderByComparator.getOrderByFields().length * 2));
-			}
-			else {
-				sb = new StringBundler(4);
-			}
-
-			sb.append(_SQL_SELECT_LAUNCHSET_WHERE);
-
-			sb.append(_FINDER_COLUMN_C_S_COMPANYID_2);
-
-			sb.append(_FINDER_COLUMN_C_S_STATUS_2);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(LaunchSetModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(companyId);
-
-				queryPos.add(status);
-
-				list = (List<LaunchSet>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByC_S.find(
+			finderCache, new Object[] {companyId, new int[] {status}}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -928,14 +831,9 @@ public class LaunchSetPersistenceImpl
 		long companyId, int status,
 		OrderByComparator<LaunchSet> orderByComparator) {
 
-		List<LaunchSet> list = findByC_S(
-			companyId, status, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByC_S.fetchFirst(
+			finderCache, new Object[] {companyId, new int[] {status}},
+			orderByComparator);
 	}
 
 	/**
@@ -1019,117 +917,10 @@ public class LaunchSetPersistenceImpl
 		OrderByComparator<LaunchSet> orderByComparator,
 		boolean useFinderCache) {
 
-		if (statuses == null) {
-			statuses = new int[0];
-		}
-		else if (statuses.length > 1) {
-			statuses = ArrayUtil.sortedUnique(statuses);
-		}
-
-		if (statuses.length == 1) {
-			return findByC_S(
-				companyId, statuses[0], start, end, orderByComparator);
-		}
-
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderArgs = new Object[] {
-					companyId, StringUtil.merge(statuses)
-				};
-			}
-		}
-		else if (useFinderCache) {
-			finderArgs = new Object[] {
-				companyId, StringUtil.merge(statuses), start, end,
-				orderByComparator
-			};
-		}
-
-		List<LaunchSet> list = null;
-
-		if (useFinderCache) {
-			list = (List<LaunchSet>)finderCache.getResult(
-				_finderPathWithPaginationFindByC_S, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (LaunchSet launchSet : list) {
-					if ((companyId != launchSet.getCompanyId()) ||
-						!ArrayUtil.contains(statuses, launchSet.getStatus())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_SELECT_LAUNCHSET_WHERE);
-
-			sb.append(_FINDER_COLUMN_C_S_COMPANYID_2);
-
-			if (statuses.length > 0) {
-				sb.append("(");
-
-				sb.append(_FINDER_COLUMN_C_S_STATUS_7);
-
-				sb.append(StringUtil.merge(statuses));
-
-				sb.append(")");
-
-				sb.append(")");
-			}
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(LaunchSetModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(companyId);
-
-				list = (List<LaunchSet>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(
-						_finderPathWithPaginationFindByC_S, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByC_S.find(
+			finderCache,
+			new Object[] {companyId, ArrayUtil.sortedUnique(statuses)}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1140,13 +931,8 @@ public class LaunchSetPersistenceImpl
 	 */
 	@Override
 	public void removeByC_S(long companyId, int status) {
-		for (LaunchSet launchSet :
-				findByC_S(
-					companyId, status, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					null)) {
-
-			remove(launchSet);
-		}
+		_collectionPersistenceFinderByC_S.remove(
+			finderCache, new Object[] {companyId, new int[] {status}});
 	}
 
 	/**
@@ -1158,49 +944,8 @@ public class LaunchSetPersistenceImpl
 	 */
 	@Override
 	public int countByC_S(long companyId, int status) {
-		FinderPath finderPath = _finderPathCountByC_S;
-
-		Object[] finderArgs = new Object[] {companyId, status};
-
-		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler(3);
-
-			sb.append(_SQL_COUNT_LAUNCHSET_WHERE);
-
-			sb.append(_FINDER_COLUMN_C_S_COMPANYID_2);
-
-			sb.append(_FINDER_COLUMN_C_S_STATUS_2);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(companyId);
-
-				queryPos.add(status);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(finderPath, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByC_S.count(
+			finderCache, new Object[] {companyId, new int[] {status}});
 	}
 
 	/**
@@ -1212,79 +957,10 @@ public class LaunchSetPersistenceImpl
 	 */
 	@Override
 	public int countByC_S(long companyId, int[] statuses) {
-		if (statuses == null) {
-			statuses = new int[0];
-		}
-		else if (statuses.length > 1) {
-			statuses = ArrayUtil.sortedUnique(statuses);
-		}
-
-		Object[] finderArgs = new Object[] {
-			companyId, StringUtil.merge(statuses)
-		};
-
-		Long count = (Long)finderCache.getResult(
-			_finderPathWithPaginationCountByC_S, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_COUNT_LAUNCHSET_WHERE);
-
-			sb.append(_FINDER_COLUMN_C_S_COMPANYID_2);
-
-			if (statuses.length > 0) {
-				sb.append("(");
-
-				sb.append(_FINDER_COLUMN_C_S_STATUS_7);
-
-				sb.append(StringUtil.merge(statuses));
-
-				sb.append(")");
-
-				sb.append(")");
-			}
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(companyId);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathWithPaginationCountByC_S, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByC_S.count(
+			finderCache,
+			new Object[] {companyId, ArrayUtil.sortedUnique(statuses)});
 	}
-
-	private static final String _FINDER_COLUMN_C_S_COMPANYID_2 =
-		"launchSet.companyId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_S_STATUS_2 =
-		"launchSet.status = ?";
-
-	private static final String _FINDER_COLUMN_C_S_STATUS_7 =
-		"launchSet.status IN (";
 
 	private FinderPath _finderPathFetchByERC_C;
 	private UniquePersistenceFinder<LaunchSet> _uniquePersistenceFinderByERC_C;
@@ -1395,103 +1071,6 @@ public class LaunchSetPersistenceImpl
 	}
 
 	/**
-	 * Caches the launch set in the entity cache if it is enabled.
-	 *
-	 * @param launchSet the launch set
-	 */
-	@Override
-	public void cacheResult(LaunchSet launchSet) {
-		entityCache.putResult(
-			LaunchSetImpl.class, launchSet.getPrimaryKey(), launchSet);
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C,
-			new Object[] {
-				launchSet.getExternalReferenceCode(), launchSet.getCompanyId()
-			},
-			launchSet);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the launch sets in the entity cache if it is enabled.
-	 *
-	 * @param launchSets the launch sets
-	 */
-	@Override
-	public void cacheResult(List<LaunchSet> launchSets) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (launchSets.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (LaunchSet launchSet : launchSets) {
-			if (entityCache.getResult(
-					LaunchSetImpl.class, launchSet.getPrimaryKey()) == null) {
-
-				cacheResult(launchSet);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all launch sets.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(LaunchSetImpl.class);
-
-		finderCache.clearCache(LaunchSetImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the launch set.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(LaunchSet launchSet) {
-		entityCache.removeResult(LaunchSetImpl.class, launchSet);
-	}
-
-	@Override
-	public void clearCache(List<LaunchSet> launchSets) {
-		for (LaunchSet launchSet : launchSets) {
-			entityCache.removeResult(LaunchSetImpl.class, launchSet);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(LaunchSetImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(LaunchSetImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		LaunchSetModelImpl launchSetModelImpl) {
-
-		Object[] args = new Object[] {
-			launchSetModelImpl.getExternalReferenceCode(),
-			launchSetModelImpl.getCompanyId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C, args, launchSetModelImpl);
-	}
-
-	/**
 	 * Creates a new launch set with the primary key. Does not add the launch set to the database.
 	 *
 	 * @param launchSetId the primary key for the new launch set
@@ -1523,47 +1102,6 @@ public class LaunchSetPersistenceImpl
 	@Override
 	public LaunchSet remove(long launchSetId) throws NoSuchLaunchSetException {
 		return remove((Serializable)launchSetId);
-	}
-
-	/**
-	 * Removes the launch set with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the launch set
-	 * @return the launch set that was removed
-	 * @throws NoSuchLaunchSetException if a launch set with the primary key could not be found
-	 */
-	@Override
-	public LaunchSet remove(Serializable primaryKey)
-		throws NoSuchLaunchSetException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			LaunchSet launchSet = (LaunchSet)session.get(
-				LaunchSetImpl.class, primaryKey);
-
-			if (launchSet == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchLaunchSetException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(launchSet);
-		}
-		catch (NoSuchLaunchSetException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1727,41 +1265,13 @@ public class LaunchSetPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			LaunchSetImpl.class, launchSetModelImpl, false, true);
-
-		cacheUniqueFindersCache(launchSetModelImpl);
+		cacheUniqueFindersResult(launchSet, false);
 
 		if (isNew) {
 			launchSet.setNew(false);
 		}
 
 		launchSet.resetOriginalValues();
-
-		return launchSet;
-	}
-
-	/**
-	 * Returns the launch set with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the launch set
-	 * @return the launch set
-	 * @throws NoSuchLaunchSetException if a launch set with the primary key could not be found
-	 */
-	@Override
-	public LaunchSet findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchLaunchSetException {
-
-		LaunchSet launchSet = fetchByPrimaryKey(primaryKey);
-
-		if (launchSet == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchLaunchSetException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return launchSet;
 	}
@@ -1789,185 +1299,6 @@ public class LaunchSetPersistenceImpl
 	@Override
 	public LaunchSet fetchByPrimaryKey(long launchSetId) {
 		return fetchByPrimaryKey((Serializable)launchSetId);
-	}
-
-	/**
-	 * Returns all the launch sets.
-	 *
-	 * @return the launch sets
-	 */
-	@Override
-	public List<LaunchSet> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the launch sets.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LaunchSetModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of launch sets
-	 * @param end the upper bound of the range of launch sets (not inclusive)
-	 * @return the range of launch sets
-	 */
-	@Override
-	public List<LaunchSet> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the launch sets.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LaunchSetModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of launch sets
-	 * @param end the upper bound of the range of launch sets (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of launch sets
-	 */
-	@Override
-	public List<LaunchSet> findAll(
-		int start, int end, OrderByComparator<LaunchSet> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the launch sets.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LaunchSetModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of launch sets
-	 * @param end the upper bound of the range of launch sets (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of launch sets
-	 */
-	@Override
-	public List<LaunchSet> findAll(
-		int start, int end, OrderByComparator<LaunchSet> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<LaunchSet> list = null;
-
-		if (useFinderCache) {
-			list = (List<LaunchSet>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_LAUNCHSET);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_LAUNCHSET;
-
-				sql = sql.concat(LaunchSetModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<LaunchSet>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the launch sets from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (LaunchSet launchSet : findAll()) {
-			remove(launchSet);
-		}
-	}
-
-	/**
-	 * Returns the number of launch sets.
-	 *
-	 * @return the number of launch sets
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_LAUNCHSET);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -2000,21 +1331,6 @@ public class LaunchSetPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -2025,19 +1341,19 @@ public class LaunchSetPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_LAUNCHSET_WHERE, _SQL_COUNT_LAUNCHSET_WHERE,
-			LaunchSetModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			LaunchSetModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"launchSet.", "uuid", FinderColumn.Type.STRING, "=", true, true,
 				LaunchSet::getUuid));
@@ -2054,12 +1370,12 @@ public class LaunchSetPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -2067,10 +1383,10 @@ public class LaunchSetPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_LAUNCHSET_WHERE,
 				_SQL_COUNT_LAUNCHSET_WHERE, LaunchSetModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"launchSet.", "uuid", FinderColumn.Type.STRING, "=", true,
-					false, LaunchSet::getUuid),
+					true, LaunchSet::getUuid),
 				new FinderColumn<>(
 					"launchSet.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, LaunchSet::getCompanyId));
@@ -2099,7 +1415,7 @@ public class LaunchSetPersistenceImpl
 				_finderPathWithoutPaginationFindByCompanyId,
 				_finderPathCountByCompanyId, _SQL_SELECT_LAUNCHSET_WHERE,
 				_SQL_COUNT_LAUNCHSET_WHERE, LaunchSetModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"launchSet.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, LaunchSet::getCompanyId));
@@ -2127,10 +1443,10 @@ public class LaunchSetPersistenceImpl
 			this, _finderPathWithPaginationFindByC_U,
 			_finderPathWithoutPaginationFindByC_U, _finderPathCountByC_U,
 			_SQL_SELECT_LAUNCHSET_WHERE, _SQL_COUNT_LAUNCHSET_WHERE,
-			LaunchSetModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			LaunchSetModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"launchSet.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, LaunchSet::getCompanyId),
+				true, LaunchSet::getCompanyId),
 			new FinderColumn<>(
 				"launchSet.", "userId", FinderColumn.Type.LONG, "=", true, true,
 				LaunchSet::getUserId));
@@ -2150,25 +1466,34 @@ public class LaunchSetPersistenceImpl
 			new String[] {"companyId", "status"}, true);
 
 		_finderPathCountByC_S = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_S",
-			new String[] {Long.class.getName(), Integer.class.getName()},
-			new String[] {"companyId", "status"}, false);
-
-		_finderPathWithPaginationCountByC_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByC_S",
 			new String[] {Long.class.getName(), Integer.class.getName()},
 			new String[] {"companyId", "status"}, false);
 
-		_finderPathFetchByERC_C = new FinderPath(
+		_collectionPersistenceFinderByC_S = new CollectionPersistenceFinder<>(
+			this, _finderPathWithPaginationFindByC_S,
+			_finderPathWithoutPaginationFindByC_S, _finderPathCountByC_S,
+			_SQL_SELECT_LAUNCHSET_WHERE, _SQL_COUNT_LAUNCHSET_WHERE,
+			LaunchSetModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+			new FinderColumn<>(
+				"launchSet.", "companyId", FinderColumn.Type.LONG, "=", true,
+				true, LaunchSet::getCompanyId),
+			new ArrayableFinderColumn<>(
+				"launchSet.", "status", FinderColumn.Type.INTEGER, "=", false,
+				true, true, LaunchSet::getStatus));
+
+		_finderPathFetchByERC_C = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"externalReferenceCode", "companyId"}, true);
+			new String[] {"externalReferenceCode", "companyId"}, 0, 1, false,
+			convertNullFunction(LaunchSet::getExternalReferenceCode),
+			LaunchSet::getCompanyId);
 
 		_uniquePersistenceFinderByERC_C = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByERC_C, _SQL_SELECT_LAUNCHSET_WHERE,
+			this, _finderPathFetchByERC_C, _SQL_SELECT_LAUNCHSET_WHERE, "",
 			new FinderColumn<>(
 				"launchSet.", "externalReferenceCode", FinderColumn.Type.STRING,
-				"=", true, false, LaunchSet::getExternalReferenceCode),
+				"=", true, true, LaunchSet::getExternalReferenceCode),
 			new FinderColumn<>(
 				"launchSet.", "companyId", FinderColumn.Type.LONG, "=", true,
 				true, LaunchSet::getCompanyId));
@@ -2215,22 +1540,17 @@ public class LaunchSetPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		LaunchSetModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_LAUNCHSET =
 		"SELECT launchSet FROM LaunchSet launchSet";
 
 	private static final String _SQL_SELECT_LAUNCHSET_WHERE =
 		"SELECT launchSet FROM LaunchSet launchSet WHERE ";
 
-	private static final String _SQL_COUNT_LAUNCHSET =
-		"SELECT COUNT(launchSet) FROM LaunchSet launchSet";
-
 	private static final String _SQL_COUNT_LAUNCHSET_WHERE =
 		"SELECT COUNT(launchSet) FROM LaunchSet launchSet WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "launchSet.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No LaunchSet exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No LaunchSet exists with the key {";
@@ -2247,4 +1567,4 @@ public class LaunchSetPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1235811517
+// LIFERAY-SERVICE-BUILDER-HASH:-2036199311

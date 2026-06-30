@@ -10,7 +10,9 @@ import {ViewObjectDefinitionsPage} from '../ViewObjectDefinitionsPage';
 export class EditObjectDetailsPage {
 	readonly accountRestrictedFieldCombobox: Locator;
 	readonly accountRestrictionToggle: Locator;
+	readonly allowDraftToggle: Locator;
 	readonly detailsTabItem: Locator;
+	readonly entryTitleField: Locator;
 	readonly entryTitleFieldCombobox: Locator;
 	readonly friendlyURLSeparator: Locator;
 	readonly labelInput: Locator;
@@ -34,7 +36,13 @@ export class EditObjectDetailsPage {
 			'Enable Account Restriction',
 			{exact: true}
 		);
+		this.allowDraftToggle = page.getByRole('switch', {
+			name: 'Allow Users to Save Entries as Draft',
+		});
 		this.detailsTabItem = page.getByRole('link', {name: 'Details'});
+		this.entryTitleField = page.getByLabel('Entry Title Field', {
+			exact: true,
+		});
 		this.entryTitleFieldCombobox = page.getByRole('combobox', {
 			name: 'Entry Title Field',
 		});

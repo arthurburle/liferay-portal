@@ -573,23 +573,6 @@ public interface ObjectValidationRuleSettingPersistence
 		long objectValidationRuleId, String name, String value);
 
 	/**
-	 * Caches the object validation rule setting in the entity cache if it is enabled.
-	 *
-	 * @param objectValidationRuleSetting the object validation rule setting
-	 */
-	public void cacheResult(
-		ObjectValidationRuleSetting objectValidationRuleSetting);
-
-	/**
-	 * Caches the object validation rule settings in the entity cache if it is enabled.
-	 *
-	 * @param objectValidationRuleSettings the object validation rule settings
-	 */
-	public void cacheResult(
-		java.util.List<ObjectValidationRuleSetting>
-			objectValidationRuleSettings);
-
-	/**
 	 * Creates a new object validation rule setting with the primary key. Does not add the object validation rule setting to the database.
 	 *
 	 * @param objectValidationRuleSettingId the primary key for the new object validation rule setting
@@ -632,74 +615,5 @@ public interface ObjectValidationRuleSettingPersistence
 	public ObjectValidationRuleSetting fetchByPrimaryKey(
 		long objectValidationRuleSettingId);
 
-	/**
-	 * Returns all the object validation rule settings.
-	 *
-	 * @return the object validation rule settings
-	 */
-	public java.util.List<ObjectValidationRuleSetting> findAll();
-
-	/**
-	 * Returns a range of all the object validation rule settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectValidationRuleSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object validation rule settings
-	 * @param end the upper bound of the range of object validation rule settings (not inclusive)
-	 * @return the range of object validation rule settings
-	 */
-	public java.util.List<ObjectValidationRuleSetting> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the object validation rule settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectValidationRuleSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object validation rule settings
-	 * @param end the upper bound of the range of object validation rule settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object validation rule settings
-	 */
-	public java.util.List<ObjectValidationRuleSetting> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<ObjectValidationRuleSetting> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the object validation rule settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectValidationRuleSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object validation rule settings
-	 * @param end the upper bound of the range of object validation rule settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object validation rule settings
-	 */
-	public java.util.List<ObjectValidationRuleSetting> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<ObjectValidationRuleSetting> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the object validation rule settings from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of object validation rule settings.
-	 *
-	 * @return the number of object validation rule settings
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1813054839
+// LIFERAY-SERVICE-BUILDER-HASH:2114318767

@@ -37,6 +37,20 @@ public class CommerceWishListUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<CommerceWishList> commerceWishLists) {
+		getPersistence().cacheResult(commerceWishLists);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CommerceWishList commerceWishList) {
+		getPersistence().cacheResult(commerceWishList);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1086,24 +1100,6 @@ public class CommerceWishListUtil {
 	}
 
 	/**
-	 * Caches the commerce wish list in the entity cache if it is enabled.
-	 *
-	 * @param commerceWishList the commerce wish list
-	 */
-	public static void cacheResult(CommerceWishList commerceWishList) {
-		getPersistence().cacheResult(commerceWishList);
-	}
-
-	/**
-	 * Caches the commerce wish lists in the entity cache if it is enabled.
-	 *
-	 * @param commerceWishLists the commerce wish lists
-	 */
-	public static void cacheResult(List<CommerceWishList> commerceWishLists) {
-		getPersistence().cacheResult(commerceWishLists);
-	}
-
-	/**
 	 * Creates a new commerce wish list with the primary key. Does not add the commerce wish list to the database.
 	 *
 	 * @param commerceWishListId the primary key for the new commerce wish list
@@ -1157,87 +1153,6 @@ public class CommerceWishListUtil {
 		return getPersistence().fetchByPrimaryKey(commerceWishListId);
 	}
 
-	/**
-	 * Returns all the commerce wish lists.
-	 *
-	 * @return the commerce wish lists
-	 */
-	public static List<CommerceWishList> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce wish lists.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.wish.list.model.impl.CommerceWishListModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce wish lists
-	 * @param end the upper bound of the range of commerce wish lists (not inclusive)
-	 * @return the range of commerce wish lists
-	 */
-	public static List<CommerceWishList> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce wish lists.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.wish.list.model.impl.CommerceWishListModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce wish lists
-	 * @param end the upper bound of the range of commerce wish lists (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce wish lists
-	 */
-	public static List<CommerceWishList> findAll(
-		int start, int end,
-		OrderByComparator<CommerceWishList> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce wish lists.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.wish.list.model.impl.CommerceWishListModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce wish lists
-	 * @param end the upper bound of the range of commerce wish lists (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce wish lists
-	 */
-	public static List<CommerceWishList> findAll(
-		int start, int end,
-		OrderByComparator<CommerceWishList> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce wish lists from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce wish lists.
-	 *
-	 * @return the number of commerce wish lists
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceWishListPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1249,4 +1164,4 @@ public class CommerceWishListUtil {
 	private static volatile CommerceWishListPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1551281816
+// LIFERAY-SERVICE-BUILDER-HASH:1787785122

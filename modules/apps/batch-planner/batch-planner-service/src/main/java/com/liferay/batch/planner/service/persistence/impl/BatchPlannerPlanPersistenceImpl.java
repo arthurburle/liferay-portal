@@ -13,30 +13,20 @@ import com.liferay.batch.planner.model.impl.BatchPlannerPlanModelImpl;
 import com.liferay.batch.planner.service.persistence.BatchPlannerPlanPersistence;
 import com.liferay.batch.planner.service.persistence.BatchPlannerPlanUtil;
 import com.liferay.batch.planner.service.persistence.impl.constants.BatchPlannerPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
-import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.dao.orm.SQLQuery;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
-import com.liferay.portal.kernel.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
-import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
+import com.liferay.portal.kernel.service.persistence.impl.FilterCollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 
@@ -48,7 +38,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -70,7 +59,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = BatchPlannerPlanPersistence.class)
 public class BatchPlannerPlanPersistenceImpl
-	extends BasePersistenceImpl<BatchPlannerPlan>
+	extends BasePersistenceImpl<BatchPlannerPlan, NoSuchPlanException>
 	implements BatchPlannerPlanPersistence {
 
 	/*
@@ -87,13 +76,10 @@ public class BatchPlannerPlanPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByCompanyId;
 	private FinderPath _finderPathWithoutPaginationFindByCompanyId;
 	private FinderPath _finderPathCountByCompanyId;
-	private CollectionPersistenceFinder<BatchPlannerPlan>
+	private FilterCollectionPersistenceFinder<BatchPlannerPlan>
 		_collectionPersistenceFinderByCompanyId;
 
 	/**
@@ -263,97 +249,9 @@ public class BatchPlannerPlanPersistenceImpl
 		long companyId, int start, int end,
 		OrderByComparator<BatchPlannerPlan> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return findByCompanyId(companyId, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByCompanyId(
-					companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator));
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				3 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(4);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_COMPANYID_COMPANYID_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(BatchPlannerPlanModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, BatchPlannerPlanImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, BatchPlannerPlanImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			return (List<BatchPlannerPlan>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByCompanyId.filterFind(
+			finderCache, new Object[] {companyId}, start, end,
+			orderByComparator, companyId, 0);
 	}
 
 	/**
@@ -387,62 +285,14 @@ public class BatchPlannerPlanPersistenceImpl
 	 */
 	@Override
 	public int filterCountByCompanyId(long companyId) {
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return countByCompanyId(companyId);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<BatchPlannerPlan> batchPlannerPlans = findByCompanyId(
-				companyId);
-
-			batchPlannerPlans = InlineSQLHelperUtil.filter(batchPlannerPlans);
-
-			return batchPlannerPlans.size();
-		}
-
-		StringBundler sb = new StringBundler(2);
-
-		sb.append(_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE);
-
-		sb.append(_FINDER_COLUMN_COMPANYID_COMPANYID_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByCompanyId.filterCount(
+			finderCache, new Object[] {companyId}, companyId, 0);
 	}
-
-	private static final String _FINDER_COLUMN_COMPANYID_COMPANYID_2 =
-		"batchPlannerPlan.companyId = ?";
 
 	private FinderPath _finderPathWithPaginationFindByC_U;
 	private FinderPath _finderPathWithoutPaginationFindByC_U;
 	private FinderPath _finderPathCountByC_U;
-	private CollectionPersistenceFinder<BatchPlannerPlan>
+	private FilterCollectionPersistenceFinder<BatchPlannerPlan>
 		_collectionPersistenceFinderByC_U;
 
 	/**
@@ -623,101 +473,9 @@ public class BatchPlannerPlanPersistenceImpl
 		long companyId, long userId, int start, int end,
 		OrderByComparator<BatchPlannerPlan> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return findByC_U(companyId, userId, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByC_U(
-					companyId, userId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator));
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				4 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(5);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_C_U_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_U_USERID_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(BatchPlannerPlanModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, BatchPlannerPlanImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, BatchPlannerPlanImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(userId);
-
-			return (List<BatchPlannerPlan>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_U.filterFind(
+			finderCache, new Object[] {companyId, userId}, start, end,
+			orderByComparator, companyId, 0);
 	}
 
 	/**
@@ -754,69 +512,14 @@ public class BatchPlannerPlanPersistenceImpl
 	 */
 	@Override
 	public int filterCountByC_U(long companyId, long userId) {
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return countByC_U(companyId, userId);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<BatchPlannerPlan> batchPlannerPlans = findByC_U(
-				companyId, userId);
-
-			batchPlannerPlans = InlineSQLHelperUtil.filter(batchPlannerPlans);
-
-			return batchPlannerPlans.size();
-		}
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE);
-
-		sb.append(_FINDER_COLUMN_C_U_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_U_USERID_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(userId);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_U.filterCount(
+			finderCache, new Object[] {companyId, userId}, companyId, 0);
 	}
-
-	private static final String _FINDER_COLUMN_C_U_COMPANYID_2 =
-		"batchPlannerPlan.companyId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_U_USERID_2 =
-		"batchPlannerPlan.userId = ?";
 
 	private FinderPath _finderPathWithPaginationFindByC_E;
 	private FinderPath _finderPathWithoutPaginationFindByC_E;
 	private FinderPath _finderPathCountByC_E;
-	private CollectionPersistenceFinder<BatchPlannerPlan>
+	private FilterCollectionPersistenceFinder<BatchPlannerPlan>
 		_collectionPersistenceFinderByC_E;
 
 	/**
@@ -999,101 +702,9 @@ public class BatchPlannerPlanPersistenceImpl
 		long companyId, boolean export, int start, int end,
 		OrderByComparator<BatchPlannerPlan> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return findByC_E(companyId, export, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByC_E(
-					companyId, export, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator));
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				4 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(5);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_C_E_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_E_EXPORT_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(BatchPlannerPlanModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, BatchPlannerPlanImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, BatchPlannerPlanImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(export);
-
-			return (List<BatchPlannerPlan>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_E.filterFind(
+			finderCache, new Object[] {companyId, export}, start, end,
+			orderByComparator, companyId, 0);
 	}
 
 	/**
@@ -1130,69 +741,14 @@ public class BatchPlannerPlanPersistenceImpl
 	 */
 	@Override
 	public int filterCountByC_E(long companyId, boolean export) {
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return countByC_E(companyId, export);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<BatchPlannerPlan> batchPlannerPlans = findByC_E(
-				companyId, export);
-
-			batchPlannerPlans = InlineSQLHelperUtil.filter(batchPlannerPlans);
-
-			return batchPlannerPlans.size();
-		}
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE);
-
-		sb.append(_FINDER_COLUMN_C_E_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_E_EXPORT_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(export);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_E.filterCount(
+			finderCache, new Object[] {companyId, export}, companyId, 0);
 	}
-
-	private static final String _FINDER_COLUMN_C_E_COMPANYID_2 =
-		"batchPlannerPlan.companyId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_E_EXPORT_2 =
-		"batchPlannerPlan.export = ?";
 
 	private FinderPath _finderPathWithPaginationFindByC_N;
 	private FinderPath _finderPathWithoutPaginationFindByC_N;
 	private FinderPath _finderPathCountByC_N;
-	private CollectionPersistenceFinder<BatchPlannerPlan>
+	private FilterCollectionPersistenceFinder<BatchPlannerPlan>
 		_collectionPersistenceFinderByC_N;
 
 	/**
@@ -1372,114 +928,9 @@ public class BatchPlannerPlanPersistenceImpl
 		long companyId, String name, int start, int end,
 		OrderByComparator<BatchPlannerPlan> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return findByC_N(companyId, name, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByC_N(
-					companyId, name, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator));
-		}
-
-		name = Objects.toString(name, "");
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				4 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(5);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_C_N_COMPANYID_2);
-
-		boolean bindName = false;
-
-		if (name.isEmpty()) {
-			sb.append(_FINDER_COLUMN_C_N_NAME_3);
-		}
-		else {
-			bindName = true;
-
-			sb.append(_FINDER_COLUMN_C_N_NAME_2);
-		}
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(BatchPlannerPlanModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, BatchPlannerPlanImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, BatchPlannerPlanImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			if (bindName) {
-				queryPos.add(name);
-			}
-
-			return (List<BatchPlannerPlan>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_N.filterFind(
+			finderCache, new Object[] {companyId, name}, start, end,
+			orderByComparator, companyId, 0);
 	}
 
 	/**
@@ -1516,85 +967,14 @@ public class BatchPlannerPlanPersistenceImpl
 	 */
 	@Override
 	public int filterCountByC_N(long companyId, String name) {
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return countByC_N(companyId, name);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<BatchPlannerPlan> batchPlannerPlans = findByC_N(
-				companyId, name);
-
-			batchPlannerPlans = InlineSQLHelperUtil.filter(batchPlannerPlans);
-
-			return batchPlannerPlans.size();
-		}
-
-		name = Objects.toString(name, "");
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE);
-
-		sb.append(_FINDER_COLUMN_C_N_COMPANYID_2);
-
-		boolean bindName = false;
-
-		if (name.isEmpty()) {
-			sb.append(_FINDER_COLUMN_C_N_NAME_3);
-		}
-		else {
-			bindName = true;
-
-			sb.append(_FINDER_COLUMN_C_N_NAME_2);
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			if (bindName) {
-				queryPos.add(name);
-			}
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_N.filterCount(
+			finderCache, new Object[] {companyId, name}, companyId, 0);
 	}
-
-	private static final String _FINDER_COLUMN_C_N_COMPANYID_2 =
-		"batchPlannerPlan.companyId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_N_NAME_2 =
-		"batchPlannerPlan.name = ?";
-
-	private static final String _FINDER_COLUMN_C_N_NAME_3 =
-		"(batchPlannerPlan.name IS NULL OR batchPlannerPlan.name = '')";
 
 	private FinderPath _finderPathWithPaginationFindByC_T;
 	private FinderPath _finderPathWithoutPaginationFindByC_T;
 	private FinderPath _finderPathCountByC_T;
-	private CollectionPersistenceFinder<BatchPlannerPlan>
+	private FilterCollectionPersistenceFinder<BatchPlannerPlan>
 		_collectionPersistenceFinderByC_T;
 
 	/**
@@ -1777,102 +1157,9 @@ public class BatchPlannerPlanPersistenceImpl
 		long companyId, boolean template, int start, int end,
 		OrderByComparator<BatchPlannerPlan> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return findByC_T(
-				companyId, template, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByC_T(
-					companyId, template, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator));
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				4 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(5);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_C_T_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_T_TEMPLATE_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(BatchPlannerPlanModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, BatchPlannerPlanImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, BatchPlannerPlanImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(template);
-
-			return (List<BatchPlannerPlan>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_T.filterFind(
+			finderCache, new Object[] {companyId, template}, start, end,
+			orderByComparator, companyId, 0);
 	}
 
 	/**
@@ -1909,69 +1196,14 @@ public class BatchPlannerPlanPersistenceImpl
 	 */
 	@Override
 	public int filterCountByC_T(long companyId, boolean template) {
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return countByC_T(companyId, template);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<BatchPlannerPlan> batchPlannerPlans = findByC_T(
-				companyId, template);
-
-			batchPlannerPlans = InlineSQLHelperUtil.filter(batchPlannerPlans);
-
-			return batchPlannerPlans.size();
-		}
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE);
-
-		sb.append(_FINDER_COLUMN_C_T_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_T_TEMPLATE_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(template);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_T.filterCount(
+			finderCache, new Object[] {companyId, template}, companyId, 0);
 	}
-
-	private static final String _FINDER_COLUMN_C_T_COMPANYID_2 =
-		"batchPlannerPlan.companyId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_T_TEMPLATE_2 =
-		"batchPlannerPlan.template = ?";
 
 	private FinderPath _finderPathWithPaginationFindByC_E_T;
 	private FinderPath _finderPathWithoutPaginationFindByC_E_T;
 	private FinderPath _finderPathCountByC_E_T;
-	private CollectionPersistenceFinder<BatchPlannerPlan>
+	private FilterCollectionPersistenceFinder<BatchPlannerPlan>
 		_collectionPersistenceFinderByC_E_T;
 
 	/**
@@ -2169,106 +1401,9 @@ public class BatchPlannerPlanPersistenceImpl
 		long companyId, boolean export, boolean template, int start, int end,
 		OrderByComparator<BatchPlannerPlan> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return findByC_E_T(
-				companyId, export, template, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByC_E_T(
-					companyId, export, template, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator));
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				5 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(6);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_C_E_T_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_E_T_EXPORT_2);
-
-		sb.append(_FINDER_COLUMN_C_E_T_TEMPLATE_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(BatchPlannerPlanModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, BatchPlannerPlanImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, BatchPlannerPlanImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(export);
-
-			queryPos.add(template);
-
-			return (List<BatchPlannerPlan>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_E_T.filterFind(
+			finderCache, new Object[] {companyId, export, template}, start, end,
+			orderByComparator, companyId, 0);
 	}
 
 	/**
@@ -2312,71 +1447,10 @@ public class BatchPlannerPlanPersistenceImpl
 	public int filterCountByC_E_T(
 		long companyId, boolean export, boolean template) {
 
-		if (!InlineSQLHelperUtil.isEnabled(companyId, 0)) {
-			return countByC_E_T(companyId, export, template);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<BatchPlannerPlan> batchPlannerPlans = findByC_E_T(
-				companyId, export, template);
-
-			batchPlannerPlans = InlineSQLHelperUtil.filter(batchPlannerPlans);
-
-			return batchPlannerPlans.size();
-		}
-
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE);
-
-		sb.append(_FINDER_COLUMN_C_E_T_COMPANYID_2);
-
-		sb.append(_FINDER_COLUMN_C_E_T_EXPORT_2);
-
-		sb.append(_FINDER_COLUMN_C_E_T_TEMPLATE_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), BatchPlannerPlan.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(companyId);
-
-			queryPos.add(export);
-
-			queryPos.add(template);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByC_E_T.filterCount(
+			finderCache, new Object[] {companyId, export, template}, companyId,
+			0);
 	}
-
-	private static final String _FINDER_COLUMN_C_E_T_COMPANYID_2 =
-		"batchPlannerPlan.companyId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_E_T_EXPORT_2 =
-		"batchPlannerPlan.export = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_E_T_TEMPLATE_2 =
-		"batchPlannerPlan.template = ?";
 
 	public BatchPlannerPlanPersistenceImpl() {
 		Map<String, String> dbColumnNames = new HashMap<String, String>();
@@ -2392,88 +1466,6 @@ public class BatchPlannerPlanPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(BatchPlannerPlanTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the batch planner plan in the entity cache if it is enabled.
-	 *
-	 * @param batchPlannerPlan the batch planner plan
-	 */
-	@Override
-	public void cacheResult(BatchPlannerPlan batchPlannerPlan) {
-		entityCache.putResult(
-			BatchPlannerPlanImpl.class, batchPlannerPlan.getPrimaryKey(),
-			batchPlannerPlan);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the batch planner plans in the entity cache if it is enabled.
-	 *
-	 * @param batchPlannerPlans the batch planner plans
-	 */
-	@Override
-	public void cacheResult(List<BatchPlannerPlan> batchPlannerPlans) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (batchPlannerPlans.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (BatchPlannerPlan batchPlannerPlan : batchPlannerPlans) {
-			if (entityCache.getResult(
-					BatchPlannerPlanImpl.class,
-					batchPlannerPlan.getPrimaryKey()) == null) {
-
-				cacheResult(batchPlannerPlan);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all batch planner plans.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(BatchPlannerPlanImpl.class);
-
-		finderCache.clearCache(BatchPlannerPlanImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the batch planner plan.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(BatchPlannerPlan batchPlannerPlan) {
-		entityCache.removeResult(BatchPlannerPlanImpl.class, batchPlannerPlan);
-	}
-
-	@Override
-	public void clearCache(List<BatchPlannerPlan> batchPlannerPlans) {
-		for (BatchPlannerPlan batchPlannerPlan : batchPlannerPlans) {
-			entityCache.removeResult(
-				BatchPlannerPlanImpl.class, batchPlannerPlan);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(BatchPlannerPlanImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(BatchPlannerPlanImpl.class, primaryKey);
-		}
 	}
 
 	/**
@@ -2506,47 +1498,6 @@ public class BatchPlannerPlanPersistenceImpl
 		throws NoSuchPlanException {
 
 		return remove((Serializable)batchPlannerPlanId);
-	}
-
-	/**
-	 * Removes the batch planner plan with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the batch planner plan
-	 * @return the batch planner plan that was removed
-	 * @throws NoSuchPlanException if a batch planner plan with the primary key could not be found
-	 */
-	@Override
-	public BatchPlannerPlan remove(Serializable primaryKey)
-		throws NoSuchPlanException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			BatchPlannerPlan batchPlannerPlan = (BatchPlannerPlan)session.get(
-				BatchPlannerPlanImpl.class, primaryKey);
-
-			if (batchPlannerPlan == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchPlanException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(batchPlannerPlan);
-		}
-		catch (NoSuchPlanException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -2649,39 +1600,13 @@ public class BatchPlannerPlanPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			BatchPlannerPlanImpl.class, batchPlannerPlanModelImpl, false, true);
+		cacheUniqueFindersResult(batchPlannerPlan, false);
 
 		if (isNew) {
 			batchPlannerPlan.setNew(false);
 		}
 
 		batchPlannerPlan.resetOriginalValues();
-
-		return batchPlannerPlan;
-	}
-
-	/**
-	 * Returns the batch planner plan with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the batch planner plan
-	 * @return the batch planner plan
-	 * @throws NoSuchPlanException if a batch planner plan with the primary key could not be found
-	 */
-	@Override
-	public BatchPlannerPlan findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchPlanException {
-
-		BatchPlannerPlan batchPlannerPlan = fetchByPrimaryKey(primaryKey);
-
-		if (batchPlannerPlan == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchPlanException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return batchPlannerPlan;
 	}
@@ -2709,187 +1634,6 @@ public class BatchPlannerPlanPersistenceImpl
 	@Override
 	public BatchPlannerPlan fetchByPrimaryKey(long batchPlannerPlanId) {
 		return fetchByPrimaryKey((Serializable)batchPlannerPlanId);
-	}
-
-	/**
-	 * Returns all the batch planner plans.
-	 *
-	 * @return the batch planner plans
-	 */
-	@Override
-	public List<BatchPlannerPlan> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the batch planner plans.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>BatchPlannerPlanModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of batch planner plans
-	 * @param end the upper bound of the range of batch planner plans (not inclusive)
-	 * @return the range of batch planner plans
-	 */
-	@Override
-	public List<BatchPlannerPlan> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the batch planner plans.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>BatchPlannerPlanModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of batch planner plans
-	 * @param end the upper bound of the range of batch planner plans (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of batch planner plans
-	 */
-	@Override
-	public List<BatchPlannerPlan> findAll(
-		int start, int end,
-		OrderByComparator<BatchPlannerPlan> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the batch planner plans.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>BatchPlannerPlanModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of batch planner plans
-	 * @param end the upper bound of the range of batch planner plans (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of batch planner plans
-	 */
-	@Override
-	public List<BatchPlannerPlan> findAll(
-		int start, int end,
-		OrderByComparator<BatchPlannerPlan> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<BatchPlannerPlan> list = null;
-
-		if (useFinderCache) {
-			list = (List<BatchPlannerPlan>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_BATCHPLANNERPLAN);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_BATCHPLANNERPLAN;
-
-				sql = sql.concat(BatchPlannerPlanModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<BatchPlannerPlan>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the batch planner plans from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (BatchPlannerPlan batchPlannerPlan : findAll()) {
-			remove(batchPlannerPlan);
-		}
-	}
-
-	/**
-	 * Returns the number of batch planner plans.
-	 *
-	 * @return the number of batch planner plans
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_BATCHPLANNERPLAN);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -2922,21 +1666,6 @@ public class BatchPlannerPlanPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByCompanyId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByCompanyId",
 			new String[] {
@@ -2956,12 +1685,23 @@ public class BatchPlannerPlanPersistenceImpl
 			false);
 
 		_collectionPersistenceFinderByCompanyId =
-			new CollectionPersistenceFinder<>(
+			new FilterCollectionPersistenceFinder<>(
 				this, _finderPathWithPaginationFindByCompanyId,
 				_finderPathWithoutPaginationFindByCompanyId,
 				_finderPathCountByCompanyId, _SQL_SELECT_BATCHPLANNERPLAN_WHERE,
 				_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
-				BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					BatchPlannerPlanImpl.class, BatchPlannerPlan.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
 				new FinderColumn<>(
 					"batchPlannerPlan.", "companyId", FinderColumn.Type.LONG,
 					"=", true, true, BatchPlannerPlan::getCompanyId));
@@ -2985,18 +1725,30 @@ public class BatchPlannerPlanPersistenceImpl
 			new String[] {Long.class.getName(), Long.class.getName()},
 			new String[] {"companyId", "userId"}, false);
 
-		_collectionPersistenceFinderByC_U = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByC_U,
-			_finderPathWithoutPaginationFindByC_U, _finderPathCountByC_U,
-			_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
-			_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
-			BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"batchPlannerPlan.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, BatchPlannerPlan::getCompanyId),
-			new FinderColumn<>(
-				"batchPlannerPlan.", "userId", FinderColumn.Type.LONG, "=",
-				true, true, BatchPlannerPlan::getUserId));
+		_collectionPersistenceFinderByC_U =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByC_U,
+				_finderPathWithoutPaginationFindByC_U, _finderPathCountByC_U,
+				_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
+				_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
+				BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					BatchPlannerPlanImpl.class, BatchPlannerPlan.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"batchPlannerPlan.", "companyId", FinderColumn.Type.LONG,
+					"=", true, true, BatchPlannerPlan::getCompanyId),
+				new FinderColumn<>(
+					"batchPlannerPlan.", "userId", FinderColumn.Type.LONG, "=",
+					true, true, BatchPlannerPlan::getUserId));
 
 		_finderPathWithPaginationFindByC_E = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByC_E",
@@ -3017,18 +1769,30 @@ public class BatchPlannerPlanPersistenceImpl
 			new String[] {Long.class.getName(), Boolean.class.getName()},
 			new String[] {"companyId", "export"}, false);
 
-		_collectionPersistenceFinderByC_E = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByC_E,
-			_finderPathWithoutPaginationFindByC_E, _finderPathCountByC_E,
-			_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
-			_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
-			BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"batchPlannerPlan.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, BatchPlannerPlan::getCompanyId),
-			new FinderColumn<>(
-				"batchPlannerPlan.", "export", FinderColumn.Type.BOOLEAN, "=",
-				true, true, BatchPlannerPlan::isExport));
+		_collectionPersistenceFinderByC_E =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByC_E,
+				_finderPathWithoutPaginationFindByC_E, _finderPathCountByC_E,
+				_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
+				_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
+				BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					BatchPlannerPlanImpl.class, BatchPlannerPlan.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"batchPlannerPlan.", "companyId", FinderColumn.Type.LONG,
+					"=", true, true, BatchPlannerPlan::getCompanyId),
+				new FinderColumn<>(
+					"batchPlannerPlan.", "export", FinderColumn.Type.BOOLEAN,
+					"=", true, true, BatchPlannerPlan::isExport));
 
 		_finderPathWithPaginationFindByC_N = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByC_N",
@@ -3042,25 +1806,37 @@ public class BatchPlannerPlanPersistenceImpl
 		_finderPathWithoutPaginationFindByC_N = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "name"}, true);
+			new String[] {"companyId", "name"}, 0, 2, true, null);
 
 		_finderPathCountByC_N = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "name"}, false);
+			new String[] {"companyId", "name"}, 0, 2, false, null);
 
-		_collectionPersistenceFinderByC_N = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByC_N,
-			_finderPathWithoutPaginationFindByC_N, _finderPathCountByC_N,
-			_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
-			_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
-			BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"batchPlannerPlan.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, BatchPlannerPlan::getCompanyId),
-			new FinderColumn<>(
-				"batchPlannerPlan.", "name", FinderColumn.Type.STRING, "=",
-				true, true, BatchPlannerPlan::getName));
+		_collectionPersistenceFinderByC_N =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByC_N,
+				_finderPathWithoutPaginationFindByC_N, _finderPathCountByC_N,
+				_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
+				_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
+				BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					BatchPlannerPlanImpl.class, BatchPlannerPlan.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"batchPlannerPlan.", "companyId", FinderColumn.Type.LONG,
+					"=", true, true, BatchPlannerPlan::getCompanyId),
+				new FinderColumn<>(
+					"batchPlannerPlan.", "name", FinderColumn.Type.STRING, "=",
+					true, true, BatchPlannerPlan::getName));
 
 		_finderPathWithPaginationFindByC_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByC_T",
@@ -3081,18 +1857,30 @@ public class BatchPlannerPlanPersistenceImpl
 			new String[] {Long.class.getName(), Boolean.class.getName()},
 			new String[] {"companyId", "template"}, false);
 
-		_collectionPersistenceFinderByC_T = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByC_T,
-			_finderPathWithoutPaginationFindByC_T, _finderPathCountByC_T,
-			_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
-			_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
-			BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"batchPlannerPlan.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, BatchPlannerPlan::getCompanyId),
-			new FinderColumn<>(
-				"batchPlannerPlan.", "template", FinderColumn.Type.BOOLEAN, "=",
-				true, true, BatchPlannerPlan::isTemplate));
+		_collectionPersistenceFinderByC_T =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByC_T,
+				_finderPathWithoutPaginationFindByC_T, _finderPathCountByC_T,
+				_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
+				_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
+				BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					BatchPlannerPlanImpl.class, BatchPlannerPlan.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"batchPlannerPlan.", "companyId", FinderColumn.Type.LONG,
+					"=", true, true, BatchPlannerPlan::getCompanyId),
+				new FinderColumn<>(
+					"batchPlannerPlan.", "template", FinderColumn.Type.BOOLEAN,
+					"=", true, true, BatchPlannerPlan::isTemplate));
 
 		_finderPathWithPaginationFindByC_E_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByC_E_T",
@@ -3119,21 +1907,33 @@ public class BatchPlannerPlanPersistenceImpl
 			},
 			new String[] {"companyId", "export", "template"}, false);
 
-		_collectionPersistenceFinderByC_E_T = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByC_E_T,
-			_finderPathWithoutPaginationFindByC_E_T, _finderPathCountByC_E_T,
-			_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
-			_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
-			BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"batchPlannerPlan.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, BatchPlannerPlan::getCompanyId),
-			new FinderColumn<>(
-				"batchPlannerPlan.", "export", FinderColumn.Type.BOOLEAN, "=",
-				true, false, BatchPlannerPlan::isExport),
-			new FinderColumn<>(
-				"batchPlannerPlan.", "template", FinderColumn.Type.BOOLEAN, "=",
-				true, true, BatchPlannerPlan::isTemplate));
+		_collectionPersistenceFinderByC_E_T =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByC_E_T,
+				_finderPathWithoutPaginationFindByC_E_T,
+				_finderPathCountByC_E_T, _SQL_SELECT_BATCHPLANNERPLAN_WHERE,
+				_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
+				BatchPlannerPlanModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					BatchPlannerPlanImpl.class, BatchPlannerPlan.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_WHERE,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_BATCHPLANNERPLAN_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_BATCHPLANNERPLAN_WHERE,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL,
+					BatchPlannerPlanModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"batchPlannerPlan.", "companyId", FinderColumn.Type.LONG,
+					"=", true, true, BatchPlannerPlan::getCompanyId),
+				new FinderColumn<>(
+					"batchPlannerPlan.", "export", FinderColumn.Type.BOOLEAN,
+					"=", true, true, BatchPlannerPlan::isExport),
+				new FinderColumn<>(
+					"batchPlannerPlan.", "template", FinderColumn.Type.BOOLEAN,
+					"=", true, true, BatchPlannerPlan::isTemplate));
 
 		BatchPlannerPlanUtil.setPersistence(this);
 	}
@@ -3177,14 +1977,14 @@ public class BatchPlannerPlanPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		BatchPlannerPlanModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_BATCHPLANNERPLAN =
 		"SELECT batchPlannerPlan FROM BatchPlannerPlan batchPlannerPlan";
 
 	private static final String _SQL_SELECT_BATCHPLANNERPLAN_WHERE =
 		"SELECT batchPlannerPlan FROM BatchPlannerPlan batchPlannerPlan WHERE ";
-
-	private static final String _SQL_COUNT_BATCHPLANNERPLAN =
-		"SELECT COUNT(batchPlannerPlan) FROM BatchPlannerPlan batchPlannerPlan";
 
 	private static final String _SQL_COUNT_BATCHPLANNERPLAN_WHERE =
 		"SELECT COUNT(batchPlannerPlan) FROM BatchPlannerPlan batchPlannerPlan WHERE ";
@@ -3210,18 +2010,8 @@ public class BatchPlannerPlanPersistenceImpl
 
 	private static final String _FILTER_ENTITY_TABLE = "BatchPlannerPlan";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS = "batchPlannerPlan.";
-
-	private static final String _ORDER_BY_ENTITY_TABLE = "BatchPlannerPlan.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No BatchPlannerPlan exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No BatchPlannerPlan exists with the key {";
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		BatchPlannerPlanPersistenceImpl.class);
 
 	private static final Set<String> _badColumnNames = SetUtil.fromArray(
 		new String[] {"active", "size"});
@@ -3232,4 +2022,4 @@ public class BatchPlannerPlanPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:6216216
+// LIFERAY-SERVICE-BUILDER-HASH:1623235847

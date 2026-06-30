@@ -37,6 +37,22 @@ public class OpenIdConnectSessionUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<OpenIdConnectSession> openIdConnectSessions) {
+
+		getPersistence().cacheResult(openIdConnectSessions);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(OpenIdConnectSession openIdConnectSession) {
+		getPersistence().cacheResult(openIdConnectSession);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -743,26 +759,6 @@ public class OpenIdConnectSessionUtil {
 	}
 
 	/**
-	 * Caches the open ID connect session in the entity cache if it is enabled.
-	 *
-	 * @param openIdConnectSession the open ID connect session
-	 */
-	public static void cacheResult(OpenIdConnectSession openIdConnectSession) {
-		getPersistence().cacheResult(openIdConnectSession);
-	}
-
-	/**
-	 * Caches the open ID connect sessions in the entity cache if it is enabled.
-	 *
-	 * @param openIdConnectSessions the open ID connect sessions
-	 */
-	public static void cacheResult(
-		List<OpenIdConnectSession> openIdConnectSessions) {
-
-		getPersistence().cacheResult(openIdConnectSessions);
-	}
-
-	/**
 	 * Creates a new open ID connect session with the primary key. Does not add the open ID connect session to the database.
 	 *
 	 * @param openIdConnectSessionId the primary key for the new open ID connect session
@@ -819,87 +815,6 @@ public class OpenIdConnectSessionUtil {
 		return getPersistence().fetchByPrimaryKey(openIdConnectSessionId);
 	}
 
-	/**
-	 * Returns all the open ID connect sessions.
-	 *
-	 * @return the open ID connect sessions
-	 */
-	public static List<OpenIdConnectSession> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the open ID connect sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.security.sso.openid.connect.persistence.model.impl.OpenIdConnectSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of open ID connect sessions
-	 * @param end the upper bound of the range of open ID connect sessions (not inclusive)
-	 * @return the range of open ID connect sessions
-	 */
-	public static List<OpenIdConnectSession> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the open ID connect sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.security.sso.openid.connect.persistence.model.impl.OpenIdConnectSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of open ID connect sessions
-	 * @param end the upper bound of the range of open ID connect sessions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of open ID connect sessions
-	 */
-	public static List<OpenIdConnectSession> findAll(
-		int start, int end,
-		OrderByComparator<OpenIdConnectSession> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the open ID connect sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.security.sso.openid.connect.persistence.model.impl.OpenIdConnectSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of open ID connect sessions
-	 * @param end the upper bound of the range of open ID connect sessions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of open ID connect sessions
-	 */
-	public static List<OpenIdConnectSession> findAll(
-		int start, int end,
-		OrderByComparator<OpenIdConnectSession> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the open ID connect sessions from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of open ID connect sessions.
-	 *
-	 * @return the number of open ID connect sessions
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static OpenIdConnectSessionPersistence getPersistence() {
 		return _persistence;
 	}
@@ -913,4 +828,4 @@ public class OpenIdConnectSessionUtil {
 	private static volatile OpenIdConnectSessionPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1208145185
+// LIFERAY-SERVICE-BUILDER-HASH:-725193328

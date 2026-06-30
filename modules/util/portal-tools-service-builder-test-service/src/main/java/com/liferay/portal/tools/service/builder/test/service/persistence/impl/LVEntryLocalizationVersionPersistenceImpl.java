@@ -5,11 +5,9 @@
 
 package com.liferay.portal.tools.service.builder.test.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.log.Log;
@@ -19,10 +17,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.portal.tools.service.builder.test.exception.NoSuchLVEntryLocalizationVersionException;
@@ -39,7 +34,6 @@ import java.lang.reflect.InvocationHandler;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The persistence implementation for the lv entry localization version service.
@@ -52,7 +46,8 @@ import java.util.Set;
  * @generated
  */
 public class LVEntryLocalizationVersionPersistenceImpl
-	extends BasePersistenceImpl<LVEntryLocalizationVersion>
+	extends BasePersistenceImpl
+		<LVEntryLocalizationVersion, NoSuchLVEntryLocalizationVersionException>
 	implements LVEntryLocalizationVersionPersistence {
 
 	/*
@@ -69,9 +64,6 @@ public class LVEntryLocalizationVersionPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByLvEntryLocalizationId;
 	private FinderPath _finderPathWithoutPaginationFindByLvEntryLocalizationId;
 	private FinderPath _finderPathCountByLvEntryLocalizationId;
@@ -925,145 +917,6 @@ public class LVEntryLocalizationVersionPersistenceImpl
 	}
 
 	/**
-	 * Caches the lv entry localization version in the entity cache if it is enabled.
-	 *
-	 * @param lvEntryLocalizationVersion the lv entry localization version
-	 */
-	@Override
-	public void cacheResult(
-		LVEntryLocalizationVersion lvEntryLocalizationVersion) {
-
-		entityCache.putResult(
-			LVEntryLocalizationVersionImpl.class,
-			lvEntryLocalizationVersion.getPrimaryKey(),
-			lvEntryLocalizationVersion);
-
-		finderCache.putResult(
-			_finderPathFetchByLvEntryLocalizationId_Version,
-			new Object[] {
-				lvEntryLocalizationVersion.getLvEntryLocalizationId(),
-				lvEntryLocalizationVersion.getVersion()
-			},
-			lvEntryLocalizationVersion);
-
-		finderCache.putResult(
-			_finderPathFetchByLvEntryId_LanguageId_Version,
-			new Object[] {
-				lvEntryLocalizationVersion.getLvEntryId(),
-				lvEntryLocalizationVersion.getLanguageId(),
-				lvEntryLocalizationVersion.getVersion()
-			},
-			lvEntryLocalizationVersion);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the lv entry localization versions in the entity cache if it is enabled.
-	 *
-	 * @param lvEntryLocalizationVersions the lv entry localization versions
-	 */
-	@Override
-	public void cacheResult(
-		List<LVEntryLocalizationVersion> lvEntryLocalizationVersions) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (lvEntryLocalizationVersions.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (LVEntryLocalizationVersion lvEntryLocalizationVersion :
-				lvEntryLocalizationVersions) {
-
-			if (entityCache.getResult(
-					LVEntryLocalizationVersionImpl.class,
-					lvEntryLocalizationVersion.getPrimaryKey()) == null) {
-
-				cacheResult(lvEntryLocalizationVersion);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all lv entry localization versions.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(LVEntryLocalizationVersionImpl.class);
-
-		finderCache.clearCache(LVEntryLocalizationVersionImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the lv entry localization version.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(
-		LVEntryLocalizationVersion lvEntryLocalizationVersion) {
-
-		entityCache.removeResult(
-			LVEntryLocalizationVersionImpl.class, lvEntryLocalizationVersion);
-	}
-
-	@Override
-	public void clearCache(
-		List<LVEntryLocalizationVersion> lvEntryLocalizationVersions) {
-
-		for (LVEntryLocalizationVersion lvEntryLocalizationVersion :
-				lvEntryLocalizationVersions) {
-
-			entityCache.removeResult(
-				LVEntryLocalizationVersionImpl.class,
-				lvEntryLocalizationVersion);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(LVEntryLocalizationVersionImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				LVEntryLocalizationVersionImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		LVEntryLocalizationVersionModelImpl
-			lvEntryLocalizationVersionModelImpl) {
-
-		Object[] args = new Object[] {
-			lvEntryLocalizationVersionModelImpl.getLvEntryLocalizationId(),
-			lvEntryLocalizationVersionModelImpl.getVersion()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByLvEntryLocalizationId_Version, args,
-			lvEntryLocalizationVersionModelImpl);
-
-		args = new Object[] {
-			lvEntryLocalizationVersionModelImpl.getLvEntryId(),
-			lvEntryLocalizationVersionModelImpl.getLanguageId(),
-			lvEntryLocalizationVersionModelImpl.getVersion()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByLvEntryId_LanguageId_Version, args,
-			lvEntryLocalizationVersionModelImpl);
-	}
-
-	/**
 	 * Creates a new lv entry localization version with the primary key. Does not add the lv entry localization version to the database.
 	 *
 	 * @param lvEntryLocalizationVersionId the primary key for the new lv entry localization version
@@ -1097,50 +950,6 @@ public class LVEntryLocalizationVersionPersistenceImpl
 		throws NoSuchLVEntryLocalizationVersionException {
 
 		return remove((Serializable)lvEntryLocalizationVersionId);
-	}
-
-	/**
-	 * Removes the lv entry localization version with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the lv entry localization version
-	 * @return the lv entry localization version that was removed
-	 * @throws NoSuchLVEntryLocalizationVersionException if a lv entry localization version with the primary key could not be found
-	 */
-	@Override
-	public LVEntryLocalizationVersion remove(Serializable primaryKey)
-		throws NoSuchLVEntryLocalizationVersionException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			LVEntryLocalizationVersion lvEntryLocalizationVersion =
-				(LVEntryLocalizationVersion)session.get(
-					LVEntryLocalizationVersionImpl.class, primaryKey);
-
-			if (lvEntryLocalizationVersion == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchLVEntryLocalizationVersionException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(lvEntryLocalizationVersion);
-		}
-		catch (NoSuchLVEntryLocalizationVersionException
-					noSuchEntityException) {
-
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1226,43 +1035,13 @@ public class LVEntryLocalizationVersionPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			LVEntryLocalizationVersionImpl.class,
-			lvEntryLocalizationVersionModelImpl, false, true);
-
-		cacheUniqueFindersCache(lvEntryLocalizationVersionModelImpl);
+		cacheUniqueFindersResult(lvEntryLocalizationVersion, false);
 
 		if (isNew) {
 			lvEntryLocalizationVersion.setNew(false);
 		}
 
 		lvEntryLocalizationVersion.resetOriginalValues();
-
-		return lvEntryLocalizationVersion;
-	}
-
-	/**
-	 * Returns the lv entry localization version with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the lv entry localization version
-	 * @return the lv entry localization version
-	 * @throws NoSuchLVEntryLocalizationVersionException if a lv entry localization version with the primary key could not be found
-	 */
-	@Override
-	public LVEntryLocalizationVersion findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchLVEntryLocalizationVersionException {
-
-		LVEntryLocalizationVersion lvEntryLocalizationVersion =
-			fetchByPrimaryKey(primaryKey);
-
-		if (lvEntryLocalizationVersion == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchLVEntryLocalizationVersionException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return lvEntryLocalizationVersion;
 	}
@@ -1295,191 +1074,6 @@ public class LVEntryLocalizationVersionPersistenceImpl
 		return fetchByPrimaryKey((Serializable)lvEntryLocalizationVersionId);
 	}
 
-	/**
-	 * Returns all the lv entry localization versions.
-	 *
-	 * @return the lv entry localization versions
-	 */
-	@Override
-	public List<LVEntryLocalizationVersion> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the lv entry localization versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LVEntryLocalizationVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of lv entry localization versions
-	 * @param end the upper bound of the range of lv entry localization versions (not inclusive)
-	 * @return the range of lv entry localization versions
-	 */
-	@Override
-	public List<LVEntryLocalizationVersion> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the lv entry localization versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LVEntryLocalizationVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of lv entry localization versions
-	 * @param end the upper bound of the range of lv entry localization versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of lv entry localization versions
-	 */
-	@Override
-	public List<LVEntryLocalizationVersion> findAll(
-		int start, int end,
-		OrderByComparator<LVEntryLocalizationVersion> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the lv entry localization versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LVEntryLocalizationVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of lv entry localization versions
-	 * @param end the upper bound of the range of lv entry localization versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of lv entry localization versions
-	 */
-	@Override
-	public List<LVEntryLocalizationVersion> findAll(
-		int start, int end,
-		OrderByComparator<LVEntryLocalizationVersion> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<LVEntryLocalizationVersion> list = null;
-
-		if (useFinderCache) {
-			list = (List<LVEntryLocalizationVersion>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_LVENTRYLOCALIZATIONVERSION);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_LVENTRYLOCALIZATIONVERSION;
-
-				sql = sql.concat(
-					LVEntryLocalizationVersionModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<LVEntryLocalizationVersion>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the lv entry localization versions from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (LVEntryLocalizationVersion lvEntryLocalizationVersion :
-				findAll()) {
-
-			remove(lvEntryLocalizationVersion);
-		}
-	}
-
-	/**
-	 * Returns the number of lv entry localization versions.
-	 *
-	 * @return the number of lv entry localization versions
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_LVENTRYLOCALIZATIONVERSION);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	protected EntityCache getEntityCache() {
 		return entityCache;
@@ -1504,21 +1098,6 @@ public class LVEntryLocalizationVersionPersistenceImpl
 	 * Initializes the lv entry localization version persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByLvEntryLocalizationId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
 			"findByLvEntryLocalizationId",
@@ -1548,24 +1127,28 @@ public class LVEntryLocalizationVersionPersistenceImpl
 				_SQL_SELECT_LVENTRYLOCALIZATIONVERSION_WHERE,
 				_SQL_COUNT_LVENTRYLOCALIZATIONVERSION_WHERE,
 				LVEntryLocalizationVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"lvEntryLocalizationVersion.", "lvEntryLocalizationId",
 					FinderColumn.Type.LONG, "=", true, true,
 					LVEntryLocalizationVersion::getLvEntryLocalizationId));
 
-		_finderPathFetchByLvEntryLocalizationId_Version = new FinderPath(
-			FINDER_CLASS_NAME_ENTITY, "fetchByLvEntryLocalizationId_Version",
-			new String[] {Long.class.getName(), Integer.class.getName()},
-			new String[] {"lvEntryLocalizationId", "version"}, true);
+		_finderPathFetchByLvEntryLocalizationId_Version =
+			createUniqueFinderPath(
+				FINDER_CLASS_NAME_ENTITY,
+				"fetchByLvEntryLocalizationId_Version",
+				new String[] {Long.class.getName(), Integer.class.getName()},
+				new String[] {"lvEntryLocalizationId", "version"}, 0, 0, false,
+				LVEntryLocalizationVersion::getLvEntryLocalizationId,
+				LVEntryLocalizationVersion::getVersion);
 
 		_uniquePersistenceFinderByLvEntryLocalizationId_Version =
 			new UniquePersistenceFinder<>(
 				this, _finderPathFetchByLvEntryLocalizationId_Version,
-				_SQL_SELECT_LVENTRYLOCALIZATIONVERSION_WHERE,
+				_SQL_SELECT_LVENTRYLOCALIZATIONVERSION_WHERE, "",
 				new FinderColumn<>(
 					"lvEntryLocalizationVersion.", "lvEntryLocalizationId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					LVEntryLocalizationVersion::getLvEntryLocalizationId),
 				new FinderColumn<>(
 					"lvEntryLocalizationVersion.", "version",
@@ -1598,7 +1181,7 @@ public class LVEntryLocalizationVersionPersistenceImpl
 				_SQL_SELECT_LVENTRYLOCALIZATIONVERSION_WHERE,
 				_SQL_COUNT_LVENTRYLOCALIZATIONVERSION_WHERE,
 				LVEntryLocalizationVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"lvEntryLocalizationVersion.", "lvEntryId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1633,10 +1216,10 @@ public class LVEntryLocalizationVersionPersistenceImpl
 				_SQL_SELECT_LVENTRYLOCALIZATIONVERSION_WHERE,
 				_SQL_COUNT_LVENTRYLOCALIZATIONVERSION_WHERE,
 				LVEntryLocalizationVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"lvEntryLocalizationVersion.", "lvEntryId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					LVEntryLocalizationVersion::getLvEntryId),
 				new FinderColumn<>(
 					"lvEntryLocalizationVersion.", "version",
@@ -1657,13 +1240,13 @@ public class LVEntryLocalizationVersionPersistenceImpl
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"findByLvEntryId_LanguageId",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"lvEntryId", "languageId"}, true);
+			new String[] {"lvEntryId", "languageId"}, 0, 2, true, null);
 
 		_finderPathCountByLvEntryId_LanguageId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"countByLvEntryId_LanguageId",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"lvEntryId", "languageId"}, false);
+			new String[] {"lvEntryId", "languageId"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByLvEntryId_LanguageId =
 			new CollectionPersistenceFinder<>(
@@ -1673,35 +1256,38 @@ public class LVEntryLocalizationVersionPersistenceImpl
 				_SQL_SELECT_LVENTRYLOCALIZATIONVERSION_WHERE,
 				_SQL_COUNT_LVENTRYLOCALIZATIONVERSION_WHERE,
 				LVEntryLocalizationVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"lvEntryLocalizationVersion.", "lvEntryId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					LVEntryLocalizationVersion::getLvEntryId),
 				new FinderColumn<>(
 					"lvEntryLocalizationVersion.", "languageId",
 					FinderColumn.Type.STRING, "=", true, true,
 					LVEntryLocalizationVersion::getLanguageId));
 
-		_finderPathFetchByLvEntryId_LanguageId_Version = new FinderPath(
+		_finderPathFetchByLvEntryId_LanguageId_Version = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByLvEntryId_LanguageId_Version",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"lvEntryId", "languageId", "version"}, true);
+			new String[] {"lvEntryId", "languageId", "version"}, 0, 2, false,
+			LVEntryLocalizationVersion::getLvEntryId,
+			convertNullFunction(LVEntryLocalizationVersion::getLanguageId),
+			LVEntryLocalizationVersion::getVersion);
 
 		_uniquePersistenceFinderByLvEntryId_LanguageId_Version =
 			new UniquePersistenceFinder<>(
 				this, _finderPathFetchByLvEntryId_LanguageId_Version,
-				_SQL_SELECT_LVENTRYLOCALIZATIONVERSION_WHERE,
+				_SQL_SELECT_LVENTRYLOCALIZATIONVERSION_WHERE, "",
 				new FinderColumn<>(
 					"lvEntryLocalizationVersion.", "lvEntryId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					LVEntryLocalizationVersion::getLvEntryId),
 				new FinderColumn<>(
 					"lvEntryLocalizationVersion.", "languageId",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					LVEntryLocalizationVersion::getLanguageId),
 				new FinderColumn<>(
 					"lvEntryLocalizationVersion.", "version",
@@ -1723,23 +1309,17 @@ public class LVEntryLocalizationVersionPersistenceImpl
 	@ServiceReference(type = FinderCache.class)
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		LVEntryLocalizationVersionModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_LVENTRYLOCALIZATIONVERSION =
 		"SELECT lvEntryLocalizationVersion FROM LVEntryLocalizationVersion lvEntryLocalizationVersion";
 
 	private static final String _SQL_SELECT_LVENTRYLOCALIZATIONVERSION_WHERE =
 		"SELECT lvEntryLocalizationVersion FROM LVEntryLocalizationVersion lvEntryLocalizationVersion WHERE ";
 
-	private static final String _SQL_COUNT_LVENTRYLOCALIZATIONVERSION =
-		"SELECT COUNT(lvEntryLocalizationVersion) FROM LVEntryLocalizationVersion lvEntryLocalizationVersion";
-
 	private static final String _SQL_COUNT_LVENTRYLOCALIZATIONVERSION_WHERE =
 		"SELECT COUNT(lvEntryLocalizationVersion) FROM LVEntryLocalizationVersion lvEntryLocalizationVersion WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"lvEntryLocalizationVersion.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No LVEntryLocalizationVersion exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No LVEntryLocalizationVersion exists with the key {";
@@ -1753,4 +1333,4 @@ public class LVEntryLocalizationVersionPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1925864935
+// LIFERAY-SERVICE-BUILDER-HASH:1330750939

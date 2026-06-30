@@ -36,6 +36,24 @@ public class CPDefinitionGroupedEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CPDefinitionGroupedEntry> cpDefinitionGroupedEntries) {
+
+		getPersistence().cacheResult(cpDefinitionGroupedEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		CPDefinitionGroupedEntry cpDefinitionGroupedEntry) {
+
+		getPersistence().cacheResult(cpDefinitionGroupedEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -765,28 +783,6 @@ public class CPDefinitionGroupedEntryUtil {
 	}
 
 	/**
-	 * Caches the cp definition grouped entry in the entity cache if it is enabled.
-	 *
-	 * @param cpDefinitionGroupedEntry the cp definition grouped entry
-	 */
-	public static void cacheResult(
-		CPDefinitionGroupedEntry cpDefinitionGroupedEntry) {
-
-		getPersistence().cacheResult(cpDefinitionGroupedEntry);
-	}
-
-	/**
-	 * Caches the cp definition grouped entries in the entity cache if it is enabled.
-	 *
-	 * @param cpDefinitionGroupedEntries the cp definition grouped entries
-	 */
-	public static void cacheResult(
-		List<CPDefinitionGroupedEntry> cpDefinitionGroupedEntries) {
-
-		getPersistence().cacheResult(cpDefinitionGroupedEntries);
-	}
-
-	/**
 	 * Creates a new cp definition grouped entry with the primary key. Does not add the cp definition grouped entry to the database.
 	 *
 	 * @param CPDefinitionGroupedEntryId the primary key for the new cp definition grouped entry
@@ -846,87 +842,6 @@ public class CPDefinitionGroupedEntryUtil {
 		return getPersistence().fetchByPrimaryKey(CPDefinitionGroupedEntryId);
 	}
 
-	/**
-	 * Returns all the cp definition grouped entries.
-	 *
-	 * @return the cp definition grouped entries
-	 */
-	public static List<CPDefinitionGroupedEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the cp definition grouped entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.type.grouped.model.impl.CPDefinitionGroupedEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definition grouped entries
-	 * @param end the upper bound of the range of cp definition grouped entries (not inclusive)
-	 * @return the range of cp definition grouped entries
-	 */
-	public static List<CPDefinitionGroupedEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp definition grouped entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.type.grouped.model.impl.CPDefinitionGroupedEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definition grouped entries
-	 * @param end the upper bound of the range of cp definition grouped entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cp definition grouped entries
-	 */
-	public static List<CPDefinitionGroupedEntry> findAll(
-		int start, int end,
-		OrderByComparator<CPDefinitionGroupedEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp definition grouped entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.type.grouped.model.impl.CPDefinitionGroupedEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definition grouped entries
-	 * @param end the upper bound of the range of cp definition grouped entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cp definition grouped entries
-	 */
-	public static List<CPDefinitionGroupedEntry> findAll(
-		int start, int end,
-		OrderByComparator<CPDefinitionGroupedEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the cp definition grouped entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of cp definition grouped entries.
-	 *
-	 * @return the number of cp definition grouped entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CPDefinitionGroupedEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -940,4 +855,4 @@ public class CPDefinitionGroupedEntryUtil {
 	private static volatile CPDefinitionGroupedEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-571854528
+// LIFERAY-SERVICE-BUILDER-HASH:-1360628262

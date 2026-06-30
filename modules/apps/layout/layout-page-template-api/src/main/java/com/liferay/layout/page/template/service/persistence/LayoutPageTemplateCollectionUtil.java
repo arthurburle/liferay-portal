@@ -36,6 +36,24 @@ public class LayoutPageTemplateCollectionUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<LayoutPageTemplateCollection> layoutPageTemplateCollections) {
+
+		getPersistence().cacheResult(layoutPageTemplateCollections);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		LayoutPageTemplateCollection layoutPageTemplateCollection) {
+
+		getPersistence().cacheResult(layoutPageTemplateCollection);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1951,28 +1969,6 @@ public class LayoutPageTemplateCollectionUtil {
 	}
 
 	/**
-	 * Caches the layout page template collection in the entity cache if it is enabled.
-	 *
-	 * @param layoutPageTemplateCollection the layout page template collection
-	 */
-	public static void cacheResult(
-		LayoutPageTemplateCollection layoutPageTemplateCollection) {
-
-		getPersistence().cacheResult(layoutPageTemplateCollection);
-	}
-
-	/**
-	 * Caches the layout page template collections in the entity cache if it is enabled.
-	 *
-	 * @param layoutPageTemplateCollections the layout page template collections
-	 */
-	public static void cacheResult(
-		List<LayoutPageTemplateCollection> layoutPageTemplateCollections) {
-
-		getPersistence().cacheResult(layoutPageTemplateCollections);
-	}
-
-	/**
 	 * Creates a new layout page template collection with the primary key. Does not add the layout page template collection to the database.
 	 *
 	 * @param layoutPageTemplateCollectionId the primary key for the new layout page template collection
@@ -2034,89 +2030,6 @@ public class LayoutPageTemplateCollectionUtil {
 			layoutPageTemplateCollectionId);
 	}
 
-	/**
-	 * Returns all the layout page template collections.
-	 *
-	 * @return the layout page template collections
-	 */
-	public static List<LayoutPageTemplateCollection> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the layout page template collections.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.page.template.model.impl.LayoutPageTemplateCollectionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout page template collections
-	 * @param end the upper bound of the range of layout page template collections (not inclusive)
-	 * @return the range of layout page template collections
-	 */
-	public static List<LayoutPageTemplateCollection> findAll(
-		int start, int end) {
-
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the layout page template collections.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.page.template.model.impl.LayoutPageTemplateCollectionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout page template collections
-	 * @param end the upper bound of the range of layout page template collections (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of layout page template collections
-	 */
-	public static List<LayoutPageTemplateCollection> findAll(
-		int start, int end,
-		OrderByComparator<LayoutPageTemplateCollection> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the layout page template collections.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.page.template.model.impl.LayoutPageTemplateCollectionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout page template collections
-	 * @param end the upper bound of the range of layout page template collections (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of layout page template collections
-	 */
-	public static List<LayoutPageTemplateCollection> findAll(
-		int start, int end,
-		OrderByComparator<LayoutPageTemplateCollection> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the layout page template collections from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of layout page template collections.
-	 *
-	 * @return the number of layout page template collections
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static LayoutPageTemplateCollectionPersistence getPersistence() {
 		return _persistence;
 	}
@@ -2131,4 +2044,4 @@ public class LayoutPageTemplateCollectionUtil {
 		_persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-494211528
+// LIFERAY-SERVICE-BUILDER-HASH:1712947429

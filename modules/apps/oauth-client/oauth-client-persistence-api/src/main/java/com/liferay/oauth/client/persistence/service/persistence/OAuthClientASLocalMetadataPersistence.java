@@ -1030,22 +1030,6 @@ public interface OAuthClientASLocalMetadataPersistence
 	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
-	 * Caches the o auth client as local metadata in the entity cache if it is enabled.
-	 *
-	 * @param oAuthClientASLocalMetadata the o auth client as local metadata
-	 */
-	public void cacheResult(
-		OAuthClientASLocalMetadata oAuthClientASLocalMetadata);
-
-	/**
-	 * Caches the o auth client as local metadatas in the entity cache if it is enabled.
-	 *
-	 * @param oAuthClientASLocalMetadatas the o auth client as local metadatas
-	 */
-	public void cacheResult(
-		java.util.List<OAuthClientASLocalMetadata> oAuthClientASLocalMetadatas);
-
-	/**
 	 * Creates a new o auth client as local metadata with the primary key. Does not add the o auth client as local metadata to the database.
 	 *
 	 * @param oAuthClientASLocalMetadataId the primary key for the new o auth client as local metadata
@@ -1086,74 +1070,5 @@ public interface OAuthClientASLocalMetadataPersistence
 	public OAuthClientASLocalMetadata fetchByPrimaryKey(
 		long oAuthClientASLocalMetadataId);
 
-	/**
-	 * Returns all the o auth client as local metadatas.
-	 *
-	 * @return the o auth client as local metadatas
-	 */
-	public java.util.List<OAuthClientASLocalMetadata> findAll();
-
-	/**
-	 * Returns a range of all the o auth client as local metadatas.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.oauth.client.persistence.model.impl.OAuthClientASLocalMetadataModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth client as local metadatas
-	 * @param end the upper bound of the range of o auth client as local metadatas (not inclusive)
-	 * @return the range of o auth client as local metadatas
-	 */
-	public java.util.List<OAuthClientASLocalMetadata> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the o auth client as local metadatas.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.oauth.client.persistence.model.impl.OAuthClientASLocalMetadataModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth client as local metadatas
-	 * @param end the upper bound of the range of o auth client as local metadatas (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of o auth client as local metadatas
-	 */
-	public java.util.List<OAuthClientASLocalMetadata> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<OAuthClientASLocalMetadata> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the o auth client as local metadatas.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.oauth.client.persistence.model.impl.OAuthClientASLocalMetadataModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth client as local metadatas
-	 * @param end the upper bound of the range of o auth client as local metadatas (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of o auth client as local metadatas
-	 */
-	public java.util.List<OAuthClientASLocalMetadata> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<OAuthClientASLocalMetadata> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the o auth client as local metadatas from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of o auth client as local metadatas.
-	 *
-	 * @return the number of o auth client as local metadatas
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1008556419
+// LIFERAY-SERVICE-BUILDER-HASH:1270144803

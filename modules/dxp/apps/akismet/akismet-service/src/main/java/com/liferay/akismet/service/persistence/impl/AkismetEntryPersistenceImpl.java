@@ -13,12 +13,10 @@ import com.liferay.akismet.model.impl.AkismetEntryModelImpl;
 import com.liferay.akismet.service.persistence.AkismetEntryPersistence;
 import com.liferay.akismet.service.persistence.AkismetEntryUtil;
 import com.liferay.akismet.service.persistence.impl.constants.OSBCommunityPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -30,10 +28,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 
@@ -66,7 +61,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = AkismetEntryPersistence.class)
 public class AkismetEntryPersistenceImpl
-	extends BasePersistenceImpl<AkismetEntry>
+	extends BasePersistenceImpl<AkismetEntry, NoSuchAkismetEntryException>
 	implements AkismetEntryPersistence {
 
 	/*
@@ -83,9 +78,6 @@ public class AkismetEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByLtModifiedDate;
 	private FinderPath _finderPathWithPaginationCountByLtModifiedDate;
 	private CollectionPersistenceFinder<AkismetEntry>
@@ -339,104 +331,6 @@ public class AkismetEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the akismet entry in the entity cache if it is enabled.
-	 *
-	 * @param akismetEntry the akismet entry
-	 */
-	@Override
-	public void cacheResult(AkismetEntry akismetEntry) {
-		entityCache.putResult(
-			AkismetEntryImpl.class, akismetEntry.getPrimaryKey(), akismetEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByC_C,
-			new Object[] {
-				akismetEntry.getClassNameId(), akismetEntry.getClassPK()
-			},
-			akismetEntry);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the akismet entries in the entity cache if it is enabled.
-	 *
-	 * @param akismetEntries the akismet entries
-	 */
-	@Override
-	public void cacheResult(List<AkismetEntry> akismetEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (akismetEntries.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (AkismetEntry akismetEntry : akismetEntries) {
-			if (entityCache.getResult(
-					AkismetEntryImpl.class, akismetEntry.getPrimaryKey()) ==
-						null) {
-
-				cacheResult(akismetEntry);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all akismet entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(AkismetEntryImpl.class);
-
-		finderCache.clearCache(AkismetEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the akismet entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(AkismetEntry akismetEntry) {
-		entityCache.removeResult(AkismetEntryImpl.class, akismetEntry);
-	}
-
-	@Override
-	public void clearCache(List<AkismetEntry> akismetEntries) {
-		for (AkismetEntry akismetEntry : akismetEntries) {
-			entityCache.removeResult(AkismetEntryImpl.class, akismetEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(AkismetEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(AkismetEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		AkismetEntryModelImpl akismetEntryModelImpl) {
-
-		Object[] args = new Object[] {
-			akismetEntryModelImpl.getClassNameId(),
-			akismetEntryModelImpl.getClassPK()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByC_C, args, akismetEntryModelImpl);
-	}
-
-	/**
 	 * Creates a new akismet entry with the primary key. Does not add the akismet entry to the database.
 	 *
 	 * @param akismetEntryId the primary key for the new akismet entry
@@ -464,47 +358,6 @@ public class AkismetEntryPersistenceImpl
 		throws NoSuchAkismetEntryException {
 
 		return remove((Serializable)akismetEntryId);
-	}
-
-	/**
-	 * Removes the akismet entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the akismet entry
-	 * @return the akismet entry that was removed
-	 * @throws NoSuchAkismetEntryException if a akismet entry with the primary key could not be found
-	 */
-	@Override
-	public AkismetEntry remove(Serializable primaryKey)
-		throws NoSuchAkismetEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			AkismetEntry akismetEntry = (AkismetEntry)session.get(
-				AkismetEntryImpl.class, primaryKey);
-
-			if (akismetEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchAkismetEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(akismetEntry);
-		}
-		catch (NoSuchAkismetEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -595,41 +448,13 @@ public class AkismetEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			AkismetEntryImpl.class, akismetEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(akismetEntryModelImpl);
+		cacheUniqueFindersResult(akismetEntry, false);
 
 		if (isNew) {
 			akismetEntry.setNew(false);
 		}
 
 		akismetEntry.resetOriginalValues();
-
-		return akismetEntry;
-	}
-
-	/**
-	 * Returns the akismet entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the akismet entry
-	 * @return the akismet entry
-	 * @throws NoSuchAkismetEntryException if a akismet entry with the primary key could not be found
-	 */
-	@Override
-	public AkismetEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchAkismetEntryException {
-
-		AkismetEntry akismetEntry = fetchByPrimaryKey(primaryKey);
-
-		if (akismetEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchAkismetEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return akismetEntry;
 	}
@@ -657,185 +482,6 @@ public class AkismetEntryPersistenceImpl
 	@Override
 	public AkismetEntry fetchByPrimaryKey(long akismetEntryId) {
 		return fetchByPrimaryKey((Serializable)akismetEntryId);
-	}
-
-	/**
-	 * Returns all the akismet entries.
-	 *
-	 * @return the akismet entries
-	 */
-	@Override
-	public List<AkismetEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the akismet entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>AkismetEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of akismet entries
-	 * @param end the upper bound of the range of akismet entries (not inclusive)
-	 * @return the range of akismet entries
-	 */
-	@Override
-	public List<AkismetEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the akismet entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>AkismetEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of akismet entries
-	 * @param end the upper bound of the range of akismet entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of akismet entries
-	 */
-	@Override
-	public List<AkismetEntry> findAll(
-		int start, int end, OrderByComparator<AkismetEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the akismet entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>AkismetEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of akismet entries
-	 * @param end the upper bound of the range of akismet entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of akismet entries
-	 */
-	@Override
-	public List<AkismetEntry> findAll(
-		int start, int end, OrderByComparator<AkismetEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<AkismetEntry> list = null;
-
-		if (useFinderCache) {
-			list = (List<AkismetEntry>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_AKISMETENTRY);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_AKISMETENTRY;
-
-				sql = sql.concat(AkismetEntryModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<AkismetEntry>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the akismet entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (AkismetEntry akismetEntry : findAll()) {
-			remove(akismetEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of akismet entries.
-	 *
-	 * @return the number of akismet entries
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_AKISMETENTRY);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -868,21 +514,6 @@ public class AkismetEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByLtModifiedDate = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByLtModifiedDate",
 			new String[] {
@@ -901,21 +532,22 @@ public class AkismetEntryPersistenceImpl
 				this, _finderPathWithPaginationFindByLtModifiedDate, null,
 				_finderPathWithPaginationCountByLtModifiedDate,
 				_SQL_SELECT_AKISMETENTRY_WHERE, _SQL_COUNT_AKISMETENTRY_WHERE,
-				AkismetEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				AkismetEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"akismetEntry.", "modifiedDate", FinderColumn.Type.DATE,
 					"<", true, true, AkismetEntry::getModifiedDate));
 
-		_finderPathFetchByC_C = new FinderPath(
+		_finderPathFetchByC_C = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_C",
 			new String[] {Long.class.getName(), Long.class.getName()},
-			new String[] {"classNameId", "classPK"}, true);
+			new String[] {"classNameId", "classPK"}, 0, 0, false,
+			AkismetEntry::getClassNameId, AkismetEntry::getClassPK);
 
 		_uniquePersistenceFinderByC_C = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByC_C, _SQL_SELECT_AKISMETENTRY_WHERE,
+			this, _finderPathFetchByC_C, _SQL_SELECT_AKISMETENTRY_WHERE, "",
 			new FinderColumn<>(
 				"akismetEntry.", "classNameId", FinderColumn.Type.LONG, "=",
-				true, false, AkismetEntry::getClassNameId),
+				true, true, AkismetEntry::getClassNameId),
 			new FinderColumn<>(
 				"akismetEntry.", "classPK", FinderColumn.Type.LONG, "=", true,
 				true, AkismetEntry::getClassPK));
@@ -962,22 +594,17 @@ public class AkismetEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		AkismetEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_AKISMETENTRY =
 		"SELECT akismetEntry FROM AkismetEntry akismetEntry";
 
 	private static final String _SQL_SELECT_AKISMETENTRY_WHERE =
 		"SELECT akismetEntry FROM AkismetEntry akismetEntry WHERE ";
 
-	private static final String _SQL_COUNT_AKISMETENTRY =
-		"SELECT COUNT(akismetEntry) FROM AkismetEntry akismetEntry";
-
 	private static final String _SQL_COUNT_AKISMETENTRY_WHERE =
 		"SELECT COUNT(akismetEntry) FROM AkismetEntry akismetEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "akismetEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No AkismetEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No AkismetEntry exists with the key {";
@@ -994,4 +621,4 @@ public class AkismetEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:354118478
+// LIFERAY-SERVICE-BUILDER-HASH:2095596341

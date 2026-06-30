@@ -13,15 +13,11 @@ import com.liferay.commerce.price.list.model.impl.CommercePriceListCommerceAccou
 import com.liferay.commerce.price.list.service.persistence.CommercePriceListCommerceAccountGroupRelPersistence;
 import com.liferay.commerce.price.list.service.persistence.CommercePriceListCommerceAccountGroupRelUtil;
 import com.liferay.commerce.price.list.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -35,10 +31,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -54,7 +47,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,7 +70,9 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CommercePriceListCommerceAccountGroupRelPersistence.class)
 public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
-	extends BasePersistenceImpl<CommercePriceListCommerceAccountGroupRel>
+	extends BasePersistenceImpl
+		<CommercePriceListCommerceAccountGroupRel,
+		 NoSuchPriceListCommerceAccountGroupRelException>
 	implements CommercePriceListCommerceAccountGroupRelPersistence {
 
 	/*
@@ -95,9 +89,6 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -180,14 +171,9 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 			orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommercePriceListCommerceAccountGroupRel.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				finderCache, new Object[] {uuid}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			finderCache, new Object[] {uuid}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -254,13 +240,8 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommercePriceListCommerceAccountGroupRel.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				finderCache, new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			finderCache, new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByUuid_C;
@@ -351,14 +332,9 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 			orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommercePriceListCommerceAccountGroupRel.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				finderCache, new Object[] {uuid, companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			finderCache, new Object[] {uuid, companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -429,13 +405,8 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommercePriceListCommerceAccountGroupRel.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				finderCache, new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			finderCache, new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByCommercePriceListId;
@@ -525,14 +496,9 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 				orderByComparator,
 			boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommercePriceListCommerceAccountGroupRel.class)) {
-
-			return _collectionPersistenceFinderByCommercePriceListId.find(
-				finderCache, new Object[] {commercePriceListId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByCommercePriceListId.find(
+			finderCache, new Object[] {commercePriceListId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -604,13 +570,8 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 	 */
 	@Override
 	public int countByCommercePriceListId(long commercePriceListId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommercePriceListCommerceAccountGroupRel.class)) {
-
-			return _collectionPersistenceFinderByCommercePriceListId.count(
-				finderCache, new Object[] {commercePriceListId});
-		}
+		return _collectionPersistenceFinderByCommercePriceListId.count(
+			finderCache, new Object[] {commercePriceListId});
 	}
 
 	private FinderPath _finderPathFetchByCAGI_CPI;
@@ -678,15 +639,10 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 		long commercePriceListId, long commerceAccountGroupId,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommercePriceListCommerceAccountGroupRel.class)) {
-
-			return _uniquePersistenceFinderByCAGI_CPI.fetch(
-				finderCache,
-				new Object[] {commercePriceListId, commerceAccountGroupId},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByCAGI_CPI.fetch(
+			finderCache,
+			new Object[] {commercePriceListId, commerceAccountGroupId},
+			useFinderCache);
 	}
 
 	/**
@@ -744,159 +700,6 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 	}
 
 	/**
-	 * Caches the commerce price list commerce account group rel in the entity cache if it is enabled.
-	 *
-	 * @param commercePriceListCommerceAccountGroupRel the commerce price list commerce account group rel
-	 */
-	@Override
-	public void cacheResult(
-		CommercePriceListCommerceAccountGroupRel
-			commercePriceListCommerceAccountGroupRel) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					commercePriceListCommerceAccountGroupRel.
-						getCtCollectionId())) {
-
-			entityCache.putResult(
-				CommercePriceListCommerceAccountGroupRelImpl.class,
-				commercePriceListCommerceAccountGroupRel.getPrimaryKey(),
-				commercePriceListCommerceAccountGroupRel);
-
-			finderCache.putResult(
-				_finderPathFetchByCAGI_CPI,
-				new Object[] {
-					commercePriceListCommerceAccountGroupRel.
-						getCommercePriceListId(),
-					commercePriceListCommerceAccountGroupRel.
-						getCommerceAccountGroupId()
-				},
-				commercePriceListCommerceAccountGroupRel);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the commerce price list commerce account group rels in the entity cache if it is enabled.
-	 *
-	 * @param commercePriceListCommerceAccountGroupRels the commerce price list commerce account group rels
-	 */
-	@Override
-	public void cacheResult(
-		List<CommercePriceListCommerceAccountGroupRel>
-			commercePriceListCommerceAccountGroupRels) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (commercePriceListCommerceAccountGroupRels.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CommercePriceListCommerceAccountGroupRel
-				commercePriceListCommerceAccountGroupRel :
-					commercePriceListCommerceAccountGroupRels) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						commercePriceListCommerceAccountGroupRel.
-							getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						CommercePriceListCommerceAccountGroupRelImpl.class,
-						commercePriceListCommerceAccountGroupRel.
-							getPrimaryKey()) == null) {
-
-					cacheResult(commercePriceListCommerceAccountGroupRel);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all commerce price list commerce account group rels.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(
-			CommercePriceListCommerceAccountGroupRelImpl.class);
-
-		finderCache.clearCache(
-			CommercePriceListCommerceAccountGroupRelImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the commerce price list commerce account group rel.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(
-		CommercePriceListCommerceAccountGroupRel
-			commercePriceListCommerceAccountGroupRel) {
-
-		entityCache.removeResult(
-			CommercePriceListCommerceAccountGroupRelImpl.class,
-			commercePriceListCommerceAccountGroupRel);
-	}
-
-	@Override
-	public void clearCache(
-		List<CommercePriceListCommerceAccountGroupRel>
-			commercePriceListCommerceAccountGroupRels) {
-
-		for (CommercePriceListCommerceAccountGroupRel
-				commercePriceListCommerceAccountGroupRel :
-					commercePriceListCommerceAccountGroupRels) {
-
-			entityCache.removeResult(
-				CommercePriceListCommerceAccountGroupRelImpl.class,
-				commercePriceListCommerceAccountGroupRel);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(
-			CommercePriceListCommerceAccountGroupRelImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CommercePriceListCommerceAccountGroupRelImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CommercePriceListCommerceAccountGroupRelModelImpl
-			commercePriceListCommerceAccountGroupRelModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					commercePriceListCommerceAccountGroupRelModelImpl.
-						getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				commercePriceListCommerceAccountGroupRelModelImpl.
-					getCommercePriceListId(),
-				commercePriceListCommerceAccountGroupRelModelImpl.
-					getCommerceAccountGroupId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByCAGI_CPI, args,
-				commercePriceListCommerceAccountGroupRelModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new commerce price list commerce account group rel with the primary key. Does not add the commerce price list commerce account group rel to the database.
 	 *
 	 * @param commercePriceListCommerceAccountGroupRelId the primary key for the new commerce price list commerce account group rel
@@ -937,53 +740,6 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 		throws NoSuchPriceListCommerceAccountGroupRelException {
 
 		return remove((Serializable)commercePriceListCommerceAccountGroupRelId);
-	}
-
-	/**
-	 * Removes the commerce price list commerce account group rel with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the commerce price list commerce account group rel
-	 * @return the commerce price list commerce account group rel that was removed
-	 * @throws NoSuchPriceListCommerceAccountGroupRelException if a commerce price list commerce account group rel with the primary key could not be found
-	 */
-	@Override
-	public CommercePriceListCommerceAccountGroupRel remove(
-			Serializable primaryKey)
-		throws NoSuchPriceListCommerceAccountGroupRelException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CommercePriceListCommerceAccountGroupRel
-				commercePriceListCommerceAccountGroupRel =
-					(CommercePriceListCommerceAccountGroupRel)session.get(
-						CommercePriceListCommerceAccountGroupRelImpl.class,
-						primaryKey);
-
-			if (commercePriceListCommerceAccountGroupRel == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchPriceListCommerceAccountGroupRelException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(commercePriceListCommerceAccountGroupRel);
-		}
-		catch (NoSuchPriceListCommerceAccountGroupRelException
-					noSuchEntityException) {
-
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1126,46 +882,14 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CommercePriceListCommerceAccountGroupRelImpl.class,
-			commercePriceListCommerceAccountGroupRelModelImpl, false, true);
-
-		cacheUniqueFindersCache(
-			commercePriceListCommerceAccountGroupRelModelImpl);
+		cacheUniqueFindersResult(
+			commercePriceListCommerceAccountGroupRel, false);
 
 		if (isNew) {
 			commercePriceListCommerceAccountGroupRel.setNew(false);
 		}
 
 		commercePriceListCommerceAccountGroupRel.resetOriginalValues();
-
-		return commercePriceListCommerceAccountGroupRel;
-	}
-
-	/**
-	 * Returns the commerce price list commerce account group rel with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the commerce price list commerce account group rel
-	 * @return the commerce price list commerce account group rel
-	 * @throws NoSuchPriceListCommerceAccountGroupRelException if a commerce price list commerce account group rel with the primary key could not be found
-	 */
-	@Override
-	public CommercePriceListCommerceAccountGroupRel findByPrimaryKey(
-			Serializable primaryKey)
-		throws NoSuchPriceListCommerceAccountGroupRelException {
-
-		CommercePriceListCommerceAccountGroupRel
-			commercePriceListCommerceAccountGroupRel = fetchByPrimaryKey(
-				primaryKey);
-
-		if (commercePriceListCommerceAccountGroupRel == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchPriceListCommerceAccountGroupRelException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return commercePriceListCommerceAccountGroupRel;
 	}
@@ -1186,59 +910,9 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 			(Serializable)commercePriceListCommerceAccountGroupRelId);
 	}
 
-	/**
-	 * Returns the commerce price list commerce account group rel with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the commerce price list commerce account group rel
-	 * @return the commerce price list commerce account group rel, or <code>null</code> if a commerce price list commerce account group rel with the primary key could not be found
-	 */
 	@Override
-	public CommercePriceListCommerceAccountGroupRel fetchByPrimaryKey(
-		Serializable primaryKey) {
-
-		if (ctPersistenceHelper.isProductionMode(
-				CommercePriceListCommerceAccountGroupRel.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		CommercePriceListCommerceAccountGroupRel
-			commercePriceListCommerceAccountGroupRel =
-				(CommercePriceListCommerceAccountGroupRel)entityCache.getResult(
-					CommercePriceListCommerceAccountGroupRelImpl.class,
-					primaryKey);
-
-		if (commercePriceListCommerceAccountGroupRel != null) {
-			return commercePriceListCommerceAccountGroupRel;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			commercePriceListCommerceAccountGroupRel =
-				(CommercePriceListCommerceAccountGroupRel)session.get(
-					CommercePriceListCommerceAccountGroupRelImpl.class,
-					primaryKey);
-
-			if (commercePriceListCommerceAccountGroupRel != null) {
-				cacheResult(commercePriceListCommerceAccountGroupRel);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return commercePriceListCommerceAccountGroupRel;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -1253,350 +927,6 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 
 		return fetchByPrimaryKey(
 			(Serializable)commercePriceListCommerceAccountGroupRelId);
-	}
-
-	@Override
-	public Map<Serializable, CommercePriceListCommerceAccountGroupRel>
-		fetchByPrimaryKeys(Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(
-				CommercePriceListCommerceAccountGroupRel.class)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, CommercePriceListCommerceAccountGroupRel> map =
-			new HashMap
-				<Serializable, CommercePriceListCommerceAccountGroupRel>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			CommercePriceListCommerceAccountGroupRel
-				commercePriceListCommerceAccountGroupRel = fetchByPrimaryKey(
-					primaryKey);
-
-			if (commercePriceListCommerceAccountGroupRel != null) {
-				map.put(primaryKey, commercePriceListCommerceAccountGroupRel);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						CommercePriceListCommerceAccountGroupRel.class,
-						primaryKey)) {
-
-				CommercePriceListCommerceAccountGroupRel
-					commercePriceListCommerceAccountGroupRel =
-						(CommercePriceListCommerceAccountGroupRel)
-							entityCache.getResult(
-								CommercePriceListCommerceAccountGroupRelImpl.
-									class,
-								primaryKey);
-
-				if (commercePriceListCommerceAccountGroupRel == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(
-						primaryKey, commercePriceListCommerceAccountGroupRel);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (CommercePriceListCommerceAccountGroupRel
-					commercePriceListCommerceAccountGroupRel :
-						(List<CommercePriceListCommerceAccountGroupRel>)
-							query.list()) {
-
-				map.put(
-					commercePriceListCommerceAccountGroupRel.getPrimaryKeyObj(),
-					commercePriceListCommerceAccountGroupRel);
-
-				cacheResult(commercePriceListCommerceAccountGroupRel);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the commerce price list commerce account group rels.
-	 *
-	 * @return the commerce price list commerce account group rels
-	 */
-	@Override
-	public List<CommercePriceListCommerceAccountGroupRel> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the commerce price list commerce account group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommercePriceListCommerceAccountGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce price list commerce account group rels
-	 * @param end the upper bound of the range of commerce price list commerce account group rels (not inclusive)
-	 * @return the range of commerce price list commerce account group rels
-	 */
-	@Override
-	public List<CommercePriceListCommerceAccountGroupRel> findAll(
-		int start, int end) {
-
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce price list commerce account group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommercePriceListCommerceAccountGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce price list commerce account group rels
-	 * @param end the upper bound of the range of commerce price list commerce account group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce price list commerce account group rels
-	 */
-	@Override
-	public List<CommercePriceListCommerceAccountGroupRel> findAll(
-		int start, int end,
-		OrderByComparator<CommercePriceListCommerceAccountGroupRel>
-			orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce price list commerce account group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommercePriceListCommerceAccountGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce price list commerce account group rels
-	 * @param end the upper bound of the range of commerce price list commerce account group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce price list commerce account group rels
-	 */
-	@Override
-	public List<CommercePriceListCommerceAccountGroupRel> findAll(
-		int start, int end,
-		OrderByComparator<CommercePriceListCommerceAccountGroupRel>
-			orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommercePriceListCommerceAccountGroupRel.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<CommercePriceListCommerceAccountGroupRel> list = null;
-
-			if (useFinderCache) {
-				list =
-					(List<CommercePriceListCommerceAccountGroupRel>)
-						finderCache.getResult(finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(
-						_SQL_SELECT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL;
-
-					sql = sql.concat(
-						CommercePriceListCommerceAccountGroupRelModelImpl.
-							ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list =
-						(List<CommercePriceListCommerceAccountGroupRel>)
-							QueryUtil.list(query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the commerce price list commerce account group rels from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CommercePriceListCommerceAccountGroupRel
-				commercePriceListCommerceAccountGroupRel : findAll()) {
-
-			remove(commercePriceListCommerceAccountGroupRel);
-		}
-	}
-
-	/**
-	 * Returns the number of commerce price list commerce account group rels.
-	 *
-	 * @return the number of commerce price list commerce account group rels
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommercePriceListCommerceAccountGroupRel.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1695,21 +1025,6 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1720,13 +1035,13 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
@@ -1734,7 +1049,7 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 			_SQL_SELECT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL_WHERE,
 			_SQL_COUNT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL_WHERE,
 			CommercePriceListCommerceAccountGroupRelModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commercePriceListCommerceAccountGroupRel.", "uuid",
 				FinderColumn.Type.STRING, "=", true, true,
@@ -1752,12 +1067,12 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1767,10 +1082,10 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 				_SQL_SELECT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL_WHERE,
 				_SQL_COUNT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL_WHERE,
 				CommercePriceListCommerceAccountGroupRelModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"commercePriceListCommerceAccountGroupRel.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					CommercePriceListCommerceAccountGroupRel::getUuid),
 				new FinderColumn<>(
 					"commercePriceListCommerceAccountGroupRel.", "companyId",
@@ -1803,7 +1118,7 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 				_SQL_SELECT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL_WHERE,
 				_SQL_COUNT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL_WHERE,
 				CommercePriceListCommerceAccountGroupRelModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"commercePriceListCommerceAccountGroupRel.",
 					"commercePriceListId", FinderColumn.Type.LONG, "=", true,
@@ -1811,18 +1126,21 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 					CommercePriceListCommerceAccountGroupRel::
 						getCommercePriceListId));
 
-		_finderPathFetchByCAGI_CPI = new FinderPath(
+		_finderPathFetchByCAGI_CPI = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByCAGI_CPI",
 			new String[] {Long.class.getName(), Long.class.getName()},
-			new String[] {"commercePriceListId", "commerceAccountGroupId"},
-			true);
+			new String[] {"commercePriceListId", "commerceAccountGroupId"}, 0,
+			0, false,
+			CommercePriceListCommerceAccountGroupRel::getCommercePriceListId,
+			CommercePriceListCommerceAccountGroupRel::
+				getCommerceAccountGroupId);
 
 		_uniquePersistenceFinderByCAGI_CPI = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByCAGI_CPI,
-			_SQL_SELECT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL_WHERE,
+			_SQL_SELECT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL_WHERE, "",
 			new FinderColumn<>(
 				"commercePriceListCommerceAccountGroupRel.",
-				"commercePriceListId", FinderColumn.Type.LONG, "=", true, false,
+				"commercePriceListId", FinderColumn.Type.LONG, "=", true, true,
 				CommercePriceListCommerceAccountGroupRel::
 					getCommercePriceListId),
 			new FinderColumn<>(
@@ -1878,6 +1196,9 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CommercePriceListCommerceAccountGroupRelModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String
 		_SQL_SELECT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL =
 			"SELECT commercePriceListCommerceAccountGroupRel FROM CommercePriceListCommerceAccountGroupRel commercePriceListCommerceAccountGroupRel";
@@ -1887,18 +1208,8 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 			"SELECT commercePriceListCommerceAccountGroupRel FROM CommercePriceListCommerceAccountGroupRel commercePriceListCommerceAccountGroupRel WHERE ";
 
 	private static final String
-		_SQL_COUNT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL =
-			"SELECT COUNT(commercePriceListCommerceAccountGroupRel) FROM CommercePriceListCommerceAccountGroupRel commercePriceListCommerceAccountGroupRel";
-
-	private static final String
 		_SQL_COUNT_COMMERCEPRICELISTCOMMERCEACCOUNTGROUPREL_WHERE =
 			"SELECT COUNT(commercePriceListCommerceAccountGroupRel) FROM CommercePriceListCommerceAccountGroupRel commercePriceListCommerceAccountGroupRel WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"commercePriceListCommerceAccountGroupRel.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CommercePriceListCommerceAccountGroupRel exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CommercePriceListCommerceAccountGroupRel exists with the key {";
@@ -1917,4 +1228,4 @@ public class CommercePriceListCommerceAccountGroupRelPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1035448985
+// LIFERAY-SERVICE-BUILDER-HASH:-1878959351

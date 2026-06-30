@@ -1238,20 +1238,6 @@ public interface AssetVocabularyPersistence
 	public int countByERC_G(String externalReferenceCode, long groupId);
 
 	/**
-	 * Caches the asset vocabulary in the entity cache if it is enabled.
-	 *
-	 * @param assetVocabulary the asset vocabulary
-	 */
-	public void cacheResult(AssetVocabulary assetVocabulary);
-
-	/**
-	 * Caches the asset vocabularies in the entity cache if it is enabled.
-	 *
-	 * @param assetVocabularies the asset vocabularies
-	 */
-	public void cacheResult(java.util.List<AssetVocabulary> assetVocabularies);
-
-	/**
 	 * Creates a new asset vocabulary with the primary key. Does not add the asset vocabulary to the database.
 	 *
 	 * @param vocabularyId the primary key for the new asset vocabulary
@@ -1289,73 +1275,5 @@ public interface AssetVocabularyPersistence
 	 */
 	public AssetVocabulary fetchByPrimaryKey(long vocabularyId);
 
-	/**
-	 * Returns all the asset vocabularies.
-	 *
-	 * @return the asset vocabularies
-	 */
-	public java.util.List<AssetVocabulary> findAll();
-
-	/**
-	 * Returns a range of all the asset vocabularies.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.asset.model.impl.AssetVocabularyModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset vocabularies
-	 * @param end the upper bound of the range of asset vocabularies (not inclusive)
-	 * @return the range of asset vocabularies
-	 */
-	public java.util.List<AssetVocabulary> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the asset vocabularies.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.asset.model.impl.AssetVocabularyModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset vocabularies
-	 * @param end the upper bound of the range of asset vocabularies (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of asset vocabularies
-	 */
-	public java.util.List<AssetVocabulary> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<AssetVocabulary>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the asset vocabularies.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.asset.model.impl.AssetVocabularyModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset vocabularies
-	 * @param end the upper bound of the range of asset vocabularies (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of asset vocabularies
-	 */
-	public java.util.List<AssetVocabulary> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<AssetVocabulary>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the asset vocabularies from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of asset vocabularies.
-	 *
-	 * @return the number of asset vocabularies
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2071639551
+// LIFERAY-SERVICE-BUILDER-HASH:1384254115

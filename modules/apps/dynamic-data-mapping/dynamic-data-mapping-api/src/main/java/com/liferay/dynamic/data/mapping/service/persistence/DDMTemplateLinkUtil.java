@@ -36,6 +36,20 @@ public class DDMTemplateLinkUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<DDMTemplateLink> ddmTemplateLinks) {
+		getPersistence().cacheResult(ddmTemplateLinks);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(DDMTemplateLink ddmTemplateLink) {
+		getPersistence().cacheResult(ddmTemplateLink);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -300,24 +314,6 @@ public class DDMTemplateLinkUtil {
 	}
 
 	/**
-	 * Caches the ddm template link in the entity cache if it is enabled.
-	 *
-	 * @param ddmTemplateLink the ddm template link
-	 */
-	public static void cacheResult(DDMTemplateLink ddmTemplateLink) {
-		getPersistence().cacheResult(ddmTemplateLink);
-	}
-
-	/**
-	 * Caches the ddm template links in the entity cache if it is enabled.
-	 *
-	 * @param ddmTemplateLinks the ddm template links
-	 */
-	public static void cacheResult(List<DDMTemplateLink> ddmTemplateLinks) {
-		getPersistence().cacheResult(ddmTemplateLinks);
-	}
-
-	/**
 	 * Creates a new ddm template link with the primary key. Does not add the ddm template link to the database.
 	 *
 	 * @param templateLinkId the primary key for the new ddm template link
@@ -369,87 +365,6 @@ public class DDMTemplateLinkUtil {
 		return getPersistence().fetchByPrimaryKey(templateLinkId);
 	}
 
-	/**
-	 * Returns all the ddm template links.
-	 *
-	 * @return the ddm template links
-	 */
-	public static List<DDMTemplateLink> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the ddm template links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMTemplateLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm template links
-	 * @param end the upper bound of the range of ddm template links (not inclusive)
-	 * @return the range of ddm template links
-	 */
-	public static List<DDMTemplateLink> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm template links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMTemplateLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm template links
-	 * @param end the upper bound of the range of ddm template links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm template links
-	 */
-	public static List<DDMTemplateLink> findAll(
-		int start, int end,
-		OrderByComparator<DDMTemplateLink> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm template links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMTemplateLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm template links
-	 * @param end the upper bound of the range of ddm template links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm template links
-	 */
-	public static List<DDMTemplateLink> findAll(
-		int start, int end,
-		OrderByComparator<DDMTemplateLink> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the ddm template links from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of ddm template links.
-	 *
-	 * @return the number of ddm template links
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static DDMTemplateLinkPersistence getPersistence() {
 		return _persistence;
 	}
@@ -461,4 +376,4 @@ public class DDMTemplateLinkUtil {
 	private static volatile DDMTemplateLinkPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1272241577
+// LIFERAY-SERVICE-BUILDER-HASH:1920680540

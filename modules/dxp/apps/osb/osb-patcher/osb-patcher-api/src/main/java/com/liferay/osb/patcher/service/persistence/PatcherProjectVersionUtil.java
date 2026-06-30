@@ -36,6 +36,24 @@ public class PatcherProjectVersionUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<PatcherProjectVersion> patcherProjectVersions) {
+
+		getPersistence().cacheResult(patcherProjectVersions);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		PatcherProjectVersion patcherProjectVersion) {
+
+		getPersistence().cacheResult(patcherProjectVersion);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1080,28 +1098,6 @@ public class PatcherProjectVersionUtil {
 	}
 
 	/**
-	 * Caches the patcher project version in the entity cache if it is enabled.
-	 *
-	 * @param patcherProjectVersion the patcher project version
-	 */
-	public static void cacheResult(
-		PatcherProjectVersion patcherProjectVersion) {
-
-		getPersistence().cacheResult(patcherProjectVersion);
-	}
-
-	/**
-	 * Caches the patcher project versions in the entity cache if it is enabled.
-	 *
-	 * @param patcherProjectVersions the patcher project versions
-	 */
-	public static void cacheResult(
-		List<PatcherProjectVersion> patcherProjectVersions) {
-
-		getPersistence().cacheResult(patcherProjectVersions);
-	}
-
-	/**
 	 * Creates a new patcher project version with the primary key. Does not add the patcher project version to the database.
 	 *
 	 * @param patcherProjectVersionId the primary key for the new patcher project version
@@ -1158,87 +1154,6 @@ public class PatcherProjectVersionUtil {
 		return getPersistence().fetchByPrimaryKey(patcherProjectVersionId);
 	}
 
-	/**
-	 * Returns all the patcher project versions.
-	 *
-	 * @return the patcher project versions
-	 */
-	public static List<PatcherProjectVersion> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the patcher project versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.patcher.model.impl.PatcherProjectVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of patcher project versions
-	 * @param end the upper bound of the range of patcher project versions (not inclusive)
-	 * @return the range of patcher project versions
-	 */
-	public static List<PatcherProjectVersion> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the patcher project versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.patcher.model.impl.PatcherProjectVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of patcher project versions
-	 * @param end the upper bound of the range of patcher project versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of patcher project versions
-	 */
-	public static List<PatcherProjectVersion> findAll(
-		int start, int end,
-		OrderByComparator<PatcherProjectVersion> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the patcher project versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.patcher.model.impl.PatcherProjectVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of patcher project versions
-	 * @param end the upper bound of the range of patcher project versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of patcher project versions
-	 */
-	public static List<PatcherProjectVersion> findAll(
-		int start, int end,
-		OrderByComparator<PatcherProjectVersion> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the patcher project versions from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of patcher project versions.
-	 *
-	 * @return the number of patcher project versions
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static PatcherProjectVersionPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1252,4 +1167,4 @@ public class PatcherProjectVersionUtil {
 	private static volatile PatcherProjectVersionPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1567896613
+// LIFERAY-SERVICE-BUILDER-HASH:257202288

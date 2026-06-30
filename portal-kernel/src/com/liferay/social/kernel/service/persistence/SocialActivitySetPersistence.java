@@ -741,21 +741,6 @@ public interface SocialActivitySetPersistence
 		long userId, long classNameId, long classPK, int type);
 
 	/**
-	 * Caches the social activity set in the entity cache if it is enabled.
-	 *
-	 * @param socialActivitySet the social activity set
-	 */
-	public void cacheResult(SocialActivitySet socialActivitySet);
-
-	/**
-	 * Caches the social activity sets in the entity cache if it is enabled.
-	 *
-	 * @param socialActivitySets the social activity sets
-	 */
-	public void cacheResult(
-		java.util.List<SocialActivitySet> socialActivitySets);
-
-	/**
 	 * Creates a new social activity set with the primary key. Does not add the social activity set to the database.
 	 *
 	 * @param activitySetId the primary key for the new social activity set
@@ -793,73 +778,5 @@ public interface SocialActivitySetPersistence
 	 */
 	public SocialActivitySet fetchByPrimaryKey(long activitySetId);
 
-	/**
-	 * Returns all the social activity sets.
-	 *
-	 * @return the social activity sets
-	 */
-	public java.util.List<SocialActivitySet> findAll();
-
-	/**
-	 * Returns a range of all the social activity sets.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialActivitySetModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social activity sets
-	 * @param end the upper bound of the range of social activity sets (not inclusive)
-	 * @return the range of social activity sets
-	 */
-	public java.util.List<SocialActivitySet> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the social activity sets.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialActivitySetModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social activity sets
-	 * @param end the upper bound of the range of social activity sets (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of social activity sets
-	 */
-	public java.util.List<SocialActivitySet> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SocialActivitySet>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the social activity sets.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialActivitySetModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social activity sets
-	 * @param end the upper bound of the range of social activity sets (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of social activity sets
-	 */
-	public java.util.List<SocialActivitySet> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SocialActivitySet>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the social activity sets from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of social activity sets.
-	 *
-	 * @return the number of social activity sets
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-342991437
+// LIFERAY-SERVICE-BUILDER-HASH:-163053979

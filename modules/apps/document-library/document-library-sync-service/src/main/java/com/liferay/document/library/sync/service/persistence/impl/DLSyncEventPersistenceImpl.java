@@ -13,12 +13,10 @@ import com.liferay.document.library.sync.model.impl.DLSyncEventModelImpl;
 import com.liferay.document.library.sync.service.persistence.DLSyncEventPersistence;
 import com.liferay.document.library.sync.service.persistence.DLSyncEventUtil;
 import com.liferay.document.library.sync.service.persistence.impl.constants.DLSyncPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -29,10 +27,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 
@@ -64,7 +59,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = DLSyncEventPersistence.class)
 public class DLSyncEventPersistenceImpl
-	extends BasePersistenceImpl<DLSyncEvent> implements DLSyncEventPersistence {
+	extends BasePersistenceImpl<DLSyncEvent, NoSuchEventException>
+	implements DLSyncEventPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -80,9 +76,6 @@ public class DLSyncEventPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByGtModifiedTime;
 	private FinderPath _finderPathWithPaginationCountByGtModifiedTime;
 	private CollectionPersistenceFinder<DLSyncEvent>
@@ -324,98 +317,6 @@ public class DLSyncEventPersistenceImpl
 	}
 
 	/**
-	 * Caches the dl sync event in the entity cache if it is enabled.
-	 *
-	 * @param dlSyncEvent the dl sync event
-	 */
-	@Override
-	public void cacheResult(DLSyncEvent dlSyncEvent) {
-		entityCache.putResult(
-			DLSyncEventImpl.class, dlSyncEvent.getPrimaryKey(), dlSyncEvent);
-
-		finderCache.putResult(
-			_finderPathFetchByTypePK, new Object[] {dlSyncEvent.getTypePK()},
-			dlSyncEvent);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the dl sync events in the entity cache if it is enabled.
-	 *
-	 * @param dlSyncEvents the dl sync events
-	 */
-	@Override
-	public void cacheResult(List<DLSyncEvent> dlSyncEvents) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (dlSyncEvents.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (DLSyncEvent dlSyncEvent : dlSyncEvents) {
-			if (entityCache.getResult(
-					DLSyncEventImpl.class, dlSyncEvent.getPrimaryKey()) ==
-						null) {
-
-				cacheResult(dlSyncEvent);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all dl sync events.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(DLSyncEventImpl.class);
-
-		finderCache.clearCache(DLSyncEventImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the dl sync event.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(DLSyncEvent dlSyncEvent) {
-		entityCache.removeResult(DLSyncEventImpl.class, dlSyncEvent);
-	}
-
-	@Override
-	public void clearCache(List<DLSyncEvent> dlSyncEvents) {
-		for (DLSyncEvent dlSyncEvent : dlSyncEvents) {
-			entityCache.removeResult(DLSyncEventImpl.class, dlSyncEvent);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(DLSyncEventImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(DLSyncEventImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		DLSyncEventModelImpl dlSyncEventModelImpl) {
-
-		Object[] args = new Object[] {dlSyncEventModelImpl.getTypePK()};
-
-		finderCache.putResult(
-			_finderPathFetchByTypePK, args, dlSyncEventModelImpl);
-	}
-
-	/**
 	 * Creates a new dl sync event with the primary key. Does not add the dl sync event to the database.
 	 *
 	 * @param syncEventId the primary key for the new dl sync event
@@ -443,47 +344,6 @@ public class DLSyncEventPersistenceImpl
 	@Override
 	public DLSyncEvent remove(long syncEventId) throws NoSuchEventException {
 		return remove((Serializable)syncEventId);
-	}
-
-	/**
-	 * Removes the dl sync event with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the dl sync event
-	 * @return the dl sync event that was removed
-	 * @throws NoSuchEventException if a dl sync event with the primary key could not be found
-	 */
-	@Override
-	public DLSyncEvent remove(Serializable primaryKey)
-		throws NoSuchEventException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			DLSyncEvent dlSyncEvent = (DLSyncEvent)session.get(
-				DLSyncEventImpl.class, primaryKey);
-
-			if (dlSyncEvent == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchEventException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(dlSyncEvent);
-		}
-		catch (NoSuchEventException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -558,41 +418,13 @@ public class DLSyncEventPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			DLSyncEventImpl.class, dlSyncEventModelImpl, false, true);
-
-		cacheUniqueFindersCache(dlSyncEventModelImpl);
+		cacheUniqueFindersResult(dlSyncEvent, false);
 
 		if (isNew) {
 			dlSyncEvent.setNew(false);
 		}
 
 		dlSyncEvent.resetOriginalValues();
-
-		return dlSyncEvent;
-	}
-
-	/**
-	 * Returns the dl sync event with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the dl sync event
-	 * @return the dl sync event
-	 * @throws NoSuchEventException if a dl sync event with the primary key could not be found
-	 */
-	@Override
-	public DLSyncEvent findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchEventException {
-
-		DLSyncEvent dlSyncEvent = fetchByPrimaryKey(primaryKey);
-
-		if (dlSyncEvent == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchEventException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return dlSyncEvent;
 	}
@@ -620,185 +452,6 @@ public class DLSyncEventPersistenceImpl
 	@Override
 	public DLSyncEvent fetchByPrimaryKey(long syncEventId) {
 		return fetchByPrimaryKey((Serializable)syncEventId);
-	}
-
-	/**
-	 * Returns all the dl sync events.
-	 *
-	 * @return the dl sync events
-	 */
-	@Override
-	public List<DLSyncEvent> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the dl sync events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DLSyncEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of dl sync events
-	 * @param end the upper bound of the range of dl sync events (not inclusive)
-	 * @return the range of dl sync events
-	 */
-	@Override
-	public List<DLSyncEvent> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the dl sync events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DLSyncEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of dl sync events
-	 * @param end the upper bound of the range of dl sync events (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of dl sync events
-	 */
-	@Override
-	public List<DLSyncEvent> findAll(
-		int start, int end, OrderByComparator<DLSyncEvent> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the dl sync events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DLSyncEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of dl sync events
-	 * @param end the upper bound of the range of dl sync events (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of dl sync events
-	 */
-	@Override
-	public List<DLSyncEvent> findAll(
-		int start, int end, OrderByComparator<DLSyncEvent> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<DLSyncEvent> list = null;
-
-		if (useFinderCache) {
-			list = (List<DLSyncEvent>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_DLSYNCEVENT);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_DLSYNCEVENT;
-
-				sql = sql.concat(DLSyncEventModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<DLSyncEvent>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the dl sync events from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (DLSyncEvent dlSyncEvent : findAll()) {
-			remove(dlSyncEvent);
-		}
-	}
-
-	/**
-	 * Returns the number of dl sync events.
-	 *
-	 * @return the number of dl sync events
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_DLSYNCEVENT);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -831,21 +484,6 @@ public class DLSyncEventPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByGtModifiedTime = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByGtModifiedTime",
 			new String[] {
@@ -864,17 +502,18 @@ public class DLSyncEventPersistenceImpl
 				this, _finderPathWithPaginationFindByGtModifiedTime, null,
 				_finderPathWithPaginationCountByGtModifiedTime,
 				_SQL_SELECT_DLSYNCEVENT_WHERE, _SQL_COUNT_DLSYNCEVENT_WHERE,
-				DLSyncEventModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				DLSyncEventModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"dlSyncEvent.", "modifiedTime", FinderColumn.Type.LONG, ">",
 					true, true, DLSyncEvent::getModifiedTime));
 
-		_finderPathFetchByTypePK = new FinderPath(
+		_finderPathFetchByTypePK = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByTypePK",
-			new String[] {Long.class.getName()}, new String[] {"typePK"}, true);
+			new String[] {Long.class.getName()}, new String[] {"typePK"}, 0, 0,
+			false, DLSyncEvent::getTypePK);
 
 		_uniquePersistenceFinderByTypePK = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByTypePK, _SQL_SELECT_DLSYNCEVENT_WHERE,
+			this, _finderPathFetchByTypePK, _SQL_SELECT_DLSYNCEVENT_WHERE, "",
 			new FinderColumn<>(
 				"dlSyncEvent.", "typePK", FinderColumn.Type.LONG, "=", true,
 				true, DLSyncEvent::getTypePK));
@@ -921,22 +560,17 @@ public class DLSyncEventPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		DLSyncEventModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_DLSYNCEVENT =
 		"SELECT dlSyncEvent FROM DLSyncEvent dlSyncEvent";
 
 	private static final String _SQL_SELECT_DLSYNCEVENT_WHERE =
 		"SELECT dlSyncEvent FROM DLSyncEvent dlSyncEvent WHERE ";
 
-	private static final String _SQL_COUNT_DLSYNCEVENT =
-		"SELECT COUNT(dlSyncEvent) FROM DLSyncEvent dlSyncEvent";
-
 	private static final String _SQL_COUNT_DLSYNCEVENT_WHERE =
 		"SELECT COUNT(dlSyncEvent) FROM DLSyncEvent dlSyncEvent WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "dlSyncEvent.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No DLSyncEvent exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No DLSyncEvent exists with the key {";
@@ -953,4 +587,4 @@ public class DLSyncEventPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-131535236
+// LIFERAY-SERVICE-BUILDER-HASH:-1067637830

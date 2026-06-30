@@ -18,26 +18,19 @@ import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
-import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
+import com.liferay.portal.kernel.service.persistence.impl.ArrayableFinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 
 import java.io.Serializable;
 
@@ -46,8 +39,6 @@ import java.lang.reflect.InvocationHandler;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -68,7 +59,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = BackgroundTaskPersistence.class)
 public class BackgroundTaskPersistenceImpl
-	extends BasePersistenceImpl<BackgroundTask>
+	extends BasePersistenceImpl<BackgroundTask, NoSuchBackgroundTaskException>
 	implements BackgroundTaskPersistence {
 
 	/*
@@ -85,9 +76,6 @@ public class BackgroundTaskPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByGroupId;
 	private FinderPath _finderPathWithoutPaginationFindByGroupId;
 	private FinderPath _finderPathCountByGroupId;
@@ -674,7 +662,8 @@ public class BackgroundTaskPersistenceImpl
 	private FinderPath _finderPathWithPaginationFindByG_T;
 	private FinderPath _finderPathWithoutPaginationFindByG_T;
 	private FinderPath _finderPathCountByG_T;
-	private FinderPath _finderPathWithPaginationCountByG_T;
+	private CollectionPersistenceFinder<BackgroundTask>
+		_collectionPersistenceFinderByG_T;
 
 	/**
 	 * Returns all the background tasks where groupId = &#63; and taskExecutorClassName = &#63;.
@@ -757,115 +746,12 @@ public class BackgroundTaskPersistenceImpl
 		OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindByG_T;
-				finderArgs = new Object[] {groupId, taskExecutorClassName};
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindByG_T;
-			finderArgs = new Object[] {
-				groupId, taskExecutorClassName, start, end, orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				finderPath, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if ((groupId != backgroundTask.getGroupId()) ||
-						!taskExecutorClassName.equals(
-							backgroundTask.getTaskExecutorClassName())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					4 + (orderByComparator.getOrderByFields().length * 2));
-			}
-			else {
-				sb = new StringBundler(4);
-			}
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_T_GROUPID_2);
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_T_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_T_TASKEXECUTORCLASSNAME_2);
-			}
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByG_T.find(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, new String[] {taskExecutorClassName}
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -918,14 +804,12 @@ public class BackgroundTaskPersistenceImpl
 		long groupId, String taskExecutorClassName,
 		OrderByComparator<BackgroundTask> orderByComparator) {
 
-		List<BackgroundTask> list = findByG_T(
-			groupId, taskExecutorClassName, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByG_T.fetchFirst(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, new String[] {taskExecutorClassName}
+			},
+			orderByComparator);
 	}
 
 	/**
@@ -1013,163 +897,13 @@ public class BackgroundTaskPersistenceImpl
 		OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		if (taskExecutorClassNames == null) {
-			taskExecutorClassNames = new String[0];
-		}
-		else if (taskExecutorClassNames.length > 1) {
-			for (int i = 0; i < taskExecutorClassNames.length; i++) {
-				taskExecutorClassNames[i] = Objects.toString(
-					taskExecutorClassNames[i], "");
-			}
-
-			taskExecutorClassNames = ArrayUtil.sortedUnique(
-				taskExecutorClassNames);
-		}
-
-		if ((groupIds.length == 1) && (taskExecutorClassNames.length == 1)) {
-			return findByG_T(
-				groupIds[0], taskExecutorClassNames[0], start, end,
-				orderByComparator);
-		}
-
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderArgs = new Object[] {
-					StringUtil.merge(groupIds),
-					StringUtil.merge(taskExecutorClassNames)
-				};
-			}
-		}
-		else if (useFinderCache) {
-			finderArgs = new Object[] {
-				StringUtil.merge(groupIds),
-				StringUtil.merge(taskExecutorClassNames), start, end,
-				orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				_finderPathWithPaginationFindByG_T, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if (!ArrayUtil.contains(
-							groupIds, backgroundTask.getGroupId()) ||
-						!ArrayUtil.contains(
-							taskExecutorClassNames,
-							backgroundTask.getTaskExecutorClassName())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			if (groupIds.length > 0) {
-				sb.append("(");
-
-				sb.append(_FINDER_COLUMN_G_T_GROUPID_7);
-
-				sb.append(StringUtil.merge(groupIds));
-
-				sb.append(")");
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			if (taskExecutorClassNames.length > 0) {
-				sb.append("(");
-
-				for (int i = 0; i < taskExecutorClassNames.length; i++) {
-					String taskExecutorClassName = taskExecutorClassNames[i];
-
-					if (taskExecutorClassName.isEmpty()) {
-						sb.append(_FINDER_COLUMN_G_T_TASKEXECUTORCLASSNAME_3);
-					}
-					else {
-						sb.append(_FINDER_COLUMN_G_T_TASKEXECUTORCLASSNAME_2);
-					}
-
-					if ((i + 1) < taskExecutorClassNames.length) {
-						sb.append(WHERE_OR);
-					}
-				}
-
-				sb.append(")");
-			}
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				for (String taskExecutorClassName : taskExecutorClassNames) {
-					if ((taskExecutorClassName != null) &&
-						!taskExecutorClassName.isEmpty()) {
-
-						queryPos.add(taskExecutorClassName);
-					}
-				}
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(
-						_finderPathWithPaginationFindByG_T, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByG_T.find(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(groupIds),
+				ArrayUtil.sortedUnique(taskExecutorClassNames)
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1180,13 +914,11 @@ public class BackgroundTaskPersistenceImpl
 	 */
 	@Override
 	public void removeByG_T(long groupId, String taskExecutorClassName) {
-		for (BackgroundTask backgroundTask :
-				findByG_T(
-					groupId, taskExecutorClassName, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, null)) {
-
-			remove(backgroundTask);
-		}
+		_collectionPersistenceFinderByG_T.remove(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, new String[] {taskExecutorClassName}
+			});
 	}
 
 	/**
@@ -1198,62 +930,11 @@ public class BackgroundTaskPersistenceImpl
 	 */
 	@Override
 	public int countByG_T(long groupId, String taskExecutorClassName) {
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = _finderPathCountByG_T;
-
-		Object[] finderArgs = new Object[] {groupId, taskExecutorClassName};
-
-		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler(3);
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_T_GROUPID_2);
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_T_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_T_TASKEXECUTORCLASSNAME_2);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(finderPath, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByG_T.count(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, new String[] {taskExecutorClassName}
+			});
 	}
 
 	/**
@@ -1265,122 +946,13 @@ public class BackgroundTaskPersistenceImpl
 	 */
 	@Override
 	public int countByG_T(long[] groupIds, String[] taskExecutorClassNames) {
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		if (taskExecutorClassNames == null) {
-			taskExecutorClassNames = new String[0];
-		}
-		else if (taskExecutorClassNames.length > 1) {
-			for (int i = 0; i < taskExecutorClassNames.length; i++) {
-				taskExecutorClassNames[i] = Objects.toString(
-					taskExecutorClassNames[i], "");
-			}
-
-			taskExecutorClassNames = ArrayUtil.sortedUnique(
-				taskExecutorClassNames);
-		}
-
-		Object[] finderArgs = new Object[] {
-			StringUtil.merge(groupIds), StringUtil.merge(taskExecutorClassNames)
-		};
-
-		Long count = (Long)finderCache.getResult(
-			_finderPathWithPaginationCountByG_T, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			if (groupIds.length > 0) {
-				sb.append("(");
-
-				sb.append(_FINDER_COLUMN_G_T_GROUPID_7);
-
-				sb.append(StringUtil.merge(groupIds));
-
-				sb.append(")");
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			if (taskExecutorClassNames.length > 0) {
-				sb.append("(");
-
-				for (int i = 0; i < taskExecutorClassNames.length; i++) {
-					String taskExecutorClassName = taskExecutorClassNames[i];
-
-					if (taskExecutorClassName.isEmpty()) {
-						sb.append(_FINDER_COLUMN_G_T_TASKEXECUTORCLASSNAME_3);
-					}
-					else {
-						sb.append(_FINDER_COLUMN_G_T_TASKEXECUTORCLASSNAME_2);
-					}
-
-					if ((i + 1) < taskExecutorClassNames.length) {
-						sb.append(WHERE_OR);
-					}
-				}
-
-				sb.append(")");
-			}
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				for (String taskExecutorClassName : taskExecutorClassNames) {
-					if ((taskExecutorClassName != null) &&
-						!taskExecutorClassName.isEmpty()) {
-
-						queryPos.add(taskExecutorClassName);
-					}
-				}
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathWithPaginationCountByG_T, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByG_T.count(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(groupIds),
+				ArrayUtil.sortedUnique(taskExecutorClassNames)
+			});
 	}
-
-	private static final String _FINDER_COLUMN_G_T_GROUPID_2 =
-		"backgroundTask.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_T_GROUPID_7 =
-		"backgroundTask.groupId IN (";
-
-	private static final String _FINDER_COLUMN_G_T_TASKEXECUTORCLASSNAME_2 =
-		"backgroundTask.taskExecutorClassName = ?";
-
-	private static final String _FINDER_COLUMN_G_T_TASKEXECUTORCLASSNAME_3 =
-		"(backgroundTask.taskExecutorClassName IS NULL OR backgroundTask.taskExecutorClassName = '')";
 
 	private FinderPath _finderPathWithPaginationFindByG_S;
 	private FinderPath _finderPathWithoutPaginationFindByG_S;
@@ -1541,7 +1113,8 @@ public class BackgroundTaskPersistenceImpl
 	private FinderPath _finderPathWithPaginationFindByT_S;
 	private FinderPath _finderPathWithoutPaginationFindByT_S;
 	private FinderPath _finderPathCountByT_S;
-	private FinderPath _finderPathWithPaginationCountByT_S;
+	private CollectionPersistenceFinder<BackgroundTask>
+		_collectionPersistenceFinderByT_S;
 
 	/**
 	 * Returns all the background tasks where taskExecutorClassName = &#63; and status = &#63;.
@@ -1623,115 +1196,10 @@ public class BackgroundTaskPersistenceImpl
 		OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindByT_S;
-				finderArgs = new Object[] {taskExecutorClassName, status};
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindByT_S;
-			finderArgs = new Object[] {
-				taskExecutorClassName, status, start, end, orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				finderPath, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if (!taskExecutorClassName.equals(
-							backgroundTask.getTaskExecutorClassName()) ||
-						(status != backgroundTask.getStatus())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					4 + (orderByComparator.getOrderByFields().length * 2));
-			}
-			else {
-				sb = new StringBundler(4);
-			}
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_2);
-			}
-
-			sb.append(_FINDER_COLUMN_T_S_STATUS_2);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				queryPos.add(status);
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByT_S.find(
+			finderCache,
+			new Object[] {new String[] {taskExecutorClassName}, status}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1784,14 +1252,10 @@ public class BackgroundTaskPersistenceImpl
 		String taskExecutorClassName, int status,
 		OrderByComparator<BackgroundTask> orderByComparator) {
 
-		List<BackgroundTask> list = findByT_S(
-			taskExecutorClassName, status, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByT_S.fetchFirst(
+			finderCache,
+			new Object[] {new String[] {taskExecutorClassName}, status},
+			orderByComparator);
 	}
 
 	/**
@@ -1879,145 +1343,12 @@ public class BackgroundTaskPersistenceImpl
 		OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		if (taskExecutorClassNames == null) {
-			taskExecutorClassNames = new String[0];
-		}
-		else if (taskExecutorClassNames.length > 1) {
-			for (int i = 0; i < taskExecutorClassNames.length; i++) {
-				taskExecutorClassNames[i] = Objects.toString(
-					taskExecutorClassNames[i], "");
-			}
-
-			taskExecutorClassNames = ArrayUtil.sortedUnique(
-				taskExecutorClassNames);
-		}
-
-		if (taskExecutorClassNames.length == 1) {
-			return findByT_S(
-				taskExecutorClassNames[0], status, start, end,
-				orderByComparator);
-		}
-
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderArgs = new Object[] {
-					StringUtil.merge(taskExecutorClassNames), status
-				};
-			}
-		}
-		else if (useFinderCache) {
-			finderArgs = new Object[] {
-				StringUtil.merge(taskExecutorClassNames), status, start, end,
-				orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				_finderPathWithPaginationFindByT_S, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if (!ArrayUtil.contains(
-							taskExecutorClassNames,
-							backgroundTask.getTaskExecutorClassName()) ||
-						(status != backgroundTask.getStatus())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			if (taskExecutorClassNames.length > 0) {
-				sb.append("(");
-
-				for (int i = 0; i < taskExecutorClassNames.length; i++) {
-					String taskExecutorClassName = taskExecutorClassNames[i];
-
-					if (taskExecutorClassName.isEmpty()) {
-						sb.append(_FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_6);
-					}
-					else {
-						sb.append(_FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_5);
-					}
-
-					if ((i + 1) < taskExecutorClassNames.length) {
-						sb.append(WHERE_OR);
-					}
-				}
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			sb.append(_FINDER_COLUMN_T_S_STATUS_2);
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				for (String taskExecutorClassName : taskExecutorClassNames) {
-					if ((taskExecutorClassName != null) &&
-						!taskExecutorClassName.isEmpty()) {
-
-						queryPos.add(taskExecutorClassName);
-					}
-				}
-
-				queryPos.add(status);
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(
-						_finderPathWithPaginationFindByT_S, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByT_S.find(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(taskExecutorClassNames), status
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2028,13 +1359,9 @@ public class BackgroundTaskPersistenceImpl
 	 */
 	@Override
 	public void removeByT_S(String taskExecutorClassName, int status) {
-		for (BackgroundTask backgroundTask :
-				findByT_S(
-					taskExecutorClassName, status, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, null)) {
-
-			remove(backgroundTask);
-		}
+		_collectionPersistenceFinderByT_S.remove(
+			finderCache,
+			new Object[] {new String[] {taskExecutorClassName}, status});
 	}
 
 	/**
@@ -2046,62 +1373,9 @@ public class BackgroundTaskPersistenceImpl
 	 */
 	@Override
 	public int countByT_S(String taskExecutorClassName, int status) {
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = _finderPathCountByT_S;
-
-		Object[] finderArgs = new Object[] {taskExecutorClassName, status};
-
-		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler(3);
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_2);
-			}
-
-			sb.append(_FINDER_COLUMN_T_S_STATUS_2);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				queryPos.add(status);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(finderPath, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByT_S.count(
+			finderCache,
+			new Object[] {new String[] {taskExecutorClassName}, status});
 	}
 
 	/**
@@ -2113,117 +1387,18 @@ public class BackgroundTaskPersistenceImpl
 	 */
 	@Override
 	public int countByT_S(String[] taskExecutorClassNames, int status) {
-		if (taskExecutorClassNames == null) {
-			taskExecutorClassNames = new String[0];
-		}
-		else if (taskExecutorClassNames.length > 1) {
-			for (int i = 0; i < taskExecutorClassNames.length; i++) {
-				taskExecutorClassNames[i] = Objects.toString(
-					taskExecutorClassNames[i], "");
-			}
-
-			taskExecutorClassNames = ArrayUtil.sortedUnique(
-				taskExecutorClassNames);
-		}
-
-		Object[] finderArgs = new Object[] {
-			StringUtil.merge(taskExecutorClassNames), status
-		};
-
-		Long count = (Long)finderCache.getResult(
-			_finderPathWithPaginationCountByT_S, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			if (taskExecutorClassNames.length > 0) {
-				sb.append("(");
-
-				for (int i = 0; i < taskExecutorClassNames.length; i++) {
-					String taskExecutorClassName = taskExecutorClassNames[i];
-
-					if (taskExecutorClassName.isEmpty()) {
-						sb.append(_FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_6);
-					}
-					else {
-						sb.append(_FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_5);
-					}
-
-					if ((i + 1) < taskExecutorClassNames.length) {
-						sb.append(WHERE_OR);
-					}
-				}
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			sb.append(_FINDER_COLUMN_T_S_STATUS_2);
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				for (String taskExecutorClassName : taskExecutorClassNames) {
-					if ((taskExecutorClassName != null) &&
-						!taskExecutorClassName.isEmpty()) {
-
-						queryPos.add(taskExecutorClassName);
-					}
-				}
-
-				queryPos.add(status);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathWithPaginationCountByT_S, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByT_S.count(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(taskExecutorClassNames), status
+			});
 	}
-
-	private static final String _FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_2 =
-		"backgroundTask.taskExecutorClassName = ? AND ";
-
-	private static final String _FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_3 =
-		"(backgroundTask.taskExecutorClassName IS NULL OR backgroundTask.taskExecutorClassName = '') AND ";
-
-	private static final String _FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_5 =
-		"(" + removeConjunction(_FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_2) +
-			")";
-
-	private static final String _FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_6 =
-		"(" + removeConjunction(_FINDER_COLUMN_T_S_TASKEXECUTORCLASSNAME_3) +
-			")";
-
-	private static final String _FINDER_COLUMN_T_S_STATUS_2 =
-		"backgroundTask.status = ?";
 
 	private FinderPath _finderPathWithPaginationFindByG_N_T;
 	private FinderPath _finderPathWithoutPaginationFindByG_N_T;
 	private FinderPath _finderPathCountByG_N_T;
-	private FinderPath _finderPathWithPaginationCountByG_N_T;
+	private CollectionPersistenceFinder<BackgroundTask>
+		_collectionPersistenceFinderByG_N_T;
 
 	/**
 	 * Returns all the background tasks where groupId = &#63; and name = &#63; and taskExecutorClassName = &#63;.
@@ -2312,135 +1487,12 @@ public class BackgroundTaskPersistenceImpl
 		int end, OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		name = Objects.toString(name, "");
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindByG_N_T;
-				finderArgs = new Object[] {
-					groupId, name, taskExecutorClassName
-				};
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindByG_N_T;
-			finderArgs = new Object[] {
-				groupId, name, taskExecutorClassName, start, end,
-				orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				finderPath, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if ((groupId != backgroundTask.getGroupId()) ||
-						!name.equals(backgroundTask.getName()) ||
-						!taskExecutorClassName.equals(
-							backgroundTask.getTaskExecutorClassName())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					5 + (orderByComparator.getOrderByFields().length * 2));
-			}
-			else {
-				sb = new StringBundler(5);
-			}
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_N_T_GROUPID_2);
-
-			boolean bindName = false;
-
-			if (name.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_NAME_3);
-			}
-			else {
-				bindName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_NAME_2);
-			}
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_TASKEXECUTORCLASSNAME_2);
-			}
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				if (bindName) {
-					queryPos.add(name);
-				}
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByG_N_T.find(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, name, new String[] {taskExecutorClassName}
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2498,14 +1550,12 @@ public class BackgroundTaskPersistenceImpl
 		long groupId, String name, String taskExecutorClassName,
 		OrderByComparator<BackgroundTask> orderByComparator) {
 
-		List<BackgroundTask> list = findByG_N_T(
-			groupId, name, taskExecutorClassName, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByG_N_T.fetchFirst(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, name, new String[] {taskExecutorClassName}
+			},
+			orderByComparator);
 	}
 
 	/**
@@ -2600,181 +1650,13 @@ public class BackgroundTaskPersistenceImpl
 		int start, int end, OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		name = Objects.toString(name, "");
-
-		if (taskExecutorClassNames == null) {
-			taskExecutorClassNames = new String[0];
-		}
-		else if (taskExecutorClassNames.length > 1) {
-			for (int i = 0; i < taskExecutorClassNames.length; i++) {
-				taskExecutorClassNames[i] = Objects.toString(
-					taskExecutorClassNames[i], "");
-			}
-
-			taskExecutorClassNames = ArrayUtil.sortedUnique(
-				taskExecutorClassNames);
-		}
-
-		if ((groupIds.length == 1) && (taskExecutorClassNames.length == 1)) {
-			return findByG_N_T(
-				groupIds[0], name, taskExecutorClassNames[0], start, end,
-				orderByComparator);
-		}
-
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderArgs = new Object[] {
-					StringUtil.merge(groupIds), name,
-					StringUtil.merge(taskExecutorClassNames)
-				};
-			}
-		}
-		else if (useFinderCache) {
-			finderArgs = new Object[] {
-				StringUtil.merge(groupIds), name,
-				StringUtil.merge(taskExecutorClassNames), start, end,
-				orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				_finderPathWithPaginationFindByG_N_T, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if (!ArrayUtil.contains(
-							groupIds, backgroundTask.getGroupId()) ||
-						!name.equals(backgroundTask.getName()) ||
-						!ArrayUtil.contains(
-							taskExecutorClassNames,
-							backgroundTask.getTaskExecutorClassName())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			if (groupIds.length > 0) {
-				sb.append("(");
-
-				sb.append(_FINDER_COLUMN_G_N_T_GROUPID_7);
-
-				sb.append(StringUtil.merge(groupIds));
-
-				sb.append(")");
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			boolean bindName = false;
-
-			if (name.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_NAME_3);
-			}
-			else {
-				bindName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_NAME_2);
-			}
-
-			if (taskExecutorClassNames.length > 0) {
-				sb.append("(");
-
-				for (int i = 0; i < taskExecutorClassNames.length; i++) {
-					String taskExecutorClassName = taskExecutorClassNames[i];
-
-					if (taskExecutorClassName.isEmpty()) {
-						sb.append(_FINDER_COLUMN_G_N_T_TASKEXECUTORCLASSNAME_3);
-					}
-					else {
-						sb.append(_FINDER_COLUMN_G_N_T_TASKEXECUTORCLASSNAME_2);
-					}
-
-					if ((i + 1) < taskExecutorClassNames.length) {
-						sb.append(WHERE_OR);
-					}
-				}
-
-				sb.append(")");
-			}
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				if (bindName) {
-					queryPos.add(name);
-				}
-
-				for (String taskExecutorClassName : taskExecutorClassNames) {
-					if ((taskExecutorClassName != null) &&
-						!taskExecutorClassName.isEmpty()) {
-
-						queryPos.add(taskExecutorClassName);
-					}
-				}
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(
-						_finderPathWithPaginationFindByG_N_T, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByG_N_T.find(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(groupIds), name,
+				ArrayUtil.sortedUnique(taskExecutorClassNames)
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2788,13 +1670,11 @@ public class BackgroundTaskPersistenceImpl
 	public void removeByG_N_T(
 		long groupId, String name, String taskExecutorClassName) {
 
-		for (BackgroundTask backgroundTask :
-				findByG_N_T(
-					groupId, name, taskExecutorClassName, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, null)) {
-
-			remove(backgroundTask);
-		}
+		_collectionPersistenceFinderByG_N_T.remove(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, name, new String[] {taskExecutorClassName}
+			});
 	}
 
 	/**
@@ -2809,80 +1689,11 @@ public class BackgroundTaskPersistenceImpl
 	public int countByG_N_T(
 		long groupId, String name, String taskExecutorClassName) {
 
-		name = Objects.toString(name, "");
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = _finderPathCountByG_N_T;
-
-		Object[] finderArgs = new Object[] {
-			groupId, name, taskExecutorClassName
-		};
-
-		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler(4);
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_N_T_GROUPID_2);
-
-			boolean bindName = false;
-
-			if (name.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_NAME_3);
-			}
-			else {
-				bindName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_NAME_2);
-			}
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_TASKEXECUTORCLASSNAME_2);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				if (bindName) {
-					queryPos.add(name);
-				}
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(finderPath, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByG_N_T.count(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, name, new String[] {taskExecutorClassName}
+			});
 	}
 
 	/**
@@ -2897,151 +1708,19 @@ public class BackgroundTaskPersistenceImpl
 	public int countByG_N_T(
 		long[] groupIds, String name, String[] taskExecutorClassNames) {
 
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		name = Objects.toString(name, "");
-
-		if (taskExecutorClassNames == null) {
-			taskExecutorClassNames = new String[0];
-		}
-		else if (taskExecutorClassNames.length > 1) {
-			for (int i = 0; i < taskExecutorClassNames.length; i++) {
-				taskExecutorClassNames[i] = Objects.toString(
-					taskExecutorClassNames[i], "");
-			}
-
-			taskExecutorClassNames = ArrayUtil.sortedUnique(
-				taskExecutorClassNames);
-		}
-
-		Object[] finderArgs = new Object[] {
-			StringUtil.merge(groupIds), name,
-			StringUtil.merge(taskExecutorClassNames)
-		};
-
-		Long count = (Long)finderCache.getResult(
-			_finderPathWithPaginationCountByG_N_T, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			if (groupIds.length > 0) {
-				sb.append("(");
-
-				sb.append(_FINDER_COLUMN_G_N_T_GROUPID_7);
-
-				sb.append(StringUtil.merge(groupIds));
-
-				sb.append(")");
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			boolean bindName = false;
-
-			if (name.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_NAME_3);
-			}
-			else {
-				bindName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_NAME_2);
-			}
-
-			if (taskExecutorClassNames.length > 0) {
-				sb.append("(");
-
-				for (int i = 0; i < taskExecutorClassNames.length; i++) {
-					String taskExecutorClassName = taskExecutorClassNames[i];
-
-					if (taskExecutorClassName.isEmpty()) {
-						sb.append(_FINDER_COLUMN_G_N_T_TASKEXECUTORCLASSNAME_3);
-					}
-					else {
-						sb.append(_FINDER_COLUMN_G_N_T_TASKEXECUTORCLASSNAME_2);
-					}
-
-					if ((i + 1) < taskExecutorClassNames.length) {
-						sb.append(WHERE_OR);
-					}
-				}
-
-				sb.append(")");
-			}
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				if (bindName) {
-					queryPos.add(name);
-				}
-
-				for (String taskExecutorClassName : taskExecutorClassNames) {
-					if ((taskExecutorClassName != null) &&
-						!taskExecutorClassName.isEmpty()) {
-
-						queryPos.add(taskExecutorClassName);
-					}
-				}
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathWithPaginationCountByG_N_T, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByG_N_T.count(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(groupIds), name,
+				ArrayUtil.sortedUnique(taskExecutorClassNames)
+			});
 	}
-
-	private static final String _FINDER_COLUMN_G_N_T_GROUPID_2 =
-		"backgroundTask.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_N_T_GROUPID_7 =
-		"backgroundTask.groupId IN (";
-
-	private static final String _FINDER_COLUMN_G_N_T_NAME_2 =
-		"backgroundTask.name = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_N_T_NAME_3 =
-		"(backgroundTask.name IS NULL OR backgroundTask.name = '') AND ";
-
-	private static final String _FINDER_COLUMN_G_N_T_TASKEXECUTORCLASSNAME_2 =
-		"backgroundTask.taskExecutorClassName = ?";
-
-	private static final String _FINDER_COLUMN_G_N_T_TASKEXECUTORCLASSNAME_3 =
-		"(backgroundTask.taskExecutorClassName IS NULL OR backgroundTask.taskExecutorClassName = '')";
 
 	private FinderPath _finderPathWithPaginationFindByG_T_C;
 	private FinderPath _finderPathWithoutPaginationFindByG_T_C;
 	private FinderPath _finderPathCountByG_T_C;
-	private FinderPath _finderPathWithPaginationCountByG_T_C;
+	private CollectionPersistenceFinder<BackgroundTask>
+		_collectionPersistenceFinderByG_T_C;
 
 	/**
 	 * Returns all the background tasks where groupId = &#63; and taskExecutorClassName = &#63; and completed = &#63;.
@@ -3131,123 +1810,13 @@ public class BackgroundTaskPersistenceImpl
 		int start, int end, OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindByG_T_C;
-				finderArgs = new Object[] {
-					groupId, taskExecutorClassName, completed
-				};
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindByG_T_C;
-			finderArgs = new Object[] {
-				groupId, taskExecutorClassName, completed, start, end,
-				orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				finderPath, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if ((groupId != backgroundTask.getGroupId()) ||
-						!taskExecutorClassName.equals(
-							backgroundTask.getTaskExecutorClassName()) ||
-						(completed != backgroundTask.isCompleted())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					5 + (orderByComparator.getOrderByFields().length * 2));
-			}
-			else {
-				sb = new StringBundler(5);
-			}
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_T_C_GROUPID_2);
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_2);
-			}
-
-			sb.append(_FINDER_COLUMN_G_T_C_COMPLETED_2);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				queryPos.add(completed);
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByG_T_C.find(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, new String[] {taskExecutorClassName},
+				completed
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3305,14 +1874,13 @@ public class BackgroundTaskPersistenceImpl
 		long groupId, String taskExecutorClassName, boolean completed,
 		OrderByComparator<BackgroundTask> orderByComparator) {
 
-		List<BackgroundTask> list = findByG_T_C(
-			groupId, taskExecutorClassName, completed, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByG_T_C.fetchFirst(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, new String[] {taskExecutorClassName},
+				completed
+			},
+			orderByComparator);
 	}
 
 	/**
@@ -3407,170 +1975,13 @@ public class BackgroundTaskPersistenceImpl
 		int start, int end, OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		if (taskExecutorClassNames == null) {
-			taskExecutorClassNames = new String[0];
-		}
-		else if (taskExecutorClassNames.length > 1) {
-			for (int i = 0; i < taskExecutorClassNames.length; i++) {
-				taskExecutorClassNames[i] = Objects.toString(
-					taskExecutorClassNames[i], "");
-			}
-
-			taskExecutorClassNames = ArrayUtil.sortedUnique(
-				taskExecutorClassNames);
-		}
-
-		if ((groupIds.length == 1) && (taskExecutorClassNames.length == 1)) {
-			return findByG_T_C(
-				groupIds[0], taskExecutorClassNames[0], completed, start, end,
-				orderByComparator);
-		}
-
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderArgs = new Object[] {
-					StringUtil.merge(groupIds),
-					StringUtil.merge(taskExecutorClassNames), completed
-				};
-			}
-		}
-		else if (useFinderCache) {
-			finderArgs = new Object[] {
-				StringUtil.merge(groupIds),
-				StringUtil.merge(taskExecutorClassNames), completed, start, end,
-				orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				_finderPathWithPaginationFindByG_T_C, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if (!ArrayUtil.contains(
-							groupIds, backgroundTask.getGroupId()) ||
-						!ArrayUtil.contains(
-							taskExecutorClassNames,
-							backgroundTask.getTaskExecutorClassName()) ||
-						(completed != backgroundTask.isCompleted())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			if (groupIds.length > 0) {
-				sb.append("(");
-
-				sb.append(_FINDER_COLUMN_G_T_C_GROUPID_7);
-
-				sb.append(StringUtil.merge(groupIds));
-
-				sb.append(")");
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			if (taskExecutorClassNames.length > 0) {
-				sb.append("(");
-
-				for (int i = 0; i < taskExecutorClassNames.length; i++) {
-					String taskExecutorClassName = taskExecutorClassNames[i];
-
-					if (taskExecutorClassName.isEmpty()) {
-						sb.append(_FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_6);
-					}
-					else {
-						sb.append(_FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_5);
-					}
-
-					if ((i + 1) < taskExecutorClassNames.length) {
-						sb.append(WHERE_OR);
-					}
-				}
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			sb.append(_FINDER_COLUMN_G_T_C_COMPLETED_2);
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				for (String taskExecutorClassName : taskExecutorClassNames) {
-					if ((taskExecutorClassName != null) &&
-						!taskExecutorClassName.isEmpty()) {
-
-						queryPos.add(taskExecutorClassName);
-					}
-				}
-
-				queryPos.add(completed);
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(
-						_finderPathWithPaginationFindByG_T_C, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByG_T_C.find(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(groupIds),
+				ArrayUtil.sortedUnique(taskExecutorClassNames), completed
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3584,13 +1995,12 @@ public class BackgroundTaskPersistenceImpl
 	public void removeByG_T_C(
 		long groupId, String taskExecutorClassName, boolean completed) {
 
-		for (BackgroundTask backgroundTask :
-				findByG_T_C(
-					groupId, taskExecutorClassName, completed,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
-
-			remove(backgroundTask);
-		}
+		_collectionPersistenceFinderByG_T_C.remove(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, new String[] {taskExecutorClassName},
+				completed
+			});
 	}
 
 	/**
@@ -3605,68 +2015,12 @@ public class BackgroundTaskPersistenceImpl
 	public int countByG_T_C(
 		long groupId, String taskExecutorClassName, boolean completed) {
 
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = _finderPathCountByG_T_C;
-
-		Object[] finderArgs = new Object[] {
-			groupId, taskExecutorClassName, completed
-		};
-
-		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler(4);
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_T_C_GROUPID_2);
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_2);
-			}
-
-			sb.append(_FINDER_COLUMN_G_T_C_COMPLETED_2);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				queryPos.add(completed);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(finderPath, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByG_T_C.count(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, new String[] {taskExecutorClassName},
+				completed
+			});
 	}
 
 	/**
@@ -3681,145 +2035,19 @@ public class BackgroundTaskPersistenceImpl
 	public int countByG_T_C(
 		long[] groupIds, String[] taskExecutorClassNames, boolean completed) {
 
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		if (taskExecutorClassNames == null) {
-			taskExecutorClassNames = new String[0];
-		}
-		else if (taskExecutorClassNames.length > 1) {
-			for (int i = 0; i < taskExecutorClassNames.length; i++) {
-				taskExecutorClassNames[i] = Objects.toString(
-					taskExecutorClassNames[i], "");
-			}
-
-			taskExecutorClassNames = ArrayUtil.sortedUnique(
-				taskExecutorClassNames);
-		}
-
-		Object[] finderArgs = new Object[] {
-			StringUtil.merge(groupIds),
-			StringUtil.merge(taskExecutorClassNames), completed
-		};
-
-		Long count = (Long)finderCache.getResult(
-			_finderPathWithPaginationCountByG_T_C, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			if (groupIds.length > 0) {
-				sb.append("(");
-
-				sb.append(_FINDER_COLUMN_G_T_C_GROUPID_7);
-
-				sb.append(StringUtil.merge(groupIds));
-
-				sb.append(")");
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			if (taskExecutorClassNames.length > 0) {
-				sb.append("(");
-
-				for (int i = 0; i < taskExecutorClassNames.length; i++) {
-					String taskExecutorClassName = taskExecutorClassNames[i];
-
-					if (taskExecutorClassName.isEmpty()) {
-						sb.append(_FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_6);
-					}
-					else {
-						sb.append(_FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_5);
-					}
-
-					if ((i + 1) < taskExecutorClassNames.length) {
-						sb.append(WHERE_OR);
-					}
-				}
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			sb.append(_FINDER_COLUMN_G_T_C_COMPLETED_2);
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				for (String taskExecutorClassName : taskExecutorClassNames) {
-					if ((taskExecutorClassName != null) &&
-						!taskExecutorClassName.isEmpty()) {
-
-						queryPos.add(taskExecutorClassName);
-					}
-				}
-
-				queryPos.add(completed);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathWithPaginationCountByG_T_C, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByG_T_C.count(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(groupIds),
+				ArrayUtil.sortedUnique(taskExecutorClassNames), completed
+			});
 	}
-
-	private static final String _FINDER_COLUMN_G_T_C_GROUPID_2 =
-		"backgroundTask.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_T_C_GROUPID_7 =
-		"backgroundTask.groupId IN (";
-
-	private static final String _FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_2 =
-		"backgroundTask.taskExecutorClassName = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_3 =
-		"(backgroundTask.taskExecutorClassName IS NULL OR backgroundTask.taskExecutorClassName = '') AND ";
-
-	private static final String _FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_5 =
-		"(" + removeConjunction(_FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_2) +
-			")";
-
-	private static final String _FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_6 =
-		"(" + removeConjunction(_FINDER_COLUMN_G_T_C_TASKEXECUTORCLASSNAME_3) +
-			")";
-
-	private static final String _FINDER_COLUMN_G_T_C_COMPLETED_2 =
-		"backgroundTask.completed = ?";
 
 	private FinderPath _finderPathWithPaginationFindByG_T_S;
 	private FinderPath _finderPathWithoutPaginationFindByG_T_S;
 	private FinderPath _finderPathCountByG_T_S;
-	private FinderPath _finderPathWithPaginationCountByG_T_S;
+	private CollectionPersistenceFinder<BackgroundTask>
+		_collectionPersistenceFinderByG_T_S;
 
 	/**
 	 * Returns all the background tasks where groupId = &#63; and taskExecutorClassName = &#63; and status = &#63;.
@@ -3908,123 +2136,12 @@ public class BackgroundTaskPersistenceImpl
 		int end, OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindByG_T_S;
-				finderArgs = new Object[] {
-					groupId, taskExecutorClassName, status
-				};
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindByG_T_S;
-			finderArgs = new Object[] {
-				groupId, taskExecutorClassName, status, start, end,
-				orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				finderPath, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if ((groupId != backgroundTask.getGroupId()) ||
-						!taskExecutorClassName.equals(
-							backgroundTask.getTaskExecutorClassName()) ||
-						(status != backgroundTask.getStatus())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					5 + (orderByComparator.getOrderByFields().length * 2));
-			}
-			else {
-				sb = new StringBundler(5);
-			}
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_T_S_GROUPID_2);
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_2);
-			}
-
-			sb.append(_FINDER_COLUMN_G_T_S_STATUS_2);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				queryPos.add(status);
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByG_T_S.find(
+			finderCache,
+			new Object[] {
+				groupId, new String[] {taskExecutorClassName}, status
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -4082,14 +2199,12 @@ public class BackgroundTaskPersistenceImpl
 		long groupId, String taskExecutorClassName, int status,
 		OrderByComparator<BackgroundTask> orderByComparator) {
 
-		List<BackgroundTask> list = findByG_T_S(
-			groupId, taskExecutorClassName, status, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByG_T_S.fetchFirst(
+			finderCache,
+			new Object[] {
+				groupId, new String[] {taskExecutorClassName}, status
+			},
+			orderByComparator);
 	}
 
 	/**
@@ -4183,150 +2298,12 @@ public class BackgroundTaskPersistenceImpl
 		int end, OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		if (taskExecutorClassNames == null) {
-			taskExecutorClassNames = new String[0];
-		}
-		else if (taskExecutorClassNames.length > 1) {
-			for (int i = 0; i < taskExecutorClassNames.length; i++) {
-				taskExecutorClassNames[i] = Objects.toString(
-					taskExecutorClassNames[i], "");
-			}
-
-			taskExecutorClassNames = ArrayUtil.sortedUnique(
-				taskExecutorClassNames);
-		}
-
-		if (taskExecutorClassNames.length == 1) {
-			return findByG_T_S(
-				groupId, taskExecutorClassNames[0], status, start, end,
-				orderByComparator);
-		}
-
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderArgs = new Object[] {
-					groupId, StringUtil.merge(taskExecutorClassNames), status
-				};
-			}
-		}
-		else if (useFinderCache) {
-			finderArgs = new Object[] {
-				groupId, StringUtil.merge(taskExecutorClassNames), status,
-				start, end, orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				_finderPathWithPaginationFindByG_T_S, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if ((groupId != backgroundTask.getGroupId()) ||
-						!ArrayUtil.contains(
-							taskExecutorClassNames,
-							backgroundTask.getTaskExecutorClassName()) ||
-						(status != backgroundTask.getStatus())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_T_S_GROUPID_2);
-
-			if (taskExecutorClassNames.length > 0) {
-				sb.append("(");
-
-				for (int i = 0; i < taskExecutorClassNames.length; i++) {
-					String taskExecutorClassName = taskExecutorClassNames[i];
-
-					if (taskExecutorClassName.isEmpty()) {
-						sb.append(_FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_6);
-					}
-					else {
-						sb.append(_FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_5);
-					}
-
-					if ((i + 1) < taskExecutorClassNames.length) {
-						sb.append(WHERE_OR);
-					}
-				}
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			sb.append(_FINDER_COLUMN_G_T_S_STATUS_2);
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				for (String taskExecutorClassName : taskExecutorClassNames) {
-					if ((taskExecutorClassName != null) &&
-						!taskExecutorClassName.isEmpty()) {
-
-						queryPos.add(taskExecutorClassName);
-					}
-				}
-
-				queryPos.add(status);
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(
-						_finderPathWithPaginationFindByG_T_S, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByG_T_S.find(
+			finderCache,
+			new Object[] {
+				groupId, ArrayUtil.sortedUnique(taskExecutorClassNames), status
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -4340,13 +2317,11 @@ public class BackgroundTaskPersistenceImpl
 	public void removeByG_T_S(
 		long groupId, String taskExecutorClassName, int status) {
 
-		for (BackgroundTask backgroundTask :
-				findByG_T_S(
-					groupId, taskExecutorClassName, status, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, null)) {
-
-			remove(backgroundTask);
-		}
+		_collectionPersistenceFinderByG_T_S.remove(
+			finderCache,
+			new Object[] {
+				groupId, new String[] {taskExecutorClassName}, status
+			});
 	}
 
 	/**
@@ -4361,68 +2336,11 @@ public class BackgroundTaskPersistenceImpl
 	public int countByG_T_S(
 		long groupId, String taskExecutorClassName, int status) {
 
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = _finderPathCountByG_T_S;
-
-		Object[] finderArgs = new Object[] {
-			groupId, taskExecutorClassName, status
-		};
-
-		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler(4);
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_T_S_GROUPID_2);
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_2);
-			}
-
-			sb.append(_FINDER_COLUMN_G_T_S_STATUS_2);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				queryPos.add(status);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(finderPath, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByG_T_S.count(
+			finderCache,
+			new Object[] {
+				groupId, new String[] {taskExecutorClassName}, status
+			});
 	}
 
 	/**
@@ -4437,124 +2355,18 @@ public class BackgroundTaskPersistenceImpl
 	public int countByG_T_S(
 		long groupId, String[] taskExecutorClassNames, int status) {
 
-		if (taskExecutorClassNames == null) {
-			taskExecutorClassNames = new String[0];
-		}
-		else if (taskExecutorClassNames.length > 1) {
-			for (int i = 0; i < taskExecutorClassNames.length; i++) {
-				taskExecutorClassNames[i] = Objects.toString(
-					taskExecutorClassNames[i], "");
-			}
-
-			taskExecutorClassNames = ArrayUtil.sortedUnique(
-				taskExecutorClassNames);
-		}
-
-		Object[] finderArgs = new Object[] {
-			groupId, StringUtil.merge(taskExecutorClassNames), status
-		};
-
-		Long count = (Long)finderCache.getResult(
-			_finderPathWithPaginationCountByG_T_S, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_T_S_GROUPID_2);
-
-			if (taskExecutorClassNames.length > 0) {
-				sb.append("(");
-
-				for (int i = 0; i < taskExecutorClassNames.length; i++) {
-					String taskExecutorClassName = taskExecutorClassNames[i];
-
-					if (taskExecutorClassName.isEmpty()) {
-						sb.append(_FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_6);
-					}
-					else {
-						sb.append(_FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_5);
-					}
-
-					if ((i + 1) < taskExecutorClassNames.length) {
-						sb.append(WHERE_OR);
-					}
-				}
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			sb.append(_FINDER_COLUMN_G_T_S_STATUS_2);
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				for (String taskExecutorClassName : taskExecutorClassNames) {
-					if ((taskExecutorClassName != null) &&
-						!taskExecutorClassName.isEmpty()) {
-
-						queryPos.add(taskExecutorClassName);
-					}
-				}
-
-				queryPos.add(status);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathWithPaginationCountByG_T_S, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByG_T_S.count(
+			finderCache,
+			new Object[] {
+				groupId, ArrayUtil.sortedUnique(taskExecutorClassNames), status
+			});
 	}
-
-	private static final String _FINDER_COLUMN_G_T_S_GROUPID_2 =
-		"backgroundTask.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_2 =
-		"backgroundTask.taskExecutorClassName = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_3 =
-		"(backgroundTask.taskExecutorClassName IS NULL OR backgroundTask.taskExecutorClassName = '') AND ";
-
-	private static final String _FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_5 =
-		"(" + removeConjunction(_FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_2) +
-			")";
-
-	private static final String _FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_6 =
-		"(" + removeConjunction(_FINDER_COLUMN_G_T_S_TASKEXECUTORCLASSNAME_3) +
-			")";
-
-	private static final String _FINDER_COLUMN_G_T_S_STATUS_2 =
-		"backgroundTask.status = ?";
 
 	private FinderPath _finderPathWithPaginationFindByG_N_T_C;
 	private FinderPath _finderPathWithoutPaginationFindByG_N_T_C;
 	private FinderPath _finderPathCountByG_N_T_C;
-	private FinderPath _finderPathWithPaginationCountByG_N_T_C;
+	private CollectionPersistenceFinder<BackgroundTask>
+		_collectionPersistenceFinderByG_N_T_C;
 
 	/**
 	 * Returns all the background tasks where groupId = &#63; and name = &#63; and taskExecutorClassName = &#63; and completed = &#63;.
@@ -4650,140 +2462,12 @@ public class BackgroundTaskPersistenceImpl
 		OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		name = Objects.toString(name, "");
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindByG_N_T_C;
-				finderArgs = new Object[] {
-					groupId, name, taskExecutorClassName, completed
-				};
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindByG_N_T_C;
-			finderArgs = new Object[] {
-				groupId, name, taskExecutorClassName, completed, start, end,
-				orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				finderPath, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if ((groupId != backgroundTask.getGroupId()) ||
-						!name.equals(backgroundTask.getName()) ||
-						!taskExecutorClassName.equals(
-							backgroundTask.getTaskExecutorClassName()) ||
-						(completed != backgroundTask.isCompleted())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					6 + (orderByComparator.getOrderByFields().length * 2));
-			}
-			else {
-				sb = new StringBundler(6);
-			}
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_N_T_C_GROUPID_2);
-
-			boolean bindName = false;
-
-			if (name.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_C_NAME_3);
-			}
-			else {
-				bindName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_C_NAME_2);
-			}
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_C_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_C_TASKEXECUTORCLASSNAME_2);
-			}
-
-			sb.append(_FINDER_COLUMN_G_N_T_C_COMPLETED_2);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				if (bindName) {
-					queryPos.add(name);
-				}
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				queryPos.add(completed);
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByG_N_T_C.find(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, name, taskExecutorClassName, completed
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -4848,15 +2532,12 @@ public class BackgroundTaskPersistenceImpl
 		boolean completed,
 		OrderByComparator<BackgroundTask> orderByComparator) {
 
-		List<BackgroundTask> list = findByG_N_T_C(
-			groupId, name, taskExecutorClassName, completed, 0, 1,
+		return _collectionPersistenceFinderByG_N_T_C.fetchFirst(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, name, taskExecutorClassName, completed
+			},
 			orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
 	}
 
 	/**
@@ -4957,159 +2638,13 @@ public class BackgroundTaskPersistenceImpl
 		OrderByComparator<BackgroundTask> orderByComparator,
 		boolean useFinderCache) {
 
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		name = Objects.toString(name, "");
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		if (groupIds.length == 1) {
-			return findByG_N_T_C(
-				groupIds[0], name, taskExecutorClassName, completed, start, end,
-				orderByComparator);
-		}
-
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderArgs = new Object[] {
-					StringUtil.merge(groupIds), name, taskExecutorClassName,
-					completed
-				};
-			}
-		}
-		else if (useFinderCache) {
-			finderArgs = new Object[] {
-				StringUtil.merge(groupIds), name, taskExecutorClassName,
-				completed, start, end, orderByComparator
-			};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				_finderPathWithPaginationFindByG_N_T_C, finderArgs, this);
-
-			if ((list != null) && !list.isEmpty()) {
-				for (BackgroundTask backgroundTask : list) {
-					if (!ArrayUtil.contains(
-							groupIds, backgroundTask.getGroupId()) ||
-						!name.equals(backgroundTask.getName()) ||
-						!taskExecutorClassName.equals(
-							backgroundTask.getTaskExecutorClassName()) ||
-						(completed != backgroundTask.isCompleted())) {
-
-						list = null;
-
-						break;
-					}
-				}
-			}
-		}
-
-		if (list == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_SELECT_BACKGROUNDTASK_WHERE);
-
-			if (groupIds.length > 0) {
-				sb.append("(");
-
-				sb.append(_FINDER_COLUMN_G_N_T_C_GROUPID_7);
-
-				sb.append(StringUtil.merge(groupIds));
-
-				sb.append(")");
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			boolean bindName = false;
-
-			if (name.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_C_NAME_3);
-			}
-			else {
-				bindName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_C_NAME_2);
-			}
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_C_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_C_TASKEXECUTORCLASSNAME_2);
-			}
-
-			sb.append(_FINDER_COLUMN_G_N_T_C_COMPLETED_2);
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			if (orderByComparator != null) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-			}
-			else {
-				sb.append(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				if (bindName) {
-					queryPos.add(name);
-				}
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				queryPos.add(completed);
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(
-						_finderPathWithPaginationFindByG_N_T_C, finderArgs,
-						list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
+		return _collectionPersistenceFinderByG_N_T_C.find(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(groupIds), name, taskExecutorClassName,
+				completed
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -5125,13 +2660,11 @@ public class BackgroundTaskPersistenceImpl
 		long groupId, String name, String taskExecutorClassName,
 		boolean completed) {
 
-		for (BackgroundTask backgroundTask :
-				findByG_N_T_C(
-					groupId, name, taskExecutorClassName, completed,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
-
-			remove(backgroundTask);
-		}
+		_collectionPersistenceFinderByG_N_T_C.remove(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, name, taskExecutorClassName, completed
+			});
 	}
 
 	/**
@@ -5148,84 +2681,11 @@ public class BackgroundTaskPersistenceImpl
 		long groupId, String name, String taskExecutorClassName,
 		boolean completed) {
 
-		name = Objects.toString(name, "");
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		FinderPath finderPath = _finderPathCountByG_N_T_C;
-
-		Object[] finderArgs = new Object[] {
-			groupId, name, taskExecutorClassName, completed
-		};
-
-		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler(5);
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			sb.append(_FINDER_COLUMN_G_N_T_C_GROUPID_2);
-
-			boolean bindName = false;
-
-			if (name.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_C_NAME_3);
-			}
-			else {
-				bindName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_C_NAME_2);
-			}
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_C_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_C_TASKEXECUTORCLASSNAME_2);
-			}
-
-			sb.append(_FINDER_COLUMN_G_N_T_C_COMPLETED_2);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				queryPos.add(groupId);
-
-				if (bindName) {
-					queryPos.add(name);
-				}
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				queryPos.add(completed);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(finderPath, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByG_N_T_C.count(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, name, taskExecutorClassName, completed
+			});
 	}
 
 	/**
@@ -5242,126 +2702,13 @@ public class BackgroundTaskPersistenceImpl
 		long[] groupIds, String name, String taskExecutorClassName,
 		boolean completed) {
 
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		name = Objects.toString(name, "");
-		taskExecutorClassName = Objects.toString(taskExecutorClassName, "");
-
-		Object[] finderArgs = new Object[] {
-			StringUtil.merge(groupIds), name, taskExecutorClassName, completed
-		};
-
-		Long count = (Long)finderCache.getResult(
-			_finderPathWithPaginationCountByG_N_T_C, finderArgs, this);
-
-		if (count == null) {
-			StringBundler sb = new StringBundler();
-
-			sb.append(_SQL_COUNT_BACKGROUNDTASK_WHERE);
-
-			if (groupIds.length > 0) {
-				sb.append("(");
-
-				sb.append(_FINDER_COLUMN_G_N_T_C_GROUPID_7);
-
-				sb.append(StringUtil.merge(groupIds));
-
-				sb.append(")");
-
-				sb.append(")");
-
-				sb.append(WHERE_AND);
-			}
-
-			boolean bindName = false;
-
-			if (name.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_C_NAME_3);
-			}
-			else {
-				bindName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_C_NAME_2);
-			}
-
-			boolean bindTaskExecutorClassName = false;
-
-			if (taskExecutorClassName.isEmpty()) {
-				sb.append(_FINDER_COLUMN_G_N_T_C_TASKEXECUTORCLASSNAME_3);
-			}
-			else {
-				bindTaskExecutorClassName = true;
-
-				sb.append(_FINDER_COLUMN_G_N_T_C_TASKEXECUTORCLASSNAME_2);
-			}
-
-			sb.append(_FINDER_COLUMN_G_N_T_C_COMPLETED_2);
-
-			sb.setStringAt(
-				removeConjunction(sb.stringAt(sb.index() - 1)), sb.index() - 1);
-
-			String sql = sb.toString();
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				QueryPos queryPos = QueryPos.getInstance(query);
-
-				if (bindName) {
-					queryPos.add(name);
-				}
-
-				if (bindTaskExecutorClassName) {
-					queryPos.add(taskExecutorClassName);
-				}
-
-				queryPos.add(completed);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathWithPaginationCountByG_N_T_C, finderArgs, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
+		return _collectionPersistenceFinderByG_N_T_C.count(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(groupIds), name, taskExecutorClassName,
+				completed
+			});
 	}
-
-	private static final String _FINDER_COLUMN_G_N_T_C_GROUPID_2 =
-		"backgroundTask.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_N_T_C_GROUPID_7 =
-		"backgroundTask.groupId IN (";
-
-	private static final String _FINDER_COLUMN_G_N_T_C_NAME_2 =
-		"backgroundTask.name = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_N_T_C_NAME_3 =
-		"(backgroundTask.name IS NULL OR backgroundTask.name = '') AND ";
-
-	private static final String _FINDER_COLUMN_G_N_T_C_TASKEXECUTORCLASSNAME_2 =
-		"backgroundTask.taskExecutorClassName = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_N_T_C_TASKEXECUTORCLASSNAME_3 =
-		"(backgroundTask.taskExecutorClassName IS NULL OR backgroundTask.taskExecutorClassName = '') AND ";
-
-	private static final String _FINDER_COLUMN_G_N_T_C_COMPLETED_2 =
-		"backgroundTask.completed = ?";
 
 	public BackgroundTaskPersistenceImpl() {
 		setModelClass(BackgroundTask.class);
@@ -5370,86 +2717,6 @@ public class BackgroundTaskPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(BackgroundTaskTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the background task in the entity cache if it is enabled.
-	 *
-	 * @param backgroundTask the background task
-	 */
-	@Override
-	public void cacheResult(BackgroundTask backgroundTask) {
-		entityCache.putResult(
-			BackgroundTaskImpl.class, backgroundTask.getPrimaryKey(),
-			backgroundTask);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the background tasks in the entity cache if it is enabled.
-	 *
-	 * @param backgroundTasks the background tasks
-	 */
-	@Override
-	public void cacheResult(List<BackgroundTask> backgroundTasks) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (backgroundTasks.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (BackgroundTask backgroundTask : backgroundTasks) {
-			if (entityCache.getResult(
-					BackgroundTaskImpl.class, backgroundTask.getPrimaryKey()) ==
-						null) {
-
-				cacheResult(backgroundTask);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all background tasks.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(BackgroundTaskImpl.class);
-
-		finderCache.clearCache(BackgroundTaskImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the background task.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(BackgroundTask backgroundTask) {
-		entityCache.removeResult(BackgroundTaskImpl.class, backgroundTask);
-	}
-
-	@Override
-	public void clearCache(List<BackgroundTask> backgroundTasks) {
-		for (BackgroundTask backgroundTask : backgroundTasks) {
-			entityCache.removeResult(BackgroundTaskImpl.class, backgroundTask);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(BackgroundTaskImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(BackgroundTaskImpl.class, primaryKey);
-		}
 	}
 
 	/**
@@ -5482,47 +2749,6 @@ public class BackgroundTaskPersistenceImpl
 		throws NoSuchBackgroundTaskException {
 
 		return remove((Serializable)backgroundTaskId);
-	}
-
-	/**
-	 * Removes the background task with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the background task
-	 * @return the background task that was removed
-	 * @throws NoSuchBackgroundTaskException if a background task with the primary key could not be found
-	 */
-	@Override
-	public BackgroundTask remove(Serializable primaryKey)
-		throws NoSuchBackgroundTaskException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			BackgroundTask backgroundTask = (BackgroundTask)session.get(
-				BackgroundTaskImpl.class, primaryKey);
-
-			if (backgroundTask == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchBackgroundTaskException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(backgroundTask);
-		}
-		catch (NoSuchBackgroundTaskException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -5624,39 +2850,13 @@ public class BackgroundTaskPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			BackgroundTaskImpl.class, backgroundTaskModelImpl, false, true);
+		cacheUniqueFindersResult(backgroundTask, false);
 
 		if (isNew) {
 			backgroundTask.setNew(false);
 		}
 
 		backgroundTask.resetOriginalValues();
-
-		return backgroundTask;
-	}
-
-	/**
-	 * Returns the background task with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the background task
-	 * @return the background task
-	 * @throws NoSuchBackgroundTaskException if a background task with the primary key could not be found
-	 */
-	@Override
-	public BackgroundTask findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchBackgroundTaskException {
-
-		BackgroundTask backgroundTask = fetchByPrimaryKey(primaryKey);
-
-		if (backgroundTask == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchBackgroundTaskException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return backgroundTask;
 	}
@@ -5686,186 +2886,6 @@ public class BackgroundTaskPersistenceImpl
 		return fetchByPrimaryKey((Serializable)backgroundTaskId);
 	}
 
-	/**
-	 * Returns all the background tasks.
-	 *
-	 * @return the background tasks
-	 */
-	@Override
-	public List<BackgroundTask> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the background tasks.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>BackgroundTaskModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of background tasks
-	 * @param end the upper bound of the range of background tasks (not inclusive)
-	 * @return the range of background tasks
-	 */
-	@Override
-	public List<BackgroundTask> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the background tasks.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>BackgroundTaskModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of background tasks
-	 * @param end the upper bound of the range of background tasks (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of background tasks
-	 */
-	@Override
-	public List<BackgroundTask> findAll(
-		int start, int end,
-		OrderByComparator<BackgroundTask> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the background tasks.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>BackgroundTaskModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of background tasks
-	 * @param end the upper bound of the range of background tasks (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of background tasks
-	 */
-	@Override
-	public List<BackgroundTask> findAll(
-		int start, int end, OrderByComparator<BackgroundTask> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<BackgroundTask> list = null;
-
-		if (useFinderCache) {
-			list = (List<BackgroundTask>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_BACKGROUNDTASK);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_BACKGROUNDTASK;
-
-				sql = sql.concat(BackgroundTaskModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<BackgroundTask>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the background tasks from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (BackgroundTask backgroundTask : findAll()) {
-			remove(backgroundTask);
-		}
-	}
-
-	/**
-	 * Returns the number of background tasks.
-	 *
-	 * @return the number of background tasks
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_BACKGROUNDTASK);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	protected EntityCache getEntityCache() {
 		return entityCache;
@@ -5891,21 +2911,6 @@ public class BackgroundTaskPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByGroupId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByGroupId",
 			new String[] {
@@ -5930,7 +2935,7 @@ public class BackgroundTaskPersistenceImpl
 				_finderPathWithoutPaginationFindByGroupId,
 				_finderPathCountByGroupId, _SQL_SELECT_BACKGROUNDTASK_WHERE,
 				_SQL_COUNT_BACKGROUNDTASK_WHERE,
-				BackgroundTaskModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				BackgroundTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"backgroundTask.", "groupId", FinderColumn.Type.LONG, "=",
 					true, true, BackgroundTask::getGroupId));
@@ -5959,7 +2964,7 @@ public class BackgroundTaskPersistenceImpl
 				_finderPathWithoutPaginationFindByCompanyId,
 				_finderPathCountByCompanyId, _SQL_SELECT_BACKGROUNDTASK_WHERE,
 				_SQL_COUNT_BACKGROUNDTASK_WHERE,
-				BackgroundTaskModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				BackgroundTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"backgroundTask.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, BackgroundTask::getCompanyId));
@@ -5988,7 +2993,7 @@ public class BackgroundTaskPersistenceImpl
 				_finderPathWithoutPaginationFindByCompleted,
 				_finderPathCountByCompleted, _SQL_SELECT_BACKGROUNDTASK_WHERE,
 				_SQL_COUNT_BACKGROUNDTASK_WHERE,
-				BackgroundTaskModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				BackgroundTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"backgroundTask.", "completed", FinderColumn.Type.BOOLEAN,
 					"=", true, true, BackgroundTask::isCompleted));
@@ -6017,7 +3022,7 @@ public class BackgroundTaskPersistenceImpl
 				_finderPathWithoutPaginationFindByStatus,
 				_finderPathCountByStatus, _SQL_SELECT_BACKGROUNDTASK_WHERE,
 				_SQL_COUNT_BACKGROUNDTASK_WHERE,
-				BackgroundTaskModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				BackgroundTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"backgroundTask.", "status", FinderColumn.Type.INTEGER, "=",
 					true, true, BackgroundTask::getStatus));
@@ -6034,17 +3039,27 @@ public class BackgroundTaskPersistenceImpl
 		_finderPathWithoutPaginationFindByG_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByG_T",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "taskExecutorClassName"}, true);
+			new String[] {"groupId", "taskExecutorClassName"}, 0, 2, true,
+			null);
 
 		_finderPathCountByG_T = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_T",
-			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "taskExecutorClassName"}, false);
-
-		_finderPathWithPaginationCountByG_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByG_T",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "taskExecutorClassName"}, false);
+			new String[] {"groupId", "taskExecutorClassName"}, 0, 2, false,
+			null);
+
+		_collectionPersistenceFinderByG_T = new CollectionPersistenceFinder<>(
+			this, _finderPathWithPaginationFindByG_T,
+			_finderPathWithoutPaginationFindByG_T, _finderPathCountByG_T,
+			_SQL_SELECT_BACKGROUNDTASK_WHERE, _SQL_COUNT_BACKGROUNDTASK_WHERE,
+			BackgroundTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+			new ArrayableFinderColumn<>(
+				"backgroundTask.", "groupId", FinderColumn.Type.LONG, "=",
+				false, true, true, BackgroundTask::getGroupId),
+			new ArrayableFinderColumn<>(
+				"backgroundTask.", "taskExecutorClassName",
+				FinderColumn.Type.STRING, "=", false, true, true,
+				BackgroundTask::getTaskExecutorClassName));
 
 		_finderPathWithPaginationFindByG_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_S",
@@ -6069,10 +3084,10 @@ public class BackgroundTaskPersistenceImpl
 			this, _finderPathWithPaginationFindByG_S,
 			_finderPathWithoutPaginationFindByG_S, _finderPathCountByG_S,
 			_SQL_SELECT_BACKGROUNDTASK_WHERE, _SQL_COUNT_BACKGROUNDTASK_WHERE,
-			BackgroundTaskModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			BackgroundTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"backgroundTask.", "groupId", FinderColumn.Type.LONG, "=", true,
-				false, BackgroundTask::getGroupId),
+				true, BackgroundTask::getGroupId),
 			new FinderColumn<>(
 				"backgroundTask.", "status", FinderColumn.Type.INTEGER, "=",
 				true, true, BackgroundTask::getStatus));
@@ -6089,17 +3104,26 @@ public class BackgroundTaskPersistenceImpl
 		_finderPathWithoutPaginationFindByT_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByT_S",
 			new String[] {String.class.getName(), Integer.class.getName()},
-			new String[] {"taskExecutorClassName", "status"}, true);
+			new String[] {"taskExecutorClassName", "status"}, 0, 1, true, null);
 
 		_finderPathCountByT_S = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByT_S",
-			new String[] {String.class.getName(), Integer.class.getName()},
-			new String[] {"taskExecutorClassName", "status"}, false);
-
-		_finderPathWithPaginationCountByT_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByT_S",
 			new String[] {String.class.getName(), Integer.class.getName()},
-			new String[] {"taskExecutorClassName", "status"}, false);
+			new String[] {"taskExecutorClassName", "status"}, 0, 1, false,
+			null);
+
+		_collectionPersistenceFinderByT_S = new CollectionPersistenceFinder<>(
+			this, _finderPathWithPaginationFindByT_S,
+			_finderPathWithoutPaginationFindByT_S, _finderPathCountByT_S,
+			_SQL_SELECT_BACKGROUNDTASK_WHERE, _SQL_COUNT_BACKGROUNDTASK_WHERE,
+			BackgroundTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+			new ArrayableFinderColumn<>(
+				"backgroundTask.", "taskExecutorClassName",
+				FinderColumn.Type.STRING, "=", false, true, true,
+				BackgroundTask::getTaskExecutorClassName),
+			new FinderColumn<>(
+				"backgroundTask.", "status", FinderColumn.Type.INTEGER, "=",
+				true, true, BackgroundTask::getStatus));
 
 		_finderPathWithPaginationFindByG_N_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_N_T",
@@ -6116,23 +3140,33 @@ public class BackgroundTaskPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"groupId", "name", "taskExecutorClassName"}, true);
+			new String[] {"groupId", "name", "taskExecutorClassName"}, 0, 6,
+			true, null);
 
 		_finderPathCountByG_N_T = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_N_T",
-			new String[] {
-				Long.class.getName(), String.class.getName(),
-				String.class.getName()
-			},
-			new String[] {"groupId", "name", "taskExecutorClassName"}, false);
-
-		_finderPathWithPaginationCountByG_N_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByG_N_T",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"groupId", "name", "taskExecutorClassName"}, false);
+			new String[] {"groupId", "name", "taskExecutorClassName"}, 0, 6,
+			false, null);
+
+		_collectionPersistenceFinderByG_N_T = new CollectionPersistenceFinder<>(
+			this, _finderPathWithPaginationFindByG_N_T,
+			_finderPathWithoutPaginationFindByG_N_T, _finderPathCountByG_N_T,
+			_SQL_SELECT_BACKGROUNDTASK_WHERE, _SQL_COUNT_BACKGROUNDTASK_WHERE,
+			BackgroundTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+			new ArrayableFinderColumn<>(
+				"backgroundTask.", "groupId", FinderColumn.Type.LONG, "=",
+				false, true, true, BackgroundTask::getGroupId),
+			new FinderColumn<>(
+				"backgroundTask.", "name", FinderColumn.Type.STRING, "=", true,
+				true, BackgroundTask::getName),
+			new ArrayableFinderColumn<>(
+				"backgroundTask.", "taskExecutorClassName",
+				FinderColumn.Type.STRING, "=", false, true, true,
+				BackgroundTask::getTaskExecutorClassName));
 
 		_finderPathWithPaginationFindByG_T_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_T_C",
@@ -6150,26 +3184,33 @@ public class BackgroundTaskPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"groupId", "taskExecutorClassName", "completed"},
-			true);
+			new String[] {"groupId", "taskExecutorClassName", "completed"}, 0,
+			2, true, null);
 
 		_finderPathCountByG_T_C = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_T_C",
-			new String[] {
-				Long.class.getName(), String.class.getName(),
-				Boolean.class.getName()
-			},
-			new String[] {"groupId", "taskExecutorClassName", "completed"},
-			false);
-
-		_finderPathWithPaginationCountByG_T_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByG_T_C",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"groupId", "taskExecutorClassName", "completed"},
-			false);
+			new String[] {"groupId", "taskExecutorClassName", "completed"}, 0,
+			2, false, null);
+
+		_collectionPersistenceFinderByG_T_C = new CollectionPersistenceFinder<>(
+			this, _finderPathWithPaginationFindByG_T_C,
+			_finderPathWithoutPaginationFindByG_T_C, _finderPathCountByG_T_C,
+			_SQL_SELECT_BACKGROUNDTASK_WHERE, _SQL_COUNT_BACKGROUNDTASK_WHERE,
+			BackgroundTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+			new ArrayableFinderColumn<>(
+				"backgroundTask.", "groupId", FinderColumn.Type.LONG, "=",
+				false, true, true, BackgroundTask::getGroupId),
+			new ArrayableFinderColumn<>(
+				"backgroundTask.", "taskExecutorClassName",
+				FinderColumn.Type.STRING, "=", false, true, true,
+				BackgroundTask::getTaskExecutorClassName),
+			new FinderColumn<>(
+				"backgroundTask.", "completed", FinderColumn.Type.BOOLEAN, "=",
+				true, true, BackgroundTask::isCompleted));
 
 		_finderPathWithPaginationFindByG_T_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_T_S",
@@ -6186,23 +3227,33 @@ public class BackgroundTaskPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"groupId", "taskExecutorClassName", "status"}, true);
+			new String[] {"groupId", "taskExecutorClassName", "status"}, 0, 2,
+			true, null);
 
 		_finderPathCountByG_T_S = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_T_S",
-			new String[] {
-				Long.class.getName(), String.class.getName(),
-				Integer.class.getName()
-			},
-			new String[] {"groupId", "taskExecutorClassName", "status"}, false);
-
-		_finderPathWithPaginationCountByG_T_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByG_T_S",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"groupId", "taskExecutorClassName", "status"}, false);
+			new String[] {"groupId", "taskExecutorClassName", "status"}, 0, 2,
+			false, null);
+
+		_collectionPersistenceFinderByG_T_S = new CollectionPersistenceFinder<>(
+			this, _finderPathWithPaginationFindByG_T_S,
+			_finderPathWithoutPaginationFindByG_T_S, _finderPathCountByG_T_S,
+			_SQL_SELECT_BACKGROUNDTASK_WHERE, _SQL_COUNT_BACKGROUNDTASK_WHERE,
+			BackgroundTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+			new FinderColumn<>(
+				"backgroundTask.", "groupId", FinderColumn.Type.LONG, "=", true,
+				true, BackgroundTask::getGroupId),
+			new ArrayableFinderColumn<>(
+				"backgroundTask.", "taskExecutorClassName",
+				FinderColumn.Type.STRING, "=", false, true, true,
+				BackgroundTask::getTaskExecutorClassName),
+			new FinderColumn<>(
+				"backgroundTask.", "status", FinderColumn.Type.INTEGER, "=",
+				true, true, BackgroundTask::getStatus));
 
 		_finderPathWithPaginationFindByG_N_T_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_N_T_C",
@@ -6226,20 +3277,9 @@ public class BackgroundTaskPersistenceImpl
 			new String[] {
 				"groupId", "name", "taskExecutorClassName", "completed"
 			},
-			true);
+			0, 6, true, null);
 
 		_finderPathCountByG_N_T_C = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_N_T_C",
-			new String[] {
-				Long.class.getName(), String.class.getName(),
-				String.class.getName(), Boolean.class.getName()
-			},
-			new String[] {
-				"groupId", "name", "taskExecutorClassName", "completed"
-			},
-			false);
-
-		_finderPathWithPaginationCountByG_N_T_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByG_N_T_C",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
@@ -6248,7 +3288,28 @@ public class BackgroundTaskPersistenceImpl
 			new String[] {
 				"groupId", "name", "taskExecutorClassName", "completed"
 			},
-			false);
+			0, 6, false, null);
+
+		_collectionPersistenceFinderByG_N_T_C =
+			new CollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_N_T_C,
+				_finderPathWithoutPaginationFindByG_N_T_C,
+				_finderPathCountByG_N_T_C, _SQL_SELECT_BACKGROUNDTASK_WHERE,
+				_SQL_COUNT_BACKGROUNDTASK_WHERE,
+				BackgroundTaskModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+				new ArrayableFinderColumn<>(
+					"backgroundTask.", "groupId", FinderColumn.Type.LONG, "=",
+					false, true, true, BackgroundTask::getGroupId),
+				new FinderColumn<>(
+					"backgroundTask.", "name", FinderColumn.Type.STRING, "=",
+					true, true, BackgroundTask::getName),
+				new FinderColumn<>(
+					"backgroundTask.", "taskExecutorClassName",
+					FinderColumn.Type.STRING, "=", true, true,
+					BackgroundTask::getTaskExecutorClassName),
+				new FinderColumn<>(
+					"backgroundTask.", "completed", FinderColumn.Type.BOOLEAN,
+					"=", true, true, BackgroundTask::isCompleted));
 
 		BackgroundTaskUtil.setPersistence(this);
 	}
@@ -6292,28 +3353,20 @@ public class BackgroundTaskPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		BackgroundTaskModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_BACKGROUNDTASK =
 		"SELECT backgroundTask FROM BackgroundTask backgroundTask";
 
 	private static final String _SQL_SELECT_BACKGROUNDTASK_WHERE =
 		"SELECT backgroundTask FROM BackgroundTask backgroundTask WHERE ";
 
-	private static final String _SQL_COUNT_BACKGROUNDTASK =
-		"SELECT COUNT(backgroundTask) FROM BackgroundTask backgroundTask";
-
 	private static final String _SQL_COUNT_BACKGROUNDTASK_WHERE =
 		"SELECT COUNT(backgroundTask) FROM BackgroundTask backgroundTask WHERE ";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS = "backgroundTask.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No BackgroundTask exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No BackgroundTask exists with the key {";
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		BackgroundTaskPersistenceImpl.class);
 
 	@Override
 	protected FinderCache getFinderCache() {
@@ -6321,4 +3374,4 @@ public class BackgroundTaskPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1053527990
+// LIFERAY-SERVICE-BUILDER-HASH:-1627441797

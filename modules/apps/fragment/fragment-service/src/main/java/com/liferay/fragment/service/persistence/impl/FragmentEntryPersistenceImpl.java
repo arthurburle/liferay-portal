@@ -14,15 +14,11 @@ import com.liferay.fragment.model.impl.FragmentEntryModelImpl;
 import com.liferay.fragment.service.persistence.FragmentEntryPersistence;
 import com.liferay.fragment.service.persistence.FragmentEntryUtil;
 import com.liferay.fragment.service.persistence.impl.constants.FragmentPersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -44,8 +40,6 @@ import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinde
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -61,7 +55,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -86,7 +79,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = FragmentEntryPersistence.class)
 public class FragmentEntryPersistenceImpl
-	extends BasePersistenceImpl<FragmentEntry>
+	extends BasePersistenceImpl<FragmentEntry, NoSuchEntryException>
 	implements FragmentEntryPersistence {
 
 	/*
@@ -103,9 +96,6 @@ public class FragmentEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -181,14 +171,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				finderCache, new Object[] {uuid}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			finderCache, new Object[] {uuid}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -250,13 +235,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				finderCache, new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			finderCache, new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByUuid_Head;
@@ -341,14 +321,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_Head.find(
-				finderCache, new Object[] {uuid, head}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_Head.find(
+			finderCache, new Object[] {uuid, head}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -416,13 +391,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_Head(String uuid, boolean head) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_Head.count(
-				finderCache, new Object[] {uuid, head});
-		}
+		return _collectionPersistenceFinderByUuid_Head.count(
+			finderCache, new Object[] {uuid, head});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByUUID_G;
@@ -507,14 +477,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByUUID_G.find(
-				finderCache, new Object[] {uuid, groupId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUUID_G.find(
+			finderCache, new Object[] {uuid, groupId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -582,13 +547,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUUID_G(String uuid, long groupId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByUUID_G.count(
-				finderCache, new Object[] {uuid, groupId});
-		}
+		return _collectionPersistenceFinderByUUID_G.count(
+			finderCache, new Object[] {uuid, groupId});
 	}
 
 	private FinderPath _finderPathFetchByUUID_G_Head;
@@ -655,14 +615,8 @@ public class FragmentEntryPersistenceImpl
 	public FragmentEntry fetchByUUID_G_Head(
 		String uuid, long groupId, boolean head, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _uniquePersistenceFinderByUUID_G_Head.fetch(
-				finderCache, new Object[] {uuid, groupId, head},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByUUID_G_Head.fetch(
+			finderCache, new Object[] {uuid, groupId, head}, useFinderCache);
 	}
 
 	/**
@@ -780,14 +734,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				finderCache, new Object[] {uuid, companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			finderCache, new Object[] {uuid, companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -855,13 +804,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				finderCache, new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			finderCache, new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByUuid_C_Head;
@@ -953,14 +897,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C_Head.find(
-				finderCache, new Object[] {uuid, companyId, head}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C_Head.find(
+			finderCache, new Object[] {uuid, companyId, head}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1034,13 +973,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C_Head(String uuid, long companyId, boolean head) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C_Head.count(
-				finderCache, new Object[] {uuid, companyId, head});
-		}
+		return _collectionPersistenceFinderByUuid_C_Head.count(
+			finderCache, new Object[] {uuid, companyId, head});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByGroupId;
@@ -1119,14 +1053,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByGroupId.find(
-				finderCache, new Object[] {groupId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByGroupId.find(
+			finderCache, new Object[] {groupId}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -1188,13 +1117,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByGroupId(long groupId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByGroupId.count(
-				finderCache, new Object[] {groupId});
-		}
+		return _collectionPersistenceFinderByGroupId.count(
+			finderCache, new Object[] {groupId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByGroupId_Head;
@@ -1280,14 +1204,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByGroupId_Head.find(
-				finderCache, new Object[] {groupId, head}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByGroupId_Head.find(
+			finderCache, new Object[] {groupId, head}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1355,13 +1274,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByGroupId_Head(long groupId, boolean head) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByGroupId_Head.count(
-				finderCache, new Object[] {groupId, head});
-		}
+		return _collectionPersistenceFinderByGroupId_Head.count(
+			finderCache, new Object[] {groupId, head});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByFragmentCollectionId;
@@ -1446,14 +1360,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByFragmentCollectionId.find(
-				finderCache, new Object[] {fragmentCollectionId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByFragmentCollectionId.find(
+			finderCache, new Object[] {fragmentCollectionId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1520,13 +1429,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByFragmentCollectionId(long fragmentCollectionId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByFragmentCollectionId.count(
-				finderCache, new Object[] {fragmentCollectionId});
-		}
+		return _collectionPersistenceFinderByFragmentCollectionId.count(
+			finderCache, new Object[] {fragmentCollectionId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByFragmentCollectionId_Head;
@@ -1617,14 +1521,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByFragmentCollectionId_Head.find(
-				finderCache, new Object[] {fragmentCollectionId, head}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByFragmentCollectionId_Head.find(
+			finderCache, new Object[] {fragmentCollectionId, head}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1700,13 +1599,8 @@ public class FragmentEntryPersistenceImpl
 	public int countByFragmentCollectionId_Head(
 		long fragmentCollectionId, boolean head) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByFragmentCollectionId_Head.
-				count(finderCache, new Object[] {fragmentCollectionId, head});
-		}
+		return _collectionPersistenceFinderByFragmentCollectionId_Head.count(
+			finderCache, new Object[] {fragmentCollectionId, head});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByType;
@@ -1784,14 +1678,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByType.find(
-				finderCache, new Object[] {type}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByType.find(
+			finderCache, new Object[] {type}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -1853,13 +1742,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByType(int type) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByType.count(
-				finderCache, new Object[] {type});
-		}
+		return _collectionPersistenceFinderByType.count(
+			finderCache, new Object[] {type});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByType_Head;
@@ -1944,14 +1828,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByType_Head.find(
-				finderCache, new Object[] {type, head}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByType_Head.find(
+			finderCache, new Object[] {type, head}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2019,13 +1898,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByType_Head(int type, boolean head) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByType_Head.count(
-				finderCache, new Object[] {type, head});
-		}
+		return _collectionPersistenceFinderByType_Head.count(
+			finderCache, new Object[] {type, head});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FCI;
@@ -2114,14 +1988,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI.find(
-				finderCache, new Object[] {groupId, fragmentCollectionId},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI.find(
+			finderCache, new Object[] {groupId, fragmentCollectionId}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2191,13 +2060,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByG_FCI(long groupId, long fragmentCollectionId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI.count(
-				finderCache, new Object[] {groupId, fragmentCollectionId});
-		}
+		return _collectionPersistenceFinderByG_FCI.count(
+			finderCache, new Object[] {groupId, fragmentCollectionId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FCI_Head;
@@ -2293,14 +2157,9 @@ public class FragmentEntryPersistenceImpl
 		int end, OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_Head.find(
-				finderCache, new Object[] {groupId, fragmentCollectionId, head},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI_Head.find(
+			finderCache, new Object[] {groupId, fragmentCollectionId, head},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2378,14 +2237,8 @@ public class FragmentEntryPersistenceImpl
 	public int countByG_FCI_Head(
 		long groupId, long fragmentCollectionId, boolean head) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_Head.count(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, head});
-		}
+		return _collectionPersistenceFinderByG_FCI_Head.count(
+			finderCache, new Object[] {groupId, fragmentCollectionId, head});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FEK;
@@ -2474,14 +2327,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FEK.find(
-				finderCache, new Object[] {groupId, fragmentEntryKey}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FEK.find(
+			finderCache, new Object[] {groupId, fragmentEntryKey}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2551,13 +2399,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByG_FEK(long groupId, String fragmentEntryKey) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FEK.count(
-				finderCache, new Object[] {groupId, fragmentEntryKey});
-		}
+		return _collectionPersistenceFinderByG_FEK.count(
+			finderCache, new Object[] {groupId, fragmentEntryKey});
 	}
 
 	private FinderPath _finderPathFetchByG_FEK_Head;
@@ -2626,14 +2469,9 @@ public class FragmentEntryPersistenceImpl
 		long groupId, String fragmentEntryKey, boolean head,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _uniquePersistenceFinderByG_FEK_Head.fetch(
-				finderCache, new Object[] {groupId, fragmentEntryKey, head},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByG_FEK_Head.fetch(
+			finderCache, new Object[] {groupId, fragmentEntryKey, head},
+			useFinderCache);
 	}
 
 	/**
@@ -2763,14 +2601,9 @@ public class FragmentEntryPersistenceImpl
 		int end, OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_LikeN.find(
-				finderCache, new Object[] {groupId, fragmentCollectionId, name},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI_LikeN.find(
+			finderCache, new Object[] {groupId, fragmentCollectionId, name},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2848,14 +2681,8 @@ public class FragmentEntryPersistenceImpl
 	public int countByG_FCI_LikeN(
 		long groupId, long fragmentCollectionId, String name) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_LikeN.count(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, name});
-		}
+		return _collectionPersistenceFinderByG_FCI_LikeN.count(
+			finderCache, new Object[] {groupId, fragmentCollectionId, name});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FCI_LikeN_Head;
@@ -2955,15 +2782,10 @@ public class FragmentEntryPersistenceImpl
 		int start, int end, OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_LikeN_Head.find(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, name, head}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI_LikeN_Head.find(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, name, head}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3048,14 +2870,9 @@ public class FragmentEntryPersistenceImpl
 	public int countByG_FCI_LikeN_Head(
 		long groupId, long fragmentCollectionId, String name, boolean head) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_LikeN_Head.count(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, name, head});
-		}
+		return _collectionPersistenceFinderByG_FCI_LikeN_Head.count(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, name, head});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FCI_T;
@@ -3150,14 +2967,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_T.find(
-				finderCache, new Object[] {groupId, fragmentCollectionId, type},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI_T.find(
+			finderCache, new Object[] {groupId, fragmentCollectionId, type},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3235,14 +3047,8 @@ public class FragmentEntryPersistenceImpl
 	public int countByG_FCI_T(
 		long groupId, long fragmentCollectionId, int type) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_T.count(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, type});
-		}
+		return _collectionPersistenceFinderByG_FCI_T.count(
+			finderCache, new Object[] {groupId, fragmentCollectionId, type});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FCI_T_Head;
@@ -3343,15 +3149,10 @@ public class FragmentEntryPersistenceImpl
 		int start, int end, OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_T_Head.find(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, type, head}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI_T_Head.find(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, type, head}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3435,14 +3236,9 @@ public class FragmentEntryPersistenceImpl
 	public int countByG_FCI_T_Head(
 		long groupId, long fragmentCollectionId, int type, boolean head) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_T_Head.count(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, type, head});
-		}
+		return _collectionPersistenceFinderByG_FCI_T_Head.count(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, type, head});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FCI_S;
@@ -3538,15 +3334,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_S.find(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, status}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI_S.find(
+			finderCache, new Object[] {groupId, fragmentCollectionId, status},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3624,14 +3414,8 @@ public class FragmentEntryPersistenceImpl
 	public int countByG_FCI_S(
 		long groupId, long fragmentCollectionId, int status) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_S.count(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, status});
-		}
+		return _collectionPersistenceFinderByG_FCI_S.count(
+			finderCache, new Object[] {groupId, fragmentCollectionId, status});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FCI_S_Head;
@@ -3732,15 +3516,10 @@ public class FragmentEntryPersistenceImpl
 		int start, int end, OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_S_Head.find(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, status, head},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI_S_Head.find(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, status, head}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -3824,14 +3603,9 @@ public class FragmentEntryPersistenceImpl
 	public int countByG_FCI_S_Head(
 		long groupId, long fragmentCollectionId, int status, boolean head) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_S_Head.count(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, status, head});
-		}
+		return _collectionPersistenceFinderByG_FCI_S_Head.count(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, status, head});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FCI_LikeN_S;
@@ -3931,15 +3705,10 @@ public class FragmentEntryPersistenceImpl
 		int start, int end, OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_LikeN_S.find(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, name, status},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI_LikeN_S.find(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, name, status}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -4023,14 +3792,9 @@ public class FragmentEntryPersistenceImpl
 	public int countByG_FCI_LikeN_S(
 		long groupId, long fragmentCollectionId, String name, int status) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_LikeN_S.count(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, name, status});
-		}
+		return _collectionPersistenceFinderByG_FCI_LikeN_S.count(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, name, status});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FCI_LikeN_S_Head;
@@ -4137,17 +3901,10 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_LikeN_S_Head.find(
-				finderCache,
-				new Object[] {
-					groupId, fragmentCollectionId, name, status, head
-				},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI_LikeN_S_Head.find(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, name, status, head},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -4241,16 +3998,9 @@ public class FragmentEntryPersistenceImpl
 		long groupId, long fragmentCollectionId, String name, int status,
 		boolean head) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_LikeN_S_Head.count(
-				finderCache,
-				new Object[] {
-					groupId, fragmentCollectionId, name, status, head
-				});
-		}
+		return _collectionPersistenceFinderByG_FCI_LikeN_S_Head.count(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, name, status, head});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FCI_T_S;
@@ -4351,15 +4101,10 @@ public class FragmentEntryPersistenceImpl
 		int start, int end, OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_T_S.find(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, type, status},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI_T_S.find(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, type, status}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -4443,14 +4188,9 @@ public class FragmentEntryPersistenceImpl
 	public int countByG_FCI_T_S(
 		long groupId, long fragmentCollectionId, int type, int status) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_T_S.count(
-				finderCache,
-				new Object[] {groupId, fragmentCollectionId, type, status});
-		}
+		return _collectionPersistenceFinderByG_FCI_T_S.count(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, type, status});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_FCI_T_S_Head;
@@ -4558,17 +4298,10 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_T_S_Head.find(
-				finderCache,
-				new Object[] {
-					groupId, fragmentCollectionId, type, status, head
-				},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_FCI_T_S_Head.find(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, type, status, head},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -4661,16 +4394,9 @@ public class FragmentEntryPersistenceImpl
 		long groupId, long fragmentCollectionId, int type, int status,
 		boolean head) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_FCI_T_S_Head.count(
-				finderCache,
-				new Object[] {
-					groupId, fragmentCollectionId, type, status, head
-				});
-		}
+		return _collectionPersistenceFinderByG_FCI_T_S_Head.count(
+			finderCache,
+			new Object[] {groupId, fragmentCollectionId, type, status, head});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByERC_G;
@@ -4760,14 +4486,9 @@ public class FragmentEntryPersistenceImpl
 		OrderByComparator<FragmentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByERC_G.find(
-				finderCache, new Object[] {externalReferenceCode, groupId},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByERC_G.find(
+			finderCache, new Object[] {externalReferenceCode, groupId}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -4837,13 +4558,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByERC_G(String externalReferenceCode, long groupId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _collectionPersistenceFinderByERC_G.count(
-				finderCache, new Object[] {externalReferenceCode, groupId});
-		}
+		return _collectionPersistenceFinderByERC_G.count(
+			finderCache, new Object[] {externalReferenceCode, groupId});
 	}
 
 	private FinderPath _finderPathFetchByERC_G_Head;
@@ -4912,15 +4628,9 @@ public class FragmentEntryPersistenceImpl
 		String externalReferenceCode, long groupId, boolean head,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _uniquePersistenceFinderByERC_G_Head.fetch(
-				finderCache,
-				new Object[] {externalReferenceCode, groupId, head},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByERC_G_Head.fetch(
+			finderCache, new Object[] {externalReferenceCode, groupId, head},
+			useFinderCache);
 	}
 
 	/**
@@ -5008,13 +4718,8 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Override
 	public FragmentEntry fetchByHeadId(long headId, boolean useFinderCache) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			return _uniquePersistenceFinderByHeadId.fetch(
-				finderCache, new Object[] {headId}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByHeadId.fetch(
+			finderCache, new Object[] {headId}, useFinderCache);
 	}
 
 	/**
@@ -5061,165 +4766,6 @@ public class FragmentEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the fragment entry in the entity cache if it is enabled.
-	 *
-	 * @param fragmentEntry the fragment entry
-	 */
-	@Override
-	public void cacheResult(FragmentEntry fragmentEntry) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					fragmentEntry.getCtCollectionId())) {
-
-			entityCache.putResult(
-				FragmentEntryImpl.class, fragmentEntry.getPrimaryKey(),
-				fragmentEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G_Head,
-				new Object[] {
-					fragmentEntry.getUuid(), fragmentEntry.getGroupId(),
-					fragmentEntry.isHead()
-				},
-				fragmentEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByG_FEK_Head,
-				new Object[] {
-					fragmentEntry.getGroupId(),
-					fragmentEntry.getFragmentEntryKey(), fragmentEntry.isHead()
-				},
-				fragmentEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByERC_G_Head,
-				new Object[] {
-					fragmentEntry.getExternalReferenceCode(),
-					fragmentEntry.getGroupId(), fragmentEntry.isHead()
-				},
-				fragmentEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByHeadId,
-				new Object[] {fragmentEntry.getHeadId()}, fragmentEntry);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the fragment entries in the entity cache if it is enabled.
-	 *
-	 * @param fragmentEntries the fragment entries
-	 */
-	@Override
-	public void cacheResult(List<FragmentEntry> fragmentEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (fragmentEntries.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (FragmentEntry fragmentEntry : fragmentEntries) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						fragmentEntry.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						FragmentEntryImpl.class,
-						fragmentEntry.getPrimaryKey()) == null) {
-
-					cacheResult(fragmentEntry);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all fragment entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(FragmentEntryImpl.class);
-
-		finderCache.clearCache(FragmentEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the fragment entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(FragmentEntry fragmentEntry) {
-		entityCache.removeResult(FragmentEntryImpl.class, fragmentEntry);
-	}
-
-	@Override
-	public void clearCache(List<FragmentEntry> fragmentEntries) {
-		for (FragmentEntry fragmentEntry : fragmentEntries) {
-			entityCache.removeResult(FragmentEntryImpl.class, fragmentEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(FragmentEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(FragmentEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		FragmentEntryModelImpl fragmentEntryModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					fragmentEntryModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				fragmentEntryModelImpl.getUuid(),
-				fragmentEntryModelImpl.getGroupId(),
-				fragmentEntryModelImpl.isHead()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G_Head, args, fragmentEntryModelImpl);
-
-			args = new Object[] {
-				fragmentEntryModelImpl.getGroupId(),
-				fragmentEntryModelImpl.getFragmentEntryKey(),
-				fragmentEntryModelImpl.isHead()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByG_FEK_Head, args, fragmentEntryModelImpl);
-
-			args = new Object[] {
-				fragmentEntryModelImpl.getExternalReferenceCode(),
-				fragmentEntryModelImpl.getGroupId(),
-				fragmentEntryModelImpl.isHead()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByERC_G_Head, args, fragmentEntryModelImpl);
-
-			args = new Object[] {fragmentEntryModelImpl.getHeadId()};
-
-			finderCache.putResult(
-				_finderPathFetchByHeadId, args, fragmentEntryModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new fragment entry with the primary key. Does not add the fragment entry to the database.
 	 *
 	 * @param fragmentEntryId the primary key for the new fragment entry
@@ -5253,47 +4799,6 @@ public class FragmentEntryPersistenceImpl
 		throws NoSuchEntryException {
 
 		return remove((Serializable)fragmentEntryId);
-	}
-
-	/**
-	 * Removes the fragment entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the fragment entry
-	 * @return the fragment entry that was removed
-	 * @throws NoSuchEntryException if a fragment entry with the primary key could not be found
-	 */
-	@Override
-	public FragmentEntry remove(Serializable primaryKey)
-		throws NoSuchEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			FragmentEntry fragmentEntry = (FragmentEntry)session.get(
-				FragmentEntryImpl.class, primaryKey);
-
-			if (fragmentEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(fragmentEntry);
-		}
-		catch (NoSuchEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -5470,41 +4975,13 @@ public class FragmentEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			FragmentEntryImpl.class, fragmentEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(fragmentEntryModelImpl);
+		cacheUniqueFindersResult(fragmentEntry, false);
 
 		if (isNew) {
 			fragmentEntry.setNew(false);
 		}
 
 		fragmentEntry.resetOriginalValues();
-
-		return fragmentEntry;
-	}
-
-	/**
-	 * Returns the fragment entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the fragment entry
-	 * @return the fragment entry
-	 * @throws NoSuchEntryException if a fragment entry with the primary key could not be found
-	 */
-	@Override
-	public FragmentEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchEntryException {
-
-		FragmentEntry fragmentEntry = fetchByPrimaryKey(primaryKey);
-
-		if (fragmentEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return fragmentEntry;
 	}
@@ -5523,52 +5000,9 @@ public class FragmentEntryPersistenceImpl
 		return findByPrimaryKey((Serializable)fragmentEntryId);
 	}
 
-	/**
-	 * Returns the fragment entry with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the fragment entry
-	 * @return the fragment entry, or <code>null</code> if a fragment entry with the primary key could not be found
-	 */
 	@Override
-	public FragmentEntry fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				FragmentEntry.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		FragmentEntry fragmentEntry = (FragmentEntry)entityCache.getResult(
-			FragmentEntryImpl.class, primaryKey);
-
-		if (fragmentEntry != null) {
-			return fragmentEntry;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			fragmentEntry = (FragmentEntry)session.get(
-				FragmentEntryImpl.class, primaryKey);
-
-			if (fragmentEntry != null) {
-				cacheResult(fragmentEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return fragmentEntry;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -5580,322 +5014,6 @@ public class FragmentEntryPersistenceImpl
 	@Override
 	public FragmentEntry fetchByPrimaryKey(long fragmentEntryId) {
 		return fetchByPrimaryKey((Serializable)fragmentEntryId);
-	}
-
-	@Override
-	public Map<Serializable, FragmentEntry> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(FragmentEntry.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, FragmentEntry> map =
-			new HashMap<Serializable, FragmentEntry>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			FragmentEntry fragmentEntry = fetchByPrimaryKey(primaryKey);
-
-			if (fragmentEntry != null) {
-				map.put(primaryKey, fragmentEntry);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						FragmentEntry.class, primaryKey)) {
-
-				FragmentEntry fragmentEntry =
-					(FragmentEntry)entityCache.getResult(
-						FragmentEntryImpl.class, primaryKey);
-
-				if (fragmentEntry == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, fragmentEntry);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (FragmentEntry fragmentEntry :
-					(List<FragmentEntry>)query.list()) {
-
-				map.put(fragmentEntry.getPrimaryKeyObj(), fragmentEntry);
-
-				cacheResult(fragmentEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the fragment entries.
-	 *
-	 * @return the fragment entries
-	 */
-	@Override
-	public List<FragmentEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the fragment entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FragmentEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of fragment entries
-	 * @param end the upper bound of the range of fragment entries (not inclusive)
-	 * @return the range of fragment entries
-	 */
-	@Override
-	public List<FragmentEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the fragment entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FragmentEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of fragment entries
-	 * @param end the upper bound of the range of fragment entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of fragment entries
-	 */
-	@Override
-	public List<FragmentEntry> findAll(
-		int start, int end,
-		OrderByComparator<FragmentEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the fragment entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FragmentEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of fragment entries
-	 * @param end the upper bound of the range of fragment entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of fragment entries
-	 */
-	@Override
-	public List<FragmentEntry> findAll(
-		int start, int end, OrderByComparator<FragmentEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<FragmentEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<FragmentEntry>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_FRAGMENTENTRY);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_FRAGMENTENTRY;
-
-					sql = sql.concat(FragmentEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<FragmentEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the fragment entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (FragmentEntry fragmentEntry : findAll()) {
-			remove(fragmentEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of fragment entries.
-	 *
-	 * @return the number of fragment entries
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FragmentEntry.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(_SQL_COUNT_FRAGMENTENTRY);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -6018,21 +5136,6 @@ public class FragmentEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -6043,19 +5146,19 @@ public class FragmentEntryPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-			FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"fragmentEntry.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, FragmentEntry::getUuid));
@@ -6072,12 +5175,12 @@ public class FragmentEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_Head = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_Head",
 			new String[] {String.class.getName(), Boolean.class.getName()},
-			new String[] {"uuid_", "head"}, true);
+			new String[] {"uuid_", "head"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_Head = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_Head",
 			new String[] {String.class.getName(), Boolean.class.getName()},
-			new String[] {"uuid_", "head"}, false);
+			new String[] {"uuid_", "head"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_Head =
 			new CollectionPersistenceFinder<>(
@@ -6085,10 +5188,10 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_Head,
 				_finderPathCountByUuid_Head, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, FragmentEntry::getUuid),
+					true, true, FragmentEntry::getUuid),
 				new FinderColumn<>(
 					"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=",
 					true, true, FragmentEntry::isHead));
@@ -6105,12 +5208,12 @@ public class FragmentEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByUUID_G = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, true, null);
 
 		_finderPathCountByUUID_G = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, false);
+			new String[] {"uuid_", "groupId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUUID_G =
 			new CollectionPersistenceFinder<>(
@@ -6118,31 +5221,33 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUUID_G,
 				_finderPathCountByUUID_G, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, FragmentEntry::getUuid),
+					true, true, FragmentEntry::getUuid),
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
 					true, true, FragmentEntry::getGroupId));
 
-		_finderPathFetchByUUID_G_Head = new FinderPath(
+		_finderPathFetchByUUID_G_Head = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G_Head",
 			new String[] {
 				String.class.getName(), Long.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"uuid_", "groupId", "head"}, true);
+			new String[] {"uuid_", "groupId", "head"}, 0, 1, false,
+			convertNullFunction(FragmentEntry::getUuid),
+			FragmentEntry::getGroupId, FragmentEntry::isHead);
 
 		_uniquePersistenceFinderByUUID_G_Head = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByUUID_G_Head,
-			_SQL_SELECT_FRAGMENTENTRY_WHERE,
+			_SQL_SELECT_FRAGMENTENTRY_WHERE, "",
 			new FinderColumn<>(
 				"fragmentEntry.", "uuid", FinderColumn.Type.STRING, "=", true,
-				false, FragmentEntry::getUuid),
+				true, FragmentEntry::getUuid),
 			new FinderColumn<>(
 				"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
-				false, FragmentEntry::getGroupId),
+				true, FragmentEntry::getGroupId),
 			new FinderColumn<>(
 				"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=", true,
 				true, FragmentEntry::isHead));
@@ -6159,12 +5264,12 @@ public class FragmentEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -6172,10 +5277,10 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, FragmentEntry::getUuid),
+					true, true, FragmentEntry::getUuid),
 				new FinderColumn<>(
 					"fragmentEntry.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, FragmentEntry::getCompanyId));
@@ -6195,7 +5300,7 @@ public class FragmentEntryPersistenceImpl
 				String.class.getName(), Long.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"uuid_", "companyId", "head"}, true);
+			new String[] {"uuid_", "companyId", "head"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C_Head = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C_Head",
@@ -6203,7 +5308,7 @@ public class FragmentEntryPersistenceImpl
 				String.class.getName(), Long.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"uuid_", "companyId", "head"}, false);
+			new String[] {"uuid_", "companyId", "head"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C_Head =
 			new CollectionPersistenceFinder<>(
@@ -6211,13 +5316,13 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C_Head,
 				_finderPathCountByUuid_C_Head, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, FragmentEntry::getUuid),
+					true, true, FragmentEntry::getUuid),
 				new FinderColumn<>(
 					"fragmentEntry.", "companyId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getCompanyId),
+					true, true, FragmentEntry::getCompanyId),
 				new FinderColumn<>(
 					"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=",
 					true, true, FragmentEntry::isHead));
@@ -6246,7 +5351,7 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByGroupId,
 				_finderPathCountByGroupId, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
 					true, true, FragmentEntry::getGroupId));
@@ -6276,10 +5381,10 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByGroupId_Head,
 				_finderPathCountByGroupId_Head, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=",
 					true, true, FragmentEntry::isHead));
@@ -6309,7 +5414,7 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByFragmentCollectionId,
 				_finderPathCountByFragmentCollectionId,
 				_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -6345,10 +5450,10 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByFragmentCollectionId_Head,
 				_finderPathCountByFragmentCollectionId_Head,
 				_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=",
@@ -6376,7 +5481,7 @@ public class FragmentEntryPersistenceImpl
 			this, _finderPathWithPaginationFindByType,
 			_finderPathWithoutPaginationFindByType, _finderPathCountByType,
 			_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-			FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"fragmentEntry.", "type", FinderColumn.Type.INTEGER, "=", true,
 				true, FragmentEntry::getType));
@@ -6406,10 +5511,10 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByType_Head,
 				_finderPathCountByType_Head, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "type", FinderColumn.Type.INTEGER, "=",
-					true, false, FragmentEntry::getType),
+					true, true, FragmentEntry::getType),
 				new FinderColumn<>(
 					"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=",
 					true, true, FragmentEntry::isHead));
@@ -6437,10 +5542,10 @@ public class FragmentEntryPersistenceImpl
 			this, _finderPathWithPaginationFindByG_FCI,
 			_finderPathWithoutPaginationFindByG_FCI, _finderPathCountByG_FCI,
 			_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-			FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
-				false, FragmentEntry::getGroupId),
+				true, FragmentEntry::getGroupId),
 			new FinderColumn<>(
 				"fragmentEntry.", "fragmentCollectionId",
 				FinderColumn.Type.LONG, "=", true, true,
@@ -6477,13 +5582,13 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByG_FCI_Head,
 				_finderPathCountByG_FCI_Head, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=",
@@ -6501,41 +5606,45 @@ public class FragmentEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByG_FEK = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByG_FEK",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "fragmentEntryKey"}, true);
+			new String[] {"groupId", "fragmentEntryKey"}, 0, 2, true, null);
 
 		_finderPathCountByG_FEK = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_FEK",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "fragmentEntryKey"}, false);
+			new String[] {"groupId", "fragmentEntryKey"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByG_FEK = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByG_FEK,
 			_finderPathWithoutPaginationFindByG_FEK, _finderPathCountByG_FEK,
 			_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-			FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
-				false, FragmentEntry::getGroupId),
+				true, FragmentEntry::getGroupId),
 			new FinderColumn<>(
 				"fragmentEntry.", "fragmentEntryKey", FinderColumn.Type.STRING,
 				"=", true, true, FragmentEntry::getFragmentEntryKey));
 
-		_finderPathFetchByG_FEK_Head = new FinderPath(
+		_finderPathFetchByG_FEK_Head = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByG_FEK_Head",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"groupId", "fragmentEntryKey", "head"}, true);
+			new String[] {"groupId", "fragmentEntryKey", "head"}, 0, 2, false,
+			FragmentEntry::getGroupId,
+			convertNullFunction(FragmentEntry::getFragmentEntryKey),
+			FragmentEntry::isHead);
 
 		_uniquePersistenceFinderByG_FEK_Head = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByG_FEK_Head, _SQL_SELECT_FRAGMENTENTRY_WHERE,
+			"",
 			new FinderColumn<>(
 				"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
-				false, FragmentEntry::getGroupId),
+				true, FragmentEntry::getGroupId),
 			new FinderColumn<>(
 				"fragmentEntry.", "fragmentEntryKey", FinderColumn.Type.STRING,
-				"=", true, false, FragmentEntry::getFragmentEntryKey),
+				"=", true, true, FragmentEntry::getFragmentEntryKey),
 			new FinderColumn<>(
 				"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=", true,
 				true, FragmentEntry::isHead));
@@ -6562,13 +5671,13 @@ public class FragmentEntryPersistenceImpl
 				this, _finderPathWithPaginationFindByG_FCI_LikeN, null,
 				_finderPathWithPaginationCountByG_FCI_LikeN,
 				_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "name", FinderColumn.Type.STRING, "LIKE",
@@ -6599,17 +5708,17 @@ public class FragmentEntryPersistenceImpl
 				this, _finderPathWithPaginationFindByG_FCI_LikeN_Head, null,
 				_finderPathWithPaginationCountByG_FCI_LikeN_Head,
 				_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "name", FinderColumn.Type.STRING, "LIKE",
-					true, false, FragmentEntry::getName),
+					true, true, FragmentEntry::getName),
 				new FinderColumn<>(
 					"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=",
 					true, true, FragmentEntry::isHead));
@@ -6645,13 +5754,13 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByG_FCI_T,
 				_finderPathCountByG_FCI_T, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "type", FinderColumn.Type.INTEGER, "=",
@@ -6692,17 +5801,17 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByG_FCI_T_Head,
 				_finderPathCountByG_FCI_T_Head, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "type", FinderColumn.Type.INTEGER, "=",
-					true, false, FragmentEntry::getType),
+					true, true, FragmentEntry::getType),
 				new FinderColumn<>(
 					"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=",
 					true, true, FragmentEntry::isHead));
@@ -6738,13 +5847,13 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByG_FCI_S,
 				_finderPathCountByG_FCI_S, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "status", FinderColumn.Type.INTEGER, "=",
@@ -6785,17 +5894,17 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByG_FCI_S_Head,
 				_finderPathCountByG_FCI_S_Head, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "status", FinderColumn.Type.INTEGER, "=",
-					true, false, FragmentEntry::getStatus),
+					true, true, FragmentEntry::getStatus),
 				new FinderColumn<>(
 					"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=",
 					true, true, FragmentEntry::isHead));
@@ -6825,17 +5934,17 @@ public class FragmentEntryPersistenceImpl
 				this, _finderPathWithPaginationFindByG_FCI_LikeN_S, null,
 				_finderPathWithPaginationCountByG_FCI_LikeN_S,
 				_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "name", FinderColumn.Type.STRING, "LIKE",
-					true, false, FragmentEntry::getName),
+					true, true, FragmentEntry::getName),
 				new FinderColumn<>(
 					"fragmentEntry.", "status", FinderColumn.Type.INTEGER, "=",
 					true, true, FragmentEntry::getStatus));
@@ -6870,20 +5979,20 @@ public class FragmentEntryPersistenceImpl
 				this, _finderPathWithPaginationFindByG_FCI_LikeN_S_Head, null,
 				_finderPathWithPaginationCountByG_FCI_LikeN_S_Head,
 				_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "name", FinderColumn.Type.STRING, "LIKE",
-					true, false, FragmentEntry::getName),
+					true, true, FragmentEntry::getName),
 				new FinderColumn<>(
 					"fragmentEntry.", "status", FinderColumn.Type.INTEGER, "=",
-					true, false, FragmentEntry::getStatus),
+					true, true, FragmentEntry::getStatus),
 				new FinderColumn<>(
 					"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=",
 					true, true, FragmentEntry::isHead));
@@ -6923,17 +6032,17 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByG_FCI_T_S,
 				_finderPathCountByG_FCI_T_S, _SQL_SELECT_FRAGMENTENTRY_WHERE,
 				_SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "type", FinderColumn.Type.INTEGER, "=",
-					true, false, FragmentEntry::getType),
+					true, true, FragmentEntry::getType),
 				new FinderColumn<>(
 					"fragmentEntry.", "status", FinderColumn.Type.INTEGER, "=",
 					true, true, FragmentEntry::getStatus));
@@ -6981,20 +6090,20 @@ public class FragmentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByG_FCI_T_S_Head,
 				_finderPathCountByG_FCI_T_S_Head,
 				_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-				FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, FragmentEntry::getGroupId),
+					true, true, FragmentEntry::getGroupId),
 				new FinderColumn<>(
 					"fragmentEntry.", "fragmentCollectionId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					FragmentEntry::getFragmentCollectionId),
 				new FinderColumn<>(
 					"fragmentEntry.", "type", FinderColumn.Type.INTEGER, "=",
-					true, false, FragmentEntry::getType),
+					true, true, FragmentEntry::getType),
 				new FinderColumn<>(
 					"fragmentEntry.", "status", FinderColumn.Type.INTEGER, "=",
-					true, false, FragmentEntry::getStatus),
+					true, true, FragmentEntry::getStatus),
 				new FinderColumn<>(
 					"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=",
 					true, true, FragmentEntry::isHead));
@@ -7011,53 +6120,59 @@ public class FragmentEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByERC_G = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByERC_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"externalReferenceCode", "groupId"}, true);
+			new String[] {"externalReferenceCode", "groupId"}, 0, 1, true,
+			null);
 
 		_finderPathCountByERC_G = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByERC_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"externalReferenceCode", "groupId"}, false);
+			new String[] {"externalReferenceCode", "groupId"}, 0, 1, false,
+			null);
 
 		_collectionPersistenceFinderByERC_G = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByERC_G,
 			_finderPathWithoutPaginationFindByERC_G, _finderPathCountByERC_G,
 			_SQL_SELECT_FRAGMENTENTRY_WHERE, _SQL_COUNT_FRAGMENTENTRY_WHERE,
-			FragmentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			FragmentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"fragmentEntry.", "externalReferenceCode",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				FragmentEntry::getExternalReferenceCode),
 			new FinderColumn<>(
 				"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
 				true, FragmentEntry::getGroupId));
 
-		_finderPathFetchByERC_G_Head = new FinderPath(
+		_finderPathFetchByERC_G_Head = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_G_Head",
 			new String[] {
 				String.class.getName(), Long.class.getName(),
 				Boolean.class.getName()
 			},
-			new String[] {"externalReferenceCode", "groupId", "head"}, true);
+			new String[] {"externalReferenceCode", "groupId", "head"}, 0, 1,
+			false, convertNullFunction(FragmentEntry::getExternalReferenceCode),
+			FragmentEntry::getGroupId, FragmentEntry::isHead);
 
 		_uniquePersistenceFinderByERC_G_Head = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByERC_G_Head, _SQL_SELECT_FRAGMENTENTRY_WHERE,
+			"",
 			new FinderColumn<>(
 				"fragmentEntry.", "externalReferenceCode",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				FragmentEntry::getExternalReferenceCode),
 			new FinderColumn<>(
 				"fragmentEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
-				false, FragmentEntry::getGroupId),
+				true, FragmentEntry::getGroupId),
 			new FinderColumn<>(
 				"fragmentEntry.", "head", FinderColumn.Type.BOOLEAN, "=", true,
 				true, FragmentEntry::isHead));
 
-		_finderPathFetchByHeadId = new FinderPath(
+		_finderPathFetchByHeadId = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByHeadId",
-			new String[] {Long.class.getName()}, new String[] {"headId"}, true);
+			new String[] {Long.class.getName()}, new String[] {"headId"}, 0, 0,
+			false, FragmentEntry::getHeadId);
 
 		_uniquePersistenceFinderByHeadId = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByHeadId, _SQL_SELECT_FRAGMENTENTRY_WHERE,
+			this, _finderPathFetchByHeadId, _SQL_SELECT_FRAGMENTENTRY_WHERE, "",
 			new FinderColumn<>(
 				"fragmentEntry.", "headId", FinderColumn.Type.LONG, "=", true,
 				true, FragmentEntry::getHeadId));
@@ -7107,22 +6222,17 @@ public class FragmentEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		FragmentEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_FRAGMENTENTRY =
 		"SELECT fragmentEntry FROM FragmentEntry fragmentEntry";
 
 	private static final String _SQL_SELECT_FRAGMENTENTRY_WHERE =
 		"SELECT fragmentEntry FROM FragmentEntry fragmentEntry WHERE ";
 
-	private static final String _SQL_COUNT_FRAGMENTENTRY =
-		"SELECT COUNT(fragmentEntry) FROM FragmentEntry fragmentEntry";
-
 	private static final String _SQL_COUNT_FRAGMENTENTRY_WHERE =
 		"SELECT COUNT(fragmentEntry) FROM FragmentEntry fragmentEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "fragmentEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No FragmentEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No FragmentEntry exists with the key {";
@@ -7139,4 +6249,4 @@ public class FragmentEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:130596257
+// LIFERAY-SERVICE-BUILDER-HASH:1561785323

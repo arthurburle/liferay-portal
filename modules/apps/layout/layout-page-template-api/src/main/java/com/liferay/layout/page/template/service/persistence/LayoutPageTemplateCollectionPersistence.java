@@ -1512,23 +1512,6 @@ public interface LayoutPageTemplateCollectionPersistence
 	public int countByERC_G(String externalReferenceCode, long groupId);
 
 	/**
-	 * Caches the layout page template collection in the entity cache if it is enabled.
-	 *
-	 * @param layoutPageTemplateCollection the layout page template collection
-	 */
-	public void cacheResult(
-		LayoutPageTemplateCollection layoutPageTemplateCollection);
-
-	/**
-	 * Caches the layout page template collections in the entity cache if it is enabled.
-	 *
-	 * @param layoutPageTemplateCollections the layout page template collections
-	 */
-	public void cacheResult(
-		java.util.List<LayoutPageTemplateCollection>
-			layoutPageTemplateCollections);
-
-	/**
 	 * Creates a new layout page template collection with the primary key. Does not add the layout page template collection to the database.
 	 *
 	 * @param layoutPageTemplateCollectionId the primary key for the new layout page template collection
@@ -1571,74 +1554,5 @@ public interface LayoutPageTemplateCollectionPersistence
 	public LayoutPageTemplateCollection fetchByPrimaryKey(
 		long layoutPageTemplateCollectionId);
 
-	/**
-	 * Returns all the layout page template collections.
-	 *
-	 * @return the layout page template collections
-	 */
-	public java.util.List<LayoutPageTemplateCollection> findAll();
-
-	/**
-	 * Returns a range of all the layout page template collections.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.page.template.model.impl.LayoutPageTemplateCollectionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout page template collections
-	 * @param end the upper bound of the range of layout page template collections (not inclusive)
-	 * @return the range of layout page template collections
-	 */
-	public java.util.List<LayoutPageTemplateCollection> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the layout page template collections.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.page.template.model.impl.LayoutPageTemplateCollectionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout page template collections
-	 * @param end the upper bound of the range of layout page template collections (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of layout page template collections
-	 */
-	public java.util.List<LayoutPageTemplateCollection> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<LayoutPageTemplateCollection> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the layout page template collections.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.page.template.model.impl.LayoutPageTemplateCollectionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout page template collections
-	 * @param end the upper bound of the range of layout page template collections (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of layout page template collections
-	 */
-	public java.util.List<LayoutPageTemplateCollection> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<LayoutPageTemplateCollection> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the layout page template collections from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of layout page template collections.
-	 *
-	 * @return the number of layout page template collections
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:551171544
+// LIFERAY-SERVICE-BUILDER-HASH:-129549994

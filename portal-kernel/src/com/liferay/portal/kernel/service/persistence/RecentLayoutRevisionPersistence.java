@@ -397,21 +397,6 @@ public interface RecentLayoutRevisionPersistence
 	public int countByU_L_P(long userId, long layoutSetBranchId, long plid);
 
 	/**
-	 * Caches the recent layout revision in the entity cache if it is enabled.
-	 *
-	 * @param recentLayoutRevision the recent layout revision
-	 */
-	public void cacheResult(RecentLayoutRevision recentLayoutRevision);
-
-	/**
-	 * Caches the recent layout revisions in the entity cache if it is enabled.
-	 *
-	 * @param recentLayoutRevisions the recent layout revisions
-	 */
-	public void cacheResult(
-		java.util.List<RecentLayoutRevision> recentLayoutRevisions);
-
-	/**
 	 * Creates a new recent layout revision with the primary key. Does not add the recent layout revision to the database.
 	 *
 	 * @param recentLayoutRevisionId the primary key for the new recent layout revision
@@ -450,73 +435,5 @@ public interface RecentLayoutRevisionPersistence
 	 */
 	public RecentLayoutRevision fetchByPrimaryKey(long recentLayoutRevisionId);
 
-	/**
-	 * Returns all the recent layout revisions.
-	 *
-	 * @return the recent layout revisions
-	 */
-	public java.util.List<RecentLayoutRevision> findAll();
-
-	/**
-	 * Returns a range of all the recent layout revisions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RecentLayoutRevisionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of recent layout revisions
-	 * @param end the upper bound of the range of recent layout revisions (not inclusive)
-	 * @return the range of recent layout revisions
-	 */
-	public java.util.List<RecentLayoutRevision> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the recent layout revisions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RecentLayoutRevisionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of recent layout revisions
-	 * @param end the upper bound of the range of recent layout revisions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of recent layout revisions
-	 */
-	public java.util.List<RecentLayoutRevision> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<RecentLayoutRevision>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the recent layout revisions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RecentLayoutRevisionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of recent layout revisions
-	 * @param end the upper bound of the range of recent layout revisions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of recent layout revisions
-	 */
-	public java.util.List<RecentLayoutRevision> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<RecentLayoutRevision>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the recent layout revisions from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of recent layout revisions.
-	 *
-	 * @return the number of recent layout revisions
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1921635057
+// LIFERAY-SERVICE-BUILDER-HASH:-264677384

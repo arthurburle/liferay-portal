@@ -36,6 +36,20 @@ public class CommerceOrderItemUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<CommerceOrderItem> commerceOrderItems) {
+		getPersistence().cacheResult(commerceOrderItems);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CommerceOrderItem commerceOrderItem) {
+		getPersistence().cacheResult(commerceOrderItem);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1693,24 +1707,6 @@ public class CommerceOrderItemUtil {
 	}
 
 	/**
-	 * Caches the commerce order item in the entity cache if it is enabled.
-	 *
-	 * @param commerceOrderItem the commerce order item
-	 */
-	public static void cacheResult(CommerceOrderItem commerceOrderItem) {
-		getPersistence().cacheResult(commerceOrderItem);
-	}
-
-	/**
-	 * Caches the commerce order items in the entity cache if it is enabled.
-	 *
-	 * @param commerceOrderItems the commerce order items
-	 */
-	public static void cacheResult(List<CommerceOrderItem> commerceOrderItems) {
-		getPersistence().cacheResult(commerceOrderItems);
-	}
-
-	/**
 	 * Creates a new commerce order item with the primary key. Does not add the commerce order item to the database.
 	 *
 	 * @param commerceOrderItemId the primary key for the new commerce order item
@@ -1764,87 +1760,6 @@ public class CommerceOrderItemUtil {
 		return getPersistence().fetchByPrimaryKey(commerceOrderItemId);
 	}
 
-	/**
-	 * Returns all the commerce order items.
-	 *
-	 * @return the commerce order items
-	 */
-	public static List<CommerceOrderItem> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce order items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order items
-	 * @param end the upper bound of the range of commerce order items (not inclusive)
-	 * @return the range of commerce order items
-	 */
-	public static List<CommerceOrderItem> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce order items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order items
-	 * @param end the upper bound of the range of commerce order items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce order items
-	 */
-	public static List<CommerceOrderItem> findAll(
-		int start, int end,
-		OrderByComparator<CommerceOrderItem> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce order items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order items
-	 * @param end the upper bound of the range of commerce order items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce order items
-	 */
-	public static List<CommerceOrderItem> findAll(
-		int start, int end,
-		OrderByComparator<CommerceOrderItem> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce order items from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce order items.
-	 *
-	 * @return the number of commerce order items
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceOrderItemPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1858,4 +1773,4 @@ public class CommerceOrderItemUtil {
 	private static volatile CommerceOrderItemPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-269761959
+// LIFERAY-SERVICE-BUILDER-HASH:-1628573762

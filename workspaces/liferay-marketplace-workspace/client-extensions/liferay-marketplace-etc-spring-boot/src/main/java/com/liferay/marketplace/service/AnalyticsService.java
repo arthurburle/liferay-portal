@@ -6,6 +6,7 @@
 package com.liferay.marketplace.service;
 
 import com.liferay.client.extension.util.spring.boot3.service.BaseService;
+import com.liferay.petra.string.StringBundler;
 
 import java.util.Base64;
 
@@ -21,6 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * @author Caleb Hall
@@ -37,6 +40,30 @@ public class AnalyticsService extends BaseService {
 		return "Basic " + encoder.encodeToString(authorization.getBytes());
 	}
 
+	public String getCorpProjectUuid(String corpProjectUuid) {
+		try {
+			return get(
+				getAuthorization(),
+				UriComponentsBuilder.fromUriString(
+					_analyticsAuthUrl
+				).path(
+					"/o/faro/main/project/corpProjectUuid/" + corpProjectUuid
+				).build(
+				).toUri());
+		}
+		catch (WebClientResponseException webClientResponseException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(
+					StringBundler.concat(
+						"Unable to get Analytics Cloud project: ",
+						corpProjectUuid, " \n",
+						webClientResponseException.getResponseBodyAsString()));
+			}
+
+			return null;
+		}
+	}
+
 	public String provision(JSONObject jsonObject) throws Exception {
 		String response = WebClient.builder(
 		).baseUrl(
@@ -51,9 +78,9 @@ public class AnalyticsService extends BaseService {
 			MediaType.APPLICATION_FORM_URLENCODED
 		).body(
 			BodyInserters.fromFormData(
-				"corpProjectName", jsonObject.getString("corpProjectName")
+				"corpProjectName", jsonObject.optString("corpProjectName")
 			).with(
-				"corpProjectUuid", jsonObject.getString("corpProjectUuid")
+				"corpProjectUuid", jsonObject.optString("corpProjectUuid")
 			).with(
 				"incidentReportEmailAddresses",
 				jsonObject.getJSONArray(

@@ -80,21 +80,6 @@ public interface DDMFormInstanceReportPersistence
 	public int countByFormInstanceId(long formInstanceId);
 
 	/**
-	 * Caches the ddm form instance report in the entity cache if it is enabled.
-	 *
-	 * @param ddmFormInstanceReport the ddm form instance report
-	 */
-	public void cacheResult(DDMFormInstanceReport ddmFormInstanceReport);
-
-	/**
-	 * Caches the ddm form instance reports in the entity cache if it is enabled.
-	 *
-	 * @param ddmFormInstanceReports the ddm form instance reports
-	 */
-	public void cacheResult(
-		java.util.List<DDMFormInstanceReport> ddmFormInstanceReports);
-
-	/**
 	 * Creates a new ddm form instance report with the primary key. Does not add the ddm form instance report to the database.
 	 *
 	 * @param formInstanceReportId the primary key for the new ddm form instance report
@@ -133,73 +118,5 @@ public interface DDMFormInstanceReportPersistence
 	 */
 	public DDMFormInstanceReport fetchByPrimaryKey(long formInstanceReportId);
 
-	/**
-	 * Returns all the ddm form instance reports.
-	 *
-	 * @return the ddm form instance reports
-	 */
-	public java.util.List<DDMFormInstanceReport> findAll();
-
-	/**
-	 * Returns a range of all the ddm form instance reports.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceReportModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm form instance reports
-	 * @param end the upper bound of the range of ddm form instance reports (not inclusive)
-	 * @return the range of ddm form instance reports
-	 */
-	public java.util.List<DDMFormInstanceReport> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the ddm form instance reports.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceReportModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm form instance reports
-	 * @param end the upper bound of the range of ddm form instance reports (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm form instance reports
-	 */
-	public java.util.List<DDMFormInstanceReport> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DDMFormInstanceReport>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the ddm form instance reports.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceReportModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm form instance reports
-	 * @param end the upper bound of the range of ddm form instance reports (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm form instance reports
-	 */
-	public java.util.List<DDMFormInstanceReport> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DDMFormInstanceReport>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the ddm form instance reports from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of ddm form instance reports.
-	 *
-	 * @return the number of ddm form instance reports
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:634599548
+// LIFERAY-SERVICE-BUILDER-HASH:1785736196

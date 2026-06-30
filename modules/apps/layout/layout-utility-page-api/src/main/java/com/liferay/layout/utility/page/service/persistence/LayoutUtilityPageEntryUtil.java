@@ -36,6 +36,24 @@ public class LayoutUtilityPageEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<LayoutUtilityPageEntry> layoutUtilityPageEntries) {
+
+		getPersistence().cacheResult(layoutUtilityPageEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		LayoutUtilityPageEntry layoutUtilityPageEntry) {
+
+		getPersistence().cacheResult(layoutUtilityPageEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1808,28 +1826,6 @@ public class LayoutUtilityPageEntryUtil {
 	}
 
 	/**
-	 * Caches the layout utility page entry in the entity cache if it is enabled.
-	 *
-	 * @param layoutUtilityPageEntry the layout utility page entry
-	 */
-	public static void cacheResult(
-		LayoutUtilityPageEntry layoutUtilityPageEntry) {
-
-		getPersistence().cacheResult(layoutUtilityPageEntry);
-	}
-
-	/**
-	 * Caches the layout utility page entries in the entity cache if it is enabled.
-	 *
-	 * @param layoutUtilityPageEntries the layout utility page entries
-	 */
-	public static void cacheResult(
-		List<LayoutUtilityPageEntry> layoutUtilityPageEntries) {
-
-		getPersistence().cacheResult(layoutUtilityPageEntries);
-	}
-
-	/**
 	 * Creates a new layout utility page entry with the primary key. Does not add the layout utility page entry to the database.
 	 *
 	 * @param LayoutUtilityPageEntryId the primary key for the new layout utility page entry
@@ -1886,87 +1882,6 @@ public class LayoutUtilityPageEntryUtil {
 		return getPersistence().fetchByPrimaryKey(LayoutUtilityPageEntryId);
 	}
 
-	/**
-	 * Returns all the layout utility page entries.
-	 *
-	 * @return the layout utility page entries
-	 */
-	public static List<LayoutUtilityPageEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the layout utility page entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.utility.page.model.impl.LayoutUtilityPageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout utility page entries
-	 * @param end the upper bound of the range of layout utility page entries (not inclusive)
-	 * @return the range of layout utility page entries
-	 */
-	public static List<LayoutUtilityPageEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the layout utility page entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.utility.page.model.impl.LayoutUtilityPageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout utility page entries
-	 * @param end the upper bound of the range of layout utility page entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of layout utility page entries
-	 */
-	public static List<LayoutUtilityPageEntry> findAll(
-		int start, int end,
-		OrderByComparator<LayoutUtilityPageEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the layout utility page entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.utility.page.model.impl.LayoutUtilityPageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout utility page entries
-	 * @param end the upper bound of the range of layout utility page entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of layout utility page entries
-	 */
-	public static List<LayoutUtilityPageEntry> findAll(
-		int start, int end,
-		OrderByComparator<LayoutUtilityPageEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the layout utility page entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of layout utility page entries.
-	 *
-	 * @return the number of layout utility page entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static LayoutUtilityPageEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1980,4 +1895,4 @@ public class LayoutUtilityPageEntryUtil {
 	private static volatile LayoutUtilityPageEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2129809901
+// LIFERAY-SERVICE-BUILDER-HASH:-1185814656

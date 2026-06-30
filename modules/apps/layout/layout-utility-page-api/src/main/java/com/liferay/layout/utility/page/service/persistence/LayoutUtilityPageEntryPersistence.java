@@ -1409,21 +1409,6 @@ public interface LayoutUtilityPageEntryPersistence
 	public int countByERC_G(String externalReferenceCode, long groupId);
 
 	/**
-	 * Caches the layout utility page entry in the entity cache if it is enabled.
-	 *
-	 * @param layoutUtilityPageEntry the layout utility page entry
-	 */
-	public void cacheResult(LayoutUtilityPageEntry layoutUtilityPageEntry);
-
-	/**
-	 * Caches the layout utility page entries in the entity cache if it is enabled.
-	 *
-	 * @param layoutUtilityPageEntries the layout utility page entries
-	 */
-	public void cacheResult(
-		java.util.List<LayoutUtilityPageEntry> layoutUtilityPageEntries);
-
-	/**
 	 * Creates a new layout utility page entry with the primary key. Does not add the layout utility page entry to the database.
 	 *
 	 * @param LayoutUtilityPageEntryId the primary key for the new layout utility page entry
@@ -1464,73 +1449,5 @@ public interface LayoutUtilityPageEntryPersistence
 	public LayoutUtilityPageEntry fetchByPrimaryKey(
 		long LayoutUtilityPageEntryId);
 
-	/**
-	 * Returns all the layout utility page entries.
-	 *
-	 * @return the layout utility page entries
-	 */
-	public java.util.List<LayoutUtilityPageEntry> findAll();
-
-	/**
-	 * Returns a range of all the layout utility page entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.utility.page.model.impl.LayoutUtilityPageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout utility page entries
-	 * @param end the upper bound of the range of layout utility page entries (not inclusive)
-	 * @return the range of layout utility page entries
-	 */
-	public java.util.List<LayoutUtilityPageEntry> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the layout utility page entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.utility.page.model.impl.LayoutUtilityPageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout utility page entries
-	 * @param end the upper bound of the range of layout utility page entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of layout utility page entries
-	 */
-	public java.util.List<LayoutUtilityPageEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<LayoutUtilityPageEntry>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the layout utility page entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.layout.utility.page.model.impl.LayoutUtilityPageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of layout utility page entries
-	 * @param end the upper bound of the range of layout utility page entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of layout utility page entries
-	 */
-	public java.util.List<LayoutUtilityPageEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<LayoutUtilityPageEntry>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the layout utility page entries from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of layout utility page entries.
-	 *
-	 * @return the number of layout utility page entries
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1573391525
+// LIFERAY-SERVICE-BUILDER-HASH:-387416124

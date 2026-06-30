@@ -6,6 +6,7 @@
 package com.liferay.headless.admin.site.internal.resource.v1_0;
 
 import com.liferay.client.extension.type.manager.CETManager;
+import com.liferay.exportimport.constants.ExportImportConstants;
 import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.vulcan.batch.engine.ExportImportVulcanBatchEngineTaskItemDelegate;
@@ -230,6 +231,11 @@ public class SitePageResourceImpl
 			@Override
 			public Scope getScope() {
 				return Scope.SITE;
+			}
+
+			@Override
+			public String getSectionKey() {
+				return ExportImportConstants.SECTION_KEY_SITE_BUILDER;
 			}
 
 			@Override
@@ -613,6 +619,26 @@ public class SitePageResourceImpl
 		return new CustomMetaTag[0];
 	}
 
+	private String _getDefaultAssetPublisherPortletId(
+		PageSettings pageSettings) {
+
+		if (pageSettings instanceof ContentPageSettings) {
+			ContentPageSettings contentPageSettings =
+				(ContentPageSettings)pageSettings;
+
+			return contentPageSettings.getDefaultAssetPublisherPortletId();
+		}
+
+		if (pageSettings instanceof WidgetPageSettings) {
+			WidgetPageSettings widgetPageSettings =
+				(WidgetPageSettings)pageSettings;
+
+			return widgetPageSettings.getDefaultAssetPublisherPortletId();
+		}
+
+		return null;
+	}
+
 	private OpenGraphSettings _getOpenGraphSettings(PageSettings pageSettings) {
 		if (pageSettings == null) {
 			return null;
@@ -875,6 +901,15 @@ public class SitePageResourceImpl
 			).setProperty(
 				"targetType", targetTypeString
 			);
+
+		String defaultAssetPublisherPortletId =
+			_getDefaultAssetPublisherPortletId(pageSettings);
+
+		if (Validator.isNotNull(defaultAssetPublisherPortletId)) {
+			unicodePropertiesWrapper.setProperty(
+				LayoutTypePortletConstants.DEFAULT_ASSET_PUBLISHER_PORTLET_ID,
+				defaultAssetPublisherPortletId);
+		}
 
 		if ((sitePage.getType() == SitePage.Type.CONTENT_PAGE) ||
 			(sitePage.getType() == SitePage.Type.PAGE_SET_PAGE)) {

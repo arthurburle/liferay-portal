@@ -240,20 +240,6 @@ public interface SamlIdpSpSessionPersistence
 	public int countBySamlIdpSsoSessionId(long samlIdpSsoSessionId);
 
 	/**
-	 * Caches the saml idp sp session in the entity cache if it is enabled.
-	 *
-	 * @param samlIdpSpSession the saml idp sp session
-	 */
-	public void cacheResult(SamlIdpSpSession samlIdpSpSession);
-
-	/**
-	 * Caches the saml idp sp sessions in the entity cache if it is enabled.
-	 *
-	 * @param samlIdpSpSessions the saml idp sp sessions
-	 */
-	public void cacheResult(java.util.List<SamlIdpSpSession> samlIdpSpSessions);
-
-	/**
 	 * Creates a new saml idp sp session with the primary key. Does not add the saml idp sp session to the database.
 	 *
 	 * @param samlIdpSpSessionId the primary key for the new saml idp sp session
@@ -291,73 +277,5 @@ public interface SamlIdpSpSessionPersistence
 	 */
 	public SamlIdpSpSession fetchByPrimaryKey(long samlIdpSpSessionId);
 
-	/**
-	 * Returns all the saml idp sp sessions.
-	 *
-	 * @return the saml idp sp sessions
-	 */
-	public java.util.List<SamlIdpSpSession> findAll();
-
-	/**
-	 * Returns a range of all the saml idp sp sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.saml.persistence.model.impl.SamlIdpSpSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml idp sp sessions
-	 * @param end the upper bound of the range of saml idp sp sessions (not inclusive)
-	 * @return the range of saml idp sp sessions
-	 */
-	public java.util.List<SamlIdpSpSession> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the saml idp sp sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.saml.persistence.model.impl.SamlIdpSpSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml idp sp sessions
-	 * @param end the upper bound of the range of saml idp sp sessions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of saml idp sp sessions
-	 */
-	public java.util.List<SamlIdpSpSession> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SamlIdpSpSession>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the saml idp sp sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.saml.persistence.model.impl.SamlIdpSpSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml idp sp sessions
-	 * @param end the upper bound of the range of saml idp sp sessions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of saml idp sp sessions
-	 */
-	public java.util.List<SamlIdpSpSession> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SamlIdpSpSession>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the saml idp sp sessions from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of saml idp sp sessions.
-	 *
-	 * @return the number of saml idp sp sessions
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1198083607
+// LIFERAY-SERVICE-BUILDER-HASH:-159999400

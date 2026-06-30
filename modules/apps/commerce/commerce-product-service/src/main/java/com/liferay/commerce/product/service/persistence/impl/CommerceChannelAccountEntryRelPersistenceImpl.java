@@ -13,15 +13,11 @@ import com.liferay.commerce.product.model.impl.CommerceChannelAccountEntryRelMod
 import com.liferay.commerce.product.service.persistence.CommerceChannelAccountEntryRelPersistence;
 import com.liferay.commerce.product.service.persistence.CommerceChannelAccountEntryRelUtil;
 import com.liferay.commerce.product.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -35,10 +31,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 
@@ -52,7 +45,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +68,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CommerceChannelAccountEntryRelPersistence.class)
 public class CommerceChannelAccountEntryRelPersistenceImpl
-	extends BasePersistenceImpl<CommerceChannelAccountEntryRel>
+	extends BasePersistenceImpl
+		<CommerceChannelAccountEntryRel, NoSuchChannelAccountEntryRelException>
 	implements CommerceChannelAccountEntryRelPersistence {
 
 	/*
@@ -93,9 +86,6 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByAccountEntryId;
 	private FinderPath _finderPathWithoutPaginationFindByAccountEntryId;
 	private FinderPath _finderPathCountByAccountEntryId;
@@ -177,14 +167,9 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 		OrderByComparator<CommerceChannelAccountEntryRel> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByAccountEntryId.find(
-				finderCache, new Object[] {accountEntryId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByAccountEntryId.find(
+			finderCache, new Object[] {accountEntryId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -248,13 +233,8 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	 */
 	@Override
 	public int countByAccountEntryId(long accountEntryId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByAccountEntryId.count(
-				finderCache, new Object[] {accountEntryId});
-		}
+		return _collectionPersistenceFinderByAccountEntryId.count(
+			finderCache, new Object[] {accountEntryId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByCommerceChannelId;
@@ -338,14 +318,9 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 		OrderByComparator<CommerceChannelAccountEntryRel> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByCommerceChannelId.find(
-				finderCache, new Object[] {commerceChannelId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByCommerceChannelId.find(
+			finderCache, new Object[] {commerceChannelId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -412,13 +387,8 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	 */
 	@Override
 	public int countByCommerceChannelId(long commerceChannelId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByCommerceChannelId.count(
-				finderCache, new Object[] {commerceChannelId});
-		}
+		return _collectionPersistenceFinderByCommerceChannelId.count(
+			finderCache, new Object[] {commerceChannelId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByA_T;
@@ -506,14 +476,9 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 		OrderByComparator<CommerceChannelAccountEntryRel> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByA_T.find(
-				finderCache, new Object[] {accountEntryId, type}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByA_T.find(
+			finderCache, new Object[] {accountEntryId, type}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -582,13 +547,8 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	 */
 	@Override
 	public int countByA_T(long accountEntryId, int type) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByA_T.count(
-				finderCache, new Object[] {accountEntryId, type});
-		}
+		return _collectionPersistenceFinderByA_T.count(
+			finderCache, new Object[] {accountEntryId, type});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_C;
@@ -676,14 +636,9 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 		OrderByComparator<CommerceChannelAccountEntryRel> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByC_C.find(
-				finderCache, new Object[] {classNameId, classPK}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_C.find(
+			finderCache, new Object[] {classNameId, classPK}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -752,13 +707,8 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	 */
 	@Override
 	public int countByC_C(long classNameId, long classPK) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByC_C.count(
-				finderCache, new Object[] {classNameId, classPK});
-		}
+		return _collectionPersistenceFinderByC_C.count(
+			finderCache, new Object[] {classNameId, classPK});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_T;
@@ -847,14 +797,9 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 		OrderByComparator<CommerceChannelAccountEntryRel> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByC_T.find(
-				finderCache, new Object[] {commerceChannelId, type}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_T.find(
+			finderCache, new Object[] {commerceChannelId, type}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -924,13 +869,8 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	 */
 	@Override
 	public int countByC_T(long commerceChannelId, int type) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByC_T.count(
-				finderCache, new Object[] {commerceChannelId, type});
-		}
+		return _collectionPersistenceFinderByC_T.count(
+			finderCache, new Object[] {commerceChannelId, type});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByA_C_T;
@@ -1028,15 +968,9 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 		OrderByComparator<CommerceChannelAccountEntryRel> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByA_C_T.find(
-				finderCache,
-				new Object[] {accountEntryId, commerceChannelId, type}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByA_C_T.find(
+			finderCache, new Object[] {accountEntryId, commerceChannelId, type},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1116,14 +1050,9 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	public int countByA_C_T(
 		long accountEntryId, long commerceChannelId, int type) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByA_C_T.count(
-				finderCache,
-				new Object[] {accountEntryId, commerceChannelId, type});
-		}
+		return _collectionPersistenceFinderByA_C_T.count(
+			finderCache,
+			new Object[] {accountEntryId, commerceChannelId, type});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_C_C_T;
@@ -1225,15 +1154,10 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 		OrderByComparator<CommerceChannelAccountEntryRel> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByC_C_C_T.find(
-				finderCache,
-				new Object[] {classNameId, classPK, commerceChannelId, type},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_C_C_T.find(
+			finderCache,
+			new Object[] {classNameId, classPK, commerceChannelId, type}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1319,14 +1243,9 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	public int countByC_C_C_T(
 		long classNameId, long classPK, long commerceChannelId, int type) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _collectionPersistenceFinderByC_C_C_T.count(
-				finderCache,
-				new Object[] {classNameId, classPK, commerceChannelId, type});
-		}
+		return _collectionPersistenceFinderByC_C_C_T.count(
+			finderCache,
+			new Object[] {classNameId, classPK, commerceChannelId, type});
 	}
 
 	private FinderPath _finderPathFetchByA_C_C_C_T;
@@ -1409,18 +1328,12 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 		long accountEntryId, long classNameId, long classPK,
 		long commerceChannelId, int type, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			return _uniquePersistenceFinderByA_C_C_C_T.fetch(
-				finderCache,
-				new Object[] {
-					accountEntryId, classNameId, classPK, commerceChannelId,
-					type
-				},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByA_C_C_C_T.fetch(
+			finderCache,
+			new Object[] {
+				accountEntryId, classNameId, classPK, commerceChannelId, type
+			},
+			useFinderCache);
 	}
 
 	/**
@@ -1486,150 +1399,6 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	}
 
 	/**
-	 * Caches the commerce channel account entry rel in the entity cache if it is enabled.
-	 *
-	 * @param commerceChannelAccountEntryRel the commerce channel account entry rel
-	 */
-	@Override
-	public void cacheResult(
-		CommerceChannelAccountEntryRel commerceChannelAccountEntryRel) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					commerceChannelAccountEntryRel.getCtCollectionId())) {
-
-			entityCache.putResult(
-				CommerceChannelAccountEntryRelImpl.class,
-				commerceChannelAccountEntryRel.getPrimaryKey(),
-				commerceChannelAccountEntryRel);
-
-			finderCache.putResult(
-				_finderPathFetchByA_C_C_C_T,
-				new Object[] {
-					commerceChannelAccountEntryRel.getAccountEntryId(),
-					commerceChannelAccountEntryRel.getClassNameId(),
-					commerceChannelAccountEntryRel.getClassPK(),
-					commerceChannelAccountEntryRel.getCommerceChannelId(),
-					commerceChannelAccountEntryRel.getType()
-				},
-				commerceChannelAccountEntryRel);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the commerce channel account entry rels in the entity cache if it is enabled.
-	 *
-	 * @param commerceChannelAccountEntryRels the commerce channel account entry rels
-	 */
-	@Override
-	public void cacheResult(
-		List<CommerceChannelAccountEntryRel> commerceChannelAccountEntryRels) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (commerceChannelAccountEntryRels.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CommerceChannelAccountEntryRel commerceChannelAccountEntryRel :
-				commerceChannelAccountEntryRels) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						commerceChannelAccountEntryRel.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						CommerceChannelAccountEntryRelImpl.class,
-						commerceChannelAccountEntryRel.getPrimaryKey()) ==
-							null) {
-
-					cacheResult(commerceChannelAccountEntryRel);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all commerce channel account entry rels.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CommerceChannelAccountEntryRelImpl.class);
-
-		finderCache.clearCache(CommerceChannelAccountEntryRelImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the commerce channel account entry rel.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(
-		CommerceChannelAccountEntryRel commerceChannelAccountEntryRel) {
-
-		entityCache.removeResult(
-			CommerceChannelAccountEntryRelImpl.class,
-			commerceChannelAccountEntryRel);
-	}
-
-	@Override
-	public void clearCache(
-		List<CommerceChannelAccountEntryRel> commerceChannelAccountEntryRels) {
-
-		for (CommerceChannelAccountEntryRel commerceChannelAccountEntryRel :
-				commerceChannelAccountEntryRels) {
-
-			entityCache.removeResult(
-				CommerceChannelAccountEntryRelImpl.class,
-				commerceChannelAccountEntryRel);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CommerceChannelAccountEntryRelImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CommerceChannelAccountEntryRelImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CommerceChannelAccountEntryRelModelImpl
-			commerceChannelAccountEntryRelModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					commerceChannelAccountEntryRelModelImpl.
-						getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				commerceChannelAccountEntryRelModelImpl.getAccountEntryId(),
-				commerceChannelAccountEntryRelModelImpl.getClassNameId(),
-				commerceChannelAccountEntryRelModelImpl.getClassPK(),
-				commerceChannelAccountEntryRelModelImpl.getCommerceChannelId(),
-				commerceChannelAccountEntryRelModelImpl.getType()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByA_C_C_C_T, args,
-				commerceChannelAccountEntryRelModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new commerce channel account entry rel with the primary key. Does not add the commerce channel account entry rel to the database.
 	 *
 	 * @param commerceChannelAccountEntryRelId the primary key for the new commerce channel account entry rel
@@ -1665,48 +1434,6 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 		throws NoSuchChannelAccountEntryRelException {
 
 		return remove((Serializable)commerceChannelAccountEntryRelId);
-	}
-
-	/**
-	 * Removes the commerce channel account entry rel with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the commerce channel account entry rel
-	 * @return the commerce channel account entry rel that was removed
-	 * @throws NoSuchChannelAccountEntryRelException if a commerce channel account entry rel with the primary key could not be found
-	 */
-	@Override
-	public CommerceChannelAccountEntryRel remove(Serializable primaryKey)
-		throws NoSuchChannelAccountEntryRelException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CommerceChannelAccountEntryRel commerceChannelAccountEntryRel =
-				(CommerceChannelAccountEntryRel)session.get(
-					CommerceChannelAccountEntryRelImpl.class, primaryKey);
-
-			if (commerceChannelAccountEntryRel == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchChannelAccountEntryRelException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(commerceChannelAccountEntryRel);
-		}
-		catch (NoSuchChannelAccountEntryRelException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1829,44 +1556,13 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CommerceChannelAccountEntryRelImpl.class,
-			commerceChannelAccountEntryRelModelImpl, false, true);
-
-		cacheUniqueFindersCache(commerceChannelAccountEntryRelModelImpl);
+		cacheUniqueFindersResult(commerceChannelAccountEntryRel, false);
 
 		if (isNew) {
 			commerceChannelAccountEntryRel.setNew(false);
 		}
 
 		commerceChannelAccountEntryRel.resetOriginalValues();
-
-		return commerceChannelAccountEntryRel;
-	}
-
-	/**
-	 * Returns the commerce channel account entry rel with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the commerce channel account entry rel
-	 * @return the commerce channel account entry rel
-	 * @throws NoSuchChannelAccountEntryRelException if a commerce channel account entry rel with the primary key could not be found
-	 */
-	@Override
-	public CommerceChannelAccountEntryRel findByPrimaryKey(
-			Serializable primaryKey)
-		throws NoSuchChannelAccountEntryRelException {
-
-		CommerceChannelAccountEntryRel commerceChannelAccountEntryRel =
-			fetchByPrimaryKey(primaryKey);
-
-		if (commerceChannelAccountEntryRel == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchChannelAccountEntryRelException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return commerceChannelAccountEntryRel;
 	}
@@ -1886,56 +1582,9 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 		return findByPrimaryKey((Serializable)commerceChannelAccountEntryRelId);
 	}
 
-	/**
-	 * Returns the commerce channel account entry rel with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the commerce channel account entry rel
-	 * @return the commerce channel account entry rel, or <code>null</code> if a commerce channel account entry rel with the primary key could not be found
-	 */
 	@Override
-	public CommerceChannelAccountEntryRel fetchByPrimaryKey(
-		Serializable primaryKey) {
-
-		if (ctPersistenceHelper.isProductionMode(
-				CommerceChannelAccountEntryRel.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		CommerceChannelAccountEntryRel commerceChannelAccountEntryRel =
-			(CommerceChannelAccountEntryRel)entityCache.getResult(
-				CommerceChannelAccountEntryRelImpl.class, primaryKey);
-
-		if (commerceChannelAccountEntryRel != null) {
-			return commerceChannelAccountEntryRel;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			commerceChannelAccountEntryRel =
-				(CommerceChannelAccountEntryRel)session.get(
-					CommerceChannelAccountEntryRelImpl.class, primaryKey);
-
-			if (commerceChannelAccountEntryRel != null) {
-				cacheResult(commerceChannelAccountEntryRel);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return commerceChannelAccountEntryRel;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -1950,333 +1599,6 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 
 		return fetchByPrimaryKey(
 			(Serializable)commerceChannelAccountEntryRelId);
-	}
-
-	@Override
-	public Map<Serializable, CommerceChannelAccountEntryRel> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(
-				CommerceChannelAccountEntryRel.class)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, CommerceChannelAccountEntryRel> map =
-			new HashMap<Serializable, CommerceChannelAccountEntryRel>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			CommerceChannelAccountEntryRel commerceChannelAccountEntryRel =
-				fetchByPrimaryKey(primaryKey);
-
-			if (commerceChannelAccountEntryRel != null) {
-				map.put(primaryKey, commerceChannelAccountEntryRel);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						CommerceChannelAccountEntryRel.class, primaryKey)) {
-
-				CommerceChannelAccountEntryRel commerceChannelAccountEntryRel =
-					(CommerceChannelAccountEntryRel)entityCache.getResult(
-						CommerceChannelAccountEntryRelImpl.class, primaryKey);
-
-				if (commerceChannelAccountEntryRel == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, commerceChannelAccountEntryRel);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (CommerceChannelAccountEntryRel commerceChannelAccountEntryRel :
-					(List<CommerceChannelAccountEntryRel>)query.list()) {
-
-				map.put(
-					commerceChannelAccountEntryRel.getPrimaryKeyObj(),
-					commerceChannelAccountEntryRel);
-
-				cacheResult(commerceChannelAccountEntryRel);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the commerce channel account entry rels.
-	 *
-	 * @return the commerce channel account entry rels
-	 */
-	@Override
-	public List<CommerceChannelAccountEntryRel> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the commerce channel account entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceChannelAccountEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce channel account entry rels
-	 * @param end the upper bound of the range of commerce channel account entry rels (not inclusive)
-	 * @return the range of commerce channel account entry rels
-	 */
-	@Override
-	public List<CommerceChannelAccountEntryRel> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce channel account entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceChannelAccountEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce channel account entry rels
-	 * @param end the upper bound of the range of commerce channel account entry rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce channel account entry rels
-	 */
-	@Override
-	public List<CommerceChannelAccountEntryRel> findAll(
-		int start, int end,
-		OrderByComparator<CommerceChannelAccountEntryRel> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce channel account entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceChannelAccountEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce channel account entry rels
-	 * @param end the upper bound of the range of commerce channel account entry rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce channel account entry rels
-	 */
-	@Override
-	public List<CommerceChannelAccountEntryRel> findAll(
-		int start, int end,
-		OrderByComparator<CommerceChannelAccountEntryRel> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<CommerceChannelAccountEntryRel> list = null;
-
-			if (useFinderCache) {
-				list =
-					(List<CommerceChannelAccountEntryRel>)finderCache.getResult(
-						finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL;
-
-					sql = sql.concat(
-						CommerceChannelAccountEntryRelModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<CommerceChannelAccountEntryRel>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the commerce channel account entry rels from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CommerceChannelAccountEntryRel commerceChannelAccountEntryRel :
-				findAll()) {
-
-			remove(commerceChannelAccountEntryRel);
-		}
-	}
-
-	/**
-	 * Returns the number of commerce channel account entry rels.
-	 *
-	 * @return the number of commerce channel account entry rels
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CommerceChannelAccountEntryRel.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_COMMERCECHANNELACCOUNTENTRYREL);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -2379,21 +1701,6 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByAccountEntryId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByAccountEntryId",
 			new String[] {
@@ -2420,7 +1727,7 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 				_SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 				_SQL_COUNT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 				CommerceChannelAccountEntryRelModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"commerceChannelAccountEntryRel.", "accountEntryId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2452,7 +1759,7 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 				_SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 				_SQL_COUNT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 				CommerceChannelAccountEntryRelModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"commerceChannelAccountEntryRel.", "commerceChannelId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2483,10 +1790,10 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 			_SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 			_SQL_COUNT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 			CommerceChannelAccountEntryRelModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "accountEntryId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceChannelAccountEntryRel::getAccountEntryId),
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "type",
@@ -2518,10 +1825,10 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 			_SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 			_SQL_COUNT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 			CommerceChannelAccountEntryRelModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "classNameId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceChannelAccountEntryRel::getClassNameId),
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "classPK",
@@ -2553,10 +1860,10 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 			_SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 			_SQL_COUNT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 			CommerceChannelAccountEntryRelModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "commerceChannelId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceChannelAccountEntryRel::getCommerceChannelId),
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "type",
@@ -2597,14 +1904,14 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 			_SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 			_SQL_COUNT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 			CommerceChannelAccountEntryRelModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "accountEntryId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceChannelAccountEntryRel::getAccountEntryId),
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "commerceChannelId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceChannelAccountEntryRel::getCommerceChannelId),
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "type",
@@ -2654,25 +1961,25 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 				_SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 				_SQL_COUNT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
 				CommerceChannelAccountEntryRelModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"commerceChannelAccountEntryRel.", "classNameId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					CommerceChannelAccountEntryRel::getClassNameId),
 				new FinderColumn<>(
 					"commerceChannelAccountEntryRel.", "classPK",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					CommerceChannelAccountEntryRel::getClassPK),
 				new FinderColumn<>(
 					"commerceChannelAccountEntryRel.", "commerceChannelId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					CommerceChannelAccountEntryRel::getCommerceChannelId),
 				new FinderColumn<>(
 					"commerceChannelAccountEntryRel.", "type",
 					FinderColumn.Type.INTEGER, "=", true, true,
 					CommerceChannelAccountEntryRel::getType));
 
-		_finderPathFetchByA_C_C_C_T = new FinderPath(
+		_finderPathFetchByA_C_C_C_T = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByA_C_C_C_T",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
@@ -2683,26 +1990,30 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 				"accountEntryId", "classNameId", "classPK", "commerceChannelId",
 				"type_"
 			},
-			true);
+			0, 0, false, CommerceChannelAccountEntryRel::getAccountEntryId,
+			CommerceChannelAccountEntryRel::getClassNameId,
+			CommerceChannelAccountEntryRel::getClassPK,
+			CommerceChannelAccountEntryRel::getCommerceChannelId,
+			CommerceChannelAccountEntryRel::getType);
 
 		_uniquePersistenceFinderByA_C_C_C_T = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByA_C_C_C_T,
-			_SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL_WHERE,
+			_SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL_WHERE, "",
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "accountEntryId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceChannelAccountEntryRel::getAccountEntryId),
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "classNameId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceChannelAccountEntryRel::getClassNameId),
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "classPK",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceChannelAccountEntryRel::getClassPK),
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "commerceChannelId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CommerceChannelAccountEntryRel::getCommerceChannelId),
 			new FinderColumn<>(
 				"commerceChannelAccountEntryRel.", "type",
@@ -2755,6 +2066,9 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CommerceChannelAccountEntryRelModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL =
 		"SELECT commerceChannelAccountEntryRel FROM CommerceChannelAccountEntryRel commerceChannelAccountEntryRel";
 
@@ -2762,18 +2076,9 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 		_SQL_SELECT_COMMERCECHANNELACCOUNTENTRYREL_WHERE =
 			"SELECT commerceChannelAccountEntryRel FROM CommerceChannelAccountEntryRel commerceChannelAccountEntryRel WHERE ";
 
-	private static final String _SQL_COUNT_COMMERCECHANNELACCOUNTENTRYREL =
-		"SELECT COUNT(commerceChannelAccountEntryRel) FROM CommerceChannelAccountEntryRel commerceChannelAccountEntryRel";
-
 	private static final String
 		_SQL_COUNT_COMMERCECHANNELACCOUNTENTRYREL_WHERE =
 			"SELECT COUNT(commerceChannelAccountEntryRel) FROM CommerceChannelAccountEntryRel commerceChannelAccountEntryRel WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"commerceChannelAccountEntryRel.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CommerceChannelAccountEntryRel exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CommerceChannelAccountEntryRel exists with the key {";
@@ -2790,4 +2095,4 @@ public class CommerceChannelAccountEntryRelPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:942858771
+// LIFERAY-SERVICE-BUILDER-HASH:-694151181

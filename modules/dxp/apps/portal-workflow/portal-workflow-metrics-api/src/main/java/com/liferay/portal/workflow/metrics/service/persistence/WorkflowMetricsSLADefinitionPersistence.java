@@ -992,23 +992,6 @@ public interface WorkflowMetricsSLADefinitionPersistence
 		int status);
 
 	/**
-	 * Caches the workflow metrics sla definition in the entity cache if it is enabled.
-	 *
-	 * @param workflowMetricsSLADefinition the workflow metrics sla definition
-	 */
-	public void cacheResult(
-		WorkflowMetricsSLADefinition workflowMetricsSLADefinition);
-
-	/**
-	 * Caches the workflow metrics sla definitions in the entity cache if it is enabled.
-	 *
-	 * @param workflowMetricsSLADefinitions the workflow metrics sla definitions
-	 */
-	public void cacheResult(
-		java.util.List<WorkflowMetricsSLADefinition>
-			workflowMetricsSLADefinitions);
-
-	/**
 	 * Creates a new workflow metrics sla definition with the primary key. Does not add the workflow metrics sla definition to the database.
 	 *
 	 * @param workflowMetricsSLADefinitionId the primary key for the new workflow metrics sla definition
@@ -1051,74 +1034,5 @@ public interface WorkflowMetricsSLADefinitionPersistence
 	public WorkflowMetricsSLADefinition fetchByPrimaryKey(
 		long workflowMetricsSLADefinitionId);
 
-	/**
-	 * Returns all the workflow metrics sla definitions.
-	 *
-	 * @return the workflow metrics sla definitions
-	 */
-	public java.util.List<WorkflowMetricsSLADefinition> findAll();
-
-	/**
-	 * Returns a range of all the workflow metrics sla definitions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.metrics.model.impl.WorkflowMetricsSLADefinitionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of workflow metrics sla definitions
-	 * @param end the upper bound of the range of workflow metrics sla definitions (not inclusive)
-	 * @return the range of workflow metrics sla definitions
-	 */
-	public java.util.List<WorkflowMetricsSLADefinition> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the workflow metrics sla definitions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.metrics.model.impl.WorkflowMetricsSLADefinitionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of workflow metrics sla definitions
-	 * @param end the upper bound of the range of workflow metrics sla definitions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of workflow metrics sla definitions
-	 */
-	public java.util.List<WorkflowMetricsSLADefinition> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<WorkflowMetricsSLADefinition> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the workflow metrics sla definitions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.metrics.model.impl.WorkflowMetricsSLADefinitionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of workflow metrics sla definitions
-	 * @param end the upper bound of the range of workflow metrics sla definitions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of workflow metrics sla definitions
-	 */
-	public java.util.List<WorkflowMetricsSLADefinition> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<WorkflowMetricsSLADefinition> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the workflow metrics sla definitions from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of workflow metrics sla definitions.
-	 *
-	 * @return the number of workflow metrics sla definitions
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:886885758
+// LIFERAY-SERVICE-BUILDER-HASH:-1937694835

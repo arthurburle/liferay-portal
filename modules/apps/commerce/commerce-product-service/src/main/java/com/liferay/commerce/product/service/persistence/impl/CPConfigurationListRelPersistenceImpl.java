@@ -13,15 +13,11 @@ import com.liferay.commerce.product.model.impl.CPConfigurationListRelModelImpl;
 import com.liferay.commerce.product.service.persistence.CPConfigurationListRelPersistence;
 import com.liferay.commerce.product.service.persistence.CPConfigurationListRelUtil;
 import com.liferay.commerce.product.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -35,10 +31,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 
 import java.io.Serializable;
@@ -49,9 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,7 +66,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CPConfigurationListRelPersistence.class)
 public class CPConfigurationListRelPersistenceImpl
-	extends BasePersistenceImpl<CPConfigurationListRel>
+	extends BasePersistenceImpl
+		<CPConfigurationListRel, NoSuchCPConfigurationListRelException>
 	implements CPConfigurationListRelPersistence {
 
 	/*
@@ -92,9 +84,6 @@ public class CPConfigurationListRelPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByCPConfigurationListId;
 	private FinderPath _finderPathWithoutPaginationFindByCPConfigurationListId;
 	private FinderPath _finderPathCountByCPConfigurationListId;
@@ -177,14 +166,9 @@ public class CPConfigurationListRelPersistenceImpl
 		OrderByComparator<CPConfigurationListRel> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPConfigurationListRel.class)) {
-
-			return _collectionPersistenceFinderByCPConfigurationListId.find(
-				finderCache, new Object[] {CPConfigurationListId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByCPConfigurationListId.find(
+			finderCache, new Object[] {CPConfigurationListId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -252,13 +236,8 @@ public class CPConfigurationListRelPersistenceImpl
 	 */
 	@Override
 	public int countByCPConfigurationListId(long CPConfigurationListId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPConfigurationListRel.class)) {
-
-			return _collectionPersistenceFinderByCPConfigurationListId.count(
-				finderCache, new Object[] {CPConfigurationListId});
-		}
+		return _collectionPersistenceFinderByCPConfigurationListId.count(
+			finderCache, new Object[] {CPConfigurationListId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_C;
@@ -348,14 +327,9 @@ public class CPConfigurationListRelPersistenceImpl
 		OrderByComparator<CPConfigurationListRel> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPConfigurationListRel.class)) {
-
-			return _collectionPersistenceFinderByC_C.find(
-				finderCache, new Object[] {classNameId, CPConfigurationListId},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_C.find(
+			finderCache, new Object[] {classNameId, CPConfigurationListId},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -425,13 +399,8 @@ public class CPConfigurationListRelPersistenceImpl
 	 */
 	@Override
 	public int countByC_C(long classNameId, long CPConfigurationListId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPConfigurationListRel.class)) {
-
-			return _collectionPersistenceFinderByC_C.count(
-				finderCache, new Object[] {classNameId, CPConfigurationListId});
-		}
+		return _collectionPersistenceFinderByC_C.count(
+			finderCache, new Object[] {classNameId, CPConfigurationListId});
 	}
 
 	private FinderPath _finderPathFetchByC_C_C;
@@ -500,15 +469,10 @@ public class CPConfigurationListRelPersistenceImpl
 		long classNameId, long classPK, long CPConfigurationListId,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPConfigurationListRel.class)) {
-
-			return _uniquePersistenceFinderByC_C_C.fetch(
-				finderCache,
-				new Object[] {classNameId, classPK, CPConfigurationListId},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByC_C_C.fetch(
+			finderCache,
+			new Object[] {classNameId, classPK, CPConfigurationListId},
+			useFinderCache);
 	}
 
 	/**
@@ -557,135 +521,6 @@ public class CPConfigurationListRelPersistenceImpl
 	}
 
 	/**
-	 * Caches the cp configuration list rel in the entity cache if it is enabled.
-	 *
-	 * @param cpConfigurationListRel the cp configuration list rel
-	 */
-	@Override
-	public void cacheResult(CPConfigurationListRel cpConfigurationListRel) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					cpConfigurationListRel.getCtCollectionId())) {
-
-			entityCache.putResult(
-				CPConfigurationListRelImpl.class,
-				cpConfigurationListRel.getPrimaryKey(), cpConfigurationListRel);
-
-			finderCache.putResult(
-				_finderPathFetchByC_C_C,
-				new Object[] {
-					cpConfigurationListRel.getClassNameId(),
-					cpConfigurationListRel.getClassPK(),
-					cpConfigurationListRel.getCPConfigurationListId()
-				},
-				cpConfigurationListRel);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the cp configuration list rels in the entity cache if it is enabled.
-	 *
-	 * @param cpConfigurationListRels the cp configuration list rels
-	 */
-	@Override
-	public void cacheResult(
-		List<CPConfigurationListRel> cpConfigurationListRels) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (cpConfigurationListRels.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CPConfigurationListRel cpConfigurationListRel :
-				cpConfigurationListRels) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						cpConfigurationListRel.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						CPConfigurationListRelImpl.class,
-						cpConfigurationListRel.getPrimaryKey()) == null) {
-
-					cacheResult(cpConfigurationListRel);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all cp configuration list rels.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CPConfigurationListRelImpl.class);
-
-		finderCache.clearCache(CPConfigurationListRelImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the cp configuration list rel.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(CPConfigurationListRel cpConfigurationListRel) {
-		entityCache.removeResult(
-			CPConfigurationListRelImpl.class, cpConfigurationListRel);
-	}
-
-	@Override
-	public void clearCache(
-		List<CPConfigurationListRel> cpConfigurationListRels) {
-
-		for (CPConfigurationListRel cpConfigurationListRel :
-				cpConfigurationListRels) {
-
-			entityCache.removeResult(
-				CPConfigurationListRelImpl.class, cpConfigurationListRel);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CPConfigurationListRelImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CPConfigurationListRelImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CPConfigurationListRelModelImpl cpConfigurationListRelModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					cpConfigurationListRelModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				cpConfigurationListRelModelImpl.getClassNameId(),
-				cpConfigurationListRelModelImpl.getClassPK(),
-				cpConfigurationListRelModelImpl.getCPConfigurationListId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByC_C_C, args, cpConfigurationListRelModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new cp configuration list rel with the primary key. Does not add the cp configuration list rel to the database.
 	 *
 	 * @param CPConfigurationListRelId the primary key for the new cp configuration list rel
@@ -716,48 +551,6 @@ public class CPConfigurationListRelPersistenceImpl
 		throws NoSuchCPConfigurationListRelException {
 
 		return remove((Serializable)CPConfigurationListRelId);
-	}
-
-	/**
-	 * Removes the cp configuration list rel with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the cp configuration list rel
-	 * @return the cp configuration list rel that was removed
-	 * @throws NoSuchCPConfigurationListRelException if a cp configuration list rel with the primary key could not be found
-	 */
-	@Override
-	public CPConfigurationListRel remove(Serializable primaryKey)
-		throws NoSuchCPConfigurationListRelException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CPConfigurationListRel cpConfigurationListRel =
-				(CPConfigurationListRel)session.get(
-					CPConfigurationListRelImpl.class, primaryKey);
-
-			if (cpConfigurationListRel == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchCPConfigurationListRelException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(cpConfigurationListRel);
-		}
-		catch (NoSuchCPConfigurationListRelException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -874,43 +667,13 @@ public class CPConfigurationListRelPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CPConfigurationListRelImpl.class, cpConfigurationListRelModelImpl,
-			false, true);
-
-		cacheUniqueFindersCache(cpConfigurationListRelModelImpl);
+		cacheUniqueFindersResult(cpConfigurationListRel, false);
 
 		if (isNew) {
 			cpConfigurationListRel.setNew(false);
 		}
 
 		cpConfigurationListRel.resetOriginalValues();
-
-		return cpConfigurationListRel;
-	}
-
-	/**
-	 * Returns the cp configuration list rel with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the cp configuration list rel
-	 * @return the cp configuration list rel
-	 * @throws NoSuchCPConfigurationListRelException if a cp configuration list rel with the primary key could not be found
-	 */
-	@Override
-	public CPConfigurationListRel findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchCPConfigurationListRelException {
-
-		CPConfigurationListRel cpConfigurationListRel = fetchByPrimaryKey(
-			primaryKey);
-
-		if (cpConfigurationListRel == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchCPConfigurationListRelException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return cpConfigurationListRel;
 	}
@@ -930,53 +693,9 @@ public class CPConfigurationListRelPersistenceImpl
 		return findByPrimaryKey((Serializable)CPConfigurationListRelId);
 	}
 
-	/**
-	 * Returns the cp configuration list rel with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the cp configuration list rel
-	 * @return the cp configuration list rel, or <code>null</code> if a cp configuration list rel with the primary key could not be found
-	 */
 	@Override
-	public CPConfigurationListRel fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				CPConfigurationListRel.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		CPConfigurationListRel cpConfigurationListRel =
-			(CPConfigurationListRel)entityCache.getResult(
-				CPConfigurationListRelImpl.class, primaryKey);
-
-		if (cpConfigurationListRel != null) {
-			return cpConfigurationListRel;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			cpConfigurationListRel = (CPConfigurationListRel)session.get(
-				CPConfigurationListRelImpl.class, primaryKey);
-
-			if (cpConfigurationListRel != null) {
-				cacheResult(cpConfigurationListRel);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return cpConfigurationListRel;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -990,330 +709,6 @@ public class CPConfigurationListRelPersistenceImpl
 		long CPConfigurationListRelId) {
 
 		return fetchByPrimaryKey((Serializable)CPConfigurationListRelId);
-	}
-
-	@Override
-	public Map<Serializable, CPConfigurationListRel> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(
-				CPConfigurationListRel.class)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, CPConfigurationListRel> map =
-			new HashMap<Serializable, CPConfigurationListRel>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			CPConfigurationListRel cpConfigurationListRel = fetchByPrimaryKey(
-				primaryKey);
-
-			if (cpConfigurationListRel != null) {
-				map.put(primaryKey, cpConfigurationListRel);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						CPConfigurationListRel.class, primaryKey)) {
-
-				CPConfigurationListRel cpConfigurationListRel =
-					(CPConfigurationListRel)entityCache.getResult(
-						CPConfigurationListRelImpl.class, primaryKey);
-
-				if (cpConfigurationListRel == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, cpConfigurationListRel);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (CPConfigurationListRel cpConfigurationListRel :
-					(List<CPConfigurationListRel>)query.list()) {
-
-				map.put(
-					cpConfigurationListRel.getPrimaryKeyObj(),
-					cpConfigurationListRel);
-
-				cacheResult(cpConfigurationListRel);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the cp configuration list rels.
-	 *
-	 * @return the cp configuration list rels
-	 */
-	@Override
-	public List<CPConfigurationListRel> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the cp configuration list rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPConfigurationListRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp configuration list rels
-	 * @param end the upper bound of the range of cp configuration list rels (not inclusive)
-	 * @return the range of cp configuration list rels
-	 */
-	@Override
-	public List<CPConfigurationListRel> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp configuration list rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPConfigurationListRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp configuration list rels
-	 * @param end the upper bound of the range of cp configuration list rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cp configuration list rels
-	 */
-	@Override
-	public List<CPConfigurationListRel> findAll(
-		int start, int end,
-		OrderByComparator<CPConfigurationListRel> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp configuration list rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPConfigurationListRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp configuration list rels
-	 * @param end the upper bound of the range of cp configuration list rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cp configuration list rels
-	 */
-	@Override
-	public List<CPConfigurationListRel> findAll(
-		int start, int end,
-		OrderByComparator<CPConfigurationListRel> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPConfigurationListRel.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<CPConfigurationListRel> list = null;
-
-			if (useFinderCache) {
-				list = (List<CPConfigurationListRel>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_CPCONFIGURATIONLISTREL);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_CPCONFIGURATIONLISTREL;
-
-					sql = sql.concat(
-						CPConfigurationListRelModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<CPConfigurationListRel>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the cp configuration list rels from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CPConfigurationListRel cpConfigurationListRel : findAll()) {
-			remove(cpConfigurationListRel);
-		}
-	}
-
-	/**
-	 * Returns the number of cp configuration list rels.
-	 *
-	 * @return the number of cp configuration list rels
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CPConfigurationListRel.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_CPCONFIGURATIONLISTREL);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1404,21 +799,6 @@ public class CPConfigurationListRelPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByCPConfigurationListId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
 			"findByCPConfigurationListId",
@@ -1448,7 +828,7 @@ public class CPConfigurationListRelPersistenceImpl
 				_SQL_SELECT_CPCONFIGURATIONLISTREL_WHERE,
 				_SQL_COUNT_CPCONFIGURATIONLISTREL_WHERE,
 				CPConfigurationListRelModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"cpConfigurationListRel.", "CPConfigurationListId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1478,35 +858,37 @@ public class CPConfigurationListRelPersistenceImpl
 			_finderPathWithoutPaginationFindByC_C, _finderPathCountByC_C,
 			_SQL_SELECT_CPCONFIGURATIONLISTREL_WHERE,
 			_SQL_COUNT_CPCONFIGURATIONLISTREL_WHERE,
-			CPConfigurationListRelModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			CPConfigurationListRelModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"cpConfigurationListRel.", "classNameId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CPConfigurationListRel::getClassNameId),
 			new FinderColumn<>(
 				"cpConfigurationListRel.", "CPConfigurationListId",
 				FinderColumn.Type.LONG, "=", true, true,
 				CPConfigurationListRel::getCPConfigurationListId));
 
-		_finderPathFetchByC_C_C = new FinderPath(
+		_finderPathFetchByC_C_C = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_C_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(), Long.class.getName()
 			},
-			new String[] {"classNameId", "classPK", "CPConfigurationListId"},
-			true);
+			new String[] {"classNameId", "classPK", "CPConfigurationListId"}, 0,
+			0, false, CPConfigurationListRel::getClassNameId,
+			CPConfigurationListRel::getClassPK,
+			CPConfigurationListRel::getCPConfigurationListId);
 
 		_uniquePersistenceFinderByC_C_C = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByC_C_C,
-			_SQL_SELECT_CPCONFIGURATIONLISTREL_WHERE,
+			_SQL_SELECT_CPCONFIGURATIONLISTREL_WHERE, "",
 			new FinderColumn<>(
 				"cpConfigurationListRel.", "classNameId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CPConfigurationListRel::getClassNameId),
 			new FinderColumn<>(
 				"cpConfigurationListRel.", "classPK", FinderColumn.Type.LONG,
-				"=", true, false, CPConfigurationListRel::getClassPK),
+				"=", true, true, CPConfigurationListRel::getClassPK),
 			new FinderColumn<>(
 				"cpConfigurationListRel.", "CPConfigurationListId",
 				FinderColumn.Type.LONG, "=", true, true,
@@ -1557,23 +939,17 @@ public class CPConfigurationListRelPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CPConfigurationListRelModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_CPCONFIGURATIONLISTREL =
 		"SELECT cpConfigurationListRel FROM CPConfigurationListRel cpConfigurationListRel";
 
 	private static final String _SQL_SELECT_CPCONFIGURATIONLISTREL_WHERE =
 		"SELECT cpConfigurationListRel FROM CPConfigurationListRel cpConfigurationListRel WHERE ";
 
-	private static final String _SQL_COUNT_CPCONFIGURATIONLISTREL =
-		"SELECT COUNT(cpConfigurationListRel) FROM CPConfigurationListRel cpConfigurationListRel";
-
 	private static final String _SQL_COUNT_CPCONFIGURATIONLISTREL_WHERE =
 		"SELECT COUNT(cpConfigurationListRel) FROM CPConfigurationListRel cpConfigurationListRel WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"cpConfigurationListRel.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CPConfigurationListRel exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CPConfigurationListRel exists with the key {";
@@ -1587,4 +963,4 @@ public class CPConfigurationListRelPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2097148005
+// LIFERAY-SERVICE-BUILDER-HASH:2037218006

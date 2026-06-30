@@ -78,21 +78,6 @@ public interface RenameFinderColumnEntryPersistence
 	public int countByColumnToRename(String columnToRename);
 
 	/**
-	 * Caches the rename finder column entry in the entity cache if it is enabled.
-	 *
-	 * @param renameFinderColumnEntry the rename finder column entry
-	 */
-	public void cacheResult(RenameFinderColumnEntry renameFinderColumnEntry);
-
-	/**
-	 * Caches the rename finder column entries in the entity cache if it is enabled.
-	 *
-	 * @param renameFinderColumnEntries the rename finder column entries
-	 */
-	public void cacheResult(
-		java.util.List<RenameFinderColumnEntry> renameFinderColumnEntries);
-
-	/**
 	 * Creates a new rename finder column entry with the primary key. Does not add the rename finder column entry to the database.
 	 *
 	 * @param renameFinderColumnEntryId the primary key for the new rename finder column entry
@@ -133,73 +118,5 @@ public interface RenameFinderColumnEntryPersistence
 	public RenameFinderColumnEntry fetchByPrimaryKey(
 		long renameFinderColumnEntryId);
 
-	/**
-	 * Returns all the rename finder column entries.
-	 *
-	 * @return the rename finder column entries
-	 */
-	public java.util.List<RenameFinderColumnEntry> findAll();
-
-	/**
-	 * Returns a range of all the rename finder column entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.RenameFinderColumnEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of rename finder column entries
-	 * @param end the upper bound of the range of rename finder column entries (not inclusive)
-	 * @return the range of rename finder column entries
-	 */
-	public java.util.List<RenameFinderColumnEntry> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the rename finder column entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.RenameFinderColumnEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of rename finder column entries
-	 * @param end the upper bound of the range of rename finder column entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of rename finder column entries
-	 */
-	public java.util.List<RenameFinderColumnEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<RenameFinderColumnEntry> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the rename finder column entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.RenameFinderColumnEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of rename finder column entries
-	 * @param end the upper bound of the range of rename finder column entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of rename finder column entries
-	 */
-	public java.util.List<RenameFinderColumnEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<RenameFinderColumnEntry> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the rename finder column entries from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of rename finder column entries.
-	 *
-	 * @return the number of rename finder column entries
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1673320097
+// LIFERAY-SERVICE-BUILDER-HASH:1538647586

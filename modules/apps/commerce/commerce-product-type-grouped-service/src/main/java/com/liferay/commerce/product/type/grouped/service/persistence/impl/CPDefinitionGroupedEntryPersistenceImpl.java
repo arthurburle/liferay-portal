@@ -13,12 +13,10 @@ import com.liferay.commerce.product.type.grouped.model.impl.CPDefinitionGroupedE
 import com.liferay.commerce.product.type.grouped.service.persistence.CPDefinitionGroupedEntryPersistence;
 import com.liferay.commerce.product.type.grouped.service.persistence.CPDefinitionGroupedEntryUtil;
 import com.liferay.commerce.product.type.grouped.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -31,10 +29,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -69,7 +64,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CPDefinitionGroupedEntryPersistence.class)
 public class CPDefinitionGroupedEntryPersistenceImpl
-	extends BasePersistenceImpl<CPDefinitionGroupedEntry>
+	extends BasePersistenceImpl
+		<CPDefinitionGroupedEntry, NoSuchCPDefinitionGroupedEntryException>
 	implements CPDefinitionGroupedEntryPersistence {
 
 	/*
@@ -86,9 +82,6 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -903,134 +896,6 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the cp definition grouped entry in the entity cache if it is enabled.
-	 *
-	 * @param cpDefinitionGroupedEntry the cp definition grouped entry
-	 */
-	@Override
-	public void cacheResult(CPDefinitionGroupedEntry cpDefinitionGroupedEntry) {
-		entityCache.putResult(
-			CPDefinitionGroupedEntryImpl.class,
-			cpDefinitionGroupedEntry.getPrimaryKey(), cpDefinitionGroupedEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G,
-			new Object[] {
-				cpDefinitionGroupedEntry.getUuid(),
-				cpDefinitionGroupedEntry.getGroupId()
-			},
-			cpDefinitionGroupedEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByC_E,
-			new Object[] {
-				cpDefinitionGroupedEntry.getCPDefinitionId(),
-				cpDefinitionGroupedEntry.getEntryCProductId()
-			},
-			cpDefinitionGroupedEntry);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the cp definition grouped entries in the entity cache if it is enabled.
-	 *
-	 * @param cpDefinitionGroupedEntries the cp definition grouped entries
-	 */
-	@Override
-	public void cacheResult(
-		List<CPDefinitionGroupedEntry> cpDefinitionGroupedEntries) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (cpDefinitionGroupedEntries.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CPDefinitionGroupedEntry cpDefinitionGroupedEntry :
-				cpDefinitionGroupedEntries) {
-
-			if (entityCache.getResult(
-					CPDefinitionGroupedEntryImpl.class,
-					cpDefinitionGroupedEntry.getPrimaryKey()) == null) {
-
-				cacheResult(cpDefinitionGroupedEntry);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all cp definition grouped entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CPDefinitionGroupedEntryImpl.class);
-
-		finderCache.clearCache(CPDefinitionGroupedEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the cp definition grouped entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(CPDefinitionGroupedEntry cpDefinitionGroupedEntry) {
-		entityCache.removeResult(
-			CPDefinitionGroupedEntryImpl.class, cpDefinitionGroupedEntry);
-	}
-
-	@Override
-	public void clearCache(
-		List<CPDefinitionGroupedEntry> cpDefinitionGroupedEntries) {
-
-		for (CPDefinitionGroupedEntry cpDefinitionGroupedEntry :
-				cpDefinitionGroupedEntries) {
-
-			entityCache.removeResult(
-				CPDefinitionGroupedEntryImpl.class, cpDefinitionGroupedEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CPDefinitionGroupedEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CPDefinitionGroupedEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		CPDefinitionGroupedEntryModelImpl cpDefinitionGroupedEntryModelImpl) {
-
-		Object[] args = new Object[] {
-			cpDefinitionGroupedEntryModelImpl.getUuid(),
-			cpDefinitionGroupedEntryModelImpl.getGroupId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G, args, cpDefinitionGroupedEntryModelImpl);
-
-		args = new Object[] {
-			cpDefinitionGroupedEntryModelImpl.getCPDefinitionId(),
-			cpDefinitionGroupedEntryModelImpl.getEntryCProductId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByC_E, args, cpDefinitionGroupedEntryModelImpl);
-	}
-
-	/**
 	 * Creates a new cp definition grouped entry with the primary key. Does not add the cp definition grouped entry to the database.
 	 *
 	 * @param CPDefinitionGroupedEntryId the primary key for the new cp definition grouped entry
@@ -1066,48 +931,6 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 		throws NoSuchCPDefinitionGroupedEntryException {
 
 		return remove((Serializable)CPDefinitionGroupedEntryId);
-	}
-
-	/**
-	 * Removes the cp definition grouped entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the cp definition grouped entry
-	 * @return the cp definition grouped entry that was removed
-	 * @throws NoSuchCPDefinitionGroupedEntryException if a cp definition grouped entry with the primary key could not be found
-	 */
-	@Override
-	public CPDefinitionGroupedEntry remove(Serializable primaryKey)
-		throws NoSuchCPDefinitionGroupedEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CPDefinitionGroupedEntry cpDefinitionGroupedEntry =
-				(CPDefinitionGroupedEntry)session.get(
-					CPDefinitionGroupedEntryImpl.class, primaryKey);
-
-			if (cpDefinitionGroupedEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchCPDefinitionGroupedEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(cpDefinitionGroupedEntry);
-		}
-		catch (NoSuchCPDefinitionGroupedEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1224,43 +1047,13 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CPDefinitionGroupedEntryImpl.class,
-			cpDefinitionGroupedEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(cpDefinitionGroupedEntryModelImpl);
+		cacheUniqueFindersResult(cpDefinitionGroupedEntry, false);
 
 		if (isNew) {
 			cpDefinitionGroupedEntry.setNew(false);
 		}
 
 		cpDefinitionGroupedEntry.resetOriginalValues();
-
-		return cpDefinitionGroupedEntry;
-	}
-
-	/**
-	 * Returns the cp definition grouped entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the cp definition grouped entry
-	 * @return the cp definition grouped entry
-	 * @throws NoSuchCPDefinitionGroupedEntryException if a cp definition grouped entry with the primary key could not be found
-	 */
-	@Override
-	public CPDefinitionGroupedEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchCPDefinitionGroupedEntryException {
-
-		CPDefinitionGroupedEntry cpDefinitionGroupedEntry = fetchByPrimaryKey(
-			primaryKey);
-
-		if (cpDefinitionGroupedEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchCPDefinitionGroupedEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return cpDefinitionGroupedEntry;
 	}
@@ -1293,189 +1086,6 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 		return fetchByPrimaryKey((Serializable)CPDefinitionGroupedEntryId);
 	}
 
-	/**
-	 * Returns all the cp definition grouped entries.
-	 *
-	 * @return the cp definition grouped entries
-	 */
-	@Override
-	public List<CPDefinitionGroupedEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the cp definition grouped entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPDefinitionGroupedEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definition grouped entries
-	 * @param end the upper bound of the range of cp definition grouped entries (not inclusive)
-	 * @return the range of cp definition grouped entries
-	 */
-	@Override
-	public List<CPDefinitionGroupedEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp definition grouped entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPDefinitionGroupedEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definition grouped entries
-	 * @param end the upper bound of the range of cp definition grouped entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cp definition grouped entries
-	 */
-	@Override
-	public List<CPDefinitionGroupedEntry> findAll(
-		int start, int end,
-		OrderByComparator<CPDefinitionGroupedEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp definition grouped entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CPDefinitionGroupedEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp definition grouped entries
-	 * @param end the upper bound of the range of cp definition grouped entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cp definition grouped entries
-	 */
-	@Override
-	public List<CPDefinitionGroupedEntry> findAll(
-		int start, int end,
-		OrderByComparator<CPDefinitionGroupedEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<CPDefinitionGroupedEntry> list = null;
-
-		if (useFinderCache) {
-			list = (List<CPDefinitionGroupedEntry>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_CPDEFINITIONGROUPEDENTRY);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_CPDEFINITIONGROUPEDENTRY;
-
-				sql = sql.concat(
-					CPDefinitionGroupedEntryModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<CPDefinitionGroupedEntry>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the cp definition grouped entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CPDefinitionGroupedEntry cpDefinitionGroupedEntry : findAll()) {
-			remove(cpDefinitionGroupedEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of cp definition grouped entries.
-	 *
-	 * @return the number of cp definition grouped entries
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_CPDEFINITIONGROUPEDENTRY);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	public Set<String> getBadColumnNames() {
 		return _badColumnNames;
@@ -1506,21 +1116,6 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1531,13 +1126,13 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
@@ -1545,22 +1140,24 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 			_SQL_SELECT_CPDEFINITIONGROUPEDENTRY_WHERE,
 			_SQL_COUNT_CPDEFINITIONGROUPEDENTRY_WHERE,
 			CPDefinitionGroupedEntryModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"cpDefinitionGroupedEntry.", "uuid", FinderColumn.Type.STRING,
 				"=", true, true, CPDefinitionGroupedEntry::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(CPDefinitionGroupedEntry::getUuid),
+			CPDefinitionGroupedEntry::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByUUID_G,
-			_SQL_SELECT_CPDEFINITIONGROUPEDENTRY_WHERE,
+			_SQL_SELECT_CPDEFINITIONGROUPEDENTRY_WHERE, "",
 			new FinderColumn<>(
 				"cpDefinitionGroupedEntry.", "uuid", FinderColumn.Type.STRING,
-				"=", true, false, CPDefinitionGroupedEntry::getUuid),
+				"=", true, true, CPDefinitionGroupedEntry::getUuid),
 			new FinderColumn<>(
 				"cpDefinitionGroupedEntry.", "groupId", FinderColumn.Type.LONG,
 				"=", true, true, CPDefinitionGroupedEntry::getGroupId));
@@ -1577,12 +1174,12 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1592,10 +1189,10 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 				_SQL_SELECT_CPDEFINITIONGROUPEDENTRY_WHERE,
 				_SQL_COUNT_CPDEFINITIONGROUPEDENTRY_WHERE,
 				CPDefinitionGroupedEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"cpDefinitionGroupedEntry.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					CPDefinitionGroupedEntry::getUuid),
 				new FinderColumn<>(
 					"cpDefinitionGroupedEntry.", "companyId",
@@ -1628,7 +1225,7 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 				_SQL_SELECT_CPDEFINITIONGROUPEDENTRY_WHERE,
 				_SQL_COUNT_CPDEFINITIONGROUPEDENTRY_WHERE,
 				CPDefinitionGroupedEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"cpDefinitionGroupedEntry.", "CPDefinitionId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1660,23 +1257,25 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 				_SQL_SELECT_CPDEFINITIONGROUPEDENTRY_WHERE,
 				_SQL_COUNT_CPDEFINITIONGROUPEDENTRY_WHERE,
 				CPDefinitionGroupedEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"cpDefinitionGroupedEntry.", "entryCProductId",
 					FinderColumn.Type.LONG, "=", true, true,
 					CPDefinitionGroupedEntry::getEntryCProductId));
 
-		_finderPathFetchByC_E = new FinderPath(
+		_finderPathFetchByC_E = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_E",
 			new String[] {Long.class.getName(), Long.class.getName()},
-			new String[] {"CPDefinitionId", "entryCProductId"}, true);
+			new String[] {"CPDefinitionId", "entryCProductId"}, 0, 0, false,
+			CPDefinitionGroupedEntry::getCPDefinitionId,
+			CPDefinitionGroupedEntry::getEntryCProductId);
 
 		_uniquePersistenceFinderByC_E = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByC_E,
-			_SQL_SELECT_CPDEFINITIONGROUPEDENTRY_WHERE,
+			_SQL_SELECT_CPDEFINITIONGROUPEDENTRY_WHERE, "",
 			new FinderColumn<>(
 				"cpDefinitionGroupedEntry.", "CPDefinitionId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				CPDefinitionGroupedEntry::getCPDefinitionId),
 			new FinderColumn<>(
 				"cpDefinitionGroupedEntry.", "entryCProductId",
@@ -1725,23 +1324,17 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CPDefinitionGroupedEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_CPDEFINITIONGROUPEDENTRY =
 		"SELECT cpDefinitionGroupedEntry FROM CPDefinitionGroupedEntry cpDefinitionGroupedEntry";
 
 	private static final String _SQL_SELECT_CPDEFINITIONGROUPEDENTRY_WHERE =
 		"SELECT cpDefinitionGroupedEntry FROM CPDefinitionGroupedEntry cpDefinitionGroupedEntry WHERE ";
 
-	private static final String _SQL_COUNT_CPDEFINITIONGROUPEDENTRY =
-		"SELECT COUNT(cpDefinitionGroupedEntry) FROM CPDefinitionGroupedEntry cpDefinitionGroupedEntry";
-
 	private static final String _SQL_COUNT_CPDEFINITIONGROUPEDENTRY_WHERE =
 		"SELECT COUNT(cpDefinitionGroupedEntry) FROM CPDefinitionGroupedEntry cpDefinitionGroupedEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"cpDefinitionGroupedEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CPDefinitionGroupedEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CPDefinitionGroupedEntry exists with the key {";
@@ -1758,4 +1351,4 @@ public class CPDefinitionGroupedEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1075739500
+// LIFERAY-SERVICE-BUILDER-HASH:705490305

@@ -36,6 +36,20 @@ public class CPTaxCategoryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<CPTaxCategory> cpTaxCategories) {
+		getPersistence().cacheResult(cpTaxCategories);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CPTaxCategory cpTaxCategory) {
+		getPersistence().cacheResult(cpTaxCategory);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -741,24 +755,6 @@ public class CPTaxCategoryUtil {
 	}
 
 	/**
-	 * Caches the cp tax category in the entity cache if it is enabled.
-	 *
-	 * @param cpTaxCategory the cp tax category
-	 */
-	public static void cacheResult(CPTaxCategory cpTaxCategory) {
-		getPersistence().cacheResult(cpTaxCategory);
-	}
-
-	/**
-	 * Caches the cp tax categories in the entity cache if it is enabled.
-	 *
-	 * @param cpTaxCategories the cp tax categories
-	 */
-	public static void cacheResult(List<CPTaxCategory> cpTaxCategories) {
-		getPersistence().cacheResult(cpTaxCategories);
-	}
-
-	/**
 	 * Creates a new cp tax category with the primary key. Does not add the cp tax category to the database.
 	 *
 	 * @param CPTaxCategoryId the primary key for the new cp tax category
@@ -810,86 +806,6 @@ public class CPTaxCategoryUtil {
 		return getPersistence().fetchByPrimaryKey(CPTaxCategoryId);
 	}
 
-	/**
-	 * Returns all the cp tax categories.
-	 *
-	 * @return the cp tax categories
-	 */
-	public static List<CPTaxCategory> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the cp tax categories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPTaxCategoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp tax categories
-	 * @param end the upper bound of the range of cp tax categories (not inclusive)
-	 * @return the range of cp tax categories
-	 */
-	public static List<CPTaxCategory> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp tax categories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPTaxCategoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp tax categories
-	 * @param end the upper bound of the range of cp tax categories (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cp tax categories
-	 */
-	public static List<CPTaxCategory> findAll(
-		int start, int end,
-		OrderByComparator<CPTaxCategory> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the cp tax categories.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPTaxCategoryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp tax categories
-	 * @param end the upper bound of the range of cp tax categories (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cp tax categories
-	 */
-	public static List<CPTaxCategory> findAll(
-		int start, int end, OrderByComparator<CPTaxCategory> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the cp tax categories from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of cp tax categories.
-	 *
-	 * @return the number of cp tax categories
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CPTaxCategoryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -901,4 +817,4 @@ public class CPTaxCategoryUtil {
 	private static volatile CPTaxCategoryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1636184978
+// LIFERAY-SERVICE-BUILDER-HASH:1899920392

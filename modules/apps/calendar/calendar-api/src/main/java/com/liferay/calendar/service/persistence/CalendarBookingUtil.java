@@ -36,6 +36,20 @@ public class CalendarBookingUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<CalendarBooking> calendarBookings) {
+		getPersistence().cacheResult(calendarBookings);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CalendarBooking calendarBooking) {
+		getPersistence().cacheResult(calendarBooking);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1506,24 +1520,6 @@ public class CalendarBookingUtil {
 	}
 
 	/**
-	 * Caches the calendar booking in the entity cache if it is enabled.
-	 *
-	 * @param calendarBooking the calendar booking
-	 */
-	public static void cacheResult(CalendarBooking calendarBooking) {
-		getPersistence().cacheResult(calendarBooking);
-	}
-
-	/**
-	 * Caches the calendar bookings in the entity cache if it is enabled.
-	 *
-	 * @param calendarBookings the calendar bookings
-	 */
-	public static void cacheResult(List<CalendarBooking> calendarBookings) {
-		getPersistence().cacheResult(calendarBookings);
-	}
-
-	/**
 	 * Creates a new calendar booking with the primary key. Does not add the calendar booking to the database.
 	 *
 	 * @param calendarBookingId the primary key for the new calendar booking
@@ -1573,87 +1569,6 @@ public class CalendarBookingUtil {
 		return getPersistence().fetchByPrimaryKey(calendarBookingId);
 	}
 
-	/**
-	 * Returns all the calendar bookings.
-	 *
-	 * @return the calendar bookings
-	 */
-	public static List<CalendarBooking> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the calendar bookings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.calendar.model.impl.CalendarBookingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of calendar bookings
-	 * @param end the upper bound of the range of calendar bookings (not inclusive)
-	 * @return the range of calendar bookings
-	 */
-	public static List<CalendarBooking> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the calendar bookings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.calendar.model.impl.CalendarBookingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of calendar bookings
-	 * @param end the upper bound of the range of calendar bookings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of calendar bookings
-	 */
-	public static List<CalendarBooking> findAll(
-		int start, int end,
-		OrderByComparator<CalendarBooking> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the calendar bookings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.calendar.model.impl.CalendarBookingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of calendar bookings
-	 * @param end the upper bound of the range of calendar bookings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of calendar bookings
-	 */
-	public static List<CalendarBooking> findAll(
-		int start, int end,
-		OrderByComparator<CalendarBooking> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the calendar bookings from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of calendar bookings.
-	 *
-	 * @return the number of calendar bookings
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CalendarBookingPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1665,4 +1580,4 @@ public class CalendarBookingUtil {
 	private static volatile CalendarBookingPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1487413951
+// LIFERAY-SERVICE-BUILDER-HASH:-1504294887

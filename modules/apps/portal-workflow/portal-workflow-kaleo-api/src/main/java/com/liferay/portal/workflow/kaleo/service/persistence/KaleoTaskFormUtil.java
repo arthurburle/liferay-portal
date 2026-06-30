@@ -36,6 +36,20 @@ public class KaleoTaskFormUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<KaleoTaskForm> kaleoTaskForms) {
+		getPersistence().cacheResult(kaleoTaskForms);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(KaleoTaskForm kaleoTaskForm) {
+		getPersistence().cacheResult(kaleoTaskForm);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -684,24 +698,6 @@ public class KaleoTaskFormUtil {
 	}
 
 	/**
-	 * Caches the kaleo task form in the entity cache if it is enabled.
-	 *
-	 * @param kaleoTaskForm the kaleo task form
-	 */
-	public static void cacheResult(KaleoTaskForm kaleoTaskForm) {
-		getPersistence().cacheResult(kaleoTaskForm);
-	}
-
-	/**
-	 * Caches the kaleo task forms in the entity cache if it is enabled.
-	 *
-	 * @param kaleoTaskForms the kaleo task forms
-	 */
-	public static void cacheResult(List<KaleoTaskForm> kaleoTaskForms) {
-		getPersistence().cacheResult(kaleoTaskForms);
-	}
-
-	/**
 	 * Creates a new kaleo task form with the primary key. Does not add the kaleo task form to the database.
 	 *
 	 * @param kaleoTaskFormId the primary key for the new kaleo task form
@@ -753,86 +749,6 @@ public class KaleoTaskFormUtil {
 		return getPersistence().fetchByPrimaryKey(kaleoTaskFormId);
 	}
 
-	/**
-	 * Returns all the kaleo task forms.
-	 *
-	 * @return the kaleo task forms
-	 */
-	public static List<KaleoTaskForm> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the kaleo task forms.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskFormModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo task forms
-	 * @param end the upper bound of the range of kaleo task forms (not inclusive)
-	 * @return the range of kaleo task forms
-	 */
-	public static List<KaleoTaskForm> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the kaleo task forms.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskFormModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo task forms
-	 * @param end the upper bound of the range of kaleo task forms (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of kaleo task forms
-	 */
-	public static List<KaleoTaskForm> findAll(
-		int start, int end,
-		OrderByComparator<KaleoTaskForm> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the kaleo task forms.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskFormModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo task forms
-	 * @param end the upper bound of the range of kaleo task forms (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of kaleo task forms
-	 */
-	public static List<KaleoTaskForm> findAll(
-		int start, int end, OrderByComparator<KaleoTaskForm> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the kaleo task forms from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of kaleo task forms.
-	 *
-	 * @return the number of kaleo task forms
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static KaleoTaskFormPersistence getPersistence() {
 		return _persistence;
 	}
@@ -844,4 +760,4 @@ public class KaleoTaskFormUtil {
 	private static volatile KaleoTaskFormPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1315801023
+// LIFERAY-SERVICE-BUILDER-HASH:-1804588434

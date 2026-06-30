@@ -869,20 +869,6 @@ public interface AMImageEntryPersistence
 	public int countByC_F(String configurationUuid, long fileVersionId);
 
 	/**
-	 * Caches the am image entry in the entity cache if it is enabled.
-	 *
-	 * @param amImageEntry the am image entry
-	 */
-	public void cacheResult(AMImageEntry amImageEntry);
-
-	/**
-	 * Caches the am image entries in the entity cache if it is enabled.
-	 *
-	 * @param amImageEntries the am image entries
-	 */
-	public void cacheResult(java.util.List<AMImageEntry> amImageEntries);
-
-	/**
 	 * Creates a new am image entry with the primary key. Does not add the am image entry to the database.
 	 *
 	 * @param amImageEntryId the primary key for the new am image entry
@@ -920,73 +906,5 @@ public interface AMImageEntryPersistence
 	 */
 	public AMImageEntry fetchByPrimaryKey(long amImageEntryId);
 
-	/**
-	 * Returns all the am image entries.
-	 *
-	 * @return the am image entries
-	 */
-	public java.util.List<AMImageEntry> findAll();
-
-	/**
-	 * Returns a range of all the am image entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.adaptive.media.image.model.impl.AMImageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of am image entries
-	 * @param end the upper bound of the range of am image entries (not inclusive)
-	 * @return the range of am image entries
-	 */
-	public java.util.List<AMImageEntry> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the am image entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.adaptive.media.image.model.impl.AMImageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of am image entries
-	 * @param end the upper bound of the range of am image entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of am image entries
-	 */
-	public java.util.List<AMImageEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<AMImageEntry>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the am image entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.adaptive.media.image.model.impl.AMImageEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of am image entries
-	 * @param end the upper bound of the range of am image entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of am image entries
-	 */
-	public java.util.List<AMImageEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<AMImageEntry>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the am image entries from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of am image entries.
-	 *
-	 * @return the number of am image entries
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:79721194
+// LIFERAY-SERVICE-BUILDER-HASH:-745266631

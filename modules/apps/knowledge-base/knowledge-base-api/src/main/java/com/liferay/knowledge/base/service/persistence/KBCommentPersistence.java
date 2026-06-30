@@ -1050,20 +1050,6 @@ public interface KBCommentPersistence
 	public int countByC_C_S(long classNameId, long classPK, int[] statuses);
 
 	/**
-	 * Caches the kb comment in the entity cache if it is enabled.
-	 *
-	 * @param kbComment the kb comment
-	 */
-	public void cacheResult(KBComment kbComment);
-
-	/**
-	 * Caches the kb comments in the entity cache if it is enabled.
-	 *
-	 * @param kbComments the kb comments
-	 */
-	public void cacheResult(java.util.List<KBComment> kbComments);
-
-	/**
 	 * Creates a new kb comment with the primary key. Does not add the kb comment to the database.
 	 *
 	 * @param kbCommentId the primary key for the new kb comment
@@ -1100,73 +1086,5 @@ public interface KBCommentPersistence
 	 */
 	public KBComment fetchByPrimaryKey(long kbCommentId);
 
-	/**
-	 * Returns all the kb comments.
-	 *
-	 * @return the kb comments
-	 */
-	public java.util.List<KBComment> findAll();
-
-	/**
-	 * Returns a range of all the kb comments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.knowledge.base.model.impl.KBCommentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kb comments
-	 * @param end the upper bound of the range of kb comments (not inclusive)
-	 * @return the range of kb comments
-	 */
-	public java.util.List<KBComment> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the kb comments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.knowledge.base.model.impl.KBCommentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kb comments
-	 * @param end the upper bound of the range of kb comments (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of kb comments
-	 */
-	public java.util.List<KBComment> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<KBComment>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the kb comments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.knowledge.base.model.impl.KBCommentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kb comments
-	 * @param end the upper bound of the range of kb comments (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of kb comments
-	 */
-	public java.util.List<KBComment> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<KBComment>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the kb comments from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of kb comments.
-	 *
-	 * @return the number of kb comments
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1803082077
+// LIFERAY-SERVICE-BUILDER-HASH:-950408513

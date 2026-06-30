@@ -36,6 +36,20 @@ public class RoleUtil {
 	 */
 
 	/**
+	 * @see BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<Role> roles) {
+		getPersistence().cacheResult(roles);
+	}
+
+	/**
+	 * @see BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(Role role) {
+		getPersistence().cacheResult(role);
+	}
+
+	/**
 	 * @see BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -2273,24 +2287,6 @@ public class RoleUtil {
 	}
 
 	/**
-	 * Caches the role in the entity cache if it is enabled.
-	 *
-	 * @param role the role
-	 */
-	public static void cacheResult(Role role) {
-		getPersistence().cacheResult(role);
-	}
-
-	/**
-	 * Caches the roles in the entity cache if it is enabled.
-	 *
-	 * @param roles the roles
-	 */
-	public static void cacheResult(List<Role> roles) {
-		getPersistence().cacheResult(roles);
-	}
-
-	/**
 	 * Creates a new role with the primary key. Does not add the role to the database.
 	 *
 	 * @param roleId the primary key for the new role
@@ -2338,85 +2334,6 @@ public class RoleUtil {
 	 */
 	public static Role fetchByPrimaryKey(long roleId) {
 		return getPersistence().fetchByPrimaryKey(roleId);
-	}
-
-	/**
-	 * Returns all the roles.
-	 *
-	 * @return the roles
-	 */
-	public static List<Role> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the roles.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RoleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of roles
-	 * @param end the upper bound of the range of roles (not inclusive)
-	 * @return the range of roles
-	 */
-	public static List<Role> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the roles.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RoleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of roles
-	 * @param end the upper bound of the range of roles (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of roles
-	 */
-	public static List<Role> findAll(
-		int start, int end, OrderByComparator<Role> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the roles.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RoleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of roles
-	 * @param end the upper bound of the range of roles (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of roles
-	 */
-	public static List<Role> findAll(
-		int start, int end, OrderByComparator<Role> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the roles from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of roles.
-	 *
-	 * @return the number of roles
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
 	}
 
 	/**
@@ -2858,4 +2775,4 @@ public class RoleUtil {
 	private static volatile RolePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1598550386
+// LIFERAY-SERVICE-BUILDER-HASH:259985122

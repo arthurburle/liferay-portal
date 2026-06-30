@@ -13,15 +13,11 @@ import com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceRecordVersionM
 import com.liferay.dynamic.data.mapping.service.persistence.DDMFormInstanceRecordVersionPersistence;
 import com.liferay.dynamic.data.mapping.service.persistence.DDMFormInstanceRecordVersionUtil;
 import com.liferay.dynamic.data.mapping.service.persistence.impl.constants.DDMPersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -35,10 +31,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 
 import java.io.Serializable;
@@ -49,9 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,7 +66,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = DDMFormInstanceRecordVersionPersistence.class)
 public class DDMFormInstanceRecordVersionPersistenceImpl
-	extends BasePersistenceImpl<DDMFormInstanceRecordVersion>
+	extends BasePersistenceImpl
+		<DDMFormInstanceRecordVersion, NoSuchFormInstanceRecordVersionException>
 	implements DDMFormInstanceRecordVersionPersistence {
 
 	/*
@@ -92,9 +84,6 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByFormInstanceRecordId;
 	private FinderPath _finderPathWithoutPaginationFindByFormInstanceRecordId;
 	private FinderPath _finderPathCountByFormInstanceRecordId;
@@ -177,14 +166,9 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 		OrderByComparator<DDMFormInstanceRecordVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			return _collectionPersistenceFinderByFormInstanceRecordId.find(
-				finderCache, new Object[] {formInstanceRecordId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByFormInstanceRecordId.find(
+			finderCache, new Object[] {formInstanceRecordId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -252,13 +236,8 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 	 */
 	@Override
 	public int countByFormInstanceRecordId(long formInstanceRecordId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			return _collectionPersistenceFinderByFormInstanceRecordId.count(
-				finderCache, new Object[] {formInstanceRecordId});
-		}
+		return _collectionPersistenceFinderByFormInstanceRecordId.count(
+			finderCache, new Object[] {formInstanceRecordId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByU_F;
@@ -346,14 +325,9 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 		OrderByComparator<DDMFormInstanceRecordVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			return _collectionPersistenceFinderByU_F.find(
-				finderCache, new Object[] {userId, formInstanceId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByU_F.find(
+			finderCache, new Object[] {userId, formInstanceId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -423,13 +397,8 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 	 */
 	@Override
 	public int countByU_F(long userId, long formInstanceId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			return _collectionPersistenceFinderByU_F.count(
-				finderCache, new Object[] {userId, formInstanceId});
-		}
+		return _collectionPersistenceFinderByU_F.count(
+			finderCache, new Object[] {userId, formInstanceId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByF_F;
@@ -519,14 +488,9 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 		OrderByComparator<DDMFormInstanceRecordVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			return _collectionPersistenceFinderByF_F.find(
-				finderCache, new Object[] {formInstanceId, formInstanceVersion},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByF_F.find(
+			finderCache, new Object[] {formInstanceId, formInstanceVersion},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -597,14 +561,8 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 	 */
 	@Override
 	public int countByF_F(long formInstanceId, String formInstanceVersion) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			return _collectionPersistenceFinderByF_F.count(
-				finderCache,
-				new Object[] {formInstanceId, formInstanceVersion});
-		}
+		return _collectionPersistenceFinderByF_F.count(
+			finderCache, new Object[] {formInstanceId, formInstanceVersion});
 	}
 
 	private FinderPath _finderPathFetchByF_V;
@@ -669,14 +627,9 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 	public DDMFormInstanceRecordVersion fetchByF_V(
 		long formInstanceRecordId, String version, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			return _uniquePersistenceFinderByF_V.fetch(
-				finderCache, new Object[] {formInstanceRecordId, version},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByF_V.fetch(
+			finderCache, new Object[] {formInstanceRecordId, version},
+			useFinderCache);
 	}
 
 	/**
@@ -796,14 +749,9 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 		OrderByComparator<DDMFormInstanceRecordVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			return _collectionPersistenceFinderByF_S.find(
-				finderCache, new Object[] {formInstanceRecordId, status}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByF_S.find(
+			finderCache, new Object[] {formInstanceRecordId, status}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -873,13 +821,8 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 	 */
 	@Override
 	public int countByF_S(long formInstanceRecordId, int status) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			return _collectionPersistenceFinderByF_S.count(
-				finderCache, new Object[] {formInstanceRecordId, status});
-		}
+		return _collectionPersistenceFinderByF_S.count(
+			finderCache, new Object[] {formInstanceRecordId, status});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByU_F_F_S;
@@ -983,17 +926,10 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 		OrderByComparator<DDMFormInstanceRecordVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			return _collectionPersistenceFinderByU_F_F_S.find(
-				finderCache,
-				new Object[] {
-					userId, formInstanceId, formInstanceVersion, status
-				},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByU_F_F_S.find(
+			finderCache,
+			new Object[] {userId, formInstanceId, formInstanceVersion, status},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1085,16 +1021,9 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 		long userId, long formInstanceId, String formInstanceVersion,
 		int status) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			return _collectionPersistenceFinderByU_F_F_S.count(
-				finderCache,
-				new Object[] {
-					userId, formInstanceId, formInstanceVersion, status
-				});
-		}
+		return _collectionPersistenceFinderByU_F_F_S.count(
+			finderCache,
+			new Object[] {userId, formInstanceId, formInstanceVersion, status});
 	}
 
 	public DDMFormInstanceRecordVersionPersistenceImpl() {
@@ -1104,143 +1033,6 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(DDMFormInstanceRecordVersionTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the ddm form instance record version in the entity cache if it is enabled.
-	 *
-	 * @param ddmFormInstanceRecordVersion the ddm form instance record version
-	 */
-	@Override
-	public void cacheResult(
-		DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ddmFormInstanceRecordVersion.getCtCollectionId())) {
-
-			entityCache.putResult(
-				DDMFormInstanceRecordVersionImpl.class,
-				ddmFormInstanceRecordVersion.getPrimaryKey(),
-				ddmFormInstanceRecordVersion);
-
-			finderCache.putResult(
-				_finderPathFetchByF_V,
-				new Object[] {
-					ddmFormInstanceRecordVersion.getFormInstanceRecordId(),
-					ddmFormInstanceRecordVersion.getVersion()
-				},
-				ddmFormInstanceRecordVersion);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the ddm form instance record versions in the entity cache if it is enabled.
-	 *
-	 * @param ddmFormInstanceRecordVersions the ddm form instance record versions
-	 */
-	@Override
-	public void cacheResult(
-		List<DDMFormInstanceRecordVersion> ddmFormInstanceRecordVersions) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (ddmFormInstanceRecordVersions.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion :
-				ddmFormInstanceRecordVersions) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						ddmFormInstanceRecordVersion.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						DDMFormInstanceRecordVersionImpl.class,
-						ddmFormInstanceRecordVersion.getPrimaryKey()) == null) {
-
-					cacheResult(ddmFormInstanceRecordVersion);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all ddm form instance record versions.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(DDMFormInstanceRecordVersionImpl.class);
-
-		finderCache.clearCache(DDMFormInstanceRecordVersionImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the ddm form instance record version.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(
-		DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion) {
-
-		entityCache.removeResult(
-			DDMFormInstanceRecordVersionImpl.class,
-			ddmFormInstanceRecordVersion);
-	}
-
-	@Override
-	public void clearCache(
-		List<DDMFormInstanceRecordVersion> ddmFormInstanceRecordVersions) {
-
-		for (DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion :
-				ddmFormInstanceRecordVersions) {
-
-			entityCache.removeResult(
-				DDMFormInstanceRecordVersionImpl.class,
-				ddmFormInstanceRecordVersion);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(DDMFormInstanceRecordVersionImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				DDMFormInstanceRecordVersionImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		DDMFormInstanceRecordVersionModelImpl
-			ddmFormInstanceRecordVersionModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ddmFormInstanceRecordVersionModelImpl.
-						getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				ddmFormInstanceRecordVersionModelImpl.getFormInstanceRecordId(),
-				ddmFormInstanceRecordVersionModelImpl.getVersion()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByF_V, args,
-				ddmFormInstanceRecordVersionModelImpl);
-		}
 	}
 
 	/**
@@ -1277,48 +1069,6 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 		throws NoSuchFormInstanceRecordVersionException {
 
 		return remove((Serializable)formInstanceRecordVersionId);
-	}
-
-	/**
-	 * Removes the ddm form instance record version with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the ddm form instance record version
-	 * @return the ddm form instance record version that was removed
-	 * @throws NoSuchFormInstanceRecordVersionException if a ddm form instance record version with the primary key could not be found
-	 */
-	@Override
-	public DDMFormInstanceRecordVersion remove(Serializable primaryKey)
-		throws NoSuchFormInstanceRecordVersionException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion =
-				(DDMFormInstanceRecordVersion)session.get(
-					DDMFormInstanceRecordVersionImpl.class, primaryKey);
-
-			if (ddmFormInstanceRecordVersion == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchFormInstanceRecordVersionException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(ddmFormInstanceRecordVersion);
-		}
-		catch (NoSuchFormInstanceRecordVersionException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1431,44 +1181,13 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			DDMFormInstanceRecordVersionImpl.class,
-			ddmFormInstanceRecordVersionModelImpl, false, true);
-
-		cacheUniqueFindersCache(ddmFormInstanceRecordVersionModelImpl);
+		cacheUniqueFindersResult(ddmFormInstanceRecordVersion, false);
 
 		if (isNew) {
 			ddmFormInstanceRecordVersion.setNew(false);
 		}
 
 		ddmFormInstanceRecordVersion.resetOriginalValues();
-
-		return ddmFormInstanceRecordVersion;
-	}
-
-	/**
-	 * Returns the ddm form instance record version with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the ddm form instance record version
-	 * @return the ddm form instance record version
-	 * @throws NoSuchFormInstanceRecordVersionException if a ddm form instance record version with the primary key could not be found
-	 */
-	@Override
-	public DDMFormInstanceRecordVersion findByPrimaryKey(
-			Serializable primaryKey)
-		throws NoSuchFormInstanceRecordVersionException {
-
-		DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion =
-			fetchByPrimaryKey(primaryKey);
-
-		if (ddmFormInstanceRecordVersion == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchFormInstanceRecordVersionException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return ddmFormInstanceRecordVersion;
 	}
@@ -1488,56 +1207,9 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 		return findByPrimaryKey((Serializable)formInstanceRecordVersionId);
 	}
 
-	/**
-	 * Returns the ddm form instance record version with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the ddm form instance record version
-	 * @return the ddm form instance record version, or <code>null</code> if a ddm form instance record version with the primary key could not be found
-	 */
 	@Override
-	public DDMFormInstanceRecordVersion fetchByPrimaryKey(
-		Serializable primaryKey) {
-
-		if (ctPersistenceHelper.isProductionMode(
-				DDMFormInstanceRecordVersion.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion =
-			(DDMFormInstanceRecordVersion)entityCache.getResult(
-				DDMFormInstanceRecordVersionImpl.class, primaryKey);
-
-		if (ddmFormInstanceRecordVersion != null) {
-			return ddmFormInstanceRecordVersion;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ddmFormInstanceRecordVersion =
-				(DDMFormInstanceRecordVersion)session.get(
-					DDMFormInstanceRecordVersionImpl.class, primaryKey);
-
-			if (ddmFormInstanceRecordVersion != null) {
-				cacheResult(ddmFormInstanceRecordVersion);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return ddmFormInstanceRecordVersion;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -1551,333 +1223,6 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 		long formInstanceRecordVersionId) {
 
 		return fetchByPrimaryKey((Serializable)formInstanceRecordVersionId);
-	}
-
-	@Override
-	public Map<Serializable, DDMFormInstanceRecordVersion> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(
-				DDMFormInstanceRecordVersion.class)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, DDMFormInstanceRecordVersion> map =
-			new HashMap<Serializable, DDMFormInstanceRecordVersion>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion =
-				fetchByPrimaryKey(primaryKey);
-
-			if (ddmFormInstanceRecordVersion != null) {
-				map.put(primaryKey, ddmFormInstanceRecordVersion);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						DDMFormInstanceRecordVersion.class, primaryKey)) {
-
-				DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion =
-					(DDMFormInstanceRecordVersion)entityCache.getResult(
-						DDMFormInstanceRecordVersionImpl.class, primaryKey);
-
-				if (ddmFormInstanceRecordVersion == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, ddmFormInstanceRecordVersion);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion :
-					(List<DDMFormInstanceRecordVersion>)query.list()) {
-
-				map.put(
-					ddmFormInstanceRecordVersion.getPrimaryKeyObj(),
-					ddmFormInstanceRecordVersion);
-
-				cacheResult(ddmFormInstanceRecordVersion);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the ddm form instance record versions.
-	 *
-	 * @return the ddm form instance record versions
-	 */
-	@Override
-	public List<DDMFormInstanceRecordVersion> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the ddm form instance record versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDMFormInstanceRecordVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm form instance record versions
-	 * @param end the upper bound of the range of ddm form instance record versions (not inclusive)
-	 * @return the range of ddm form instance record versions
-	 */
-	@Override
-	public List<DDMFormInstanceRecordVersion> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm form instance record versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDMFormInstanceRecordVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm form instance record versions
-	 * @param end the upper bound of the range of ddm form instance record versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm form instance record versions
-	 */
-	@Override
-	public List<DDMFormInstanceRecordVersion> findAll(
-		int start, int end,
-		OrderByComparator<DDMFormInstanceRecordVersion> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm form instance record versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDMFormInstanceRecordVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm form instance record versions
-	 * @param end the upper bound of the range of ddm form instance record versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm form instance record versions
-	 */
-	@Override
-	public List<DDMFormInstanceRecordVersion> findAll(
-		int start, int end,
-		OrderByComparator<DDMFormInstanceRecordVersion> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<DDMFormInstanceRecordVersion> list = null;
-
-			if (useFinderCache) {
-				list =
-					(List<DDMFormInstanceRecordVersion>)finderCache.getResult(
-						finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_DDMFORMINSTANCERECORDVERSION);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_DDMFORMINSTANCERECORDVERSION;
-
-					sql = sql.concat(
-						DDMFormInstanceRecordVersionModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<DDMFormInstanceRecordVersion>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the ddm form instance record versions from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion :
-				findAll()) {
-
-			remove(ddmFormInstanceRecordVersion);
-		}
-	}
-
-	/**
-	 * Returns the number of ddm form instance record versions.
-	 *
-	 * @return the number of ddm form instance record versions
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMFormInstanceRecordVersion.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_DDMFORMINSTANCERECORDVERSION);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1971,21 +1316,6 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByFormInstanceRecordId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
 			"findByFormInstanceRecordId",
@@ -2013,7 +1343,7 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 				_SQL_SELECT_DDMFORMINSTANCERECORDVERSION_WHERE,
 				_SQL_COUNT_DDMFORMINSTANCERECORDVERSION_WHERE,
 				DDMFormInstanceRecordVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ddmFormInstanceRecordVersion.", "formInstanceRecordId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2044,10 +1374,10 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 			_SQL_SELECT_DDMFORMINSTANCERECORDVERSION_WHERE,
 			_SQL_COUNT_DDMFORMINSTANCERECORDVERSION_WHERE,
 			DDMFormInstanceRecordVersionModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ddmFormInstanceRecordVersion.", "userId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				DDMFormInstanceRecordVersion::getUserId),
 			new FinderColumn<>(
 				"ddmFormInstanceRecordVersion.", "formInstanceId",
@@ -2066,12 +1396,14 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 		_finderPathWithoutPaginationFindByF_F = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByF_F",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"formInstanceId", "formInstanceVersion"}, true);
+			new String[] {"formInstanceId", "formInstanceVersion"}, 0, 2, true,
+			null);
 
 		_finderPathCountByF_F = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByF_F",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"formInstanceId", "formInstanceVersion"}, false);
+			new String[] {"formInstanceId", "formInstanceVersion"}, 0, 2, false,
+			null);
 
 		_collectionPersistenceFinderByF_F = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByF_F,
@@ -2079,27 +1411,29 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 			_SQL_SELECT_DDMFORMINSTANCERECORDVERSION_WHERE,
 			_SQL_COUNT_DDMFORMINSTANCERECORDVERSION_WHERE,
 			DDMFormInstanceRecordVersionModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ddmFormInstanceRecordVersion.", "formInstanceId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				DDMFormInstanceRecordVersion::getFormInstanceId),
 			new FinderColumn<>(
 				"ddmFormInstanceRecordVersion.", "formInstanceVersion",
 				FinderColumn.Type.STRING, "=", true, true,
 				DDMFormInstanceRecordVersion::getFormInstanceVersion));
 
-		_finderPathFetchByF_V = new FinderPath(
+		_finderPathFetchByF_V = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByF_V",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"formInstanceRecordId", "version"}, true);
+			new String[] {"formInstanceRecordId", "version"}, 0, 2, false,
+			DDMFormInstanceRecordVersion::getFormInstanceRecordId,
+			convertNullFunction(DDMFormInstanceRecordVersion::getVersion));
 
 		_uniquePersistenceFinderByF_V = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByF_V,
-			_SQL_SELECT_DDMFORMINSTANCERECORDVERSION_WHERE,
+			_SQL_SELECT_DDMFORMINSTANCERECORDVERSION_WHERE, "",
 			new FinderColumn<>(
 				"ddmFormInstanceRecordVersion.", "formInstanceRecordId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				DDMFormInstanceRecordVersion::getFormInstanceRecordId),
 			new FinderColumn<>(
 				"ddmFormInstanceRecordVersion.", "version",
@@ -2131,10 +1465,10 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 			_SQL_SELECT_DDMFORMINSTANCERECORDVERSION_WHERE,
 			_SQL_COUNT_DDMFORMINSTANCERECORDVERSION_WHERE,
 			DDMFormInstanceRecordVersionModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ddmFormInstanceRecordVersion.", "formInstanceRecordId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				DDMFormInstanceRecordVersion::getFormInstanceRecordId),
 			new FinderColumn<>(
 				"ddmFormInstanceRecordVersion.", "status",
@@ -2163,7 +1497,7 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 			new String[] {
 				"userId", "formInstanceId", "formInstanceVersion", "status"
 			},
-			true);
+			0, 4, true, null);
 
 		_finderPathCountByU_F_F_S = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByU_F_F_S",
@@ -2174,7 +1508,7 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 			new String[] {
 				"userId", "formInstanceId", "formInstanceVersion", "status"
 			},
-			false);
+			0, 4, false, null);
 
 		_collectionPersistenceFinderByU_F_F_S =
 			new CollectionPersistenceFinder<>(
@@ -2184,18 +1518,18 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 				_SQL_SELECT_DDMFORMINSTANCERECORDVERSION_WHERE,
 				_SQL_COUNT_DDMFORMINSTANCERECORDVERSION_WHERE,
 				DDMFormInstanceRecordVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ddmFormInstanceRecordVersion.", "userId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					DDMFormInstanceRecordVersion::getUserId),
 				new FinderColumn<>(
 					"ddmFormInstanceRecordVersion.", "formInstanceId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					DDMFormInstanceRecordVersion::getFormInstanceId),
 				new FinderColumn<>(
 					"ddmFormInstanceRecordVersion.", "formInstanceVersion",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					DDMFormInstanceRecordVersion::getFormInstanceVersion),
 				new FinderColumn<>(
 					"ddmFormInstanceRecordVersion.", "status",
@@ -2248,23 +1582,17 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		DDMFormInstanceRecordVersionModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_DDMFORMINSTANCERECORDVERSION =
 		"SELECT ddmFormInstanceRecordVersion FROM DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion";
 
 	private static final String _SQL_SELECT_DDMFORMINSTANCERECORDVERSION_WHERE =
 		"SELECT ddmFormInstanceRecordVersion FROM DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion WHERE ";
 
-	private static final String _SQL_COUNT_DDMFORMINSTANCERECORDVERSION =
-		"SELECT COUNT(ddmFormInstanceRecordVersion) FROM DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion";
-
 	private static final String _SQL_COUNT_DDMFORMINSTANCERECORDVERSION_WHERE =
 		"SELECT COUNT(ddmFormInstanceRecordVersion) FROM DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"ddmFormInstanceRecordVersion.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No DDMFormInstanceRecordVersion exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No DDMFormInstanceRecordVersion exists with the key {";
@@ -2278,4 +1606,4 @@ public class DDMFormInstanceRecordVersionPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:195416828
+// LIFERAY-SERVICE-BUILDER-HASH:1079314229

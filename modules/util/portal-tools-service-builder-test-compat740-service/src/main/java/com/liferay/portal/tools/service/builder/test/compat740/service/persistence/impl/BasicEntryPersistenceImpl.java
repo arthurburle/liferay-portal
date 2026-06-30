@@ -5,12 +5,10 @@
 
 package com.liferay.portal.tools.service.builder.test.compat740.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -26,11 +24,8 @@ import com.liferay.portal.kernel.service.persistence.impl.TableMapper;
 import com.liferay.portal.kernel.service.persistence.impl.TableMapperFactory;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.tools.service.builder.test.compat740.exception.NoSuchBasicEntryException;
@@ -72,7 +67,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = BasicEntryPersistence.class)
 public class BasicEntryPersistenceImpl
-	extends BasePersistenceImpl<BasicEntry> implements BasicEntryPersistence {
+	extends BasePersistenceImpl<BasicEntry, NoSuchBasicEntryException>
+	implements BasicEntryPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -88,9 +84,6 @@ public class BasicEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByGroupId;
 	private FinderPath _finderPathWithoutPaginationFindByGroupId;
 	private FinderPath _finderPathCountByGroupId;
@@ -334,99 +327,6 @@ public class BasicEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the basic entry in the entity cache if it is enabled.
-	 *
-	 * @param basicEntry the basic entry
-	 */
-	@Override
-	public void cacheResult(BasicEntry basicEntry) {
-		entityCache.putResult(
-			BasicEntryImpl.class, basicEntry.getPrimaryKey(), basicEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByC_N,
-			new Object[] {basicEntry.getCompanyId(), basicEntry.getName()},
-			basicEntry);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the basic entries in the entity cache if it is enabled.
-	 *
-	 * @param basicEntries the basic entries
-	 */
-	@Override
-	public void cacheResult(List<BasicEntry> basicEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (basicEntries.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (BasicEntry basicEntry : basicEntries) {
-			if (entityCache.getResult(
-					BasicEntryImpl.class, basicEntry.getPrimaryKey()) == null) {
-
-				cacheResult(basicEntry);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all basic entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(BasicEntryImpl.class);
-
-		finderCache.clearCache(BasicEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the basic entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(BasicEntry basicEntry) {
-		entityCache.removeResult(BasicEntryImpl.class, basicEntry);
-	}
-
-	@Override
-	public void clearCache(List<BasicEntry> basicEntries) {
-		for (BasicEntry basicEntry : basicEntries) {
-			entityCache.removeResult(BasicEntryImpl.class, basicEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(BasicEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(BasicEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		BasicEntryModelImpl basicEntryModelImpl) {
-
-		Object[] args = new Object[] {
-			basicEntryModelImpl.getCompanyId(), basicEntryModelImpl.getName()
-		};
-
-		finderCache.putResult(_finderPathFetchByC_N, args, basicEntryModelImpl);
-	}
-
-	/**
 	 * Creates a new basic entry with the primary key. Does not add the basic entry to the database.
 	 *
 	 * @param basicEntryId the primary key for the new basic entry
@@ -456,47 +356,6 @@ public class BasicEntryPersistenceImpl
 		throws NoSuchBasicEntryException {
 
 		return remove((Serializable)basicEntryId);
-	}
-
-	/**
-	 * Removes the basic entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the basic entry
-	 * @return the basic entry that was removed
-	 * @throws NoSuchBasicEntryException if a basic entry with the primary key could not be found
-	 */
-	@Override
-	public BasicEntry remove(Serializable primaryKey)
-		throws NoSuchBasicEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			BasicEntry basicEntry = (BasicEntry)session.get(
-				BasicEntryImpl.class, primaryKey);
-
-			if (basicEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchBasicEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(basicEntry);
-		}
-		catch (NoSuchBasicEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -598,41 +457,13 @@ public class BasicEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			BasicEntryImpl.class, basicEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(basicEntryModelImpl);
+		cacheUniqueFindersResult(basicEntry, false);
 
 		if (isNew) {
 			basicEntry.setNew(false);
 		}
 
 		basicEntry.resetOriginalValues();
-
-		return basicEntry;
-	}
-
-	/**
-	 * Returns the basic entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the basic entry
-	 * @return the basic entry
-	 * @throws NoSuchBasicEntryException if a basic entry with the primary key could not be found
-	 */
-	@Override
-	public BasicEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchBasicEntryException {
-
-		BasicEntry basicEntry = fetchByPrimaryKey(primaryKey);
-
-		if (basicEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchBasicEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return basicEntry;
 	}
@@ -660,185 +491,6 @@ public class BasicEntryPersistenceImpl
 	@Override
 	public BasicEntry fetchByPrimaryKey(long basicEntryId) {
 		return fetchByPrimaryKey((Serializable)basicEntryId);
-	}
-
-	/**
-	 * Returns all the basic entries.
-	 *
-	 * @return the basic entries
-	 */
-	@Override
-	public List<BasicEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the basic entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>BasicEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of basic entries
-	 * @param end the upper bound of the range of basic entries (not inclusive)
-	 * @return the range of basic entries
-	 */
-	@Override
-	public List<BasicEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the basic entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>BasicEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of basic entries
-	 * @param end the upper bound of the range of basic entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of basic entries
-	 */
-	@Override
-	public List<BasicEntry> findAll(
-		int start, int end, OrderByComparator<BasicEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the basic entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>BasicEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of basic entries
-	 * @param end the upper bound of the range of basic entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of basic entries
-	 */
-	@Override
-	public List<BasicEntry> findAll(
-		int start, int end, OrderByComparator<BasicEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<BasicEntry> list = null;
-
-		if (useFinderCache) {
-			list = (List<BasicEntry>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_BASICENTRY);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_BASICENTRY;
-
-				sql = sql.concat(BasicEntryModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<BasicEntry>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the basic entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (BasicEntry basicEntry : findAll()) {
-			remove(basicEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of basic entries.
-	 *
-	 * @return the number of basic entries
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_BASICENTRY);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	/**
@@ -1190,25 +842,10 @@ public class BasicEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
 		basicEntryToMappingEntryTableMapper = TableMapperFactory.getTableMapper(
 			"MappingEntries_BasicEntries#basicEntryId",
 			"MappingEntries_BasicEntries", "companyId", "basicEntryId",
 			"mappingEntryId", this, MappingEntry.class);
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
 
 		_finderPathWithPaginationFindByGroupId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByGroupId",
@@ -1234,21 +871,22 @@ public class BasicEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByGroupId,
 				_finderPathCountByGroupId, _SQL_SELECT_BASICENTRY_WHERE,
 				_SQL_COUNT_BASICENTRY_WHERE, BasicEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"basicEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
 					true, BasicEntry::getGroupId));
 
-		_finderPathFetchByC_N = new FinderPath(
+		_finderPathFetchByC_N = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "name"}, true);
+			new String[] {"companyId", "name"}, 0, 2, false,
+			BasicEntry::getCompanyId, convertNullFunction(BasicEntry::getName));
 
 		_uniquePersistenceFinderByC_N = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByC_N, _SQL_SELECT_BASICENTRY_WHERE,
+			this, _finderPathFetchByC_N, _SQL_SELECT_BASICENTRY_WHERE, "",
 			new FinderColumn<>(
 				"basicEntry.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, BasicEntry::getCompanyId),
+				true, BasicEntry::getCompanyId),
 			new FinderColumn<>(
 				"basicEntry.", "name", FinderColumn.Type.STRING, "=", true,
 				true, BasicEntry::getName));
@@ -1301,22 +939,17 @@ public class BasicEntryPersistenceImpl
 	protected TableMapper<BasicEntry, MappingEntry>
 		basicEntryToMappingEntryTableMapper;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		BasicEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_BASICENTRY =
 		"SELECT basicEntry FROM BasicEntry basicEntry";
 
 	private static final String _SQL_SELECT_BASICENTRY_WHERE =
 		"SELECT basicEntry FROM BasicEntry basicEntry WHERE ";
 
-	private static final String _SQL_COUNT_BASICENTRY =
-		"SELECT COUNT(basicEntry) FROM BasicEntry basicEntry";
-
 	private static final String _SQL_COUNT_BASICENTRY_WHERE =
 		"SELECT COUNT(basicEntry) FROM BasicEntry basicEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "basicEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No BasicEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No BasicEntry exists with the key {";
@@ -1330,4 +963,4 @@ public class BasicEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1749650283
+// LIFERAY-SERVICE-BUILDER-HASH:382047884

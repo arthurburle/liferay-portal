@@ -12,8 +12,25 @@ public interface Rels {
 
 	public static final String ACCOUNT = "account";
 
+	public static final String ACCOUNT_DETAILS = "account-details";
+
+	public static final String ACCOUNT_INDIVIDUALS = "account-individuals";
+
+	public static final String ACCOUNT_LIFECYCLE = "account-lifecycle";
+
 	public static final String ACCOUNT_LIFECYCLE_OVERVIEW =
 		"account-lifecycle-overview";
+
+	public static final String ACCOUNT_LIFECYCLE_STAGE_RULES =
+		"account-lifecycle-stage-rules";
+
+	public static final String ACCOUNT_LIFECYCLE_STAGES =
+		"account-lifecycle-stages";
+
+	public static final String ACCOUNT_LIFECYCLE_STATUS =
+		"account-lifecycle-status";
+
+	public static final String ACCOUNT_LIFECYCLES = "account-lifecycles";
 
 	public static final String ACCOUNTS = "accounts";
 
@@ -56,6 +73,9 @@ public interface Rels {
 	public static final String ASSET_SUMMARY_TAGS = "asset-summary-tags";
 
 	public static final String ASSET_SUMMARY_TYPES = "asset-summary-types";
+
+	public static final String ASSET_SUMMARY_VOCABULARIES =
+		"asset-summary-vocabularies";
 
 	public static final String ASSETS = "assets";
 

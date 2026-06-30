@@ -509,20 +509,6 @@ public interface DDMFieldPersistence
 	public int countByS_I(long storageId, String instanceId);
 
 	/**
-	 * Caches the ddm field in the entity cache if it is enabled.
-	 *
-	 * @param ddmField the ddm field
-	 */
-	public void cacheResult(DDMField ddmField);
-
-	/**
-	 * Caches the ddm fields in the entity cache if it is enabled.
-	 *
-	 * @param ddmFields the ddm fields
-	 */
-	public void cacheResult(java.util.List<DDMField> ddmFields);
-
-	/**
 	 * Creates a new ddm field with the primary key. Does not add the ddm field to the database.
 	 *
 	 * @param fieldId the primary key for the new ddm field
@@ -558,73 +544,5 @@ public interface DDMFieldPersistence
 	 */
 	public DDMField fetchByPrimaryKey(long fieldId);
 
-	/**
-	 * Returns all the ddm fields.
-	 *
-	 * @return the ddm fields
-	 */
-	public java.util.List<DDMField> findAll();
-
-	/**
-	 * Returns a range of all the ddm fields.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMFieldModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm fields
-	 * @param end the upper bound of the range of ddm fields (not inclusive)
-	 * @return the range of ddm fields
-	 */
-	public java.util.List<DDMField> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the ddm fields.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMFieldModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm fields
-	 * @param end the upper bound of the range of ddm fields (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm fields
-	 */
-	public java.util.List<DDMField> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DDMField>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the ddm fields.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMFieldModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm fields
-	 * @param end the upper bound of the range of ddm fields (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm fields
-	 */
-	public java.util.List<DDMField> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DDMField>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the ddm fields from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of ddm fields.
-	 *
-	 * @return the number of ddm fields
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:613772943
+// LIFERAY-SERVICE-BUILDER-HASH:1014934305

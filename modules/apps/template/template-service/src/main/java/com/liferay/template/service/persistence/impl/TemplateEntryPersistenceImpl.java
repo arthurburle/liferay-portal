@@ -5,16 +5,12 @@
 
 package com.liferay.template.service.persistence.impl;
 
-import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
-import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -29,6 +25,7 @@ import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.change.tracking.helper.CTPersistenceHelper;
+import com.liferay.portal.kernel.service.persistence.impl.ArrayableFinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
@@ -37,11 +34,8 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.template.exception.DuplicateTemplateEntryExternalReferenceCodeException;
@@ -64,7 +58,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -89,7 +82,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = TemplateEntryPersistence.class)
 public class TemplateEntryPersistenceImpl
-	extends BasePersistenceImpl<TemplateEntry>
+	extends BasePersistenceImpl<TemplateEntry, NoSuchTemplateEntryException>
 	implements TemplateEntryPersistence {
 
 	/*
@@ -106,9 +99,6 @@ public class TemplateEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -184,14 +174,9 @@ public class TemplateEntryPersistenceImpl
 		OrderByComparator<TemplateEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				finderCache, new Object[] {uuid}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			finderCache, new Object[] {uuid}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -253,13 +238,8 @@ public class TemplateEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				finderCache, new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			finderCache, new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathFetchByUUID_G;
@@ -319,13 +299,8 @@ public class TemplateEntryPersistenceImpl
 	public TemplateEntry fetchByUUID_G(
 		String uuid, long groupId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			return _uniquePersistenceFinderByUUID_G.fetch(
-				finderCache, new Object[] {uuid, groupId}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByUUID_G.fetch(
+			finderCache, new Object[] {uuid, groupId}, useFinderCache);
 	}
 
 	/**
@@ -440,14 +415,9 @@ public class TemplateEntryPersistenceImpl
 		OrderByComparator<TemplateEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				finderCache, new Object[] {uuid, companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			finderCache, new Object[] {uuid, companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -515,19 +485,15 @@ public class TemplateEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				finderCache, new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			finderCache, new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByGroupId;
 	private FinderPath _finderPathWithoutPaginationFindByGroupId;
 	private FinderPath _finderPathCountByGroupId;
-	private FinderPath _finderPathWithPaginationCountByGroupId;
+	private CollectionPersistenceFinder<TemplateEntry>
+		_collectionPersistenceFinderByGroupId;
 
 	/**
 	 * Returns all the template entries where groupId = &#63;.
@@ -599,100 +565,9 @@ public class TemplateEntryPersistenceImpl
 		OrderByComparator<TemplateEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindByGroupId;
-					finderArgs = new Object[] {groupId};
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindByGroupId;
-				finderArgs = new Object[] {
-					groupId, start, end, orderByComparator
-				};
-			}
-
-			List<TemplateEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<TemplateEntry>)finderCache.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (TemplateEntry templateEntry : list) {
-						if (groupId != templateEntry.getGroupId()) {
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						3 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(3);
-				}
-
-				sb.append(_SQL_SELECT_TEMPLATEENTRY_WHERE);
-
-				sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2);
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(TemplateEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					list = (List<TemplateEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByGroupId.find(
+			finderCache, new Object[] {new long[] {groupId}}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -738,14 +613,9 @@ public class TemplateEntryPersistenceImpl
 	public TemplateEntry fetchByGroupId_First(
 		long groupId, OrderByComparator<TemplateEntry> orderByComparator) {
 
-		List<TemplateEntry> list = findByGroupId(
-			groupId, 0, 1, orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
+		return _collectionPersistenceFinderByGroupId.fetchFirst(
+			finderCache, new Object[] {new long[] {groupId}},
+			orderByComparator);
 	}
 
 	/**
@@ -824,114 +694,9 @@ public class TemplateEntryPersistenceImpl
 		OrderByComparator<TemplateEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		if (groupIds.length == 1) {
-			return findByGroupId(groupIds[0], start, end, orderByComparator);
-		}
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderArgs = new Object[] {StringUtil.merge(groupIds)};
-				}
-			}
-			else if (useFinderCache) {
-				finderArgs = new Object[] {
-					StringUtil.merge(groupIds), start, end, orderByComparator
-				};
-			}
-
-			List<TemplateEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<TemplateEntry>)finderCache.getResult(
-					_finderPathWithPaginationFindByGroupId, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (TemplateEntry templateEntry : list) {
-						if (!ArrayUtil.contains(
-								groupIds, templateEntry.getGroupId())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_SELECT_TEMPLATEENTRY_WHERE);
-
-				if (groupIds.length > 0) {
-					sb.append("(");
-
-					sb.append(_FINDER_COLUMN_GROUPID_GROUPID_7);
-
-					sb.append(StringUtil.merge(groupIds));
-
-					sb.append(")");
-
-					sb.append(")");
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(TemplateEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<TemplateEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(
-							_finderPathWithPaginationFindByGroupId, finderArgs,
-							list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByGroupId.find(
+			finderCache, new Object[] {ArrayUtil.sortedUnique(groupIds)}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -941,12 +706,8 @@ public class TemplateEntryPersistenceImpl
 	 */
 	@Override
 	public void removeByGroupId(long groupId) {
-		for (TemplateEntry templateEntry :
-				findByGroupId(
-					groupId, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
-
-			remove(templateEntry);
-		}
+		_collectionPersistenceFinderByGroupId.remove(
+			finderCache, new Object[] {new long[] {groupId}});
 	}
 
 	/**
@@ -957,51 +718,8 @@ public class TemplateEntryPersistenceImpl
 	 */
 	@Override
 	public int countByGroupId(long groupId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			FinderPath finderPath = _finderPathCountByGroupId;
-
-			Object[] finderArgs = new Object[] {groupId};
-
-			Long count = (Long)finderCache.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(2);
-
-				sb.append(_SQL_COUNT_TEMPLATEENTRY_WHERE);
-
-				sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByGroupId.count(
+			finderCache, new Object[] {new long[] {groupId}});
 	}
 
 	/**
@@ -1012,75 +730,9 @@ public class TemplateEntryPersistenceImpl
 	 */
 	@Override
 	public int countByGroupId(long[] groupIds) {
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			Object[] finderArgs = new Object[] {StringUtil.merge(groupIds)};
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathWithPaginationCountByGroupId, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_COUNT_TEMPLATEENTRY_WHERE);
-
-				if (groupIds.length > 0) {
-					sb.append("(");
-
-					sb.append(_FINDER_COLUMN_GROUPID_GROUPID_7);
-
-					sb.append(StringUtil.merge(groupIds));
-
-					sb.append(")");
-
-					sb.append(")");
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathWithPaginationCountByGroupId, finderArgs,
-						count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByGroupId.count(
+			finderCache, new Object[] {ArrayUtil.sortedUnique(groupIds)});
 	}
-
-	private static final String _FINDER_COLUMN_GROUPID_GROUPID_2 =
-		"templateEntry.groupId = ?";
-
-	private static final String _FINDER_COLUMN_GROUPID_GROUPID_7 =
-		"templateEntry.groupId IN (";
 
 	private FinderPath _finderPathFetchByDDMTemplateId;
 	private UniquePersistenceFinder<TemplateEntry>
@@ -1136,13 +788,8 @@ public class TemplateEntryPersistenceImpl
 	public TemplateEntry fetchByDDMTemplateId(
 		long ddmTemplateId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			return _uniquePersistenceFinderByDDMTemplateId.fetch(
-				finderCache, new Object[] {ddmTemplateId}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByDDMTemplateId.fetch(
+			finderCache, new Object[] {ddmTemplateId}, useFinderCache);
 	}
 
 	/**
@@ -1258,14 +905,9 @@ public class TemplateEntryPersistenceImpl
 		OrderByComparator<TemplateEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			return _collectionPersistenceFinderByG_IICN.find(
-				finderCache, new Object[] {groupId, infoItemClassName}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_IICN.find(
+			finderCache, new Object[] {groupId, infoItemClassName}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1335,19 +977,15 @@ public class TemplateEntryPersistenceImpl
 	 */
 	@Override
 	public int countByG_IICN(long groupId, String infoItemClassName) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			return _collectionPersistenceFinderByG_IICN.count(
-				finderCache, new Object[] {groupId, infoItemClassName});
-		}
+		return _collectionPersistenceFinderByG_IICN.count(
+			finderCache, new Object[] {groupId, infoItemClassName});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_IICN_IIFVK;
 	private FinderPath _finderPathWithoutPaginationFindByG_IICN_IIFVK;
 	private FinderPath _finderPathCountByG_IICN_IIFVK;
-	private FinderPath _finderPathWithPaginationCountByG_IICN_IIFVK;
+	private CollectionPersistenceFinder<TemplateEntry>
+		_collectionPersistenceFinderByG_IICN_IIFVK;
 
 	/**
 	 * Returns all the template entries where groupId = &#63; and infoItemClassName = &#63; and infoItemFormVariationKey = &#63;.
@@ -1439,144 +1077,13 @@ public class TemplateEntryPersistenceImpl
 		int start, int end, OrderByComparator<TemplateEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			infoItemClassName = Objects.toString(infoItemClassName, "");
-			infoItemFormVariationKey = Objects.toString(
-				infoItemFormVariationKey, "");
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindByG_IICN_IIFVK;
-					finderArgs = new Object[] {
-						groupId, infoItemClassName, infoItemFormVariationKey
-					};
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindByG_IICN_IIFVK;
-				finderArgs = new Object[] {
-					groupId, infoItemClassName, infoItemFormVariationKey, start,
-					end, orderByComparator
-				};
-			}
-
-			List<TemplateEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<TemplateEntry>)finderCache.getResult(
-					finderPath, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (TemplateEntry templateEntry : list) {
-						if ((groupId != templateEntry.getGroupId()) ||
-							!infoItemClassName.equals(
-								templateEntry.getInfoItemClassName()) ||
-							!infoItemFormVariationKey.equals(
-								templateEntry.getInfoItemFormVariationKey())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						5 + (orderByComparator.getOrderByFields().length * 2));
-				}
-				else {
-					sb = new StringBundler(5);
-				}
-
-				sb.append(_SQL_SELECT_TEMPLATEENTRY_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_IICN_IIFVK_GROUPID_2);
-
-				boolean bindInfoItemClassName = false;
-
-				if (infoItemClassName.isEmpty()) {
-					sb.append(_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMCLASSNAME_3);
-				}
-				else {
-					bindInfoItemClassName = true;
-
-					sb.append(_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMCLASSNAME_2);
-				}
-
-				boolean bindInfoItemFormVariationKey = false;
-
-				if (infoItemFormVariationKey.isEmpty()) {
-					sb.append(
-						_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMFORMVARIATIONKEY_3);
-				}
-				else {
-					bindInfoItemFormVariationKey = true;
-
-					sb.append(
-						_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMFORMVARIATIONKEY_2);
-				}
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(TemplateEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					if (bindInfoItemClassName) {
-						queryPos.add(infoItemClassName);
-					}
-
-					if (bindInfoItemFormVariationKey) {
-						queryPos.add(infoItemFormVariationKey);
-					}
-
-					list = (List<TemplateEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByG_IICN_IIFVK.find(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, infoItemClassName,
+				infoItemFormVariationKey
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1636,15 +1143,13 @@ public class TemplateEntryPersistenceImpl
 		long groupId, String infoItemClassName, String infoItemFormVariationKey,
 		OrderByComparator<TemplateEntry> orderByComparator) {
 
-		List<TemplateEntry> list = findByG_IICN_IIFVK(
-			groupId, infoItemClassName, infoItemFormVariationKey, 0, 1,
+		return _collectionPersistenceFinderByG_IICN_IIFVK.fetchFirst(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, infoItemClassName,
+				infoItemFormVariationKey
+			},
 			orderByComparator);
-
-		if (!list.isEmpty()) {
-			return list.get(0);
-		}
-
-		return null;
 	}
 
 	/**
@@ -1742,165 +1247,13 @@ public class TemplateEntryPersistenceImpl
 		OrderByComparator<TemplateEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		infoItemClassName = Objects.toString(infoItemClassName, "");
-		infoItemFormVariationKey = Objects.toString(
-			infoItemFormVariationKey, "");
-
-		if (groupIds.length == 1) {
-			return findByG_IICN_IIFVK(
-				groupIds[0], infoItemClassName, infoItemFormVariationKey, start,
-				end, orderByComparator);
-		}
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderArgs = new Object[] {
-						StringUtil.merge(groupIds), infoItemClassName,
-						infoItemFormVariationKey
-					};
-				}
-			}
-			else if (useFinderCache) {
-				finderArgs = new Object[] {
-					StringUtil.merge(groupIds), infoItemClassName,
-					infoItemFormVariationKey, start, end, orderByComparator
-				};
-			}
-
-			List<TemplateEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<TemplateEntry>)finderCache.getResult(
-					_finderPathWithPaginationFindByG_IICN_IIFVK, finderArgs,
-					this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (TemplateEntry templateEntry : list) {
-						if (!ArrayUtil.contains(
-								groupIds, templateEntry.getGroupId()) ||
-							!infoItemClassName.equals(
-								templateEntry.getInfoItemClassName()) ||
-							!infoItemFormVariationKey.equals(
-								templateEntry.getInfoItemFormVariationKey())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_SELECT_TEMPLATEENTRY_WHERE);
-
-				if (groupIds.length > 0) {
-					sb.append("(");
-
-					sb.append(_FINDER_COLUMN_G_IICN_IIFVK_GROUPID_7);
-
-					sb.append(StringUtil.merge(groupIds));
-
-					sb.append(")");
-
-					sb.append(")");
-
-					sb.append(WHERE_AND);
-				}
-
-				boolean bindInfoItemClassName = false;
-
-				if (infoItemClassName.isEmpty()) {
-					sb.append(_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMCLASSNAME_3);
-				}
-				else {
-					bindInfoItemClassName = true;
-
-					sb.append(_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMCLASSNAME_2);
-				}
-
-				boolean bindInfoItemFormVariationKey = false;
-
-				if (infoItemFormVariationKey.isEmpty()) {
-					sb.append(
-						_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMFORMVARIATIONKEY_3);
-				}
-				else {
-					bindInfoItemFormVariationKey = true;
-
-					sb.append(
-						_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMFORMVARIATIONKEY_2);
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(TemplateEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					if (bindInfoItemClassName) {
-						queryPos.add(infoItemClassName);
-					}
-
-					if (bindInfoItemFormVariationKey) {
-						queryPos.add(infoItemFormVariationKey);
-					}
-
-					list = (List<TemplateEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(
-							_finderPathWithPaginationFindByG_IICN_IIFVK,
-							finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByG_IICN_IIFVK.find(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(groupIds), infoItemClassName,
+				infoItemFormVariationKey
+			},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1915,13 +1268,12 @@ public class TemplateEntryPersistenceImpl
 		long groupId, String infoItemClassName,
 		String infoItemFormVariationKey) {
 
-		for (TemplateEntry templateEntry :
-				findByG_IICN_IIFVK(
-					groupId, infoItemClassName, infoItemFormVariationKey,
-					QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
-
-			remove(templateEntry);
-		}
+		_collectionPersistenceFinderByG_IICN_IIFVK.remove(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, infoItemClassName,
+				infoItemFormVariationKey
+			});
 	}
 
 	/**
@@ -1937,89 +1289,12 @@ public class TemplateEntryPersistenceImpl
 		long groupId, String infoItemClassName,
 		String infoItemFormVariationKey) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			infoItemClassName = Objects.toString(infoItemClassName, "");
-			infoItemFormVariationKey = Objects.toString(
-				infoItemFormVariationKey, "");
-
-			FinderPath finderPath = _finderPathCountByG_IICN_IIFVK;
-
-			Object[] finderArgs = new Object[] {
-				groupId, infoItemClassName, infoItemFormVariationKey
-			};
-
-			Long count = (Long)finderCache.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(4);
-
-				sb.append(_SQL_COUNT_TEMPLATEENTRY_WHERE);
-
-				sb.append(_FINDER_COLUMN_G_IICN_IIFVK_GROUPID_2);
-
-				boolean bindInfoItemClassName = false;
-
-				if (infoItemClassName.isEmpty()) {
-					sb.append(_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMCLASSNAME_3);
-				}
-				else {
-					bindInfoItemClassName = true;
-
-					sb.append(_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMCLASSNAME_2);
-				}
-
-				boolean bindInfoItemFormVariationKey = false;
-
-				if (infoItemFormVariationKey.isEmpty()) {
-					sb.append(
-						_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMFORMVARIATIONKEY_3);
-				}
-				else {
-					bindInfoItemFormVariationKey = true;
-
-					sb.append(
-						_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMFORMVARIATIONKEY_2);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(groupId);
-
-					if (bindInfoItemClassName) {
-						queryPos.add(infoItemClassName);
-					}
-
-					if (bindInfoItemFormVariationKey) {
-						queryPos.add(infoItemFormVariationKey);
-					}
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByG_IICN_IIFVK.count(
+			finderCache,
+			new Object[] {
+				new long[] {groupId}, infoItemClassName,
+				infoItemFormVariationKey
+			});
 	}
 
 	/**
@@ -2035,134 +1310,13 @@ public class TemplateEntryPersistenceImpl
 		long[] groupIds, String infoItemClassName,
 		String infoItemFormVariationKey) {
 
-		if (groupIds == null) {
-			groupIds = new long[0];
-		}
-		else if (groupIds.length > 1) {
-			groupIds = ArrayUtil.sortedUnique(groupIds);
-		}
-
-		infoItemClassName = Objects.toString(infoItemClassName, "");
-		infoItemFormVariationKey = Objects.toString(
-			infoItemFormVariationKey, "");
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			Object[] finderArgs = new Object[] {
-				StringUtil.merge(groupIds), infoItemClassName,
+		return _collectionPersistenceFinderByG_IICN_IIFVK.count(
+			finderCache,
+			new Object[] {
+				ArrayUtil.sortedUnique(groupIds), infoItemClassName,
 				infoItemFormVariationKey
-			};
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathWithPaginationCountByG_IICN_IIFVK, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_COUNT_TEMPLATEENTRY_WHERE);
-
-				if (groupIds.length > 0) {
-					sb.append("(");
-
-					sb.append(_FINDER_COLUMN_G_IICN_IIFVK_GROUPID_7);
-
-					sb.append(StringUtil.merge(groupIds));
-
-					sb.append(")");
-
-					sb.append(")");
-
-					sb.append(WHERE_AND);
-				}
-
-				boolean bindInfoItemClassName = false;
-
-				if (infoItemClassName.isEmpty()) {
-					sb.append(_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMCLASSNAME_3);
-				}
-				else {
-					bindInfoItemClassName = true;
-
-					sb.append(_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMCLASSNAME_2);
-				}
-
-				boolean bindInfoItemFormVariationKey = false;
-
-				if (infoItemFormVariationKey.isEmpty()) {
-					sb.append(
-						_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMFORMVARIATIONKEY_3);
-				}
-				else {
-					bindInfoItemFormVariationKey = true;
-
-					sb.append(
-						_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMFORMVARIATIONKEY_2);
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					if (bindInfoItemClassName) {
-						queryPos.add(infoItemClassName);
-					}
-
-					if (bindInfoItemFormVariationKey) {
-						queryPos.add(infoItemFormVariationKey);
-					}
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathWithPaginationCountByG_IICN_IIFVK,
-						finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+			});
 	}
-
-	private static final String _FINDER_COLUMN_G_IICN_IIFVK_GROUPID_2 =
-		"templateEntry.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_IICN_IIFVK_GROUPID_7 =
-		"templateEntry.groupId IN (";
-
-	private static final String
-		_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMCLASSNAME_2 =
-			"templateEntry.infoItemClassName = ? AND ";
-
-	private static final String
-		_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMCLASSNAME_3 =
-			"(templateEntry.infoItemClassName IS NULL OR templateEntry.infoItemClassName = '') AND ";
-
-	private static final String
-		_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMFORMVARIATIONKEY_2 =
-			"templateEntry.infoItemFormVariationKey = ?";
-
-	private static final String
-		_FINDER_COLUMN_G_IICN_IIFVK_INFOITEMFORMVARIATIONKEY_3 =
-			"(templateEntry.infoItemFormVariationKey IS NULL OR templateEntry.infoItemFormVariationKey = '')";
 
 	private FinderPath _finderPathFetchByERC_G;
 	private UniquePersistenceFinder<TemplateEntry>
@@ -2225,14 +1379,9 @@ public class TemplateEntryPersistenceImpl
 	public TemplateEntry fetchByERC_G(
 		String externalReferenceCode, long groupId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			return _uniquePersistenceFinderByERC_G.fetch(
-				finderCache, new Object[] {externalReferenceCode, groupId},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByERC_G.fetch(
+			finderCache, new Object[] {externalReferenceCode, groupId},
+			useFinderCache);
 	}
 
 	/**
@@ -2282,145 +1431,6 @@ public class TemplateEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the template entry in the entity cache if it is enabled.
-	 *
-	 * @param templateEntry the template entry
-	 */
-	@Override
-	public void cacheResult(TemplateEntry templateEntry) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					templateEntry.getCtCollectionId())) {
-
-			entityCache.putResult(
-				TemplateEntryImpl.class, templateEntry.getPrimaryKey(),
-				templateEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G,
-				new Object[] {
-					templateEntry.getUuid(), templateEntry.getGroupId()
-				},
-				templateEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByDDMTemplateId,
-				new Object[] {templateEntry.getDDMTemplateId()}, templateEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByERC_G,
-				new Object[] {
-					templateEntry.getExternalReferenceCode(),
-					templateEntry.getGroupId()
-				},
-				templateEntry);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the template entries in the entity cache if it is enabled.
-	 *
-	 * @param templateEntries the template entries
-	 */
-	@Override
-	public void cacheResult(List<TemplateEntry> templateEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (templateEntries.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (TemplateEntry templateEntry : templateEntries) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						templateEntry.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						TemplateEntryImpl.class,
-						templateEntry.getPrimaryKey()) == null) {
-
-					cacheResult(templateEntry);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all template entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(TemplateEntryImpl.class);
-
-		finderCache.clearCache(TemplateEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the template entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(TemplateEntry templateEntry) {
-		entityCache.removeResult(TemplateEntryImpl.class, templateEntry);
-	}
-
-	@Override
-	public void clearCache(List<TemplateEntry> templateEntries) {
-		for (TemplateEntry templateEntry : templateEntries) {
-			entityCache.removeResult(TemplateEntryImpl.class, templateEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(TemplateEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(TemplateEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		TemplateEntryModelImpl templateEntryModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					templateEntryModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				templateEntryModelImpl.getUuid(),
-				templateEntryModelImpl.getGroupId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G, args, templateEntryModelImpl);
-
-			args = new Object[] {templateEntryModelImpl.getDDMTemplateId()};
-
-			finderCache.putResult(
-				_finderPathFetchByDDMTemplateId, args, templateEntryModelImpl);
-
-			args = new Object[] {
-				templateEntryModelImpl.getExternalReferenceCode(),
-				templateEntryModelImpl.getGroupId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByERC_G, args, templateEntryModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new template entry with the primary key. Does not add the template entry to the database.
 	 *
 	 * @param templateEntryId the primary key for the new template entry
@@ -2454,47 +1464,6 @@ public class TemplateEntryPersistenceImpl
 		throws NoSuchTemplateEntryException {
 
 		return remove((Serializable)templateEntryId);
-	}
-
-	/**
-	 * Removes the template entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the template entry
-	 * @return the template entry that was removed
-	 * @throws NoSuchTemplateEntryException if a template entry with the primary key could not be found
-	 */
-	@Override
-	public TemplateEntry remove(Serializable primaryKey)
-		throws NoSuchTemplateEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			TemplateEntry templateEntry = (TemplateEntry)session.get(
-				TemplateEntryImpl.class, primaryKey);
-
-			if (templateEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchTemplateEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(templateEntry);
-		}
-		catch (NoSuchTemplateEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -2671,41 +1640,13 @@ public class TemplateEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			TemplateEntryImpl.class, templateEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(templateEntryModelImpl);
+		cacheUniqueFindersResult(templateEntry, false);
 
 		if (isNew) {
 			templateEntry.setNew(false);
 		}
 
 		templateEntry.resetOriginalValues();
-
-		return templateEntry;
-	}
-
-	/**
-	 * Returns the template entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the template entry
-	 * @return the template entry
-	 * @throws NoSuchTemplateEntryException if a template entry with the primary key could not be found
-	 */
-	@Override
-	public TemplateEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchTemplateEntryException {
-
-		TemplateEntry templateEntry = fetchByPrimaryKey(primaryKey);
-
-		if (templateEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchTemplateEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return templateEntry;
 	}
@@ -2724,52 +1665,9 @@ public class TemplateEntryPersistenceImpl
 		return findByPrimaryKey((Serializable)templateEntryId);
 	}
 
-	/**
-	 * Returns the template entry with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the template entry
-	 * @return the template entry, or <code>null</code> if a template entry with the primary key could not be found
-	 */
 	@Override
-	public TemplateEntry fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				TemplateEntry.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		TemplateEntry templateEntry = (TemplateEntry)entityCache.getResult(
-			TemplateEntryImpl.class, primaryKey);
-
-		if (templateEntry != null) {
-			return templateEntry;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			templateEntry = (TemplateEntry)session.get(
-				TemplateEntryImpl.class, primaryKey);
-
-			if (templateEntry != null) {
-				cacheResult(templateEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return templateEntry;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -2781,322 +1679,6 @@ public class TemplateEntryPersistenceImpl
 	@Override
 	public TemplateEntry fetchByPrimaryKey(long templateEntryId) {
 		return fetchByPrimaryKey((Serializable)templateEntryId);
-	}
-
-	@Override
-	public Map<Serializable, TemplateEntry> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(TemplateEntry.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, TemplateEntry> map =
-			new HashMap<Serializable, TemplateEntry>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			TemplateEntry templateEntry = fetchByPrimaryKey(primaryKey);
-
-			if (templateEntry != null) {
-				map.put(primaryKey, templateEntry);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						TemplateEntry.class, primaryKey)) {
-
-				TemplateEntry templateEntry =
-					(TemplateEntry)entityCache.getResult(
-						TemplateEntryImpl.class, primaryKey);
-
-				if (templateEntry == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, templateEntry);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (TemplateEntry templateEntry :
-					(List<TemplateEntry>)query.list()) {
-
-				map.put(templateEntry.getPrimaryKeyObj(), templateEntry);
-
-				cacheResult(templateEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the template entries.
-	 *
-	 * @return the template entries
-	 */
-	@Override
-	public List<TemplateEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the template entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>TemplateEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of template entries
-	 * @param end the upper bound of the range of template entries (not inclusive)
-	 * @return the range of template entries
-	 */
-	@Override
-	public List<TemplateEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the template entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>TemplateEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of template entries
-	 * @param end the upper bound of the range of template entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of template entries
-	 */
-	@Override
-	public List<TemplateEntry> findAll(
-		int start, int end,
-		OrderByComparator<TemplateEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the template entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>TemplateEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of template entries
-	 * @param end the upper bound of the range of template entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of template entries
-	 */
-	@Override
-	public List<TemplateEntry> findAll(
-		int start, int end, OrderByComparator<TemplateEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<TemplateEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<TemplateEntry>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_TEMPLATEENTRY);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_TEMPLATEENTRY;
-
-					sql = sql.concat(TemplateEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<TemplateEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the template entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (TemplateEntry templateEntry : findAll()) {
-			remove(templateEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of template entries.
-	 *
-	 * @return the number of template entries
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					TemplateEntry.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(_SQL_COUNT_TEMPLATEENTRY);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -3198,21 +1780,6 @@ public class TemplateEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -3223,33 +1790,35 @@ public class TemplateEntryPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_TEMPLATEENTRY_WHERE, _SQL_COUNT_TEMPLATEENTRY_WHERE,
-			TemplateEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			TemplateEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"templateEntry.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, TemplateEntry::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(TemplateEntry::getUuid),
+			TemplateEntry::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByUUID_G, _SQL_SELECT_TEMPLATEENTRY_WHERE,
+			this, _finderPathFetchByUUID_G, _SQL_SELECT_TEMPLATEENTRY_WHERE, "",
 			new FinderColumn<>(
 				"templateEntry.", "uuid", FinderColumn.Type.STRING, "=", true,
-				false, TemplateEntry::getUuid),
+				true, TemplateEntry::getUuid),
 			new FinderColumn<>(
 				"templateEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
 				true, TemplateEntry::getGroupId));
@@ -3266,12 +1835,12 @@ public class TemplateEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -3279,10 +1848,10 @@ public class TemplateEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_TEMPLATEENTRY_WHERE,
 				_SQL_COUNT_TEMPLATEENTRY_WHERE,
-				TemplateEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				TemplateEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"templateEntry.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, TemplateEntry::getUuid),
+					true, true, TemplateEntry::getUuid),
 				new FinderColumn<>(
 					"templateEntry.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, TemplateEntry::getCompanyId));
@@ -3301,23 +1870,29 @@ public class TemplateEntryPersistenceImpl
 			true);
 
 		_finderPathCountByGroupId = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByGroupId",
-			new String[] {Long.class.getName()}, new String[] {"groupId"},
-			false);
-
-		_finderPathWithPaginationCountByGroupId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByGroupId",
 			new String[] {Long.class.getName()}, new String[] {"groupId"},
 			false);
 
-		_finderPathFetchByDDMTemplateId = new FinderPath(
+		_collectionPersistenceFinderByGroupId =
+			new CollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByGroupId,
+				_finderPathWithoutPaginationFindByGroupId,
+				_finderPathCountByGroupId, _SQL_SELECT_TEMPLATEENTRY_WHERE,
+				_SQL_COUNT_TEMPLATEENTRY_WHERE,
+				TemplateEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+				new ArrayableFinderColumn<>(
+					"templateEntry.", "groupId", FinderColumn.Type.LONG, "=",
+					false, true, true, TemplateEntry::getGroupId));
+
+		_finderPathFetchByDDMTemplateId = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByDDMTemplateId",
 			new String[] {Long.class.getName()}, new String[] {"ddmTemplateId"},
-			true);
+			0, 0, false, TemplateEntry::getDDMTemplateId);
 
 		_uniquePersistenceFinderByDDMTemplateId = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByDDMTemplateId,
-			_SQL_SELECT_TEMPLATEENTRY_WHERE,
+			_SQL_SELECT_TEMPLATEENTRY_WHERE, "",
 			new FinderColumn<>(
 				"templateEntry.", "ddmTemplateId", FinderColumn.Type.LONG, "=",
 				true, true, TemplateEntry::getDDMTemplateId));
@@ -3334,12 +1909,12 @@ public class TemplateEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByG_IICN = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByG_IICN",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "infoItemClassName"}, true);
+			new String[] {"groupId", "infoItemClassName"}, 0, 2, true, null);
 
 		_finderPathCountByG_IICN = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_IICN",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "infoItemClassName"}, false);
+			new String[] {"groupId", "infoItemClassName"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByG_IICN =
 			new CollectionPersistenceFinder<>(
@@ -3347,10 +1922,10 @@ public class TemplateEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByG_IICN,
 				_finderPathCountByG_IICN, _SQL_SELECT_TEMPLATEENTRY_WHERE,
 				_SQL_COUNT_TEMPLATEENTRY_WHERE,
-				TemplateEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				TemplateEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"templateEntry.", "groupId", FinderColumn.Type.LONG, "=",
-					true, false, TemplateEntry::getGroupId),
+					true, true, TemplateEntry::getGroupId),
 				new FinderColumn<>(
 					"templateEntry.", "infoItemClassName",
 					FinderColumn.Type.STRING, "=", true, true,
@@ -3377,20 +1952,9 @@ public class TemplateEntryPersistenceImpl
 			new String[] {
 				"groupId", "infoItemClassName", "infoItemFormVariationKey"
 			},
-			true);
+			0, 6, true, null);
 
 		_finderPathCountByG_IICN_IIFVK = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_IICN_IIFVK",
-			new String[] {
-				Long.class.getName(), String.class.getName(),
-				String.class.getName()
-			},
-			new String[] {
-				"groupId", "infoItemClassName", "infoItemFormVariationKey"
-			},
-			false);
-
-		_finderPathWithPaginationCountByG_IICN_IIFVK = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByG_IICN_IIFVK",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
@@ -3399,18 +1963,39 @@ public class TemplateEntryPersistenceImpl
 			new String[] {
 				"groupId", "infoItemClassName", "infoItemFormVariationKey"
 			},
-			false);
+			0, 6, false, null);
 
-		_finderPathFetchByERC_G = new FinderPath(
+		_collectionPersistenceFinderByG_IICN_IIFVK =
+			new CollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_IICN_IIFVK,
+				_finderPathWithoutPaginationFindByG_IICN_IIFVK,
+				_finderPathCountByG_IICN_IIFVK, _SQL_SELECT_TEMPLATEENTRY_WHERE,
+				_SQL_COUNT_TEMPLATEENTRY_WHERE,
+				TemplateEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+				new ArrayableFinderColumn<>(
+					"templateEntry.", "groupId", FinderColumn.Type.LONG, "=",
+					false, true, true, TemplateEntry::getGroupId),
+				new FinderColumn<>(
+					"templateEntry.", "infoItemClassName",
+					FinderColumn.Type.STRING, "=", true, true,
+					TemplateEntry::getInfoItemClassName),
+				new FinderColumn<>(
+					"templateEntry.", "infoItemFormVariationKey",
+					FinderColumn.Type.STRING, "=", true, true,
+					TemplateEntry::getInfoItemFormVariationKey));
+
+		_finderPathFetchByERC_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"externalReferenceCode", "groupId"}, true);
+			new String[] {"externalReferenceCode", "groupId"}, 0, 1, false,
+			convertNullFunction(TemplateEntry::getExternalReferenceCode),
+			TemplateEntry::getGroupId);
 
 		_uniquePersistenceFinderByERC_G = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByERC_G, _SQL_SELECT_TEMPLATEENTRY_WHERE,
+			this, _finderPathFetchByERC_G, _SQL_SELECT_TEMPLATEENTRY_WHERE, "",
 			new FinderColumn<>(
 				"templateEntry.", "externalReferenceCode",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				TemplateEntry::getExternalReferenceCode),
 			new FinderColumn<>(
 				"templateEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
@@ -3461,22 +2046,17 @@ public class TemplateEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		TemplateEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_TEMPLATEENTRY =
 		"SELECT templateEntry FROM TemplateEntry templateEntry";
 
 	private static final String _SQL_SELECT_TEMPLATEENTRY_WHERE =
 		"SELECT templateEntry FROM TemplateEntry templateEntry WHERE ";
 
-	private static final String _SQL_COUNT_TEMPLATEENTRY =
-		"SELECT COUNT(templateEntry) FROM TemplateEntry templateEntry";
-
 	private static final String _SQL_COUNT_TEMPLATEENTRY_WHERE =
 		"SELECT COUNT(templateEntry) FROM TemplateEntry templateEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "templateEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No TemplateEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No TemplateEntry exists with the key {";
@@ -3493,4 +2073,4 @@ public class TemplateEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2033087994
+// LIFERAY-SERVICE-BUILDER-HASH:-2097295084

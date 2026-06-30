@@ -36,6 +36,20 @@ public class CSDiagramPinUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<CSDiagramPin> csDiagramPins) {
+		getPersistence().cacheResult(csDiagramPins);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CSDiagramPin csDiagramPin) {
+		getPersistence().cacheResult(csDiagramPin);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -236,24 +250,6 @@ public class CSDiagramPinUtil {
 	}
 
 	/**
-	 * Caches the cs diagram pin in the entity cache if it is enabled.
-	 *
-	 * @param csDiagramPin the cs diagram pin
-	 */
-	public static void cacheResult(CSDiagramPin csDiagramPin) {
-		getPersistence().cacheResult(csDiagramPin);
-	}
-
-	/**
-	 * Caches the cs diagram pins in the entity cache if it is enabled.
-	 *
-	 * @param csDiagramPins the cs diagram pins
-	 */
-	public static void cacheResult(List<CSDiagramPin> csDiagramPins) {
-		getPersistence().cacheResult(csDiagramPins);
-	}
-
-	/**
 	 * Creates a new cs diagram pin with the primary key. Does not add the cs diagram pin to the database.
 	 *
 	 * @param CSDiagramPinId the primary key for the new cs diagram pin
@@ -305,85 +301,6 @@ public class CSDiagramPinUtil {
 		return getPersistence().fetchByPrimaryKey(CSDiagramPinId);
 	}
 
-	/**
-	 * Returns all the cs diagram pins.
-	 *
-	 * @return the cs diagram pins
-	 */
-	public static List<CSDiagramPin> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the cs diagram pins.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.shop.by.diagram.model.impl.CSDiagramPinModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cs diagram pins
-	 * @param end the upper bound of the range of cs diagram pins (not inclusive)
-	 * @return the range of cs diagram pins
-	 */
-	public static List<CSDiagramPin> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the cs diagram pins.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.shop.by.diagram.model.impl.CSDiagramPinModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cs diagram pins
-	 * @param end the upper bound of the range of cs diagram pins (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cs diagram pins
-	 */
-	public static List<CSDiagramPin> findAll(
-		int start, int end, OrderByComparator<CSDiagramPin> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the cs diagram pins.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.shop.by.diagram.model.impl.CSDiagramPinModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cs diagram pins
-	 * @param end the upper bound of the range of cs diagram pins (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cs diagram pins
-	 */
-	public static List<CSDiagramPin> findAll(
-		int start, int end, OrderByComparator<CSDiagramPin> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the cs diagram pins from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of cs diagram pins.
-	 *
-	 * @return the number of cs diagram pins
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CSDiagramPinPersistence getPersistence() {
 		return _persistence;
 	}
@@ -395,4 +312,4 @@ public class CSDiagramPinUtil {
 	private static volatile CSDiagramPinPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1272966698
+// LIFERAY-SERVICE-BUILDER-HASH:1613583525

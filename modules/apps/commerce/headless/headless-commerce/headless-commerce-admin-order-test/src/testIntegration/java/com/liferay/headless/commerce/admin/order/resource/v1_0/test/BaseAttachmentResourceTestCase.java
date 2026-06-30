@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Time;
@@ -112,7 +113,8 @@ public abstract class BaseAttachmentResourceTestCase {
 			_testCompanyAdminUser.getEmailAddress(),
 			PropsValues.DEFAULT_ADMIN_PASSWORD
 		).endpoint(
-			testCompany.getVirtualHostname(), 8080, "http"
+			testCompany.getVirtualHostname(),
+			PortalUtil.getPortalServerPort(false), "http"
 		).locale(
 			LocaleUtil.getDefault()
 		).build();
@@ -177,6 +179,7 @@ public abstract class BaseAttachmentResourceTestCase {
 		attachment.setAttachment(regex);
 		attachment.setExtension(regex);
 		attachment.setExternalReferenceCode(regex);
+		attachment.setFileName(regex);
 		attachment.setTitle(regex);
 		attachment.setType(regex);
 		attachment.setTypeLabel(regex);
@@ -191,6 +194,7 @@ public abstract class BaseAttachmentResourceTestCase {
 		Assert.assertEquals(regex, attachment.getAttachment());
 		Assert.assertEquals(regex, attachment.getExtension());
 		Assert.assertEquals(regex, attachment.getExternalReferenceCode());
+		Assert.assertEquals(regex, attachment.getFileName());
 		Assert.assertEquals(regex, attachment.getTitle());
 		Assert.assertEquals(regex, attachment.getType());
 		Assert.assertEquals(regex, attachment.getTypeLabel());
@@ -233,6 +237,7 @@ public abstract class BaseAttachmentResourceTestCase {
 
 		// No namespace
 
+		@SuppressWarnings("PMD.UnusedLocalVariable")
 		Attachment attachment1 =
 			testGraphQLDeleteOrderAttachment_addAttachment();
 
@@ -270,6 +275,7 @@ public abstract class BaseAttachmentResourceTestCase {
 
 		// Using the namespace headlessCommerceAdminOrder_v1_0
 
+		@SuppressWarnings("PMD.UnusedLocalVariable")
 		Attachment attachment2 =
 			testGraphQLDeleteOrderAttachment_addAttachment();
 
@@ -379,6 +385,7 @@ public abstract class BaseAttachmentResourceTestCase {
 
 		// No namespace
 
+		@SuppressWarnings("PMD.UnusedLocalVariable")
 		Attachment attachment1 =
 			testGraphQLDeleteOrderByExternalReferenceCodeAttachmentByExternalReferenceCode_addAttachment();
 
@@ -428,6 +435,7 @@ public abstract class BaseAttachmentResourceTestCase {
 
 		// Using the namespace headlessCommerceAdminOrder_v1_0
 
+		@SuppressWarnings("PMD.UnusedLocalVariable")
 		Attachment attachment2 =
 			testGraphQLDeleteOrderByExternalReferenceCodeAttachmentByExternalReferenceCode_addAttachment();
 
@@ -1942,16 +1950,22 @@ public abstract class BaseAttachmentResourceTestCase {
 		else if (value instanceof Boolean || value instanceof Number) {
 			return value.toString();
 		}
-		else if (value instanceof Date date) {
+		else if (value instanceof Date) {
+			Date date = (Date)value;
+
 			return "\"" +
 				DateUtil.getDate(
 					date, "yyyy-MM-dd'T'HH:mm:ss'Z'", LocaleUtil.getDefault(),
 					TimeZone.getTimeZone("UTC")) + "\"";
 		}
-		else if (value instanceof Enum<?> enm) {
+		else if (value instanceof Enum) {
+			Enum<?> enm = (Enum<?>)value;
+
 			return enm.name();
 		}
-		else if (value instanceof Map<?, ?> map) {
+		else if (value instanceof Map) {
+			Map<?, ?> map = (Map<?, ?>)value;
+
 			List<String> entries = new ArrayList<>();
 
 			for (Map.Entry<?, ?> entry : map.entrySet()) {
@@ -1964,7 +1978,9 @@ public abstract class BaseAttachmentResourceTestCase {
 
 			return "{" + String.join(", ", entries) + "}";
 		}
-		else if (value instanceof Object[] array) {
+		else if (value instanceof Object[]) {
+			Object[] array = (Object[])value;
+
 			List<String> entries = new ArrayList<>();
 
 			for (Object entry : array) {
@@ -2111,6 +2127,14 @@ public abstract class BaseAttachmentResourceTestCase {
 					"externalReferenceCode", additionalAssertFieldName)) {
 
 				if (attachment.getExternalReferenceCode() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("fileName", additionalAssertFieldName)) {
+				if (attachment.getFileName() == null) {
 					valid = false;
 				}
 
@@ -2336,6 +2360,16 @@ public abstract class BaseAttachmentResourceTestCase {
 				if (!Objects.deepEquals(
 						attachment1.getExternalReferenceCode(),
 						attachment2.getExternalReferenceCode())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("fileName", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						attachment1.getFileName(), attachment2.getFileName())) {
 
 					return false;
 				}
@@ -2694,6 +2728,52 @@ public abstract class BaseAttachmentResourceTestCase {
 			return sb.toString();
 		}
 
+		if (entityFieldName.equals("fileName")) {
+			Object object = attachment.getFileName();
+
+			String value = String.valueOf(object);
+
+			if (operator.equals("contains")) {
+				sb = new StringBundler();
+
+				sb.append("contains(");
+				sb.append(entityFieldName);
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 2)) {
+					sb.append(value.substring(1, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
+			}
+			else if (operator.equals("startswith")) {
+				sb = new StringBundler();
+
+				sb.append("startswith(");
+				sb.append(entityFieldName);
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 1)) {
+					sb.append(value.substring(0, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
+			}
+			else {
+				sb.append("'");
+				sb.append(value);
+				sb.append("'");
+			}
+
+			return sb.toString();
+		}
+
 		if (entityFieldName.equals("id")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
@@ -2907,7 +2987,9 @@ public abstract class BaseAttachmentResourceTestCase {
 			).toString(),
 			"application/json");
 		httpInvoker.httpMethod(HttpInvoker.HttpMethod.POST);
-		httpInvoker.path("http://localhost:8080/o/graphql");
+		httpInvoker.path(
+			"http://localhost:" + PortalUtil.getPortalServerPort(false) +
+				"/o/graphql");
 		httpInvoker.userNameAndPassword(
 			"test@liferay.com:" + PropsValues.DEFAULT_ADMIN_PASSWORD);
 
@@ -2945,6 +3027,8 @@ public abstract class BaseAttachmentResourceTestCase {
 				extension = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
 				externalReferenceCode = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+				fileName = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
 				id = RandomTestUtil.randomLong();
 				priority = RandomTestUtil.randomDouble();
@@ -3179,4 +3263,4 @@ public abstract class BaseAttachmentResourceTestCase {
 			AttachmentResource _attachmentResource;
 
 }
-// LIFERAY-REST-BUILDER-HASH:-1205916924
+// LIFERAY-REST-BUILDER-HASH:-946501247

@@ -14,15 +14,11 @@ import com.liferay.friendly.url.service.persistence.FriendlyURLEntryLocalization
 import com.liferay.friendly.url.service.persistence.FriendlyURLEntryPersistence;
 import com.liferay.friendly.url.service.persistence.FriendlyURLEntryUtil;
 import com.liferay.friendly.url.service.persistence.impl.constants.FURLPersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -36,10 +32,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -55,7 +48,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,7 +71,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = FriendlyURLEntryPersistence.class)
 public class FriendlyURLEntryPersistenceImpl
-	extends BasePersistenceImpl<FriendlyURLEntry>
+	extends BasePersistenceImpl
+		<FriendlyURLEntry, NoSuchFriendlyURLEntryException>
 	implements FriendlyURLEntryPersistence {
 
 	/*
@@ -96,9 +89,6 @@ public class FriendlyURLEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -174,14 +164,9 @@ public class FriendlyURLEntryPersistenceImpl
 		OrderByComparator<FriendlyURLEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				finderCache, new Object[] {uuid}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			finderCache, new Object[] {uuid}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -243,13 +228,8 @@ public class FriendlyURLEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				finderCache, new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			finderCache, new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathFetchByUUID_G;
@@ -309,13 +289,8 @@ public class FriendlyURLEntryPersistenceImpl
 	public FriendlyURLEntry fetchByUUID_G(
 		String uuid, long groupId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			return _uniquePersistenceFinderByUUID_G.fetch(
-				finderCache, new Object[] {uuid, groupId}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByUUID_G.fetch(
+			finderCache, new Object[] {uuid, groupId}, useFinderCache);
 	}
 
 	/**
@@ -430,14 +405,9 @@ public class FriendlyURLEntryPersistenceImpl
 		OrderByComparator<FriendlyURLEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				finderCache, new Object[] {uuid, companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			finderCache, new Object[] {uuid, companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -505,13 +475,8 @@ public class FriendlyURLEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				finderCache, new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			finderCache, new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_C;
@@ -597,14 +562,9 @@ public class FriendlyURLEntryPersistenceImpl
 		OrderByComparator<FriendlyURLEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			return _collectionPersistenceFinderByG_C.find(
-				finderCache, new Object[] {groupId, classNameId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_C.find(
+			finderCache, new Object[] {groupId, classNameId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -673,13 +633,8 @@ public class FriendlyURLEntryPersistenceImpl
 	 */
 	@Override
 	public int countByG_C(long groupId, long classNameId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			return _collectionPersistenceFinderByG_C.count(
-				finderCache, new Object[] {groupId, classNameId});
-		}
+		return _collectionPersistenceFinderByG_C.count(
+			finderCache, new Object[] {groupId, classNameId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_C;
@@ -765,14 +720,9 @@ public class FriendlyURLEntryPersistenceImpl
 		OrderByComparator<FriendlyURLEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			return _collectionPersistenceFinderByC_C.find(
-				finderCache, new Object[] {companyId, classNameId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_C.find(
+			finderCache, new Object[] {companyId, classNameId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -842,13 +792,8 @@ public class FriendlyURLEntryPersistenceImpl
 	 */
 	@Override
 	public int countByC_C(long companyId, long classNameId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			return _collectionPersistenceFinderByC_C.count(
-				finderCache, new Object[] {companyId, classNameId});
-		}
+		return _collectionPersistenceFinderByC_C.count(
+			finderCache, new Object[] {companyId, classNameId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_C_C;
@@ -941,14 +886,9 @@ public class FriendlyURLEntryPersistenceImpl
 		OrderByComparator<FriendlyURLEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			return _collectionPersistenceFinderByG_C_C.find(
-				finderCache, new Object[] {groupId, classNameId, classPK},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_C_C.find(
+			finderCache, new Object[] {groupId, classNameId, classPK}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1022,13 +962,8 @@ public class FriendlyURLEntryPersistenceImpl
 	 */
 	@Override
 	public int countByG_C_C(long groupId, long classNameId, long classPK) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			return _collectionPersistenceFinderByG_C_C.count(
-				finderCache, new Object[] {groupId, classNameId, classPK});
-		}
+		return _collectionPersistenceFinderByG_C_C.count(
+			finderCache, new Object[] {groupId, classNameId, classPK});
 	}
 
 	public FriendlyURLEntryPersistenceImpl() {
@@ -1044,122 +979,6 @@ public class FriendlyURLEntryPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(FriendlyURLEntryTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the friendly url entry in the entity cache if it is enabled.
-	 *
-	 * @param friendlyURLEntry the friendly url entry
-	 */
-	@Override
-	public void cacheResult(FriendlyURLEntry friendlyURLEntry) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					friendlyURLEntry.getCtCollectionId())) {
-
-			entityCache.putResult(
-				FriendlyURLEntryImpl.class, friendlyURLEntry.getPrimaryKey(),
-				friendlyURLEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G,
-				new Object[] {
-					friendlyURLEntry.getUuid(), friendlyURLEntry.getGroupId()
-				},
-				friendlyURLEntry);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the friendly url entries in the entity cache if it is enabled.
-	 *
-	 * @param friendlyURLEntries the friendly url entries
-	 */
-	@Override
-	public void cacheResult(List<FriendlyURLEntry> friendlyURLEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (friendlyURLEntries.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (FriendlyURLEntry friendlyURLEntry : friendlyURLEntries) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						friendlyURLEntry.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						FriendlyURLEntryImpl.class,
-						friendlyURLEntry.getPrimaryKey()) == null) {
-
-					cacheResult(friendlyURLEntry);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all friendly url entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(FriendlyURLEntryImpl.class);
-
-		finderCache.clearCache(FriendlyURLEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the friendly url entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(FriendlyURLEntry friendlyURLEntry) {
-		entityCache.removeResult(FriendlyURLEntryImpl.class, friendlyURLEntry);
-	}
-
-	@Override
-	public void clearCache(List<FriendlyURLEntry> friendlyURLEntries) {
-		for (FriendlyURLEntry friendlyURLEntry : friendlyURLEntries) {
-			entityCache.removeResult(
-				FriendlyURLEntryImpl.class, friendlyURLEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(FriendlyURLEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(FriendlyURLEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		FriendlyURLEntryModelImpl friendlyURLEntryModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					friendlyURLEntryModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				friendlyURLEntryModelImpl.getUuid(),
-				friendlyURLEntryModelImpl.getGroupId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G, args, friendlyURLEntryModelImpl);
-		}
 	}
 
 	/**
@@ -1196,47 +1015,6 @@ public class FriendlyURLEntryPersistenceImpl
 		throws NoSuchFriendlyURLEntryException {
 
 		return remove((Serializable)friendlyURLEntryId);
-	}
-
-	/**
-	 * Removes the friendly url entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the friendly url entry
-	 * @return the friendly url entry that was removed
-	 * @throws NoSuchFriendlyURLEntryException if a friendly url entry with the primary key could not be found
-	 */
-	@Override
-	public FriendlyURLEntry remove(Serializable primaryKey)
-		throws NoSuchFriendlyURLEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			FriendlyURLEntry friendlyURLEntry = (FriendlyURLEntry)session.get(
-				FriendlyURLEntryImpl.class, primaryKey);
-
-			if (friendlyURLEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchFriendlyURLEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(friendlyURLEntry);
-		}
-		catch (NoSuchFriendlyURLEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1356,41 +1134,13 @@ public class FriendlyURLEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			FriendlyURLEntryImpl.class, friendlyURLEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(friendlyURLEntryModelImpl);
+		cacheUniqueFindersResult(friendlyURLEntry, false);
 
 		if (isNew) {
 			friendlyURLEntry.setNew(false);
 		}
 
 		friendlyURLEntry.resetOriginalValues();
-
-		return friendlyURLEntry;
-	}
-
-	/**
-	 * Returns the friendly url entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the friendly url entry
-	 * @return the friendly url entry
-	 * @throws NoSuchFriendlyURLEntryException if a friendly url entry with the primary key could not be found
-	 */
-	@Override
-	public FriendlyURLEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchFriendlyURLEntryException {
-
-		FriendlyURLEntry friendlyURLEntry = fetchByPrimaryKey(primaryKey);
-
-		if (friendlyURLEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchFriendlyURLEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return friendlyURLEntry;
 	}
@@ -1409,53 +1159,9 @@ public class FriendlyURLEntryPersistenceImpl
 		return findByPrimaryKey((Serializable)friendlyURLEntryId);
 	}
 
-	/**
-	 * Returns the friendly url entry with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the friendly url entry
-	 * @return the friendly url entry, or <code>null</code> if a friendly url entry with the primary key could not be found
-	 */
 	@Override
-	public FriendlyURLEntry fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				FriendlyURLEntry.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		FriendlyURLEntry friendlyURLEntry =
-			(FriendlyURLEntry)entityCache.getResult(
-				FriendlyURLEntryImpl.class, primaryKey);
-
-		if (friendlyURLEntry != null) {
-			return friendlyURLEntry;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			friendlyURLEntry = (FriendlyURLEntry)session.get(
-				FriendlyURLEntryImpl.class, primaryKey);
-
-			if (friendlyURLEntry != null) {
-				cacheResult(friendlyURLEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return friendlyURLEntry;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -1467,324 +1173,6 @@ public class FriendlyURLEntryPersistenceImpl
 	@Override
 	public FriendlyURLEntry fetchByPrimaryKey(long friendlyURLEntryId) {
 		return fetchByPrimaryKey((Serializable)friendlyURLEntryId);
-	}
-
-	@Override
-	public Map<Serializable, FriendlyURLEntry> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(FriendlyURLEntry.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, FriendlyURLEntry> map =
-			new HashMap<Serializable, FriendlyURLEntry>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			FriendlyURLEntry friendlyURLEntry = fetchByPrimaryKey(primaryKey);
-
-			if (friendlyURLEntry != null) {
-				map.put(primaryKey, friendlyURLEntry);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						FriendlyURLEntry.class, primaryKey)) {
-
-				FriendlyURLEntry friendlyURLEntry =
-					(FriendlyURLEntry)entityCache.getResult(
-						FriendlyURLEntryImpl.class, primaryKey);
-
-				if (friendlyURLEntry == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, friendlyURLEntry);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (FriendlyURLEntry friendlyURLEntry :
-					(List<FriendlyURLEntry>)query.list()) {
-
-				map.put(friendlyURLEntry.getPrimaryKeyObj(), friendlyURLEntry);
-
-				cacheResult(friendlyURLEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the friendly url entries.
-	 *
-	 * @return the friendly url entries
-	 */
-	@Override
-	public List<FriendlyURLEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the friendly url entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FriendlyURLEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of friendly url entries
-	 * @param end the upper bound of the range of friendly url entries (not inclusive)
-	 * @return the range of friendly url entries
-	 */
-	@Override
-	public List<FriendlyURLEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the friendly url entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FriendlyURLEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of friendly url entries
-	 * @param end the upper bound of the range of friendly url entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of friendly url entries
-	 */
-	@Override
-	public List<FriendlyURLEntry> findAll(
-		int start, int end,
-		OrderByComparator<FriendlyURLEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the friendly url entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FriendlyURLEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of friendly url entries
-	 * @param end the upper bound of the range of friendly url entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of friendly url entries
-	 */
-	@Override
-	public List<FriendlyURLEntry> findAll(
-		int start, int end,
-		OrderByComparator<FriendlyURLEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<FriendlyURLEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<FriendlyURLEntry>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_FRIENDLYURLENTRY);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_FRIENDLYURLENTRY;
-
-					sql = sql.concat(FriendlyURLEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<FriendlyURLEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the friendly url entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (FriendlyURLEntry friendlyURLEntry : findAll()) {
-			remove(friendlyURLEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of friendly url entries.
-	 *
-	 * @return the number of friendly url entries
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					FriendlyURLEntry.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_FRIENDLYURLENTRY);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1877,21 +1265,6 @@ public class FriendlyURLEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1902,34 +1275,37 @@ public class FriendlyURLEntryPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_FRIENDLYURLENTRY_WHERE,
 			_SQL_COUNT_FRIENDLYURLENTRY_WHERE,
-			FriendlyURLEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			FriendlyURLEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"friendlyURLEntry.", "uuid", FinderColumn.Type.STRING, "=",
 				true, true, FriendlyURLEntry::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(FriendlyURLEntry::getUuid),
+			FriendlyURLEntry::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByUUID_G, _SQL_SELECT_FRIENDLYURLENTRY_WHERE,
+			"",
 			new FinderColumn<>(
 				"friendlyURLEntry.", "uuid", FinderColumn.Type.STRING, "=",
-				true, false, FriendlyURLEntry::getUuid),
+				true, true, FriendlyURLEntry::getUuid),
 			new FinderColumn<>(
 				"friendlyURLEntry.", "groupId", FinderColumn.Type.LONG, "=",
 				true, true, FriendlyURLEntry::getGroupId));
@@ -1946,12 +1322,12 @@ public class FriendlyURLEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1959,10 +1335,11 @@ public class FriendlyURLEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_FRIENDLYURLENTRY_WHERE,
 				_SQL_COUNT_FRIENDLYURLENTRY_WHERE,
-				FriendlyURLEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FriendlyURLEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"friendlyURLEntry.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, FriendlyURLEntry::getUuid),
+					true, true, FriendlyURLEntry::getUuid),
 				new FinderColumn<>(
 					"friendlyURLEntry.", "companyId", FinderColumn.Type.LONG,
 					"=", true, true, FriendlyURLEntry::getCompanyId));
@@ -1991,10 +1368,10 @@ public class FriendlyURLEntryPersistenceImpl
 			_finderPathWithoutPaginationFindByG_C, _finderPathCountByG_C,
 			_SQL_SELECT_FRIENDLYURLENTRY_WHERE,
 			_SQL_COUNT_FRIENDLYURLENTRY_WHERE,
-			FriendlyURLEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			FriendlyURLEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"friendlyURLEntry.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, FriendlyURLEntry::getGroupId),
+				true, true, FriendlyURLEntry::getGroupId),
 			new FinderColumn<>(
 				"friendlyURLEntry.", "classNameId", FinderColumn.Type.LONG, "=",
 				true, true, FriendlyURLEntry::getClassNameId));
@@ -2023,10 +1400,10 @@ public class FriendlyURLEntryPersistenceImpl
 			_finderPathWithoutPaginationFindByC_C, _finderPathCountByC_C,
 			_SQL_SELECT_FRIENDLYURLENTRY_WHERE,
 			_SQL_COUNT_FRIENDLYURLENTRY_WHERE,
-			FriendlyURLEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			FriendlyURLEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"friendlyURLEntry.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, FriendlyURLEntry::getCompanyId),
+				true, true, FriendlyURLEntry::getCompanyId),
 			new FinderColumn<>(
 				"friendlyURLEntry.", "classNameId", FinderColumn.Type.LONG, "=",
 				true, true, FriendlyURLEntry::getClassNameId));
@@ -2059,13 +1436,13 @@ public class FriendlyURLEntryPersistenceImpl
 			_finderPathWithoutPaginationFindByG_C_C, _finderPathCountByG_C_C,
 			_SQL_SELECT_FRIENDLYURLENTRY_WHERE,
 			_SQL_COUNT_FRIENDLYURLENTRY_WHERE,
-			FriendlyURLEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			FriendlyURLEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"friendlyURLEntry.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, FriendlyURLEntry::getGroupId),
+				true, true, FriendlyURLEntry::getGroupId),
 			new FinderColumn<>(
 				"friendlyURLEntry.", "classNameId", FinderColumn.Type.LONG, "=",
-				true, false, FriendlyURLEntry::getClassNameId),
+				true, true, FriendlyURLEntry::getClassNameId),
 			new FinderColumn<>(
 				"friendlyURLEntry.", "classPK", FinderColumn.Type.LONG, "=",
 				true, true, FriendlyURLEntry::getClassPK));
@@ -2119,22 +1496,17 @@ public class FriendlyURLEntryPersistenceImpl
 	protected FriendlyURLEntryLocalizationPersistence
 		friendlyURLEntryLocalizationPersistence;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		FriendlyURLEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_FRIENDLYURLENTRY =
 		"SELECT friendlyURLEntry FROM FriendlyURLEntry friendlyURLEntry";
 
 	private static final String _SQL_SELECT_FRIENDLYURLENTRY_WHERE =
 		"SELECT friendlyURLEntry FROM FriendlyURLEntry friendlyURLEntry WHERE ";
 
-	private static final String _SQL_COUNT_FRIENDLYURLENTRY =
-		"SELECT COUNT(friendlyURLEntry) FROM FriendlyURLEntry friendlyURLEntry";
-
 	private static final String _SQL_COUNT_FRIENDLYURLENTRY_WHERE =
 		"SELECT COUNT(friendlyURLEntry) FROM FriendlyURLEntry friendlyURLEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "friendlyURLEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No FriendlyURLEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No FriendlyURLEntry exists with the key {";
@@ -2151,4 +1523,4 @@ public class FriendlyURLEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-401262191
+// LIFERAY-SERVICE-BUILDER-HASH:-1072455437

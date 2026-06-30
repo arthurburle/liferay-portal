@@ -1653,20 +1653,6 @@ public interface CPInstancePersistence
 	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
-	 * Caches the cp instance in the entity cache if it is enabled.
-	 *
-	 * @param cpInstance the cp instance
-	 */
-	public void cacheResult(CPInstance cpInstance);
-
-	/**
-	 * Caches the cp instances in the entity cache if it is enabled.
-	 *
-	 * @param cpInstances the cp instances
-	 */
-	public void cacheResult(java.util.List<CPInstance> cpInstances);
-
-	/**
 	 * Creates a new cp instance with the primary key. Does not add the cp instance to the database.
 	 *
 	 * @param CPInstanceId the primary key for the new cp instance
@@ -1704,73 +1690,5 @@ public interface CPInstancePersistence
 	 */
 	public CPInstance fetchByPrimaryKey(long CPInstanceId);
 
-	/**
-	 * Returns all the cp instances.
-	 *
-	 * @return the cp instances
-	 */
-	public java.util.List<CPInstance> findAll();
-
-	/**
-	 * Returns a range of all the cp instances.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPInstanceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp instances
-	 * @param end the upper bound of the range of cp instances (not inclusive)
-	 * @return the range of cp instances
-	 */
-	public java.util.List<CPInstance> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the cp instances.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPInstanceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp instances
-	 * @param end the upper bound of the range of cp instances (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cp instances
-	 */
-	public java.util.List<CPInstance> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CPInstance>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the cp instances.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPInstanceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp instances
-	 * @param end the upper bound of the range of cp instances (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cp instances
-	 */
-	public java.util.List<CPInstance> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CPInstance>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the cp instances from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of cp instances.
-	 *
-	 * @return the number of cp instances
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:748984835
+// LIFERAY-SERVICE-BUILDER-HASH:145074308

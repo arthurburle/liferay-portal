@@ -906,23 +906,6 @@ public interface CommerceChannelAccountEntryRelPersistence
 		long commerceChannelId, int type);
 
 	/**
-	 * Caches the commerce channel account entry rel in the entity cache if it is enabled.
-	 *
-	 * @param commerceChannelAccountEntryRel the commerce channel account entry rel
-	 */
-	public void cacheResult(
-		CommerceChannelAccountEntryRel commerceChannelAccountEntryRel);
-
-	/**
-	 * Caches the commerce channel account entry rels in the entity cache if it is enabled.
-	 *
-	 * @param commerceChannelAccountEntryRels the commerce channel account entry rels
-	 */
-	public void cacheResult(
-		java.util.List<CommerceChannelAccountEntryRel>
-			commerceChannelAccountEntryRels);
-
-	/**
 	 * Creates a new commerce channel account entry rel with the primary key. Does not add the commerce channel account entry rel to the database.
 	 *
 	 * @param commerceChannelAccountEntryRelId the primary key for the new commerce channel account entry rel
@@ -965,74 +948,5 @@ public interface CommerceChannelAccountEntryRelPersistence
 	public CommerceChannelAccountEntryRel fetchByPrimaryKey(
 		long commerceChannelAccountEntryRelId);
 
-	/**
-	 * Returns all the commerce channel account entry rels.
-	 *
-	 * @return the commerce channel account entry rels
-	 */
-	public java.util.List<CommerceChannelAccountEntryRel> findAll();
-
-	/**
-	 * Returns a range of all the commerce channel account entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CommerceChannelAccountEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce channel account entry rels
-	 * @param end the upper bound of the range of commerce channel account entry rels (not inclusive)
-	 * @return the range of commerce channel account entry rels
-	 */
-	public java.util.List<CommerceChannelAccountEntryRel> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce channel account entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CommerceChannelAccountEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce channel account entry rels
-	 * @param end the upper bound of the range of commerce channel account entry rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce channel account entry rels
-	 */
-	public java.util.List<CommerceChannelAccountEntryRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceChannelAccountEntryRel> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce channel account entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CommerceChannelAccountEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce channel account entry rels
-	 * @param end the upper bound of the range of commerce channel account entry rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce channel account entry rels
-	 */
-	public java.util.List<CommerceChannelAccountEntryRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceChannelAccountEntryRel> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce channel account entry rels from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce channel account entry rels.
-	 *
-	 * @return the number of commerce channel account entry rels
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-152274280
+// LIFERAY-SERVICE-BUILDER-HASH:492787133

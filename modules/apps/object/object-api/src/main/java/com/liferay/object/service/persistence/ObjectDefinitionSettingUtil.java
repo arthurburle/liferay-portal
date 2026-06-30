@@ -36,6 +36,24 @@ public class ObjectDefinitionSettingUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<ObjectDefinitionSetting> objectDefinitionSettings) {
+
+		getPersistence().cacheResult(objectDefinitionSettings);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		ObjectDefinitionSetting objectDefinitionSetting) {
+
+		getPersistence().cacheResult(objectDefinitionSetting);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -847,28 +865,6 @@ public class ObjectDefinitionSettingUtil {
 	}
 
 	/**
-	 * Caches the object definition setting in the entity cache if it is enabled.
-	 *
-	 * @param objectDefinitionSetting the object definition setting
-	 */
-	public static void cacheResult(
-		ObjectDefinitionSetting objectDefinitionSetting) {
-
-		getPersistence().cacheResult(objectDefinitionSetting);
-	}
-
-	/**
-	 * Caches the object definition settings in the entity cache if it is enabled.
-	 *
-	 * @param objectDefinitionSettings the object definition settings
-	 */
-	public static void cacheResult(
-		List<ObjectDefinitionSetting> objectDefinitionSettings) {
-
-		getPersistence().cacheResult(objectDefinitionSettings);
-	}
-
-	/**
 	 * Creates a new object definition setting with the primary key. Does not add the object definition setting to the database.
 	 *
 	 * @param objectDefinitionSettingId the primary key for the new object definition setting
@@ -927,87 +923,6 @@ public class ObjectDefinitionSettingUtil {
 		return getPersistence().fetchByPrimaryKey(objectDefinitionSettingId);
 	}
 
-	/**
-	 * Returns all the object definition settings.
-	 *
-	 * @return the object definition settings
-	 */
-	public static List<ObjectDefinitionSetting> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the object definition settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectDefinitionSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object definition settings
-	 * @param end the upper bound of the range of object definition settings (not inclusive)
-	 * @return the range of object definition settings
-	 */
-	public static List<ObjectDefinitionSetting> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the object definition settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectDefinitionSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object definition settings
-	 * @param end the upper bound of the range of object definition settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object definition settings
-	 */
-	public static List<ObjectDefinitionSetting> findAll(
-		int start, int end,
-		OrderByComparator<ObjectDefinitionSetting> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the object definition settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectDefinitionSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object definition settings
-	 * @param end the upper bound of the range of object definition settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object definition settings
-	 */
-	public static List<ObjectDefinitionSetting> findAll(
-		int start, int end,
-		OrderByComparator<ObjectDefinitionSetting> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the object definition settings from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of object definition settings.
-	 *
-	 * @return the number of object definition settings
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static ObjectDefinitionSettingPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1021,4 +936,4 @@ public class ObjectDefinitionSettingUtil {
 	private static volatile ObjectDefinitionSettingPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:425478242
+// LIFERAY-SERVICE-BUILDER-HASH:328058835

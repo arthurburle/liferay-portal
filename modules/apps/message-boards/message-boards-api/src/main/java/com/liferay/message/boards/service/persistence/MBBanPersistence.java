@@ -650,20 +650,6 @@ public interface MBBanPersistence
 	public int countByG_B(long groupId, long banUserId);
 
 	/**
-	 * Caches the message boards ban in the entity cache if it is enabled.
-	 *
-	 * @param mbBan the message boards ban
-	 */
-	public void cacheResult(MBBan mbBan);
-
-	/**
-	 * Caches the message boards bans in the entity cache if it is enabled.
-	 *
-	 * @param mbBans the message boards bans
-	 */
-	public void cacheResult(java.util.List<MBBan> mbBans);
-
-	/**
 	 * Creates a new message boards ban with the primary key. Does not add the message boards ban to the database.
 	 *
 	 * @param banId the primary key for the new message boards ban
@@ -699,73 +685,5 @@ public interface MBBanPersistence
 	 */
 	public MBBan fetchByPrimaryKey(long banId);
 
-	/**
-	 * Returns all the message boards bans.
-	 *
-	 * @return the message boards bans
-	 */
-	public java.util.List<MBBan> findAll();
-
-	/**
-	 * Returns a range of all the message boards bans.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.message.boards.model.impl.MBBanModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of message boards bans
-	 * @param end the upper bound of the range of message boards bans (not inclusive)
-	 * @return the range of message boards bans
-	 */
-	public java.util.List<MBBan> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the message boards bans.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.message.boards.model.impl.MBBanModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of message boards bans
-	 * @param end the upper bound of the range of message boards bans (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of message boards bans
-	 */
-	public java.util.List<MBBan> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<MBBan>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the message boards bans.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.message.boards.model.impl.MBBanModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of message boards bans
-	 * @param end the upper bound of the range of message boards bans (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of message boards bans
-	 */
-	public java.util.List<MBBan> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<MBBan>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the message boards bans from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of message boards bans.
-	 *
-	 * @return the number of message boards bans
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:217736020
+// LIFERAY-SERVICE-BUILDER-HASH:-1869550970

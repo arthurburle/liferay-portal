@@ -5,13 +5,11 @@
 
 package com.liferay.portal.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.exception.NoSuchUserIdMapperException;
@@ -26,10 +24,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.model.impl.UserIdMapperImpl;
@@ -55,7 +50,7 @@ import java.util.Set;
  * @generated
  */
 public class UserIdMapperPersistenceImpl
-	extends BasePersistenceImpl<UserIdMapper>
+	extends BasePersistenceImpl<UserIdMapper, NoSuchUserIdMapperException>
 	implements UserIdMapperPersistence {
 
 	/*
@@ -72,9 +67,6 @@ public class UserIdMapperPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUserId;
 	private FinderPath _finderPathWithoutPaginationFindByUserId;
 	private FinderPath _finderPathCountByUserId;
@@ -417,116 +409,6 @@ public class UserIdMapperPersistenceImpl
 	}
 
 	/**
-	 * Caches the user ID mapper in the entity cache if it is enabled.
-	 *
-	 * @param userIdMapper the user ID mapper
-	 */
-	@Override
-	public void cacheResult(UserIdMapper userIdMapper) {
-		EntityCacheUtil.putResult(
-			UserIdMapperImpl.class, userIdMapper.getPrimaryKey(), userIdMapper);
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByU_T,
-			new Object[] {userIdMapper.getUserId(), userIdMapper.getType()},
-			userIdMapper);
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByT_E,
-			new Object[] {
-				userIdMapper.getType(), userIdMapper.getExternalUserId()
-			},
-			userIdMapper);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the user ID mappers in the entity cache if it is enabled.
-	 *
-	 * @param userIdMappers the user ID mappers
-	 */
-	@Override
-	public void cacheResult(List<UserIdMapper> userIdMappers) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (userIdMappers.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (UserIdMapper userIdMapper : userIdMappers) {
-			if (EntityCacheUtil.getResult(
-					UserIdMapperImpl.class, userIdMapper.getPrimaryKey()) ==
-						null) {
-
-				cacheResult(userIdMapper);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all user ID mappers.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		EntityCacheUtil.clearCache(UserIdMapperImpl.class);
-
-		FinderCacheUtil.clearCache(UserIdMapperImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the user ID mapper.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(UserIdMapper userIdMapper) {
-		EntityCacheUtil.removeResult(UserIdMapperImpl.class, userIdMapper);
-	}
-
-	@Override
-	public void clearCache(List<UserIdMapper> userIdMappers) {
-		for (UserIdMapper userIdMapper : userIdMappers) {
-			EntityCacheUtil.removeResult(UserIdMapperImpl.class, userIdMapper);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		FinderCacheUtil.clearCache(UserIdMapperImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			EntityCacheUtil.removeResult(UserIdMapperImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		UserIdMapperModelImpl userIdMapperModelImpl) {
-
-		Object[] args = new Object[] {
-			userIdMapperModelImpl.getUserId(), userIdMapperModelImpl.getType()
-		};
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByU_T, args, userIdMapperModelImpl);
-
-		args = new Object[] {
-			userIdMapperModelImpl.getType(),
-			userIdMapperModelImpl.getExternalUserId()
-		};
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByT_E, args, userIdMapperModelImpl);
-	}
-
-	/**
 	 * Creates a new user ID mapper with the primary key. Does not add the user ID mapper to the database.
 	 *
 	 * @param userIdMapperId the primary key for the new user ID mapper
@@ -556,47 +438,6 @@ public class UserIdMapperPersistenceImpl
 		throws NoSuchUserIdMapperException {
 
 		return remove((Serializable)userIdMapperId);
-	}
-
-	/**
-	 * Removes the user ID mapper with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the user ID mapper
-	 * @return the user ID mapper that was removed
-	 * @throws NoSuchUserIdMapperException if a user ID mapper with the primary key could not be found
-	 */
-	@Override
-	public UserIdMapper remove(Serializable primaryKey)
-		throws NoSuchUserIdMapperException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			UserIdMapper userIdMapper = (UserIdMapper)session.get(
-				UserIdMapperImpl.class, primaryKey);
-
-			if (userIdMapper == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchUserIdMapperException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(userIdMapper);
-		}
-		catch (NoSuchUserIdMapperException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -672,41 +513,13 @@ public class UserIdMapperPersistenceImpl
 			closeSession(session);
 		}
 
-		EntityCacheUtil.putResult(
-			UserIdMapperImpl.class, userIdMapperModelImpl, false, true);
-
-		cacheUniqueFindersCache(userIdMapperModelImpl);
+		cacheUniqueFindersResult(userIdMapper, false);
 
 		if (isNew) {
 			userIdMapper.setNew(false);
 		}
 
 		userIdMapper.resetOriginalValues();
-
-		return userIdMapper;
-	}
-
-	/**
-	 * Returns the user ID mapper with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the user ID mapper
-	 * @return the user ID mapper
-	 * @throws NoSuchUserIdMapperException if a user ID mapper with the primary key could not be found
-	 */
-	@Override
-	public UserIdMapper findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchUserIdMapperException {
-
-		UserIdMapper userIdMapper = fetchByPrimaryKey(primaryKey);
-
-		if (userIdMapper == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchUserIdMapperException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return userIdMapper;
 	}
@@ -734,185 +547,6 @@ public class UserIdMapperPersistenceImpl
 	@Override
 	public UserIdMapper fetchByPrimaryKey(long userIdMapperId) {
 		return fetchByPrimaryKey((Serializable)userIdMapperId);
-	}
-
-	/**
-	 * Returns all the user ID mappers.
-	 *
-	 * @return the user ID mappers
-	 */
-	@Override
-	public List<UserIdMapper> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the user ID mappers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>UserIdMapperModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of user ID mappers
-	 * @param end the upper bound of the range of user ID mappers (not inclusive)
-	 * @return the range of user ID mappers
-	 */
-	@Override
-	public List<UserIdMapper> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the user ID mappers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>UserIdMapperModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of user ID mappers
-	 * @param end the upper bound of the range of user ID mappers (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of user ID mappers
-	 */
-	@Override
-	public List<UserIdMapper> findAll(
-		int start, int end, OrderByComparator<UserIdMapper> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the user ID mappers.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>UserIdMapperModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of user ID mappers
-	 * @param end the upper bound of the range of user ID mappers (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of user ID mappers
-	 */
-	@Override
-	public List<UserIdMapper> findAll(
-		int start, int end, OrderByComparator<UserIdMapper> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<UserIdMapper> list = null;
-
-		if (useFinderCache) {
-			list = (List<UserIdMapper>)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_USERIDMAPPER);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_USERIDMAPPER;
-
-				sql = sql.concat(UserIdMapperModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<UserIdMapper>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the user ID mappers from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (UserIdMapper userIdMapper : findAll()) {
-			remove(userIdMapper);
-		}
-	}
-
-	/**
-	 * Returns the number of user ID mappers.
-	 *
-	 * @return the number of user ID mappers
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)FinderCacheUtil.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_USERIDMAPPER);
-
-				count = (Long)query.uniqueResult();
-
-				FinderCacheUtil.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -944,21 +578,6 @@ public class UserIdMapperPersistenceImpl
 	 * Initializes the user ID mapper persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUserId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUserId",
 			new String[] {
@@ -982,35 +601,39 @@ public class UserIdMapperPersistenceImpl
 				_finderPathWithoutPaginationFindByUserId,
 				_finderPathCountByUserId, _SQL_SELECT_USERIDMAPPER_WHERE,
 				_SQL_COUNT_USERIDMAPPER_WHERE,
-				UserIdMapperModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				UserIdMapperModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"userIdMapper.", "userId", FinderColumn.Type.LONG, "=",
 					true, true, UserIdMapper::getUserId));
 
-		_finderPathFetchByU_T = new FinderPath(
+		_finderPathFetchByU_T = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByU_T",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"userId", "type_"}, true);
+			new String[] {"userId", "type_"}, 0, 2, false,
+			UserIdMapper::getUserId,
+			convertNullFunction(UserIdMapper::getType));
 
 		_uniquePersistenceFinderByU_T = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByU_T, _SQL_SELECT_USERIDMAPPER_WHERE,
+			this, _finderPathFetchByU_T, _SQL_SELECT_USERIDMAPPER_WHERE, "",
 			new FinderColumn<>(
 				"userIdMapper.", "userId", FinderColumn.Type.LONG, "=", true,
-				false, UserIdMapper::getUserId),
+				true, UserIdMapper::getUserId),
 			new FinderColumn<>(
 				"userIdMapper.", "type", FinderColumn.Type.STRING, "=", true,
 				true, UserIdMapper::getType));
 
-		_finderPathFetchByT_E = new FinderPath(
+		_finderPathFetchByT_E = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByT_E",
 			new String[] {String.class.getName(), String.class.getName()},
-			new String[] {"type_", "externalUserId"}, true);
+			new String[] {"type_", "externalUserId"}, 0, 3, false,
+			convertNullFunction(UserIdMapper::getType),
+			convertNullFunction(UserIdMapper::getExternalUserId));
 
 		_uniquePersistenceFinderByT_E = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByT_E, _SQL_SELECT_USERIDMAPPER_WHERE,
+			this, _finderPathFetchByT_E, _SQL_SELECT_USERIDMAPPER_WHERE, "",
 			new FinderColumn<>(
 				"userIdMapper.", "type", FinderColumn.Type.STRING, "=", true,
-				false, UserIdMapper::getType),
+				true, UserIdMapper::getType),
 			new FinderColumn<>(
 				"userIdMapper.", "externalUserId", FinderColumn.Type.STRING,
 				"=", true, true, UserIdMapper::getExternalUserId));
@@ -1024,22 +647,17 @@ public class UserIdMapperPersistenceImpl
 		EntityCacheUtil.removeCache(UserIdMapperImpl.class.getName());
 	}
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		UserIdMapperModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_USERIDMAPPER =
 		"SELECT userIdMapper FROM UserIdMapper userIdMapper";
 
 	private static final String _SQL_SELECT_USERIDMAPPER_WHERE =
 		"SELECT userIdMapper FROM UserIdMapper userIdMapper WHERE ";
 
-	private static final String _SQL_COUNT_USERIDMAPPER =
-		"SELECT COUNT(userIdMapper) FROM UserIdMapper userIdMapper";
-
 	private static final String _SQL_COUNT_USERIDMAPPER_WHERE =
 		"SELECT COUNT(userIdMapper) FROM UserIdMapper userIdMapper WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "userIdMapper.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No UserIdMapper exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No UserIdMapper exists with the key {";
@@ -1056,4 +674,4 @@ public class UserIdMapperPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1100684906
+// LIFERAY-SERVICE-BUILDER-HASH:-499589595

@@ -36,6 +36,24 @@ public class CommerceTaxCategoryMappingUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CommerceTaxCategoryMapping> commerceTaxCategoryMappings) {
+
+		getPersistence().cacheResult(commerceTaxCategoryMappings);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		CommerceTaxCategoryMapping commerceTaxCategoryMapping) {
+
+		getPersistence().cacheResult(commerceTaxCategoryMapping);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -716,28 +734,6 @@ public class CommerceTaxCategoryMappingUtil {
 	}
 
 	/**
-	 * Caches the commerce tax category mapping in the entity cache if it is enabled.
-	 *
-	 * @param commerceTaxCategoryMapping the commerce tax category mapping
-	 */
-	public static void cacheResult(
-		CommerceTaxCategoryMapping commerceTaxCategoryMapping) {
-
-		getPersistence().cacheResult(commerceTaxCategoryMapping);
-	}
-
-	/**
-	 * Caches the commerce tax category mappings in the entity cache if it is enabled.
-	 *
-	 * @param commerceTaxCategoryMappings the commerce tax category mappings
-	 */
-	public static void cacheResult(
-		List<CommerceTaxCategoryMapping> commerceTaxCategoryMappings) {
-
-		getPersistence().cacheResult(commerceTaxCategoryMappings);
-	}
-
-	/**
 	 * Creates a new commerce tax category mapping with the primary key. Does not add the commerce tax category mapping to the database.
 	 *
 	 * @param commerceTaxCategoryMappingId the primary key for the new commerce tax category mapping
@@ -797,87 +793,6 @@ public class CommerceTaxCategoryMappingUtil {
 		return getPersistence().fetchByPrimaryKey(commerceTaxCategoryMappingId);
 	}
 
-	/**
-	 * Returns all the commerce tax category mappings.
-	 *
-	 * @return the commerce tax category mappings
-	 */
-	public static List<CommerceTaxCategoryMapping> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce tax category mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.tax.model.impl.CommerceTaxCategoryMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce tax category mappings
-	 * @param end the upper bound of the range of commerce tax category mappings (not inclusive)
-	 * @return the range of commerce tax category mappings
-	 */
-	public static List<CommerceTaxCategoryMapping> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce tax category mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.tax.model.impl.CommerceTaxCategoryMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce tax category mappings
-	 * @param end the upper bound of the range of commerce tax category mappings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce tax category mappings
-	 */
-	public static List<CommerceTaxCategoryMapping> findAll(
-		int start, int end,
-		OrderByComparator<CommerceTaxCategoryMapping> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce tax category mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.tax.model.impl.CommerceTaxCategoryMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce tax category mappings
-	 * @param end the upper bound of the range of commerce tax category mappings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce tax category mappings
-	 */
-	public static List<CommerceTaxCategoryMapping> findAll(
-		int start, int end,
-		OrderByComparator<CommerceTaxCategoryMapping> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce tax category mappings from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce tax category mappings.
-	 *
-	 * @return the number of commerce tax category mappings
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceTaxCategoryMappingPersistence getPersistence() {
 		return _persistence;
 	}
@@ -891,4 +806,4 @@ public class CommerceTaxCategoryMappingUtil {
 	private static volatile CommerceTaxCategoryMappingPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1154944075
+// LIFERAY-SERVICE-BUILDER-HASH:1711172445

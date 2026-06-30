@@ -1208,21 +1208,6 @@ public interface WorkflowDefinitionLinkPersistence
 	public int countByERC_G(String externalReferenceCode, long groupId);
 
 	/**
-	 * Caches the workflow definition link in the entity cache if it is enabled.
-	 *
-	 * @param workflowDefinitionLink the workflow definition link
-	 */
-	public void cacheResult(WorkflowDefinitionLink workflowDefinitionLink);
-
-	/**
-	 * Caches the workflow definition links in the entity cache if it is enabled.
-	 *
-	 * @param workflowDefinitionLinks the workflow definition links
-	 */
-	public void cacheResult(
-		java.util.List<WorkflowDefinitionLink> workflowDefinitionLinks);
-
-	/**
 	 * Creates a new workflow definition link with the primary key. Does not add the workflow definition link to the database.
 	 *
 	 * @param workflowDefinitionLinkId the primary key for the new workflow definition link
@@ -1263,73 +1248,5 @@ public interface WorkflowDefinitionLinkPersistence
 	public WorkflowDefinitionLink fetchByPrimaryKey(
 		long workflowDefinitionLinkId);
 
-	/**
-	 * Returns all the workflow definition links.
-	 *
-	 * @return the workflow definition links
-	 */
-	public java.util.List<WorkflowDefinitionLink> findAll();
-
-	/**
-	 * Returns a range of all the workflow definition links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.WorkflowDefinitionLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of workflow definition links
-	 * @param end the upper bound of the range of workflow definition links (not inclusive)
-	 * @return the range of workflow definition links
-	 */
-	public java.util.List<WorkflowDefinitionLink> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the workflow definition links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.WorkflowDefinitionLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of workflow definition links
-	 * @param end the upper bound of the range of workflow definition links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of workflow definition links
-	 */
-	public java.util.List<WorkflowDefinitionLink> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<WorkflowDefinitionLink>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the workflow definition links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.WorkflowDefinitionLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of workflow definition links
-	 * @param end the upper bound of the range of workflow definition links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of workflow definition links
-	 */
-	public java.util.List<WorkflowDefinitionLink> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<WorkflowDefinitionLink>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the workflow definition links from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of workflow definition links.
-	 *
-	 * @return the number of workflow definition links
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1319872175
+// LIFERAY-SERVICE-BUILDER-HASH:-1563132946

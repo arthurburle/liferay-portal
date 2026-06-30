@@ -24,6 +24,8 @@ export class ObjectFieldsPage {
 	readonly objectFieldLabelInput: Locator;
 	readonly objectFieldNameInput: Locator;
 	readonly objectFieldOptionsDropdown: Locator;
+	readonly prefixDropdown: Locator;
+	readonly prefixTypeDropdown: Locator;
 	readonly page: Page;
 	readonly saveButton: Locator;
 	readonly selectOptionButton: Locator;
@@ -62,6 +64,14 @@ export class ObjectFieldsPage {
 		this.objectFieldNameInput = page.locator('input[name="name"]');
 		this.objectFieldOptionsDropdown = page.getByText('Select an Option');
 		this.page = page;
+		this.prefixDropdown = this.iframeLocator.getByRole('combobox', {
+			exact: true,
+			name: 'Prefix',
+		});
+		this.prefixTypeDropdown = this.iframeLocator.getByRole('combobox', {
+			exact: true,
+			name: 'Prefix Type',
+		});
 		this.saveButton = page.getByRole('button', {name: 'Save'});
 		this.selectOptionButton = this.iframeLocator.getByRole('combobox');
 		this.useDefaultValueToggle = this.iframeLocator.getByRole('switch', {

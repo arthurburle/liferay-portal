@@ -36,6 +36,22 @@ public class DepotEntryGroupRelUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<DepotEntryGroupRel> depotEntryGroupRels) {
+
+		getPersistence().cacheResult(depotEntryGroupRels);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(DepotEntryGroupRel depotEntryGroupRel) {
+		getPersistence().cacheResult(depotEntryGroupRel);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1152,26 +1168,6 @@ public class DepotEntryGroupRelUtil {
 	}
 
 	/**
-	 * Caches the depot entry group rel in the entity cache if it is enabled.
-	 *
-	 * @param depotEntryGroupRel the depot entry group rel
-	 */
-	public static void cacheResult(DepotEntryGroupRel depotEntryGroupRel) {
-		getPersistence().cacheResult(depotEntryGroupRel);
-	}
-
-	/**
-	 * Caches the depot entry group rels in the entity cache if it is enabled.
-	 *
-	 * @param depotEntryGroupRels the depot entry group rels
-	 */
-	public static void cacheResult(
-		List<DepotEntryGroupRel> depotEntryGroupRels) {
-
-		getPersistence().cacheResult(depotEntryGroupRels);
-	}
-
-	/**
 	 * Creates a new depot entry group rel with the primary key. Does not add the depot entry group rel to the database.
 	 *
 	 * @param depotEntryGroupRelId the primary key for the new depot entry group rel
@@ -1225,87 +1221,6 @@ public class DepotEntryGroupRelUtil {
 		return getPersistence().fetchByPrimaryKey(depotEntryGroupRelId);
 	}
 
-	/**
-	 * Returns all the depot entry group rels.
-	 *
-	 * @return the depot entry group rels
-	 */
-	public static List<DepotEntryGroupRel> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the depot entry group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.depot.model.impl.DepotEntryGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of depot entry group rels
-	 * @param end the upper bound of the range of depot entry group rels (not inclusive)
-	 * @return the range of depot entry group rels
-	 */
-	public static List<DepotEntryGroupRel> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the depot entry group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.depot.model.impl.DepotEntryGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of depot entry group rels
-	 * @param end the upper bound of the range of depot entry group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of depot entry group rels
-	 */
-	public static List<DepotEntryGroupRel> findAll(
-		int start, int end,
-		OrderByComparator<DepotEntryGroupRel> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the depot entry group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.depot.model.impl.DepotEntryGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of depot entry group rels
-	 * @param end the upper bound of the range of depot entry group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of depot entry group rels
-	 */
-	public static List<DepotEntryGroupRel> findAll(
-		int start, int end,
-		OrderByComparator<DepotEntryGroupRel> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the depot entry group rels from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of depot entry group rels.
-	 *
-	 * @return the number of depot entry group rels
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static DepotEntryGroupRelPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1319,4 +1234,4 @@ public class DepotEntryGroupRelUtil {
 	private static volatile DepotEntryGroupRelPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1765564698
+// LIFERAY-SERVICE-BUILDER-HASH:1334340268

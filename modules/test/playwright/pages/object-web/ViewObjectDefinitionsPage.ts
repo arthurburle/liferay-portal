@@ -10,6 +10,7 @@ import path from 'path';
 
 import {PORTLET_URLS} from '../../utils/portletUrls';
 import {getTempDir} from '../../utils/temp';
+import {waitForAlert} from '../../utils/waitForAlert';
 
 export class ViewObjectDefinitionsPage {
 	readonly actionsButton: Locator;
@@ -93,6 +94,11 @@ export class ViewObjectDefinitionsPage {
 		await this.page.getByRole('switch', {name: 'Activate Object'}).click();
 
 		await this.page.getByRole('button', {name: 'Save'}).click();
+
+		await waitForAlert(
+			this.page,
+			`Success:The object was saved successfully.`
+		);
 	}
 
 	async clickEditObjectDefinitionLink(
@@ -131,6 +137,18 @@ export class ViewObjectDefinitionsPage {
 		const response = await responsePromise;
 
 		return response.json();
+	}
+
+	async deleteObjectDefinition(label: string, name: string) {
+		await this.clickObjectDefinitionActionButton(label);
+
+		await this.deleteObjectDefinitionOption.click();
+
+		const modal = this.page.getByRole('dialog');
+
+		await modal.getByRole('textbox').fill(name);
+
+		await modal.getByRole('button', {exact: true, name: 'Delete'}).click();
 	}
 
 	async deleteObjectFolder(objectFolderName: string) {

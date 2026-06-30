@@ -36,6 +36,24 @@ public class RecentLayoutSetBranchUtil {
 	 */
 
 	/**
+	 * @see BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<RecentLayoutSetBranch> recentLayoutSetBranchs) {
+
+		getPersistence().cacheResult(recentLayoutSetBranchs);
+	}
+
+	/**
+	 * @see BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		RecentLayoutSetBranch recentLayoutSetBranch) {
+
+		getPersistence().cacheResult(recentLayoutSetBranch);
+	}
+
+	/**
 	 * @see BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -554,28 +572,6 @@ public class RecentLayoutSetBranchUtil {
 	}
 
 	/**
-	 * Caches the recent layout set branch in the entity cache if it is enabled.
-	 *
-	 * @param recentLayoutSetBranch the recent layout set branch
-	 */
-	public static void cacheResult(
-		RecentLayoutSetBranch recentLayoutSetBranch) {
-
-		getPersistence().cacheResult(recentLayoutSetBranch);
-	}
-
-	/**
-	 * Caches the recent layout set branches in the entity cache if it is enabled.
-	 *
-	 * @param recentLayoutSetBranchs the recent layout set branches
-	 */
-	public static void cacheResult(
-		List<RecentLayoutSetBranch> recentLayoutSetBranchs) {
-
-		getPersistence().cacheResult(recentLayoutSetBranchs);
-	}
-
-	/**
 	 * Creates a new recent layout set branch with the primary key. Does not add the recent layout set branch to the database.
 	 *
 	 * @param recentLayoutSetBranchId the primary key for the new recent layout set branch
@@ -632,87 +628,6 @@ public class RecentLayoutSetBranchUtil {
 		return getPersistence().fetchByPrimaryKey(recentLayoutSetBranchId);
 	}
 
-	/**
-	 * Returns all the recent layout set branches.
-	 *
-	 * @return the recent layout set branches
-	 */
-	public static List<RecentLayoutSetBranch> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the recent layout set branches.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RecentLayoutSetBranchModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of recent layout set branches
-	 * @param end the upper bound of the range of recent layout set branches (not inclusive)
-	 * @return the range of recent layout set branches
-	 */
-	public static List<RecentLayoutSetBranch> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the recent layout set branches.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RecentLayoutSetBranchModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of recent layout set branches
-	 * @param end the upper bound of the range of recent layout set branches (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of recent layout set branches
-	 */
-	public static List<RecentLayoutSetBranch> findAll(
-		int start, int end,
-		OrderByComparator<RecentLayoutSetBranch> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the recent layout set branches.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.RecentLayoutSetBranchModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of recent layout set branches
-	 * @param end the upper bound of the range of recent layout set branches (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of recent layout set branches
-	 */
-	public static List<RecentLayoutSetBranch> findAll(
-		int start, int end,
-		OrderByComparator<RecentLayoutSetBranch> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the recent layout set branches from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of recent layout set branches.
-	 *
-	 * @return the number of recent layout set branches
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static RecentLayoutSetBranchPersistence getPersistence() {
 		return _persistence;
 	}
@@ -726,4 +641,4 @@ public class RecentLayoutSetBranchUtil {
 	private static volatile RecentLayoutSetBranchPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1909925569
+// LIFERAY-SERVICE-BUILDER-HASH:191495028

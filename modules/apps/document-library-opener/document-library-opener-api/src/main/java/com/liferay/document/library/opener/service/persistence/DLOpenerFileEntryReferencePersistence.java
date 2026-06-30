@@ -131,22 +131,6 @@ public interface DLOpenerFileEntryReferencePersistence
 	public int countByR_F(String referenceType, long fileEntryId);
 
 	/**
-	 * Caches the dl opener file entry reference in the entity cache if it is enabled.
-	 *
-	 * @param dlOpenerFileEntryReference the dl opener file entry reference
-	 */
-	public void cacheResult(
-		DLOpenerFileEntryReference dlOpenerFileEntryReference);
-
-	/**
-	 * Caches the dl opener file entry references in the entity cache if it is enabled.
-	 *
-	 * @param dlOpenerFileEntryReferences the dl opener file entry references
-	 */
-	public void cacheResult(
-		java.util.List<DLOpenerFileEntryReference> dlOpenerFileEntryReferences);
-
-	/**
 	 * Creates a new dl opener file entry reference with the primary key. Does not add the dl opener file entry reference to the database.
 	 *
 	 * @param dlOpenerFileEntryReferenceId the primary key for the new dl opener file entry reference
@@ -187,74 +171,5 @@ public interface DLOpenerFileEntryReferencePersistence
 	public DLOpenerFileEntryReference fetchByPrimaryKey(
 		long dlOpenerFileEntryReferenceId);
 
-	/**
-	 * Returns all the dl opener file entry references.
-	 *
-	 * @return the dl opener file entry references
-	 */
-	public java.util.List<DLOpenerFileEntryReference> findAll();
-
-	/**
-	 * Returns a range of all the dl opener file entry references.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.document.library.opener.model.impl.DLOpenerFileEntryReferenceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of dl opener file entry references
-	 * @param end the upper bound of the range of dl opener file entry references (not inclusive)
-	 * @return the range of dl opener file entry references
-	 */
-	public java.util.List<DLOpenerFileEntryReference> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the dl opener file entry references.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.document.library.opener.model.impl.DLOpenerFileEntryReferenceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of dl opener file entry references
-	 * @param end the upper bound of the range of dl opener file entry references (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of dl opener file entry references
-	 */
-	public java.util.List<DLOpenerFileEntryReference> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<DLOpenerFileEntryReference> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the dl opener file entry references.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.document.library.opener.model.impl.DLOpenerFileEntryReferenceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of dl opener file entry references
-	 * @param end the upper bound of the range of dl opener file entry references (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of dl opener file entry references
-	 */
-	public java.util.List<DLOpenerFileEntryReference> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<DLOpenerFileEntryReference> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the dl opener file entry references from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of dl opener file entry references.
-	 *
-	 * @return the number of dl opener file entry references
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1507492296
+// LIFERAY-SERVICE-BUILDER-HASH:-102046098

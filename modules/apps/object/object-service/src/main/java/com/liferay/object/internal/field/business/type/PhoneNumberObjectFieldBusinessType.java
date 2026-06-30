@@ -20,7 +20,16 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.model.Country;
+import com.liferay.portal.kernel.service.CountryLocalService;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.LocaleThreadLocal;
+import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -28,7 +37,10 @@ import com.liferay.portal.vulcan.extension.PropertyDefinition;
 
 import java.io.Serializable;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,6 +49,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -89,6 +102,13 @@ public class PhoneNumberObjectFieldBusinessType
 	@Override
 	public PropertyDefinition.PropertyType getPropertyType() {
 		return PropertyDefinition.PropertyType.TEXT;
+	}
+
+	@Override
+	public Map<String, Object> getRenderingProperties() {
+		return HashMapBuilder.<String, Object>put(
+			"countries", _getCountries()
+		).build();
 	}
 
 	@Override
@@ -263,6 +283,76 @@ public class PhoneNumberObjectFieldBusinessType
 		}
 	}
 
+	@Activate
+	protected void activate() {
+		Set<String> a2s = new HashSet<>();
+
+		for (String languageId : PropsValues.LOCALES) {
+			Locale locale = LocaleUtil.fromLanguageId(languageId, false);
+
+			String a2 = locale.getCountry();
+
+			if (Validator.isNotNull(a2)) {
+				a2s.add(a2);
+			}
+		}
+
+		_a2s = Collections.unmodifiableSet(a2s);
+	}
+
+	private List<Map<String, String>> _getCountries() {
+		ServiceContext serviceContext =
+			ServiceContextThreadLocal.getServiceContext();
+
+		if (serviceContext == null) {
+			return Collections.emptyList();
+		}
+
+		long companyId = serviceContext.getCompanyId();
+
+		if (companyId == 0) {
+			return Collections.emptyList();
+		}
+
+		List<Map<String, String>> countries = new ArrayList<>();
+
+		Locale locale = LocaleThreadLocal.getThemeDisplayLocale();
+
+		if (locale == null) {
+			locale = LocaleUtil.getDefault();
+		}
+
+		String languageId = LocaleUtil.toLanguageId(locale);
+
+		for (Country country :
+				_countryLocalService.getCompanyCountries(companyId, true)) {
+
+			String a2 = country.getA2();
+
+			if (!_a2s.contains(a2)) {
+				continue;
+			}
+
+			String idd = country.getIdd();
+
+			if (Validator.isNull(idd)) {
+				continue;
+			}
+
+			countries.add(
+				HashMapBuilder.put(
+					"a2", a2
+				).put(
+					"idd", idd
+				).put(
+					"name", country.getTitle(languageId)
+				).build());
+		}
+
+		return ListUtil.sort(
+			countries, Comparator.comparing(country -> country.get("name")));
+	}
+
 	private boolean _isValid(String phoneNumber) {
 		if (Validator.isNull(phoneNumber)) {
 			return false;
@@ -298,6 +388,11 @@ public class PhoneNumberObjectFieldBusinessType
 		"^\\+[0-9]{7,15}$");
 	private static final Pattern _prefixPattern = Pattern.compile(
 		"^\\+[1-9][0-9]{0,2}$");
+
+	private Set<String> _a2s;
+
+	@Reference
+	private CountryLocalService _countryLocalService;
 
 	@Reference
 	private Language _language;

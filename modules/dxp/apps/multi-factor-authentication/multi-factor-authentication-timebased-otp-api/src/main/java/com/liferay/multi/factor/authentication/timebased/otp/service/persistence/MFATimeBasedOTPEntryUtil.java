@@ -36,6 +36,22 @@ public class MFATimeBasedOTPEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<MFATimeBasedOTPEntry> mfaTimeBasedOTPEntries) {
+
+		getPersistence().cacheResult(mfaTimeBasedOTPEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(MFATimeBasedOTPEntry mfaTimeBasedOTPEntry) {
+		getPersistence().cacheResult(mfaTimeBasedOTPEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -174,26 +190,6 @@ public class MFATimeBasedOTPEntryUtil {
 	}
 
 	/**
-	 * Caches the mfa time based otp entry in the entity cache if it is enabled.
-	 *
-	 * @param mfaTimeBasedOTPEntry the mfa time based otp entry
-	 */
-	public static void cacheResult(MFATimeBasedOTPEntry mfaTimeBasedOTPEntry) {
-		getPersistence().cacheResult(mfaTimeBasedOTPEntry);
-	}
-
-	/**
-	 * Caches the mfa time based otp entries in the entity cache if it is enabled.
-	 *
-	 * @param mfaTimeBasedOTPEntries the mfa time based otp entries
-	 */
-	public static void cacheResult(
-		List<MFATimeBasedOTPEntry> mfaTimeBasedOTPEntries) {
-
-		getPersistence().cacheResult(mfaTimeBasedOTPEntries);
-	}
-
-	/**
 	 * Creates a new mfa time based otp entry with the primary key. Does not add the mfa time based otp entry to the database.
 	 *
 	 * @param mfaTimeBasedOTPEntryId the primary key for the new mfa time based otp entry
@@ -250,87 +246,6 @@ public class MFATimeBasedOTPEntryUtil {
 		return getPersistence().fetchByPrimaryKey(mfaTimeBasedOTPEntryId);
 	}
 
-	/**
-	 * Returns all the mfa time based otp entries.
-	 *
-	 * @return the mfa time based otp entries
-	 */
-	public static List<MFATimeBasedOTPEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the mfa time based otp entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.multi.factor.authentication.timebased.otp.model.impl.MFATimeBasedOTPEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of mfa time based otp entries
-	 * @param end the upper bound of the range of mfa time based otp entries (not inclusive)
-	 * @return the range of mfa time based otp entries
-	 */
-	public static List<MFATimeBasedOTPEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the mfa time based otp entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.multi.factor.authentication.timebased.otp.model.impl.MFATimeBasedOTPEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of mfa time based otp entries
-	 * @param end the upper bound of the range of mfa time based otp entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of mfa time based otp entries
-	 */
-	public static List<MFATimeBasedOTPEntry> findAll(
-		int start, int end,
-		OrderByComparator<MFATimeBasedOTPEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the mfa time based otp entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.multi.factor.authentication.timebased.otp.model.impl.MFATimeBasedOTPEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of mfa time based otp entries
-	 * @param end the upper bound of the range of mfa time based otp entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of mfa time based otp entries
-	 */
-	public static List<MFATimeBasedOTPEntry> findAll(
-		int start, int end,
-		OrderByComparator<MFATimeBasedOTPEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the mfa time based otp entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of mfa time based otp entries.
-	 *
-	 * @return the number of mfa time based otp entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static MFATimeBasedOTPEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -344,4 +259,4 @@ public class MFATimeBasedOTPEntryUtil {
 	private static volatile MFATimeBasedOTPEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:384232761
+// LIFERAY-SERVICE-BUILDER-HASH:-979204174

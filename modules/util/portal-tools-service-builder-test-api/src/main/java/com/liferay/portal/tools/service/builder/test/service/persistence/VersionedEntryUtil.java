@@ -36,6 +36,20 @@ public class VersionedEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<VersionedEntry> versionedEntries) {
+		getPersistence().cacheResult(versionedEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(VersionedEntry versionedEntry) {
+		getPersistence().cacheResult(versionedEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -426,24 +440,6 @@ public class VersionedEntryUtil {
 	}
 
 	/**
-	 * Caches the versioned entry in the entity cache if it is enabled.
-	 *
-	 * @param versionedEntry the versioned entry
-	 */
-	public static void cacheResult(VersionedEntry versionedEntry) {
-		getPersistence().cacheResult(versionedEntry);
-	}
-
-	/**
-	 * Caches the versioned entries in the entity cache if it is enabled.
-	 *
-	 * @param versionedEntries the versioned entries
-	 */
-	public static void cacheResult(List<VersionedEntry> versionedEntries) {
-		getPersistence().cacheResult(versionedEntries);
-	}
-
-	/**
 	 * Creates a new versioned entry with the primary key. Does not add the versioned entry to the database.
 	 *
 	 * @param versionedEntryId the primary key for the new versioned entry
@@ -495,86 +491,6 @@ public class VersionedEntryUtil {
 		return getPersistence().fetchByPrimaryKey(versionedEntryId);
 	}
 
-	/**
-	 * Returns all the versioned entries.
-	 *
-	 * @return the versioned entries
-	 */
-	public static List<VersionedEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the versioned entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.VersionedEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of versioned entries
-	 * @param end the upper bound of the range of versioned entries (not inclusive)
-	 * @return the range of versioned entries
-	 */
-	public static List<VersionedEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the versioned entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.VersionedEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of versioned entries
-	 * @param end the upper bound of the range of versioned entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of versioned entries
-	 */
-	public static List<VersionedEntry> findAll(
-		int start, int end,
-		OrderByComparator<VersionedEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the versioned entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.VersionedEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of versioned entries
-	 * @param end the upper bound of the range of versioned entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of versioned entries
-	 */
-	public static List<VersionedEntry> findAll(
-		int start, int end, OrderByComparator<VersionedEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the versioned entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of versioned entries.
-	 *
-	 * @return the number of versioned entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static VersionedEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -586,4 +502,4 @@ public class VersionedEntryUtil {
 	private static volatile VersionedEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:427409398
+// LIFERAY-SERVICE-BUILDER-HASH:-1452140895

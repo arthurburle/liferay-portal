@@ -505,20 +505,6 @@ public interface ObjectFolderItemPersistence
 	public int countByODI_OFI(long objectDefinitionId, long objectFolderId);
 
 	/**
-	 * Caches the object folder item in the entity cache if it is enabled.
-	 *
-	 * @param objectFolderItem the object folder item
-	 */
-	public void cacheResult(ObjectFolderItem objectFolderItem);
-
-	/**
-	 * Caches the object folder items in the entity cache if it is enabled.
-	 *
-	 * @param objectFolderItems the object folder items
-	 */
-	public void cacheResult(java.util.List<ObjectFolderItem> objectFolderItems);
-
-	/**
 	 * Creates a new object folder item with the primary key. Does not add the object folder item to the database.
 	 *
 	 * @param objectFolderItemId the primary key for the new object folder item
@@ -556,73 +542,5 @@ public interface ObjectFolderItemPersistence
 	 */
 	public ObjectFolderItem fetchByPrimaryKey(long objectFolderItemId);
 
-	/**
-	 * Returns all the object folder items.
-	 *
-	 * @return the object folder items
-	 */
-	public java.util.List<ObjectFolderItem> findAll();
-
-	/**
-	 * Returns a range of all the object folder items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectFolderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object folder items
-	 * @param end the upper bound of the range of object folder items (not inclusive)
-	 * @return the range of object folder items
-	 */
-	public java.util.List<ObjectFolderItem> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the object folder items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectFolderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object folder items
-	 * @param end the upper bound of the range of object folder items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object folder items
-	 */
-	public java.util.List<ObjectFolderItem> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ObjectFolderItem>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the object folder items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectFolderItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object folder items
-	 * @param end the upper bound of the range of object folder items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object folder items
-	 */
-	public java.util.List<ObjectFolderItem> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ObjectFolderItem>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the object folder items from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of object folder items.
-	 *
-	 * @return the number of object folder items
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-319362156
+// LIFERAY-SERVICE-BUILDER-HASH:-434176540

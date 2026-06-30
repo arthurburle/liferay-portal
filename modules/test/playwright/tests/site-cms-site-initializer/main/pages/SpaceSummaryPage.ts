@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {Locator, Page} from '@playwright/test';
+import {Locator, Page, expect} from '@playwright/test';
 
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
 import {PORTLET_URLS} from '../../../../utils/portletUrls';
@@ -76,13 +76,24 @@ export class SpaceSummaryPage {
 			.getByRole('listitem')
 			.filter({hasText: userName});
 
-		await userRow.getByRole('button', {name: 'Space Member'}).click();
+		await userRow.waitFor();
+
+		const triggerText = userRow.locator('.permission-select-trigger-text');
+
+		await expect(triggerText).toHaveText(/\S+/);
+
+		await userRow
+			.locator('button:has(.permission-select-trigger-text)')
+			.click();
 
 		await this.page
 			.getByRole('checkbox', {
+				exact: true,
 				name: roleName,
 			})
 			.check();
+
+		await expect(triggerText).toContainText(roleName);
 
 		await this.closeButton.click();
 	}
@@ -104,6 +115,7 @@ export class SpaceSummaryPage {
 
 		await input.waitFor({state: 'visible'});
 		await input.click();
+		await input.fill(name);
 
 		await this.page.getByRole('option', {name}).click();
 
@@ -111,7 +123,8 @@ export class SpaceSummaryPage {
 			this.page,
 			type.includes('group')
 				? `Success:Group ${name} successfully added to space.`
-				: `Success:User ${name} successfully added to space.`
+				: `Success:User ${name} successfully added to space.`,
+			{autoClose: false}
 		);
 
 		await this.closeButton.click();
@@ -122,7 +135,7 @@ export class SpaceSummaryPage {
 	async removeUserOrUserGroup(name: string, type: UserOrUserGroupType) {
 		await this.viewAllMembersLink.click();
 
-		this.page.getByRole('dialog').waitFor();
+		await this.page.getByRole('dialog').waitFor();
 		await this.page
 			.getByLabel('Add People to Collaborate', {exact: true})
 			.selectOption(type);
@@ -130,14 +143,15 @@ export class SpaceSummaryPage {
 		await this.page
 			.locator('li')
 			.filter({hasText: name})
-			.getByLabel('Remove Group')
+			.getByLabel(type.includes('group') ? 'Remove Group' : 'Remove User')
 			.click();
 
 		await waitForAlert(
 			this.page,
 			type.includes('group')
 				? `Success:Group ${name} successfully removed from space.`
-				: `Success:User ${name} successfully removed from space.`
+				: `Success:User ${name} successfully removed from space.`,
+			{autoClose: false}
 		);
 
 		await this.closeButton.click();
@@ -180,16 +194,22 @@ export class SpaceSummaryPage {
 	}
 
 	async connectSite(siteName: string) {
-		await this.page.getByRole('button', {name: 'Connect Sites'}).click();
+		await this.page
+			.getByRole('button', {name: 'Connect Sites'})
+			.or(this.page.getByRole('button', {name: 'View All Sites'}))
+			.click();
 
-		this.page.getByRole('dialog').waitFor();
+		await this.page.getByRole('dialog').waitFor();
 		await this.page.getByLabel('Site', {exact: true}).click();
 		await this.page.getByRole('option', {name: siteName}).click();
 		await this.page
 			.getByRole('button', {exact: true, name: 'Connect'})
 			.click();
 
-		this.page.getByLabel('Connected Sites').getByText(siteName).waitFor();
+		await this.page
+			.getByLabel('Connected Sites')
+			.getByText(siteName)
+			.waitFor();
 
 		await this.closeButton.click();
 	}

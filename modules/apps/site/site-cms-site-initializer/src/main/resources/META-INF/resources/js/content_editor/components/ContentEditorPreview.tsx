@@ -3,26 +3,36 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {ClayButtonWithIcon} from '@clayui/button';
-import {PanelResizer as Resizer, useObservedMaxWidth} from '@clayui/shared';
+import {ResizeHandle} from '@clayui/core';
+import {useObservedMaxWidth} from '@clayui/shared';
 import {useEventListener} from '@liferay/frontend-js-react-web';
 import classNames from 'classnames';
 import {useSessionState} from 'frontend-js-components-web';
-import {sub} from 'frontend-js-web';
 import React, {useCallback, useEffect, useId, useRef, useState} from 'react';
 
 import {
 	EVENT_CLOSE_PREVIEW,
 	EVENT_HANDLE_PREVIEW,
 } from './ContentEditorToolbar';
+import PreviewBody from './preview/PreviewBody';
+import PreviewHeader from './preview/PreviewHeader';
+import useIsContentEdited from './useIsContentEdited';
 
 import '../../../css/content_editor/ContentEditorPreview.scss';
 
 const BREAKPOINT_LG = 992;
+const FORM_SELECTOR = '.lfr-layout-structure-item-form';
 const PREVIEW_WIDTH_MIN = 500;
 const PREVIEW_WIDTH_SESSION_KEY = 'CMSContentEditorPreviewWidth';
 
-export default function ContentEditorPreview({title}: {title: string}) {
+export default function ContentEditorPreview({
+	getPreviewDataURL,
+	title,
+}: {
+	getPreviewDataURL: string;
+	title: string;
+}) {
+	const isContentEdited = useIsContentEdited(FORM_SELECTOR);
 	const [isVisible, setIsVisible] = useState<boolean>(false);
 	const [resizeWidth, setResizeWidth] = useSessionState(
 		PREVIEW_WIDTH_SESSION_KEY,
@@ -92,7 +102,7 @@ export default function ContentEditorPreview({title}: {title: string}) {
 	return (
 		<div
 			aria-labelledby={titleId}
-			className={classNames('content-editor__preview c-slideout-end', {
+			className={classNames('content-editor__preview', {
 				resizing,
 				visible: isVisible,
 			})}
@@ -106,39 +116,32 @@ export default function ContentEditorPreview({title}: {title: string}) {
 			tabIndex={-1}
 		>
 			{isVisible ? (
-				<div className="border-bottom d-flex justify-content-between p-3">
-					<span className="font-weight-bold text-6" id={titleId}>
-						{sub(Liferay.Language.get('x-preview'), title)}
-					</span>
-
-					<ClayButtonWithIcon
-						aria-label={sub(
-							Liferay.Language.get('close-x'),
-							Liferay.Language.get('preview')
-						)}
-						borderless
-						displayType="secondary"
-						monospaced
-						onClick={() => {
+				<>
+					<PreviewHeader
+						onClosePreview={() => {
 							Liferay.fire(EVENT_CLOSE_PREVIEW);
 
 							setIsVisible(false);
 						}}
-						size="sm"
-						symbol="times"
+						title={title}
+						titleId={titleId}
 					/>
-				</div>
+					<PreviewBody
+						getPreviewDataURL={getPreviewDataURL}
+						isContentEdited={isContentEdited}
+					/>
+				</>
 			) : null}
 
-			<Resizer
-				onPanelWidthChange={(width) => {
+			<ResizeHandle
+				maxWidth={previewWidthMax}
+				minWidth={PREVIEW_WIDTH_MIN}
+				onWidthChange={(width: number) => {
 					setResizeWidth(width);
 					setResizing(true);
 				}}
-				panelWidth={previewWidth}
-				panelWidthMax={previewWidthMax}
-				panelWidthMin={PREVIEW_WIDTH_MIN}
 				position="right"
+				width={previewWidth}
 			/>
 		</div>
 	);

@@ -347,20 +347,6 @@ public interface WikiPageResourcePersistence
 	public int countByN_T(long nodeId, String title);
 
 	/**
-	 * Caches the wiki page resource in the entity cache if it is enabled.
-	 *
-	 * @param wikiPageResource the wiki page resource
-	 */
-	public void cacheResult(WikiPageResource wikiPageResource);
-
-	/**
-	 * Caches the wiki page resources in the entity cache if it is enabled.
-	 *
-	 * @param wikiPageResources the wiki page resources
-	 */
-	public void cacheResult(java.util.List<WikiPageResource> wikiPageResources);
-
-	/**
 	 * Creates a new wiki page resource with the primary key. Does not add the wiki page resource to the database.
 	 *
 	 * @param resourcePrimKey the primary key for the new wiki page resource
@@ -398,73 +384,5 @@ public interface WikiPageResourcePersistence
 	 */
 	public WikiPageResource fetchByPrimaryKey(long resourcePrimKey);
 
-	/**
-	 * Returns all the wiki page resources.
-	 *
-	 * @return the wiki page resources
-	 */
-	public java.util.List<WikiPageResource> findAll();
-
-	/**
-	 * Returns a range of all the wiki page resources.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.wiki.model.impl.WikiPageResourceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of wiki page resources
-	 * @param end the upper bound of the range of wiki page resources (not inclusive)
-	 * @return the range of wiki page resources
-	 */
-	public java.util.List<WikiPageResource> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the wiki page resources.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.wiki.model.impl.WikiPageResourceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of wiki page resources
-	 * @param end the upper bound of the range of wiki page resources (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of wiki page resources
-	 */
-	public java.util.List<WikiPageResource> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<WikiPageResource>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the wiki page resources.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.wiki.model.impl.WikiPageResourceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of wiki page resources
-	 * @param end the upper bound of the range of wiki page resources (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of wiki page resources
-	 */
-	public java.util.List<WikiPageResource> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<WikiPageResource>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the wiki page resources from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of wiki page resources.
-	 *
-	 * @return the number of wiki page resources
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2112288287
+// LIFERAY-SERVICE-BUILDER-HASH:-1022984874

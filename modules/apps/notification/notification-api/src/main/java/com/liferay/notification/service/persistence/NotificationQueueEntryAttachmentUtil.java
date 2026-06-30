@@ -36,6 +36,25 @@ public class NotificationQueueEntryAttachmentUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<NotificationQueueEntryAttachment>
+			notificationQueueEntryAttachments) {
+
+		getPersistence().cacheResult(notificationQueueEntryAttachments);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		NotificationQueueEntryAttachment notificationQueueEntryAttachment) {
+
+		getPersistence().cacheResult(notificationQueueEntryAttachment);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -261,29 +280,6 @@ public class NotificationQueueEntryAttachmentUtil {
 	}
 
 	/**
-	 * Caches the notification queue entry attachment in the entity cache if it is enabled.
-	 *
-	 * @param notificationQueueEntryAttachment the notification queue entry attachment
-	 */
-	public static void cacheResult(
-		NotificationQueueEntryAttachment notificationQueueEntryAttachment) {
-
-		getPersistence().cacheResult(notificationQueueEntryAttachment);
-	}
-
-	/**
-	 * Caches the notification queue entry attachments in the entity cache if it is enabled.
-	 *
-	 * @param notificationQueueEntryAttachments the notification queue entry attachments
-	 */
-	public static void cacheResult(
-		List<NotificationQueueEntryAttachment>
-			notificationQueueEntryAttachments) {
-
-		getPersistence().cacheResult(notificationQueueEntryAttachments);
-	}
-
-	/**
 	 * Creates a new notification queue entry attachment with the primary key. Does not add the notification queue entry attachment to the database.
 	 *
 	 * @param notificationQueueEntryAttachmentId the primary key for the new notification queue entry attachment
@@ -345,89 +341,6 @@ public class NotificationQueueEntryAttachmentUtil {
 			notificationQueueEntryAttachmentId);
 	}
 
-	/**
-	 * Returns all the notification queue entry attachments.
-	 *
-	 * @return the notification queue entry attachments
-	 */
-	public static List<NotificationQueueEntryAttachment> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the notification queue entry attachments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.notification.model.impl.NotificationQueueEntryAttachmentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of notification queue entry attachments
-	 * @param end the upper bound of the range of notification queue entry attachments (not inclusive)
-	 * @return the range of notification queue entry attachments
-	 */
-	public static List<NotificationQueueEntryAttachment> findAll(
-		int start, int end) {
-
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the notification queue entry attachments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.notification.model.impl.NotificationQueueEntryAttachmentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of notification queue entry attachments
-	 * @param end the upper bound of the range of notification queue entry attachments (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of notification queue entry attachments
-	 */
-	public static List<NotificationQueueEntryAttachment> findAll(
-		int start, int end,
-		OrderByComparator<NotificationQueueEntryAttachment> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the notification queue entry attachments.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.notification.model.impl.NotificationQueueEntryAttachmentModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of notification queue entry attachments
-	 * @param end the upper bound of the range of notification queue entry attachments (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of notification queue entry attachments
-	 */
-	public static List<NotificationQueueEntryAttachment> findAll(
-		int start, int end,
-		OrderByComparator<NotificationQueueEntryAttachment> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the notification queue entry attachments from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of notification queue entry attachments.
-	 *
-	 * @return the number of notification queue entry attachments
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static NotificationQueueEntryAttachmentPersistence getPersistence() {
 		return _persistence;
 	}
@@ -442,4 +355,4 @@ public class NotificationQueueEntryAttachmentUtil {
 		_persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-981950800
+// LIFERAY-SERVICE-BUILDER-HASH:1802134043

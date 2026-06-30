@@ -546,20 +546,6 @@ public interface SourcePersistence extends BasePersistence<Source> {
 	public int countByCompanyId(long companyId);
 
 	/**
-	 * Caches the source in the entity cache if it is enabled.
-	 *
-	 * @param source the source
-	 */
-	public void cacheResult(Source source);
-
-	/**
-	 * Caches the sources in the entity cache if it is enabled.
-	 *
-	 * @param sources the sources
-	 */
-	public void cacheResult(java.util.List<Source> sources);
-
-	/**
 	 * Creates a new source with the primary key. Does not add the source to the database.
 	 *
 	 * @param sourceId the primary key for the new source
@@ -595,73 +581,5 @@ public interface SourcePersistence extends BasePersistence<Source> {
 	 */
 	public Source fetchByPrimaryKey(long sourceId);
 
-	/**
-	 * Returns all the sources.
-	 *
-	 * @return the sources
-	 */
-	public java.util.List<Source> findAll();
-
-	/**
-	 * Returns a range of all the sources.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.reports.engine.console.model.impl.SourceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of sources
-	 * @param end the upper bound of the range of sources (not inclusive)
-	 * @return the range of sources
-	 */
-	public java.util.List<Source> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the sources.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.reports.engine.console.model.impl.SourceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of sources
-	 * @param end the upper bound of the range of sources (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of sources
-	 */
-	public java.util.List<Source> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Source>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the sources.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.reports.engine.console.model.impl.SourceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of sources
-	 * @param end the upper bound of the range of sources (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of sources
-	 */
-	public java.util.List<Source> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Source>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the sources from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of sources.
-	 *
-	 * @return the number of sources
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:863049629
+// LIFERAY-SERVICE-BUILDER-HASH:221365972

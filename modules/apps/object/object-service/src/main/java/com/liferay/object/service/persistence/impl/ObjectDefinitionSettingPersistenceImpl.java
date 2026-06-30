@@ -13,12 +13,10 @@ import com.liferay.object.model.impl.ObjectDefinitionSettingModelImpl;
 import com.liferay.object.service.persistence.ObjectDefinitionSettingPersistence;
 import com.liferay.object.service.persistence.ObjectDefinitionSettingUtil;
 import com.liferay.object.service.persistence.impl.constants.ObjectPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -31,10 +29,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -69,7 +64,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ObjectDefinitionSettingPersistence.class)
 public class ObjectDefinitionSettingPersistenceImpl
-	extends BasePersistenceImpl<ObjectDefinitionSetting>
+	extends BasePersistenceImpl
+		<ObjectDefinitionSetting, NoSuchObjectDefinitionSettingException>
 	implements ObjectDefinitionSettingPersistence {
 
 	/*
@@ -86,9 +82,6 @@ public class ObjectDefinitionSettingPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -990,118 +983,6 @@ public class ObjectDefinitionSettingPersistenceImpl
 	}
 
 	/**
-	 * Caches the object definition setting in the entity cache if it is enabled.
-	 *
-	 * @param objectDefinitionSetting the object definition setting
-	 */
-	@Override
-	public void cacheResult(ObjectDefinitionSetting objectDefinitionSetting) {
-		entityCache.putResult(
-			ObjectDefinitionSettingImpl.class,
-			objectDefinitionSetting.getPrimaryKey(), objectDefinitionSetting);
-
-		finderCache.putResult(
-			_finderPathFetchByODI_N,
-			new Object[] {
-				objectDefinitionSetting.getObjectDefinitionId(),
-				objectDefinitionSetting.getName()
-			},
-			objectDefinitionSetting);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the object definition settings in the entity cache if it is enabled.
-	 *
-	 * @param objectDefinitionSettings the object definition settings
-	 */
-	@Override
-	public void cacheResult(
-		List<ObjectDefinitionSetting> objectDefinitionSettings) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (objectDefinitionSettings.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ObjectDefinitionSetting objectDefinitionSetting :
-				objectDefinitionSettings) {
-
-			if (entityCache.getResult(
-					ObjectDefinitionSettingImpl.class,
-					objectDefinitionSetting.getPrimaryKey()) == null) {
-
-				cacheResult(objectDefinitionSetting);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all object definition settings.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ObjectDefinitionSettingImpl.class);
-
-		finderCache.clearCache(ObjectDefinitionSettingImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the object definition setting.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ObjectDefinitionSetting objectDefinitionSetting) {
-		entityCache.removeResult(
-			ObjectDefinitionSettingImpl.class, objectDefinitionSetting);
-	}
-
-	@Override
-	public void clearCache(
-		List<ObjectDefinitionSetting> objectDefinitionSettings) {
-
-		for (ObjectDefinitionSetting objectDefinitionSetting :
-				objectDefinitionSettings) {
-
-			entityCache.removeResult(
-				ObjectDefinitionSettingImpl.class, objectDefinitionSetting);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ObjectDefinitionSettingImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				ObjectDefinitionSettingImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		ObjectDefinitionSettingModelImpl objectDefinitionSettingModelImpl) {
-
-		Object[] args = new Object[] {
-			objectDefinitionSettingModelImpl.getObjectDefinitionId(),
-			objectDefinitionSettingModelImpl.getName()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByODI_N, args, objectDefinitionSettingModelImpl);
-	}
-
-	/**
 	 * Creates a new object definition setting with the primary key. Does not add the object definition setting to the database.
 	 *
 	 * @param objectDefinitionSettingId the primary key for the new object definition setting
@@ -1136,48 +1017,6 @@ public class ObjectDefinitionSettingPersistenceImpl
 		throws NoSuchObjectDefinitionSettingException {
 
 		return remove((Serializable)objectDefinitionSettingId);
-	}
-
-	/**
-	 * Removes the object definition setting with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the object definition setting
-	 * @return the object definition setting that was removed
-	 * @throws NoSuchObjectDefinitionSettingException if a object definition setting with the primary key could not be found
-	 */
-	@Override
-	public ObjectDefinitionSetting remove(Serializable primaryKey)
-		throws NoSuchObjectDefinitionSettingException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ObjectDefinitionSetting objectDefinitionSetting =
-				(ObjectDefinitionSetting)session.get(
-					ObjectDefinitionSettingImpl.class, primaryKey);
-
-			if (objectDefinitionSetting == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchObjectDefinitionSettingException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(objectDefinitionSetting);
-		}
-		catch (NoSuchObjectDefinitionSettingException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1293,43 +1132,13 @@ public class ObjectDefinitionSettingPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ObjectDefinitionSettingImpl.class, objectDefinitionSettingModelImpl,
-			false, true);
-
-		cacheUniqueFindersCache(objectDefinitionSettingModelImpl);
+		cacheUniqueFindersResult(objectDefinitionSetting, false);
 
 		if (isNew) {
 			objectDefinitionSetting.setNew(false);
 		}
 
 		objectDefinitionSetting.resetOriginalValues();
-
-		return objectDefinitionSetting;
-	}
-
-	/**
-	 * Returns the object definition setting with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the object definition setting
-	 * @return the object definition setting
-	 * @throws NoSuchObjectDefinitionSettingException if a object definition setting with the primary key could not be found
-	 */
-	@Override
-	public ObjectDefinitionSetting findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchObjectDefinitionSettingException {
-
-		ObjectDefinitionSetting objectDefinitionSetting = fetchByPrimaryKey(
-			primaryKey);
-
-		if (objectDefinitionSetting == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchObjectDefinitionSettingException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return objectDefinitionSetting;
 	}
@@ -1362,189 +1171,6 @@ public class ObjectDefinitionSettingPersistenceImpl
 		return fetchByPrimaryKey((Serializable)objectDefinitionSettingId);
 	}
 
-	/**
-	 * Returns all the object definition settings.
-	 *
-	 * @return the object definition settings
-	 */
-	@Override
-	public List<ObjectDefinitionSetting> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the object definition settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectDefinitionSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object definition settings
-	 * @param end the upper bound of the range of object definition settings (not inclusive)
-	 * @return the range of object definition settings
-	 */
-	@Override
-	public List<ObjectDefinitionSetting> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the object definition settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectDefinitionSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object definition settings
-	 * @param end the upper bound of the range of object definition settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object definition settings
-	 */
-	@Override
-	public List<ObjectDefinitionSetting> findAll(
-		int start, int end,
-		OrderByComparator<ObjectDefinitionSetting> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the object definition settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectDefinitionSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object definition settings
-	 * @param end the upper bound of the range of object definition settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object definition settings
-	 */
-	@Override
-	public List<ObjectDefinitionSetting> findAll(
-		int start, int end,
-		OrderByComparator<ObjectDefinitionSetting> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ObjectDefinitionSetting> list = null;
-
-		if (useFinderCache) {
-			list = (List<ObjectDefinitionSetting>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_OBJECTDEFINITIONSETTING);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_OBJECTDEFINITIONSETTING;
-
-				sql = sql.concat(
-					ObjectDefinitionSettingModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ObjectDefinitionSetting>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the object definition settings from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ObjectDefinitionSetting objectDefinitionSetting : findAll()) {
-			remove(objectDefinitionSetting);
-		}
-	}
-
-	/**
-	 * Returns the number of object definition settings.
-	 *
-	 * @return the number of object definition settings
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_OBJECTDEFINITIONSETTING);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	public Set<String> getBadColumnNames() {
 		return _badColumnNames;
@@ -1575,21 +1201,6 @@ public class ObjectDefinitionSettingPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1600,13 +1211,13 @@ public class ObjectDefinitionSettingPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
@@ -1614,7 +1225,7 @@ public class ObjectDefinitionSettingPersistenceImpl
 			_SQL_SELECT_OBJECTDEFINITIONSETTING_WHERE,
 			_SQL_COUNT_OBJECTDEFINITIONSETTING_WHERE,
 			ObjectDefinitionSettingModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"objectDefinitionSetting.", "uuid", FinderColumn.Type.STRING,
 				"=", true, true, ObjectDefinitionSetting::getUuid));
@@ -1631,12 +1242,12 @@ public class ObjectDefinitionSettingPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1646,10 +1257,10 @@ public class ObjectDefinitionSettingPersistenceImpl
 				_SQL_SELECT_OBJECTDEFINITIONSETTING_WHERE,
 				_SQL_COUNT_OBJECTDEFINITIONSETTING_WHERE,
 				ObjectDefinitionSettingModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectDefinitionSetting.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					ObjectDefinitionSetting::getUuid),
 				new FinderColumn<>(
 					"objectDefinitionSetting.", "companyId",
@@ -1682,7 +1293,7 @@ public class ObjectDefinitionSettingPersistenceImpl
 				_SQL_SELECT_OBJECTDEFINITIONSETTING_WHERE,
 				_SQL_COUNT_OBJECTDEFINITIONSETTING_WHERE,
 				ObjectDefinitionSettingModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectDefinitionSetting.", "objectDefinitionId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1700,12 +1311,12 @@ public class ObjectDefinitionSettingPersistenceImpl
 		_finderPathWithoutPaginationFindByC_N = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "name"}, true);
+			new String[] {"companyId", "name"}, 0, 2, true, null);
 
 		_finderPathCountByC_N = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "name"}, false);
+			new String[] {"companyId", "name"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByC_N = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_N,
@@ -1713,25 +1324,27 @@ public class ObjectDefinitionSettingPersistenceImpl
 			_SQL_SELECT_OBJECTDEFINITIONSETTING_WHERE,
 			_SQL_COUNT_OBJECTDEFINITIONSETTING_WHERE,
 			ObjectDefinitionSettingModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"objectDefinitionSetting.", "companyId", FinderColumn.Type.LONG,
-				"=", true, false, ObjectDefinitionSetting::getCompanyId),
+				"=", true, true, ObjectDefinitionSetting::getCompanyId),
 			new FinderColumn<>(
 				"objectDefinitionSetting.", "name", FinderColumn.Type.STRING,
 				"=", true, true, ObjectDefinitionSetting::getName));
 
-		_finderPathFetchByODI_N = new FinderPath(
+		_finderPathFetchByODI_N = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByODI_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"objectDefinitionId", "name"}, true);
+			new String[] {"objectDefinitionId", "name"}, 0, 2, false,
+			ObjectDefinitionSetting::getObjectDefinitionId,
+			convertNullFunction(ObjectDefinitionSetting::getName));
 
 		_uniquePersistenceFinderByODI_N = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByODI_N,
-			_SQL_SELECT_OBJECTDEFINITIONSETTING_WHERE,
+			_SQL_SELECT_OBJECTDEFINITIONSETTING_WHERE, "",
 			new FinderColumn<>(
 				"objectDefinitionSetting.", "objectDefinitionId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				ObjectDefinitionSetting::getObjectDefinitionId),
 			new FinderColumn<>(
 				"objectDefinitionSetting.", "name", FinderColumn.Type.STRING,
@@ -1752,7 +1365,7 @@ public class ObjectDefinitionSettingPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "name", "value"}, true);
+			new String[] {"companyId", "name", "value"}, 0, 6, true, null);
 
 		_finderPathCountByC_N_V = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_N_V",
@@ -1760,7 +1373,7 @@ public class ObjectDefinitionSettingPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "name", "value"}, false);
+			new String[] {"companyId", "name", "value"}, 0, 6, false, null);
 
 		_collectionPersistenceFinderByC_N_V = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_N_V,
@@ -1768,13 +1381,13 @@ public class ObjectDefinitionSettingPersistenceImpl
 			_SQL_SELECT_OBJECTDEFINITIONSETTING_WHERE,
 			_SQL_COUNT_OBJECTDEFINITIONSETTING_WHERE,
 			ObjectDefinitionSettingModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"objectDefinitionSetting.", "companyId", FinderColumn.Type.LONG,
-				"=", true, false, ObjectDefinitionSetting::getCompanyId),
+				"=", true, true, ObjectDefinitionSetting::getCompanyId),
 			new FinderColumn<>(
 				"objectDefinitionSetting.", "name", FinderColumn.Type.STRING,
-				"=", true, false, ObjectDefinitionSetting::getName),
+				"=", true, true, ObjectDefinitionSetting::getName),
 			new FinderColumn<>(
 				"objectDefinitionSetting.", "value", FinderColumn.Type.STRING,
 				"=", true, true, ObjectDefinitionSetting::getValue));
@@ -1821,23 +1434,17 @@ public class ObjectDefinitionSettingPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ObjectDefinitionSettingModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_OBJECTDEFINITIONSETTING =
 		"SELECT objectDefinitionSetting FROM ObjectDefinitionSetting objectDefinitionSetting";
 
 	private static final String _SQL_SELECT_OBJECTDEFINITIONSETTING_WHERE =
 		"SELECT objectDefinitionSetting FROM ObjectDefinitionSetting objectDefinitionSetting WHERE ";
 
-	private static final String _SQL_COUNT_OBJECTDEFINITIONSETTING =
-		"SELECT COUNT(objectDefinitionSetting) FROM ObjectDefinitionSetting objectDefinitionSetting";
-
 	private static final String _SQL_COUNT_OBJECTDEFINITIONSETTING_WHERE =
 		"SELECT COUNT(objectDefinitionSetting) FROM ObjectDefinitionSetting objectDefinitionSetting WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"objectDefinitionSetting.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ObjectDefinitionSetting exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ObjectDefinitionSetting exists with the key {";
@@ -1854,4 +1461,4 @@ public class ObjectDefinitionSettingPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:564694398
+// LIFERAY-SERVICE-BUILDER-HASH:1605245207

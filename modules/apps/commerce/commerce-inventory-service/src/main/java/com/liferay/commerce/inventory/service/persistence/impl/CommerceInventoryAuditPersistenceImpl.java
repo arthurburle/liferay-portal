@@ -13,27 +13,20 @@ import com.liferay.commerce.inventory.model.impl.CommerceInventoryAuditModelImpl
 import com.liferay.commerce.inventory.service.persistence.CommerceInventoryAuditPersistence;
 import com.liferay.commerce.inventory.service.persistence.CommerceInventoryAuditUtil;
 import com.liferay.commerce.inventory.service.persistence.impl.constants.CommercePersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 
@@ -66,7 +59,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CommerceInventoryAuditPersistence.class)
 public class CommerceInventoryAuditPersistenceImpl
-	extends BasePersistenceImpl<CommerceInventoryAudit>
+	extends BasePersistenceImpl
+		<CommerceInventoryAudit, NoSuchInventoryAuditException>
 	implements CommerceInventoryAuditPersistence {
 
 	/*
@@ -83,9 +77,6 @@ public class CommerceInventoryAuditPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByLtCreateDate;
 	private FinderPath _finderPathWithPaginationCountByLtCreateDate;
 	private CollectionPersistenceFinder<CommerceInventoryAudit>
@@ -426,98 +417,6 @@ public class CommerceInventoryAuditPersistenceImpl
 	}
 
 	/**
-	 * Caches the commerce inventory audit in the entity cache if it is enabled.
-	 *
-	 * @param commerceInventoryAudit the commerce inventory audit
-	 */
-	@Override
-	public void cacheResult(CommerceInventoryAudit commerceInventoryAudit) {
-		entityCache.putResult(
-			CommerceInventoryAuditImpl.class,
-			commerceInventoryAudit.getPrimaryKey(), commerceInventoryAudit);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the commerce inventory audits in the entity cache if it is enabled.
-	 *
-	 * @param commerceInventoryAudits the commerce inventory audits
-	 */
-	@Override
-	public void cacheResult(
-		List<CommerceInventoryAudit> commerceInventoryAudits) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (commerceInventoryAudits.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CommerceInventoryAudit commerceInventoryAudit :
-				commerceInventoryAudits) {
-
-			if (entityCache.getResult(
-					CommerceInventoryAuditImpl.class,
-					commerceInventoryAudit.getPrimaryKey()) == null) {
-
-				cacheResult(commerceInventoryAudit);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all commerce inventory audits.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(CommerceInventoryAuditImpl.class);
-
-		finderCache.clearCache(CommerceInventoryAuditImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the commerce inventory audit.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(CommerceInventoryAudit commerceInventoryAudit) {
-		entityCache.removeResult(
-			CommerceInventoryAuditImpl.class, commerceInventoryAudit);
-	}
-
-	@Override
-	public void clearCache(
-		List<CommerceInventoryAudit> commerceInventoryAudits) {
-
-		for (CommerceInventoryAudit commerceInventoryAudit :
-				commerceInventoryAudits) {
-
-			entityCache.removeResult(
-				CommerceInventoryAuditImpl.class, commerceInventoryAudit);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(CommerceInventoryAuditImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				CommerceInventoryAuditImpl.class, primaryKey);
-		}
-	}
-
-	/**
 	 * Creates a new commerce inventory audit with the primary key. Does not add the commerce inventory audit to the database.
 	 *
 	 * @param commerceInventoryAuditId the primary key for the new commerce inventory audit
@@ -548,48 +447,6 @@ public class CommerceInventoryAuditPersistenceImpl
 		throws NoSuchInventoryAuditException {
 
 		return remove((Serializable)commerceInventoryAuditId);
-	}
-
-	/**
-	 * Removes the commerce inventory audit with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the commerce inventory audit
-	 * @return the commerce inventory audit that was removed
-	 * @throws NoSuchInventoryAuditException if a commerce inventory audit with the primary key could not be found
-	 */
-	@Override
-	public CommerceInventoryAudit remove(Serializable primaryKey)
-		throws NoSuchInventoryAuditException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CommerceInventoryAudit commerceInventoryAudit =
-				(CommerceInventoryAudit)session.get(
-					CommerceInventoryAuditImpl.class, primaryKey);
-
-			if (commerceInventoryAudit == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchInventoryAuditException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(commerceInventoryAudit);
-		}
-		catch (NoSuchInventoryAuditException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -698,41 +555,13 @@ public class CommerceInventoryAuditPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			CommerceInventoryAuditImpl.class, commerceInventoryAuditModelImpl,
-			false, true);
+		cacheUniqueFindersResult(commerceInventoryAudit, false);
 
 		if (isNew) {
 			commerceInventoryAudit.setNew(false);
 		}
 
 		commerceInventoryAudit.resetOriginalValues();
-
-		return commerceInventoryAudit;
-	}
-
-	/**
-	 * Returns the commerce inventory audit with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the commerce inventory audit
-	 * @return the commerce inventory audit
-	 * @throws NoSuchInventoryAuditException if a commerce inventory audit with the primary key could not be found
-	 */
-	@Override
-	public CommerceInventoryAudit findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchInventoryAuditException {
-
-		CommerceInventoryAudit commerceInventoryAudit = fetchByPrimaryKey(
-			primaryKey);
-
-		if (commerceInventoryAudit == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchInventoryAuditException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return commerceInventoryAudit;
 	}
@@ -765,188 +594,6 @@ public class CommerceInventoryAuditPersistenceImpl
 		return fetchByPrimaryKey((Serializable)commerceInventoryAuditId);
 	}
 
-	/**
-	 * Returns all the commerce inventory audits.
-	 *
-	 * @return the commerce inventory audits
-	 */
-	@Override
-	public List<CommerceInventoryAudit> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the commerce inventory audits.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceInventoryAuditModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory audits
-	 * @param end the upper bound of the range of commerce inventory audits (not inclusive)
-	 * @return the range of commerce inventory audits
-	 */
-	@Override
-	public List<CommerceInventoryAudit> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce inventory audits.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceInventoryAuditModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory audits
-	 * @param end the upper bound of the range of commerce inventory audits (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce inventory audits
-	 */
-	@Override
-	public List<CommerceInventoryAudit> findAll(
-		int start, int end,
-		OrderByComparator<CommerceInventoryAudit> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce inventory audits.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceInventoryAuditModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory audits
-	 * @param end the upper bound of the range of commerce inventory audits (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce inventory audits
-	 */
-	@Override
-	public List<CommerceInventoryAudit> findAll(
-		int start, int end,
-		OrderByComparator<CommerceInventoryAudit> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<CommerceInventoryAudit> list = null;
-
-		if (useFinderCache) {
-			list = (List<CommerceInventoryAudit>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_COMMERCEINVENTORYAUDIT);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_COMMERCEINVENTORYAUDIT;
-
-				sql = sql.concat(CommerceInventoryAuditModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<CommerceInventoryAudit>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the commerce inventory audits from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CommerceInventoryAudit commerceInventoryAudit : findAll()) {
-			remove(commerceInventoryAudit);
-		}
-	}
-
-	/**
-	 * Returns the number of commerce inventory audits.
-	 *
-	 * @return the number of commerce inventory audits
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_COMMERCEINVENTORYAUDIT);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	public Set<String> getBadColumnNames() {
 		return _badColumnNames;
@@ -977,21 +624,6 @@ public class CommerceInventoryAuditPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByLtCreateDate = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByLtCreateDate",
 			new String[] {
@@ -1012,7 +644,7 @@ public class CommerceInventoryAuditPersistenceImpl
 				_SQL_SELECT_COMMERCEINVENTORYAUDIT_WHERE,
 				_SQL_COUNT_COMMERCEINVENTORYAUDIT_WHERE,
 				CommerceInventoryAuditModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"commerceInventoryAudit.", "createDate",
 					FinderColumn.Type.DATE, "<", true, true,
@@ -1033,7 +665,8 @@ public class CommerceInventoryAuditPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "sku", "unitOfMeasureKey"}, true);
+			new String[] {"companyId", "sku", "unitOfMeasureKey"}, 0, 6, true,
+			null);
 
 		_finderPathCountByC_S_U = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_S_U",
@@ -1041,21 +674,22 @@ public class CommerceInventoryAuditPersistenceImpl
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "sku", "unitOfMeasureKey"}, false);
+			new String[] {"companyId", "sku", "unitOfMeasureKey"}, 0, 6, false,
+			null);
 
 		_collectionPersistenceFinderByC_S_U = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_S_U,
 			_finderPathWithoutPaginationFindByC_S_U, _finderPathCountByC_S_U,
 			_SQL_SELECT_COMMERCEINVENTORYAUDIT_WHERE,
 			_SQL_COUNT_COMMERCEINVENTORYAUDIT_WHERE,
-			CommerceInventoryAuditModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			CommerceInventoryAuditModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"commerceInventoryAudit.", "companyId", FinderColumn.Type.LONG,
-				"=", true, false, CommerceInventoryAudit::getCompanyId),
+				"=", true, true, CommerceInventoryAudit::getCompanyId),
 			new FinderColumn<>(
 				"commerceInventoryAudit.", "sku", FinderColumn.Type.STRING, "=",
-				true, false, CommerceInventoryAudit::getSku),
+				true, true, CommerceInventoryAudit::getSku),
 			new FinderColumn<>(
 				"commerceInventoryAudit.", "unitOfMeasureKey",
 				FinderColumn.Type.STRING, "=", true, true,
@@ -1103,29 +737,20 @@ public class CommerceInventoryAuditPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CommerceInventoryAuditModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_COMMERCEINVENTORYAUDIT =
 		"SELECT commerceInventoryAudit FROM CommerceInventoryAudit commerceInventoryAudit";
 
 	private static final String _SQL_SELECT_COMMERCEINVENTORYAUDIT_WHERE =
 		"SELECT commerceInventoryAudit FROM CommerceInventoryAudit commerceInventoryAudit WHERE ";
 
-	private static final String _SQL_COUNT_COMMERCEINVENTORYAUDIT =
-		"SELECT COUNT(commerceInventoryAudit) FROM CommerceInventoryAudit commerceInventoryAudit";
-
 	private static final String _SQL_COUNT_COMMERCEINVENTORYAUDIT_WHERE =
 		"SELECT COUNT(commerceInventoryAudit) FROM CommerceInventoryAudit commerceInventoryAudit WHERE ";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"commerceInventoryAudit.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CommerceInventoryAudit exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CommerceInventoryAudit exists with the key {";
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceInventoryAuditPersistenceImpl.class);
 
 	private static final Set<String> _badColumnNames = SetUtil.fromArray(
 		new String[] {"commerceInventoryAuditId"});
@@ -1136,4 +761,4 @@ public class CommerceInventoryAuditPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1994441573
+// LIFERAY-SERVICE-BUILDER-HASH:1749146241

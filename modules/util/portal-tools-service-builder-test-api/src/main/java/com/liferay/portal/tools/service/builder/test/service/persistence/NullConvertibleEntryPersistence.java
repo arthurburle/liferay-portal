@@ -78,21 +78,6 @@ public interface NullConvertibleEntryPersistence
 	public int countByName(String name);
 
 	/**
-	 * Caches the null convertible entry in the entity cache if it is enabled.
-	 *
-	 * @param nullConvertibleEntry the null convertible entry
-	 */
-	public void cacheResult(NullConvertibleEntry nullConvertibleEntry);
-
-	/**
-	 * Caches the null convertible entries in the entity cache if it is enabled.
-	 *
-	 * @param nullConvertibleEntries the null convertible entries
-	 */
-	public void cacheResult(
-		java.util.List<NullConvertibleEntry> nullConvertibleEntries);
-
-	/**
 	 * Creates a new null convertible entry with the primary key. Does not add the null convertible entry to the database.
 	 *
 	 * @param nullConvertibleEntryId the primary key for the new null convertible entry
@@ -131,73 +116,5 @@ public interface NullConvertibleEntryPersistence
 	 */
 	public NullConvertibleEntry fetchByPrimaryKey(long nullConvertibleEntryId);
 
-	/**
-	 * Returns all the null convertible entries.
-	 *
-	 * @return the null convertible entries
-	 */
-	public java.util.List<NullConvertibleEntry> findAll();
-
-	/**
-	 * Returns a range of all the null convertible entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.NullConvertibleEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of null convertible entries
-	 * @param end the upper bound of the range of null convertible entries (not inclusive)
-	 * @return the range of null convertible entries
-	 */
-	public java.util.List<NullConvertibleEntry> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the null convertible entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.NullConvertibleEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of null convertible entries
-	 * @param end the upper bound of the range of null convertible entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of null convertible entries
-	 */
-	public java.util.List<NullConvertibleEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<NullConvertibleEntry>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the null convertible entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.NullConvertibleEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of null convertible entries
-	 * @param end the upper bound of the range of null convertible entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of null convertible entries
-	 */
-	public java.util.List<NullConvertibleEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<NullConvertibleEntry>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the null convertible entries from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of null convertible entries.
-	 *
-	 * @return the number of null convertible entries
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-123108257
+// LIFERAY-SERVICE-BUILDER-HASH:-351739276

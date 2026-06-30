@@ -12,6 +12,7 @@ import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.service.base.CommerceOrderAttachmentLocalServiceBaseImpl;
 import com.liferay.commerce.service.persistence.CommerceOrderPersistence;
 import com.liferay.document.library.kernel.util.DLAppHelperThreadLocal;
+import com.liferay.document.library.kernel.util.DLUtil;
 import com.liferay.list.type.model.ListTypeDefinition;
 import com.liferay.list.type.model.ListTypeEntry;
 import com.liferay.list.type.service.ListTypeDefinitionLocalService;
@@ -244,6 +245,8 @@ public class CommerceOrderAttachmentLocalServiceImpl
 			}
 
 			file = FileUtil.createTempFile(inputStream);
+			fileName = DLUtil.getUniqueFileName(
+				folder.getGroupId(), folder.getFolderId(), fileName, false);
 
 			ServiceContext serviceContext = new ServiceContext();
 
@@ -280,7 +283,7 @@ public class CommerceOrderAttachmentLocalServiceImpl
 		}
 
 		if (Validator.isNull(type)) {
-			return;
+			throw new CommerceOrderAttachmentTypeException();
 		}
 
 		ListTypeDefinition listTypeDefinition =

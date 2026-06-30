@@ -5,12 +5,10 @@
 
 package com.liferay.sharing.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -31,8 +29,6 @@ import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinde
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -77,7 +73,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = SharingEntryPersistence.class)
 public class SharingEntryPersistenceImpl
-	extends BasePersistenceImpl<SharingEntry>
+	extends BasePersistenceImpl<SharingEntry, NoSuchEntryException>
 	implements SharingEntryPersistence {
 
 	/*
@@ -94,9 +90,6 @@ public class SharingEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -771,6 +764,301 @@ public class SharingEntryPersistenceImpl
 	public int countByUserId(long userId) {
 		return _collectionPersistenceFinderByUserId.count(
 			finderCache, new Object[] {userId});
+	}
+
+	private FinderPath _finderPathWithPaginationFindByToTicketId;
+	private FinderPath _finderPathWithoutPaginationFindByToTicketId;
+	private FinderPath _finderPathCountByToTicketId;
+	private CollectionPersistenceFinder<SharingEntry>
+		_collectionPersistenceFinderByToTicketId;
+
+	/**
+	 * Returns all the sharing entries where toTicketId = &#63;.
+	 *
+	 * @param toTicketId the to ticket ID
+	 * @return the matching sharing entries
+	 */
+	@Override
+	public List<SharingEntry> findByToTicketId(long toTicketId) {
+		return findByToTicketId(
+			toTicketId, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+	}
+
+	/**
+	 * Returns a range of all the sharing entries where toTicketId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SharingEntryModelImpl</code>.
+	 * </p>
+	 *
+	 * @param toTicketId the to ticket ID
+	 * @param start the lower bound of the range of sharing entries
+	 * @param end the upper bound of the range of sharing entries (not inclusive)
+	 * @return the range of matching sharing entries
+	 */
+	@Override
+	public List<SharingEntry> findByToTicketId(
+		long toTicketId, int start, int end) {
+
+		return findByToTicketId(toTicketId, start, end, null);
+	}
+
+	/**
+	 * Returns an ordered range of all the sharing entries where toTicketId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SharingEntryModelImpl</code>.
+	 * </p>
+	 *
+	 * @param toTicketId the to ticket ID
+	 * @param start the lower bound of the range of sharing entries
+	 * @param end the upper bound of the range of sharing entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching sharing entries
+	 */
+	@Override
+	public List<SharingEntry> findByToTicketId(
+		long toTicketId, int start, int end,
+		OrderByComparator<SharingEntry> orderByComparator) {
+
+		return findByToTicketId(
+			toTicketId, start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the sharing entries where toTicketId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SharingEntryModelImpl</code>.
+	 * </p>
+	 *
+	 * @param toTicketId the to ticket ID
+	 * @param start the lower bound of the range of sharing entries
+	 * @param end the upper bound of the range of sharing entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the ordered range of matching sharing entries
+	 */
+	@Override
+	public List<SharingEntry> findByToTicketId(
+		long toTicketId, int start, int end,
+		OrderByComparator<SharingEntry> orderByComparator,
+		boolean useFinderCache) {
+
+		return _collectionPersistenceFinderByToTicketId.find(
+			finderCache, new Object[] {toTicketId}, start, end,
+			orderByComparator, useFinderCache);
+	}
+
+	/**
+	 * Returns the first sharing entry in the ordered set where toTicketId = &#63;.
+	 *
+	 * @param toTicketId the to ticket ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching sharing entry
+	 * @throws NoSuchEntryException if a matching sharing entry could not be found
+	 */
+	@Override
+	public SharingEntry findByToTicketId_First(
+			long toTicketId, OrderByComparator<SharingEntry> orderByComparator)
+		throws NoSuchEntryException {
+
+		SharingEntry sharingEntry = fetchByToTicketId_First(
+			toTicketId, orderByComparator);
+
+		if (sharingEntry != null) {
+			return sharingEntry;
+		}
+
+		throw new NoSuchEntryException(
+			_collectionPersistenceFinderByToTicketId.buildNoSuchKeyMessage(
+				_NO_SUCH_ENTITY_WITH_KEY, new Object[] {toTicketId}));
+	}
+
+	/**
+	 * Returns the first sharing entry in the ordered set where toTicketId = &#63;.
+	 *
+	 * @param toTicketId the to ticket ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching sharing entry, or <code>null</code> if a matching sharing entry could not be found
+	 */
+	@Override
+	public SharingEntry fetchByToTicketId_First(
+		long toTicketId, OrderByComparator<SharingEntry> orderByComparator) {
+
+		return _collectionPersistenceFinderByToTicketId.fetchFirst(
+			finderCache, new Object[] {toTicketId}, orderByComparator);
+	}
+
+	/**
+	 * Removes all the sharing entries where toTicketId = &#63; from the database.
+	 *
+	 * @param toTicketId the to ticket ID
+	 */
+	@Override
+	public void removeByToTicketId(long toTicketId) {
+		_collectionPersistenceFinderByToTicketId.remove(
+			finderCache, new Object[] {toTicketId});
+	}
+
+	/**
+	 * Returns the number of sharing entries where toTicketId = &#63;.
+	 *
+	 * @param toTicketId the to ticket ID
+	 * @return the number of matching sharing entries
+	 */
+	@Override
+	public int countByToTicketId(long toTicketId) {
+		return _collectionPersistenceFinderByToTicketId.count(
+			finderCache, new Object[] {toTicketId});
+	}
+
+	private FinderPath _finderPathWithPaginationFindByToUserGroupId;
+	private FinderPath _finderPathWithoutPaginationFindByToUserGroupId;
+	private FinderPath _finderPathCountByToUserGroupId;
+	private CollectionPersistenceFinder<SharingEntry>
+		_collectionPersistenceFinderByToUserGroupId;
+
+	/**
+	 * Returns all the sharing entries where toUserGroupId = &#63;.
+	 *
+	 * @param toUserGroupId the to user group ID
+	 * @return the matching sharing entries
+	 */
+	@Override
+	public List<SharingEntry> findByToUserGroupId(long toUserGroupId) {
+		return findByToUserGroupId(
+			toUserGroupId, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+	}
+
+	/**
+	 * Returns a range of all the sharing entries where toUserGroupId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SharingEntryModelImpl</code>.
+	 * </p>
+	 *
+	 * @param toUserGroupId the to user group ID
+	 * @param start the lower bound of the range of sharing entries
+	 * @param end the upper bound of the range of sharing entries (not inclusive)
+	 * @return the range of matching sharing entries
+	 */
+	@Override
+	public List<SharingEntry> findByToUserGroupId(
+		long toUserGroupId, int start, int end) {
+
+		return findByToUserGroupId(toUserGroupId, start, end, null);
+	}
+
+	/**
+	 * Returns an ordered range of all the sharing entries where toUserGroupId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SharingEntryModelImpl</code>.
+	 * </p>
+	 *
+	 * @param toUserGroupId the to user group ID
+	 * @param start the lower bound of the range of sharing entries
+	 * @param end the upper bound of the range of sharing entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching sharing entries
+	 */
+	@Override
+	public List<SharingEntry> findByToUserGroupId(
+		long toUserGroupId, int start, int end,
+		OrderByComparator<SharingEntry> orderByComparator) {
+
+		return findByToUserGroupId(
+			toUserGroupId, start, end, orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the sharing entries where toUserGroupId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SharingEntryModelImpl</code>.
+	 * </p>
+	 *
+	 * @param toUserGroupId the to user group ID
+	 * @param start the lower bound of the range of sharing entries
+	 * @param end the upper bound of the range of sharing entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the ordered range of matching sharing entries
+	 */
+	@Override
+	public List<SharingEntry> findByToUserGroupId(
+		long toUserGroupId, int start, int end,
+		OrderByComparator<SharingEntry> orderByComparator,
+		boolean useFinderCache) {
+
+		return _collectionPersistenceFinderByToUserGroupId.find(
+			finderCache, new Object[] {toUserGroupId}, start, end,
+			orderByComparator, useFinderCache);
+	}
+
+	/**
+	 * Returns the first sharing entry in the ordered set where toUserGroupId = &#63;.
+	 *
+	 * @param toUserGroupId the to user group ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching sharing entry
+	 * @throws NoSuchEntryException if a matching sharing entry could not be found
+	 */
+	@Override
+	public SharingEntry findByToUserGroupId_First(
+			long toUserGroupId,
+			OrderByComparator<SharingEntry> orderByComparator)
+		throws NoSuchEntryException {
+
+		SharingEntry sharingEntry = fetchByToUserGroupId_First(
+			toUserGroupId, orderByComparator);
+
+		if (sharingEntry != null) {
+			return sharingEntry;
+		}
+
+		throw new NoSuchEntryException(
+			_collectionPersistenceFinderByToUserGroupId.buildNoSuchKeyMessage(
+				_NO_SUCH_ENTITY_WITH_KEY, new Object[] {toUserGroupId}));
+	}
+
+	/**
+	 * Returns the first sharing entry in the ordered set where toUserGroupId = &#63;.
+	 *
+	 * @param toUserGroupId the to user group ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching sharing entry, or <code>null</code> if a matching sharing entry could not be found
+	 */
+	@Override
+	public SharingEntry fetchByToUserGroupId_First(
+		long toUserGroupId, OrderByComparator<SharingEntry> orderByComparator) {
+
+		return _collectionPersistenceFinderByToUserGroupId.fetchFirst(
+			finderCache, new Object[] {toUserGroupId}, orderByComparator);
+	}
+
+	/**
+	 * Removes all the sharing entries where toUserGroupId = &#63; from the database.
+	 *
+	 * @param toUserGroupId the to user group ID
+	 */
+	@Override
+	public void removeByToUserGroupId(long toUserGroupId) {
+		_collectionPersistenceFinderByToUserGroupId.remove(
+			finderCache, new Object[] {toUserGroupId});
+	}
+
+	/**
+	 * Returns the number of sharing entries where toUserGroupId = &#63;.
+	 *
+	 * @param toUserGroupId the to user group ID
+	 * @return the number of matching sharing entries
+	 */
+	@Override
+	public int countByToUserGroupId(long toUserGroupId) {
+		return _collectionPersistenceFinderByToUserGroupId.count(
+			finderCache, new Object[] {toUserGroupId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByToUserId;
@@ -1943,137 +2231,6 @@ public class SharingEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the sharing entry in the entity cache if it is enabled.
-	 *
-	 * @param sharingEntry the sharing entry
-	 */
-	@Override
-	public void cacheResult(SharingEntry sharingEntry) {
-		entityCache.putResult(
-			SharingEntryImpl.class, sharingEntry.getPrimaryKey(), sharingEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G,
-			new Object[] {sharingEntry.getUuid(), sharingEntry.getGroupId()},
-			sharingEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByTT_TUG_TU_C_C,
-			new Object[] {
-				sharingEntry.getToTicketId(), sharingEntry.getToUserGroupId(),
-				sharingEntry.getToUserId(), sharingEntry.getClassNameId(),
-				sharingEntry.getClassPK()
-			},
-			sharingEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByERC_G,
-			new Object[] {
-				sharingEntry.getExternalReferenceCode(),
-				sharingEntry.getGroupId()
-			},
-			sharingEntry);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the sharing entries in the entity cache if it is enabled.
-	 *
-	 * @param sharingEntries the sharing entries
-	 */
-	@Override
-	public void cacheResult(List<SharingEntry> sharingEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (sharingEntries.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (SharingEntry sharingEntry : sharingEntries) {
-			if (entityCache.getResult(
-					SharingEntryImpl.class, sharingEntry.getPrimaryKey()) ==
-						null) {
-
-				cacheResult(sharingEntry);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all sharing entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(SharingEntryImpl.class);
-
-		finderCache.clearCache(SharingEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the sharing entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(SharingEntry sharingEntry) {
-		entityCache.removeResult(SharingEntryImpl.class, sharingEntry);
-	}
-
-	@Override
-	public void clearCache(List<SharingEntry> sharingEntries) {
-		for (SharingEntry sharingEntry : sharingEntries) {
-			entityCache.removeResult(SharingEntryImpl.class, sharingEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(SharingEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(SharingEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		SharingEntryModelImpl sharingEntryModelImpl) {
-
-		Object[] args = new Object[] {
-			sharingEntryModelImpl.getUuid(), sharingEntryModelImpl.getGroupId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G, args, sharingEntryModelImpl);
-
-		args = new Object[] {
-			sharingEntryModelImpl.getToTicketId(),
-			sharingEntryModelImpl.getToUserGroupId(),
-			sharingEntryModelImpl.getToUserId(),
-			sharingEntryModelImpl.getClassNameId(),
-			sharingEntryModelImpl.getClassPK()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByTT_TUG_TU_C_C, args, sharingEntryModelImpl);
-
-		args = new Object[] {
-			sharingEntryModelImpl.getExternalReferenceCode(),
-			sharingEntryModelImpl.getGroupId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByERC_G, args, sharingEntryModelImpl);
-	}
-
-	/**
 	 * Creates a new sharing entry with the primary key. Does not add the sharing entry to the database.
 	 *
 	 * @param sharingEntryId the primary key for the new sharing entry
@@ -2107,47 +2264,6 @@ public class SharingEntryPersistenceImpl
 		throws NoSuchEntryException {
 
 		return remove((Serializable)sharingEntryId);
-	}
-
-	/**
-	 * Removes the sharing entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the sharing entry
-	 * @return the sharing entry that was removed
-	 * @throws NoSuchEntryException if a sharing entry with the primary key could not be found
-	 */
-	@Override
-	public SharingEntry remove(Serializable primaryKey)
-		throws NoSuchEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SharingEntry sharingEntry = (SharingEntry)session.get(
-				SharingEntryImpl.class, primaryKey);
-
-			if (sharingEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(sharingEntry);
-		}
-		catch (NoSuchEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -2315,41 +2431,13 @@ public class SharingEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			SharingEntryImpl.class, sharingEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(sharingEntryModelImpl);
+		cacheUniqueFindersResult(sharingEntry, false);
 
 		if (isNew) {
 			sharingEntry.setNew(false);
 		}
 
 		sharingEntry.resetOriginalValues();
-
-		return sharingEntry;
-	}
-
-	/**
-	 * Returns the sharing entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the sharing entry
-	 * @return the sharing entry
-	 * @throws NoSuchEntryException if a sharing entry with the primary key could not be found
-	 */
-	@Override
-	public SharingEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchEntryException {
-
-		SharingEntry sharingEntry = fetchByPrimaryKey(primaryKey);
-
-		if (sharingEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return sharingEntry;
 	}
@@ -2377,185 +2465,6 @@ public class SharingEntryPersistenceImpl
 	@Override
 	public SharingEntry fetchByPrimaryKey(long sharingEntryId) {
 		return fetchByPrimaryKey((Serializable)sharingEntryId);
-	}
-
-	/**
-	 * Returns all the sharing entries.
-	 *
-	 * @return the sharing entries
-	 */
-	@Override
-	public List<SharingEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the sharing entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SharingEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of sharing entries
-	 * @param end the upper bound of the range of sharing entries (not inclusive)
-	 * @return the range of sharing entries
-	 */
-	@Override
-	public List<SharingEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the sharing entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SharingEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of sharing entries
-	 * @param end the upper bound of the range of sharing entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of sharing entries
-	 */
-	@Override
-	public List<SharingEntry> findAll(
-		int start, int end, OrderByComparator<SharingEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the sharing entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SharingEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of sharing entries
-	 * @param end the upper bound of the range of sharing entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of sharing entries
-	 */
-	@Override
-	public List<SharingEntry> findAll(
-		int start, int end, OrderByComparator<SharingEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<SharingEntry> list = null;
-
-		if (useFinderCache) {
-			list = (List<SharingEntry>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_SHARINGENTRY);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_SHARINGENTRY;
-
-				sql = sql.concat(SharingEntryModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<SharingEntry>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the sharing entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (SharingEntry sharingEntry : findAll()) {
-			remove(sharingEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of sharing entries.
-	 *
-	 * @return the number of sharing entries
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_SHARINGENTRY);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -2588,21 +2497,6 @@ public class SharingEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -2613,33 +2507,35 @@ public class SharingEntryPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_SHARINGENTRY_WHERE, _SQL_COUNT_SHARINGENTRY_WHERE,
-			SharingEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"sharingEntry.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, SharingEntry::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(SharingEntry::getUuid),
+			SharingEntry::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByUUID_G, _SQL_SELECT_SHARINGENTRY_WHERE,
+			this, _finderPathFetchByUUID_G, _SQL_SELECT_SHARINGENTRY_WHERE, "",
 			new FinderColumn<>(
 				"sharingEntry.", "uuid", FinderColumn.Type.STRING, "=", true,
-				false, SharingEntry::getUuid),
+				true, SharingEntry::getUuid),
 			new FinderColumn<>(
 				"sharingEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
 				true, SharingEntry::getGroupId));
@@ -2656,12 +2552,12 @@ public class SharingEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -2669,10 +2565,10 @@ public class SharingEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_SHARINGENTRY_WHERE,
 				_SQL_COUNT_SHARINGENTRY_WHERE,
-				SharingEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"sharingEntry.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, SharingEntry::getUuid),
+					true, true, SharingEntry::getUuid),
 				new FinderColumn<>(
 					"sharingEntry.", "companyId", FinderColumn.Type.LONG, "=",
 					true, true, SharingEntry::getCompanyId));
@@ -2701,7 +2597,7 @@ public class SharingEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByGroupId,
 				_finderPathCountByGroupId, _SQL_SELECT_SHARINGENTRY_WHERE,
 				_SQL_COUNT_SHARINGENTRY_WHERE,
-				SharingEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"sharingEntry.", "groupId", FinderColumn.Type.LONG, "=",
 					true, true, SharingEntry::getGroupId));
@@ -2729,10 +2625,68 @@ public class SharingEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUserId,
 				_finderPathCountByUserId, _SQL_SELECT_SHARINGENTRY_WHERE,
 				_SQL_COUNT_SHARINGENTRY_WHERE,
-				SharingEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"sharingEntry.", "userId", FinderColumn.Type.LONG, "=",
 					true, true, SharingEntry::getUserId));
+
+		_finderPathWithPaginationFindByToTicketId = new FinderPath(
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByToTicketId",
+			new String[] {
+				Long.class.getName(), Integer.class.getName(),
+				Integer.class.getName(), OrderByComparator.class.getName()
+			},
+			new String[] {"toTicketId"}, true);
+
+		_finderPathWithoutPaginationFindByToTicketId = new FinderPath(
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByToTicketId",
+			new String[] {Long.class.getName()}, new String[] {"toTicketId"},
+			true);
+
+		_finderPathCountByToTicketId = new FinderPath(
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByToTicketId",
+			new String[] {Long.class.getName()}, new String[] {"toTicketId"},
+			false);
+
+		_collectionPersistenceFinderByToTicketId =
+			new CollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByToTicketId,
+				_finderPathWithoutPaginationFindByToTicketId,
+				_finderPathCountByToTicketId, _SQL_SELECT_SHARINGENTRY_WHERE,
+				_SQL_COUNT_SHARINGENTRY_WHERE,
+				SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+				new FinderColumn<>(
+					"sharingEntry.", "toTicketId", FinderColumn.Type.LONG, "=",
+					true, true, SharingEntry::getToTicketId));
+
+		_finderPathWithPaginationFindByToUserGroupId = new FinderPath(
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByToUserGroupId",
+			new String[] {
+				Long.class.getName(), Integer.class.getName(),
+				Integer.class.getName(), OrderByComparator.class.getName()
+			},
+			new String[] {"toUserGroupId"}, true);
+
+		_finderPathWithoutPaginationFindByToUserGroupId = new FinderPath(
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByToUserGroupId",
+			new String[] {Long.class.getName()}, new String[] {"toUserGroupId"},
+			true);
+
+		_finderPathCountByToUserGroupId = new FinderPath(
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByToUserGroupId",
+			new String[] {Long.class.getName()}, new String[] {"toUserGroupId"},
+			false);
+
+		_collectionPersistenceFinderByToUserGroupId =
+			new CollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByToUserGroupId,
+				_finderPathWithoutPaginationFindByToUserGroupId,
+				_finderPathCountByToUserGroupId, _SQL_SELECT_SHARINGENTRY_WHERE,
+				_SQL_COUNT_SHARINGENTRY_WHERE,
+				SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
+				new FinderColumn<>(
+					"sharingEntry.", "toUserGroupId", FinderColumn.Type.LONG,
+					"=", true, true, SharingEntry::getToUserGroupId));
 
 		_finderPathWithPaginationFindByToUserId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByToUserId",
@@ -2758,7 +2712,7 @@ public class SharingEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByToUserId,
 				_finderPathCountByToUserId, _SQL_SELECT_SHARINGENTRY_WHERE,
 				_SQL_COUNT_SHARINGENTRY_WHERE,
-				SharingEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"sharingEntry.", "toUserId", FinderColumn.Type.LONG, "=",
 					true, true, SharingEntry::getToUserId));
@@ -2781,7 +2735,7 @@ public class SharingEntryPersistenceImpl
 				this, _finderPathWithPaginationFindByLtExpirationDate, null,
 				_finderPathWithPaginationCountByLtExpirationDate,
 				_SQL_SELECT_SHARINGENTRY_WHERE, _SQL_COUNT_SHARINGENTRY_WHERE,
-				SharingEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"sharingEntry.", "expirationDate", FinderColumn.Type.DATE,
 					"<", true, true, SharingEntry::getExpirationDate));
@@ -2809,10 +2763,10 @@ public class SharingEntryPersistenceImpl
 			this, _finderPathWithPaginationFindByC_CN,
 			_finderPathWithoutPaginationFindByC_CN, _finderPathCountByC_CN,
 			_SQL_SELECT_SHARINGENTRY_WHERE, _SQL_COUNT_SHARINGENTRY_WHERE,
-			SharingEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"sharingEntry.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, SharingEntry::getCompanyId),
+				true, SharingEntry::getCompanyId),
 			new FinderColumn<>(
 				"sharingEntry.", "classNameId", FinderColumn.Type.LONG, "=",
 				true, true, SharingEntry::getClassNameId));
@@ -2840,10 +2794,10 @@ public class SharingEntryPersistenceImpl
 			this, _finderPathWithPaginationFindByU_C,
 			_finderPathWithoutPaginationFindByU_C, _finderPathCountByU_C,
 			_SQL_SELECT_SHARINGENTRY_WHERE, _SQL_COUNT_SHARINGENTRY_WHERE,
-			SharingEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"sharingEntry.", "userId", FinderColumn.Type.LONG, "=", true,
-				false, SharingEntry::getUserId),
+				true, SharingEntry::getUserId),
 			new FinderColumn<>(
 				"sharingEntry.", "classNameId", FinderColumn.Type.LONG, "=",
 				true, true, SharingEntry::getClassNameId));
@@ -2871,10 +2825,10 @@ public class SharingEntryPersistenceImpl
 			this, _finderPathWithPaginationFindByTU_C,
 			_finderPathWithoutPaginationFindByTU_C, _finderPathCountByTU_C,
 			_SQL_SELECT_SHARINGENTRY_WHERE, _SQL_COUNT_SHARINGENTRY_WHERE,
-			SharingEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"sharingEntry.", "toUserId", FinderColumn.Type.LONG, "=", true,
-				false, SharingEntry::getToUserId),
+				true, SharingEntry::getToUserId),
 			new FinderColumn<>(
 				"sharingEntry.", "classNameId", FinderColumn.Type.LONG, "=",
 				true, true, SharingEntry::getClassNameId));
@@ -2902,15 +2856,15 @@ public class SharingEntryPersistenceImpl
 			this, _finderPathWithPaginationFindByC_C,
 			_finderPathWithoutPaginationFindByC_C, _finderPathCountByC_C,
 			_SQL_SELECT_SHARINGENTRY_WHERE, _SQL_COUNT_SHARINGENTRY_WHERE,
-			SharingEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			SharingEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"sharingEntry.", "classNameId", FinderColumn.Type.LONG, "=",
-				true, false, SharingEntry::getClassNameId),
+				true, true, SharingEntry::getClassNameId),
 			new FinderColumn<>(
 				"sharingEntry.", "classPK", FinderColumn.Type.LONG, "=", true,
 				true, SharingEntry::getClassPK));
 
-		_finderPathFetchByTT_TUG_TU_C_C = new FinderPath(
+		_finderPathFetchByTT_TUG_TU_C_C = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByTT_TUG_TU_C_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
@@ -2920,37 +2874,41 @@ public class SharingEntryPersistenceImpl
 				"toTicketId", "toUserGroupId", "toUserId", "classNameId",
 				"classPK"
 			},
-			true);
+			0, 0, false, SharingEntry::getToTicketId,
+			SharingEntry::getToUserGroupId, SharingEntry::getToUserId,
+			SharingEntry::getClassNameId, SharingEntry::getClassPK);
 
 		_uniquePersistenceFinderByTT_TUG_TU_C_C = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByTT_TUG_TU_C_C,
-			_SQL_SELECT_SHARINGENTRY_WHERE,
+			_SQL_SELECT_SHARINGENTRY_WHERE, "",
 			new FinderColumn<>(
 				"sharingEntry.", "toTicketId", FinderColumn.Type.LONG, "=",
-				true, false, SharingEntry::getToTicketId),
+				true, true, SharingEntry::getToTicketId),
 			new FinderColumn<>(
 				"sharingEntry.", "toUserGroupId", FinderColumn.Type.LONG, "=",
-				true, false, SharingEntry::getToUserGroupId),
+				true, true, SharingEntry::getToUserGroupId),
 			new FinderColumn<>(
 				"sharingEntry.", "toUserId", FinderColumn.Type.LONG, "=", true,
-				false, SharingEntry::getToUserId),
+				true, SharingEntry::getToUserId),
 			new FinderColumn<>(
 				"sharingEntry.", "classNameId", FinderColumn.Type.LONG, "=",
-				true, false, SharingEntry::getClassNameId),
+				true, true, SharingEntry::getClassNameId),
 			new FinderColumn<>(
 				"sharingEntry.", "classPK", FinderColumn.Type.LONG, "=", true,
 				true, SharingEntry::getClassPK));
 
-		_finderPathFetchByERC_G = new FinderPath(
+		_finderPathFetchByERC_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"externalReferenceCode", "groupId"}, true);
+			new String[] {"externalReferenceCode", "groupId"}, 0, 1, false,
+			convertNullFunction(SharingEntry::getExternalReferenceCode),
+			SharingEntry::getGroupId);
 
 		_uniquePersistenceFinderByERC_G = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByERC_G, _SQL_SELECT_SHARINGENTRY_WHERE,
+			this, _finderPathFetchByERC_G, _SQL_SELECT_SHARINGENTRY_WHERE, "",
 			new FinderColumn<>(
 				"sharingEntry.", "externalReferenceCode",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				SharingEntry::getExternalReferenceCode),
 			new FinderColumn<>(
 				"sharingEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
@@ -2998,22 +2956,17 @@ public class SharingEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		SharingEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_SHARINGENTRY =
 		"SELECT sharingEntry FROM SharingEntry sharingEntry";
 
 	private static final String _SQL_SELECT_SHARINGENTRY_WHERE =
 		"SELECT sharingEntry FROM SharingEntry sharingEntry WHERE ";
 
-	private static final String _SQL_COUNT_SHARINGENTRY =
-		"SELECT COUNT(sharingEntry) FROM SharingEntry sharingEntry";
-
 	private static final String _SQL_COUNT_SHARINGENTRY_WHERE =
 		"SELECT COUNT(sharingEntry) FROM SharingEntry sharingEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "sharingEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No SharingEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No SharingEntry exists with the key {";
@@ -3030,4 +2983,4 @@ public class SharingEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1372134638
+// LIFERAY-SERVICE-BUILDER-HASH:984907281

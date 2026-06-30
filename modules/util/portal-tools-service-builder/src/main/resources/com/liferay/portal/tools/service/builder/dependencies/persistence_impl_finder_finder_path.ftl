@@ -16,12 +16,16 @@
 	private FinderPath _finderPathCountBy${entityFinder.name};
 </#if>
 
-<#if entityFinder.hasArrayableOperator() || entityFinder.hasCustomComparator()>
+<#if entityFinder.hasCustomComparator() || (entityFinder.hasArrayableOperator() && !entityFinder.collectionPersistenceFinderEnabled)>
 	private FinderPath _finderPathWithPaginationCountBy${entityFinder.name};
 </#if>
 
 <#if entityFinder.collectionPersistenceFinderEnabled>
-	private CollectionPersistenceFinder<${entity.name}> _collectionPersistenceFinderBy${entityFinder.name};
+	<#if entity.isPermissionCheckEnabled(entityFinder)>
+		private FilterCollectionPersistenceFinder<${entity.name}> _collectionPersistenceFinderBy${entityFinder.name};
+	<#else>
+		private CollectionPersistenceFinder<${entity.name}> _collectionPersistenceFinderBy${entityFinder.name};
+	</#if>
 </#if>
 
 <#if entityFinder.uniquePersistenceFinderEnabled>

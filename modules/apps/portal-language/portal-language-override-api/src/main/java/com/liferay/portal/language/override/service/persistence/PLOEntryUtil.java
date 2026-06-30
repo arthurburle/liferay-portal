@@ -36,6 +36,20 @@ public class PLOEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<PLOEntry> ploEntries) {
+		getPersistence().cacheResult(ploEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(PLOEntry ploEntry) {
+		getPersistence().cacheResult(ploEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -572,24 +586,6 @@ public class PLOEntryUtil {
 	}
 
 	/**
-	 * Caches the plo entry in the entity cache if it is enabled.
-	 *
-	 * @param ploEntry the plo entry
-	 */
-	public static void cacheResult(PLOEntry ploEntry) {
-		getPersistence().cacheResult(ploEntry);
-	}
-
-	/**
-	 * Caches the plo entries in the entity cache if it is enabled.
-	 *
-	 * @param ploEntries the plo entries
-	 */
-	public static void cacheResult(List<PLOEntry> ploEntries) {
-		getPersistence().cacheResult(ploEntries);
-	}
-
-	/**
 	 * Creates a new plo entry with the primary key. Does not add the plo entry to the database.
 	 *
 	 * @param ploEntryId the primary key for the new plo entry
@@ -641,85 +637,6 @@ public class PLOEntryUtil {
 		return getPersistence().fetchByPrimaryKey(ploEntryId);
 	}
 
-	/**
-	 * Returns all the plo entries.
-	 *
-	 * @return the plo entries
-	 */
-	public static List<PLOEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the plo entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.language.override.model.impl.PLOEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of plo entries
-	 * @param end the upper bound of the range of plo entries (not inclusive)
-	 * @return the range of plo entries
-	 */
-	public static List<PLOEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the plo entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.language.override.model.impl.PLOEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of plo entries
-	 * @param end the upper bound of the range of plo entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of plo entries
-	 */
-	public static List<PLOEntry> findAll(
-		int start, int end, OrderByComparator<PLOEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the plo entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.language.override.model.impl.PLOEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of plo entries
-	 * @param end the upper bound of the range of plo entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of plo entries
-	 */
-	public static List<PLOEntry> findAll(
-		int start, int end, OrderByComparator<PLOEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the plo entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of plo entries.
-	 *
-	 * @return the number of plo entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static PLOEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -731,4 +648,4 @@ public class PLOEntryUtil {
 	private static volatile PLOEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1713135569
+// LIFERAY-SERVICE-BUILDER-HASH:-792063031

@@ -36,6 +36,20 @@ public class MBThreadFlagUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<MBThreadFlag> mbThreadFlags) {
+		getPersistence().cacheResult(mbThreadFlags);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(MBThreadFlag mbThreadFlag) {
+		getPersistence().cacheResult(mbThreadFlag);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -726,24 +740,6 @@ public class MBThreadFlagUtil {
 	}
 
 	/**
-	 * Caches the message boards thread flag in the entity cache if it is enabled.
-	 *
-	 * @param mbThreadFlag the message boards thread flag
-	 */
-	public static void cacheResult(MBThreadFlag mbThreadFlag) {
-		getPersistence().cacheResult(mbThreadFlag);
-	}
-
-	/**
-	 * Caches the message boards thread flags in the entity cache if it is enabled.
-	 *
-	 * @param mbThreadFlags the message boards thread flags
-	 */
-	public static void cacheResult(List<MBThreadFlag> mbThreadFlags) {
-		getPersistence().cacheResult(mbThreadFlags);
-	}
-
-	/**
 	 * Creates a new message boards thread flag with the primary key. Does not add the message boards thread flag to the database.
 	 *
 	 * @param threadFlagId the primary key for the new message boards thread flag
@@ -793,85 +789,6 @@ public class MBThreadFlagUtil {
 		return getPersistence().fetchByPrimaryKey(threadFlagId);
 	}
 
-	/**
-	 * Returns all the message boards thread flags.
-	 *
-	 * @return the message boards thread flags
-	 */
-	public static List<MBThreadFlag> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the message boards thread flags.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.message.boards.model.impl.MBThreadFlagModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of message boards thread flags
-	 * @param end the upper bound of the range of message boards thread flags (not inclusive)
-	 * @return the range of message boards thread flags
-	 */
-	public static List<MBThreadFlag> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the message boards thread flags.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.message.boards.model.impl.MBThreadFlagModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of message boards thread flags
-	 * @param end the upper bound of the range of message boards thread flags (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of message boards thread flags
-	 */
-	public static List<MBThreadFlag> findAll(
-		int start, int end, OrderByComparator<MBThreadFlag> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the message boards thread flags.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.message.boards.model.impl.MBThreadFlagModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of message boards thread flags
-	 * @param end the upper bound of the range of message boards thread flags (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of message boards thread flags
-	 */
-	public static List<MBThreadFlag> findAll(
-		int start, int end, OrderByComparator<MBThreadFlag> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the message boards thread flags from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of message boards thread flags.
-	 *
-	 * @return the number of message boards thread flags
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static MBThreadFlagPersistence getPersistence() {
 		return _persistence;
 	}
@@ -883,4 +800,4 @@ public class MBThreadFlagUtil {
 	private static volatile MBThreadFlagPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1479923649
+// LIFERAY-SERVICE-BUILDER-HASH:2122464684

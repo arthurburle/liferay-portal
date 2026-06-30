@@ -32,14 +32,14 @@ if (portletURL != null) {
 
 	url = PortalUtil.escapeRedirect(urlArray[0]);
 	urlAnchor = urlArray[1];
-}
 
-if (url != null) {
-	if (url.indexOf(CharPool.QUESTION) == -1) {
-		url += "?";
-	}
-	else if (!url.endsWith("&")) {
-		url += "&";
+	if (Validator.isNotNull(url)) {
+		if (url.indexOf(CharPool.QUESTION) == -1) {
+			url += "?";
+		}
+		else if (!url.endsWith("&")) {
+			url += "&";
+		}
 	}
 }
 
@@ -83,12 +83,13 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 		String ariaPagination = namespace + id + "_ariaPagination";
 		String ariaPaginationButton = namespace + id + "_ariaPaginationButton";
 		String ariaPaginationPicker = namespace + id + "_ariaPaginationPicker";
+		String ariaPaginationReloadDescription = namespace + id + "_ariaPaginationReloadDescription";
 		String ariaPaginationResults = namespace + id + "_ariaPaginationResults";
 		%>
 
 		<c:if test="<%= deltaConfigurable %>">
 			<div class="dropdown pagination-items-per-page" id="<%= ariaPagination %>">
-				<button aria-controls="<%= ariaPaginationPicker %>" aria-describedby="<%= ariaPaginationResults %>" aria-expanded="false" aria-haspopup="listbox" aria-label="<%= LanguageUtil.get(request, "items-per-page") %>" class="dropdown-toggle page-link" data-attribute="<%= delta %>" data-toggle="liferay-dropdown" id=<%= ariaPaginationButton %> role="combobox">
+				<button aria-controls="<%= ariaPaginationPicker %>" aria-describedby="<%= ariaPaginationResults %> <%= ariaPaginationReloadDescription %>" aria-expanded="false" aria-haspopup="listbox" aria-label="<%= LanguageUtil.get(request, "items-per-page") %>" class="dropdown-toggle page-link" data-attribute="<%= delta %>" data-toggle="liferay-dropdown" id=<%= ariaPaginationButton %> role="combobox">
 					<liferay-ui:message arguments="<%= delta %>" key="x-entries" translateArguments="<%= false %>" />
 
 					<aui:icon image="caret-double-l" markupView="lexicon" />
@@ -103,6 +104,8 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 						}
 
 						String curDeltaURL = HttpComponentsUtil.setParameter(url + urlAnchor, namespace + deltaParam, curDelta);
+
+						curDeltaURL = HttpComponentsUtil.sortParameters(curDeltaURL);
 					%>
 
 						<li role="presentation">
@@ -118,6 +121,10 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 					%>
 
 				</ul>
+
+				<span class="sr-only" id="<%= ariaPaginationReloadDescription %>">
+					<liferay-ui:message key="selecting-an-option-will-reload-the-page" />
+				</span>
 			</div>
 
 			<aui:script senna="temporary" type="text/javascript">
@@ -538,7 +545,13 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 <%!
 private String _getHREF(String formName, String curParam, int cur, String jsCall, String url, String urlAnchor) throws Exception {
 	if (Validator.isNotNull(url)) {
-		return HtmlUtil.escapeHREF(HttpComponentsUtil.addParameter(HttpComponentsUtil.removeParameter(url, curParam) + urlAnchor, curParam, cur));
+		url = HttpComponentsUtil.removeParameter(url, curParam);
+
+		url = HttpComponentsUtil.addParameter(url + urlAnchor, curParam, cur);
+
+		url = HttpComponentsUtil.sortParameters(url);
+
+		return HtmlUtil.escapeHREF(url);
 	}
 
 	return "javascript:document." + formName + "." + curParam + ".value = '" + cur + "'; " + jsCall;

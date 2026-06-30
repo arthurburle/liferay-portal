@@ -733,21 +733,6 @@ public interface CPMeasurementUnitPersistence
 	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
-	 * Caches the cp measurement unit in the entity cache if it is enabled.
-	 *
-	 * @param cpMeasurementUnit the cp measurement unit
-	 */
-	public void cacheResult(CPMeasurementUnit cpMeasurementUnit);
-
-	/**
-	 * Caches the cp measurement units in the entity cache if it is enabled.
-	 *
-	 * @param cpMeasurementUnits the cp measurement units
-	 */
-	public void cacheResult(
-		java.util.List<CPMeasurementUnit> cpMeasurementUnits);
-
-	/**
 	 * Creates a new cp measurement unit with the primary key. Does not add the cp measurement unit to the database.
 	 *
 	 * @param CPMeasurementUnitId the primary key for the new cp measurement unit
@@ -785,73 +770,5 @@ public interface CPMeasurementUnitPersistence
 	 */
 	public CPMeasurementUnit fetchByPrimaryKey(long CPMeasurementUnitId);
 
-	/**
-	 * Returns all the cp measurement units.
-	 *
-	 * @return the cp measurement units
-	 */
-	public java.util.List<CPMeasurementUnit> findAll();
-
-	/**
-	 * Returns a range of all the cp measurement units.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPMeasurementUnitModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp measurement units
-	 * @param end the upper bound of the range of cp measurement units (not inclusive)
-	 * @return the range of cp measurement units
-	 */
-	public java.util.List<CPMeasurementUnit> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the cp measurement units.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPMeasurementUnitModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp measurement units
-	 * @param end the upper bound of the range of cp measurement units (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cp measurement units
-	 */
-	public java.util.List<CPMeasurementUnit> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CPMeasurementUnit>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the cp measurement units.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.product.model.impl.CPMeasurementUnitModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cp measurement units
-	 * @param end the upper bound of the range of cp measurement units (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cp measurement units
-	 */
-	public java.util.List<CPMeasurementUnit> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CPMeasurementUnit>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the cp measurement units from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of cp measurement units.
-	 *
-	 * @return the number of cp measurement units
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1680435761
+// LIFERAY-SERVICE-BUILDER-HASH:1704566672

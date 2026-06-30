@@ -450,21 +450,6 @@ public interface JournalArticleResourcePersistence
 	public int countByG_A(long groupId, String articleId);
 
 	/**
-	 * Caches the journal article resource in the entity cache if it is enabled.
-	 *
-	 * @param journalArticleResource the journal article resource
-	 */
-	public void cacheResult(JournalArticleResource journalArticleResource);
-
-	/**
-	 * Caches the journal article resources in the entity cache if it is enabled.
-	 *
-	 * @param journalArticleResources the journal article resources
-	 */
-	public void cacheResult(
-		java.util.List<JournalArticleResource> journalArticleResources);
-
-	/**
 	 * Creates a new journal article resource with the primary key. Does not add the journal article resource to the database.
 	 *
 	 * @param resourcePrimKey the primary key for the new journal article resource
@@ -503,73 +488,5 @@ public interface JournalArticleResourcePersistence
 	 */
 	public JournalArticleResource fetchByPrimaryKey(long resourcePrimKey);
 
-	/**
-	 * Returns all the journal article resources.
-	 *
-	 * @return the journal article resources
-	 */
-	public java.util.List<JournalArticleResource> findAll();
-
-	/**
-	 * Returns a range of all the journal article resources.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.journal.model.impl.JournalArticleResourceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of journal article resources
-	 * @param end the upper bound of the range of journal article resources (not inclusive)
-	 * @return the range of journal article resources
-	 */
-	public java.util.List<JournalArticleResource> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the journal article resources.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.journal.model.impl.JournalArticleResourceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of journal article resources
-	 * @param end the upper bound of the range of journal article resources (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of journal article resources
-	 */
-	public java.util.List<JournalArticleResource> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<JournalArticleResource>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the journal article resources.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.journal.model.impl.JournalArticleResourceModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of journal article resources
-	 * @param end the upper bound of the range of journal article resources (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of journal article resources
-	 */
-	public java.util.List<JournalArticleResource> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<JournalArticleResource>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the journal article resources from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of journal article resources.
-	 *
-	 * @return the number of journal article resources
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2031810811
+// LIFERAY-SERVICE-BUILDER-HASH:62207967

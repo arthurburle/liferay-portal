@@ -5,12 +5,10 @@
 
 package com.liferay.portal.tools.service.builder.test.compat740.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -20,10 +18,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -65,7 +60,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = LazyBlobEntryPersistence.class)
 public class LazyBlobEntryPersistenceImpl
-	extends BasePersistenceImpl<LazyBlobEntry>
+	extends BasePersistenceImpl<LazyBlobEntry, NoSuchLazyBlobEntryException>
 	implements LazyBlobEntryPersistence {
 
 	/*
@@ -82,9 +77,6 @@ public class LazyBlobEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -334,103 +326,6 @@ public class LazyBlobEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the lazy blob entry in the entity cache if it is enabled.
-	 *
-	 * @param lazyBlobEntry the lazy blob entry
-	 */
-	@Override
-	public void cacheResult(LazyBlobEntry lazyBlobEntry) {
-		entityCache.putResult(
-			LazyBlobEntryImpl.class, lazyBlobEntry.getPrimaryKey(),
-			lazyBlobEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G,
-			new Object[] {lazyBlobEntry.getUuid(), lazyBlobEntry.getGroupId()},
-			lazyBlobEntry);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the lazy blob entries in the entity cache if it is enabled.
-	 *
-	 * @param lazyBlobEntries the lazy blob entries
-	 */
-	@Override
-	public void cacheResult(List<LazyBlobEntry> lazyBlobEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (lazyBlobEntries.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (LazyBlobEntry lazyBlobEntry : lazyBlobEntries) {
-			if (entityCache.getResult(
-					LazyBlobEntryImpl.class, lazyBlobEntry.getPrimaryKey()) ==
-						null) {
-
-				cacheResult(lazyBlobEntry);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all lazy blob entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(LazyBlobEntryImpl.class);
-
-		finderCache.clearCache(LazyBlobEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the lazy blob entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(LazyBlobEntry lazyBlobEntry) {
-		entityCache.removeResult(LazyBlobEntryImpl.class, lazyBlobEntry);
-	}
-
-	@Override
-	public void clearCache(List<LazyBlobEntry> lazyBlobEntries) {
-		for (LazyBlobEntry lazyBlobEntry : lazyBlobEntries) {
-			entityCache.removeResult(LazyBlobEntryImpl.class, lazyBlobEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(LazyBlobEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(LazyBlobEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		LazyBlobEntryModelImpl lazyBlobEntryModelImpl) {
-
-		Object[] args = new Object[] {
-			lazyBlobEntryModelImpl.getUuid(),
-			lazyBlobEntryModelImpl.getGroupId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G, args, lazyBlobEntryModelImpl);
-	}
-
-	/**
 	 * Creates a new lazy blob entry with the primary key. Does not add the lazy blob entry to the database.
 	 *
 	 * @param lazyBlobEntryId the primary key for the new lazy blob entry
@@ -462,47 +357,6 @@ public class LazyBlobEntryPersistenceImpl
 		throws NoSuchLazyBlobEntryException {
 
 		return remove((Serializable)lazyBlobEntryId);
-	}
-
-	/**
-	 * Removes the lazy blob entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the lazy blob entry
-	 * @return the lazy blob entry that was removed
-	 * @throws NoSuchLazyBlobEntryException if a lazy blob entry with the primary key could not be found
-	 */
-	@Override
-	public LazyBlobEntry remove(Serializable primaryKey)
-		throws NoSuchLazyBlobEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			LazyBlobEntry lazyBlobEntry = (LazyBlobEntry)session.get(
-				LazyBlobEntryImpl.class, primaryKey);
-
-			if (lazyBlobEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchLazyBlobEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(lazyBlobEntry);
-		}
-		catch (NoSuchLazyBlobEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -590,41 +444,13 @@ public class LazyBlobEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			LazyBlobEntryImpl.class, lazyBlobEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(lazyBlobEntryModelImpl);
+		cacheUniqueFindersResult(lazyBlobEntry, false);
 
 		if (isNew) {
 			lazyBlobEntry.setNew(false);
 		}
 
 		lazyBlobEntry.resetOriginalValues();
-
-		return lazyBlobEntry;
-	}
-
-	/**
-	 * Returns the lazy blob entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the lazy blob entry
-	 * @return the lazy blob entry
-	 * @throws NoSuchLazyBlobEntryException if a lazy blob entry with the primary key could not be found
-	 */
-	@Override
-	public LazyBlobEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchLazyBlobEntryException {
-
-		LazyBlobEntry lazyBlobEntry = fetchByPrimaryKey(primaryKey);
-
-		if (lazyBlobEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchLazyBlobEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return lazyBlobEntry;
 	}
@@ -652,186 +478,6 @@ public class LazyBlobEntryPersistenceImpl
 	@Override
 	public LazyBlobEntry fetchByPrimaryKey(long lazyBlobEntryId) {
 		return fetchByPrimaryKey((Serializable)lazyBlobEntryId);
-	}
-
-	/**
-	 * Returns all the lazy blob entries.
-	 *
-	 * @return the lazy blob entries
-	 */
-	@Override
-	public List<LazyBlobEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the lazy blob entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LazyBlobEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of lazy blob entries
-	 * @param end the upper bound of the range of lazy blob entries (not inclusive)
-	 * @return the range of lazy blob entries
-	 */
-	@Override
-	public List<LazyBlobEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the lazy blob entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LazyBlobEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of lazy blob entries
-	 * @param end the upper bound of the range of lazy blob entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of lazy blob entries
-	 */
-	@Override
-	public List<LazyBlobEntry> findAll(
-		int start, int end,
-		OrderByComparator<LazyBlobEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the lazy blob entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LazyBlobEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of lazy blob entries
-	 * @param end the upper bound of the range of lazy blob entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of lazy blob entries
-	 */
-	@Override
-	public List<LazyBlobEntry> findAll(
-		int start, int end, OrderByComparator<LazyBlobEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<LazyBlobEntry> list = null;
-
-		if (useFinderCache) {
-			list = (List<LazyBlobEntry>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_LAZYBLOBENTRY);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_LAZYBLOBENTRY;
-
-				sql = sql.concat(LazyBlobEntryModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<LazyBlobEntry>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the lazy blob entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (LazyBlobEntry lazyBlobEntry : findAll()) {
-			remove(lazyBlobEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of lazy blob entries.
-	 *
-	 * @return the number of lazy blob entries
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_LAZYBLOBENTRY);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -864,21 +510,6 @@ public class LazyBlobEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -889,33 +520,35 @@ public class LazyBlobEntryPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_LAZYBLOBENTRY_WHERE, _SQL_COUNT_LAZYBLOBENTRY_WHERE,
-			LazyBlobEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			LazyBlobEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"lazyBlobEntry.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, LazyBlobEntry::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(LazyBlobEntry::getUuid),
+			LazyBlobEntry::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByUUID_G, _SQL_SELECT_LAZYBLOBENTRY_WHERE,
+			this, _finderPathFetchByUUID_G, _SQL_SELECT_LAZYBLOBENTRY_WHERE, "",
 			new FinderColumn<>(
 				"lazyBlobEntry.", "uuid", FinderColumn.Type.STRING, "=", true,
-				false, LazyBlobEntry::getUuid),
+				true, LazyBlobEntry::getUuid),
 			new FinderColumn<>(
 				"lazyBlobEntry.", "groupId", FinderColumn.Type.LONG, "=", true,
 				true, LazyBlobEntry::getGroupId));
@@ -962,22 +595,17 @@ public class LazyBlobEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		LazyBlobEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_LAZYBLOBENTRY =
 		"SELECT lazyBlobEntry FROM LazyBlobEntry lazyBlobEntry";
 
 	private static final String _SQL_SELECT_LAZYBLOBENTRY_WHERE =
 		"SELECT lazyBlobEntry FROM LazyBlobEntry lazyBlobEntry WHERE ";
 
-	private static final String _SQL_COUNT_LAZYBLOBENTRY =
-		"SELECT COUNT(lazyBlobEntry) FROM LazyBlobEntry lazyBlobEntry";
-
 	private static final String _SQL_COUNT_LAZYBLOBENTRY_WHERE =
 		"SELECT COUNT(lazyBlobEntry) FROM LazyBlobEntry lazyBlobEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "lazyBlobEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No LazyBlobEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No LazyBlobEntry exists with the key {";
@@ -994,4 +622,4 @@ public class LazyBlobEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2137192192
+// LIFERAY-SERVICE-BUILDER-HASH:-317084688

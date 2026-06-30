@@ -10,8 +10,8 @@ clusterBootstrap:
             memory: 8Mi
     script: |
         sysctl -w vm.max_map_count=1048576
+crossplaneGsaEmail: ""
 crossplaneNamespace: crossplane-system
-deploymentName: ""
 eck-operator:
     enabled: true
 gateway:
@@ -19,9 +19,7 @@ gateway:
     internetFacing: true
     namespace: envoy-gateway-system
 global:
-    gcp:
-        projectId: ""
-        projectNumber: ""
+    gcp: {}
 liferay-subchart-backup-controller:
     enabled: true
     serviceAccountName: backup-controller

@@ -808,6 +808,10 @@
 			<category name="Javadoc" />
 			<description name="Checks if the `@deprecated` javadoc is pointing to the correct version." />
 		</check>
+		<check name="JavaExpandoBridgeAttributesCallOrderCheck">
+			<category name="Bug Prevention" />
+			<description name="Ensure `setExpandoBridgeAttributes` is the final setter called on a model before model persistence." />
+		</check>
 		<check name="JavaFeatureFlagManagerUtilCheck">
 			<category name="Bug Prevention" />
 			<description name="Finds cases where `FeatureFlagManagerUtil.isEnabled` should be used and incorrect use of it." />
@@ -1539,6 +1543,10 @@
 		</check>
 	</source-processor>
 	<source-processor name="MarkdownSourceProcessor">
+		<check name="EmbeddedJSONCheck">
+			<category name="Styling" />
+			<description name="Ensures consistent formatting for embedded JSON." />
+		</check>
 		<check name="MarkdownBreakingChangesAmendmentsFileCheck">
 			<category name="Styling" />
 			<description name="Checks that breaking changes amendments should contain the schematized breaking changes in `BREAKING_CHANGES_AMENDMENTS.md` file." />
@@ -2093,13 +2101,13 @@
 		</check>
 	</source-processor>
 	<source-processor name="XMLSourceProcessor">
+		<check name="EmbeddedJSONCheck">
+			<category name="Styling" />
+			<description name="Ensures consistent formatting for embedded JSON." />
+		</check>
 		<check name="XMLBuildFileCheck">
 			<category name="Bug Prevention" />
 			<description name="Performs several checks on `build.xml`." />
-		</check>
-		<check name="XMLCDATACheck">
-			<category name="Bug Prevention" />
-			<description name="Performs several checks on `CDATA` inside `xml`." />
 		</check>
 		<check name="XMLCustomSQLOrderCheck">
 			<category name="Styling" />

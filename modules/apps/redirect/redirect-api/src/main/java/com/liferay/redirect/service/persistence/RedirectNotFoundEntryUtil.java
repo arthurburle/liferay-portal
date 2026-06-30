@@ -36,6 +36,24 @@ public class RedirectNotFoundEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<RedirectNotFoundEntry> redirectNotFoundEntries) {
+
+		getPersistence().cacheResult(redirectNotFoundEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		RedirectNotFoundEntry redirectNotFoundEntry) {
+
+		getPersistence().cacheResult(redirectNotFoundEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -299,28 +317,6 @@ public class RedirectNotFoundEntryUtil {
 	}
 
 	/**
-	 * Caches the redirect not found entry in the entity cache if it is enabled.
-	 *
-	 * @param redirectNotFoundEntry the redirect not found entry
-	 */
-	public static void cacheResult(
-		RedirectNotFoundEntry redirectNotFoundEntry) {
-
-		getPersistence().cacheResult(redirectNotFoundEntry);
-	}
-
-	/**
-	 * Caches the redirect not found entries in the entity cache if it is enabled.
-	 *
-	 * @param redirectNotFoundEntries the redirect not found entries
-	 */
-	public static void cacheResult(
-		List<RedirectNotFoundEntry> redirectNotFoundEntries) {
-
-		getPersistence().cacheResult(redirectNotFoundEntries);
-	}
-
-	/**
 	 * Creates a new redirect not found entry with the primary key. Does not add the redirect not found entry to the database.
 	 *
 	 * @param redirectNotFoundEntryId the primary key for the new redirect not found entry
@@ -375,87 +371,6 @@ public class RedirectNotFoundEntryUtil {
 		return getPersistence().fetchByPrimaryKey(redirectNotFoundEntryId);
 	}
 
-	/**
-	 * Returns all the redirect not found entries.
-	 *
-	 * @return the redirect not found entries
-	 */
-	public static List<RedirectNotFoundEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the redirect not found entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.redirect.model.impl.RedirectNotFoundEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of redirect not found entries
-	 * @param end the upper bound of the range of redirect not found entries (not inclusive)
-	 * @return the range of redirect not found entries
-	 */
-	public static List<RedirectNotFoundEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the redirect not found entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.redirect.model.impl.RedirectNotFoundEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of redirect not found entries
-	 * @param end the upper bound of the range of redirect not found entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of redirect not found entries
-	 */
-	public static List<RedirectNotFoundEntry> findAll(
-		int start, int end,
-		OrderByComparator<RedirectNotFoundEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the redirect not found entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.redirect.model.impl.RedirectNotFoundEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of redirect not found entries
-	 * @param end the upper bound of the range of redirect not found entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of redirect not found entries
-	 */
-	public static List<RedirectNotFoundEntry> findAll(
-		int start, int end,
-		OrderByComparator<RedirectNotFoundEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the redirect not found entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of redirect not found entries.
-	 *
-	 * @return the number of redirect not found entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static RedirectNotFoundEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -469,4 +384,4 @@ public class RedirectNotFoundEntryUtil {
 	private static volatile RedirectNotFoundEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-421857752
+// LIFERAY-SERVICE-BUILDER-HASH:170094886

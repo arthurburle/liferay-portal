@@ -14,17 +14,13 @@ import com.liferay.oauth2.provider.model.impl.OAuth2AuthorizationModelImpl;
 import com.liferay.oauth2.provider.service.persistence.OAuth2AuthorizationPersistence;
 import com.liferay.oauth2.provider.service.persistence.OAuth2AuthorizationUtil;
 import com.liferay.oauth2.provider.service.persistence.impl.constants.OAuthTwoPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
@@ -34,11 +30,8 @@ import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.TableMapper;
 import com.liferay.portal.kernel.service.persistence.impl.TableMapperFactory;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 
@@ -72,7 +65,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = OAuth2AuthorizationPersistence.class)
 public class OAuth2AuthorizationPersistenceImpl
-	extends BasePersistenceImpl<OAuth2Authorization>
+	extends BasePersistenceImpl
+		<OAuth2Authorization, NoSuchOAuth2AuthorizationException>
 	implements OAuth2AuthorizationPersistence {
 
 	/*
@@ -89,9 +83,6 @@ public class OAuth2AuthorizationPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUserId;
 	private FinderPath _finderPathWithoutPaginationFindByUserId;
 	private FinderPath _finderPathCountByUserId;
@@ -924,89 +915,6 @@ public class OAuth2AuthorizationPersistenceImpl
 	}
 
 	/**
-	 * Caches the o auth2 authorization in the entity cache if it is enabled.
-	 *
-	 * @param oAuth2Authorization the o auth2 authorization
-	 */
-	@Override
-	public void cacheResult(OAuth2Authorization oAuth2Authorization) {
-		entityCache.putResult(
-			OAuth2AuthorizationImpl.class, oAuth2Authorization.getPrimaryKey(),
-			oAuth2Authorization);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the o auth2 authorizations in the entity cache if it is enabled.
-	 *
-	 * @param oAuth2Authorizations the o auth2 authorizations
-	 */
-	@Override
-	public void cacheResult(List<OAuth2Authorization> oAuth2Authorizations) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (oAuth2Authorizations.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (OAuth2Authorization oAuth2Authorization : oAuth2Authorizations) {
-			if (entityCache.getResult(
-					OAuth2AuthorizationImpl.class,
-					oAuth2Authorization.getPrimaryKey()) == null) {
-
-				cacheResult(oAuth2Authorization);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all o auth2 authorizations.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(OAuth2AuthorizationImpl.class);
-
-		finderCache.clearCache(OAuth2AuthorizationImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the o auth2 authorization.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(OAuth2Authorization oAuth2Authorization) {
-		entityCache.removeResult(
-			OAuth2AuthorizationImpl.class, oAuth2Authorization);
-	}
-
-	@Override
-	public void clearCache(List<OAuth2Authorization> oAuth2Authorizations) {
-		for (OAuth2Authorization oAuth2Authorization : oAuth2Authorizations) {
-			entityCache.removeResult(
-				OAuth2AuthorizationImpl.class, oAuth2Authorization);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(OAuth2AuthorizationImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(OAuth2AuthorizationImpl.class, primaryKey);
-		}
-	}
-
-	/**
 	 * Creates a new o auth2 authorization with the primary key. Does not add the o auth2 authorization to the database.
 	 *
 	 * @param oAuth2AuthorizationId the primary key for the new o auth2 authorization
@@ -1036,48 +944,6 @@ public class OAuth2AuthorizationPersistenceImpl
 		throws NoSuchOAuth2AuthorizationException {
 
 		return remove((Serializable)oAuth2AuthorizationId);
-	}
-
-	/**
-	 * Removes the o auth2 authorization with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the o auth2 authorization
-	 * @return the o auth2 authorization that was removed
-	 * @throws NoSuchOAuth2AuthorizationException if a o auth2 authorization with the primary key could not be found
-	 */
-	@Override
-	public OAuth2Authorization remove(Serializable primaryKey)
-		throws NoSuchOAuth2AuthorizationException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			OAuth2Authorization oAuth2Authorization =
-				(OAuth2Authorization)session.get(
-					OAuth2AuthorizationImpl.class, primaryKey);
-
-			if (oAuth2Authorization == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchOAuth2AuthorizationException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(oAuth2Authorization);
-		}
-		catch (NoSuchOAuth2AuthorizationException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1178,40 +1044,13 @@ public class OAuth2AuthorizationPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			OAuth2AuthorizationImpl.class, oAuth2AuthorizationModelImpl, false,
-			true);
+		cacheUniqueFindersResult(oAuth2Authorization, false);
 
 		if (isNew) {
 			oAuth2Authorization.setNew(false);
 		}
 
 		oAuth2Authorization.resetOriginalValues();
-
-		return oAuth2Authorization;
-	}
-
-	/**
-	 * Returns the o auth2 authorization with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the o auth2 authorization
-	 * @return the o auth2 authorization
-	 * @throws NoSuchOAuth2AuthorizationException if a o auth2 authorization with the primary key could not be found
-	 */
-	@Override
-	public OAuth2Authorization findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchOAuth2AuthorizationException {
-
-		OAuth2Authorization oAuth2Authorization = fetchByPrimaryKey(primaryKey);
-
-		if (oAuth2Authorization == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchOAuth2AuthorizationException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return oAuth2Authorization;
 	}
@@ -1239,188 +1078,6 @@ public class OAuth2AuthorizationPersistenceImpl
 	@Override
 	public OAuth2Authorization fetchByPrimaryKey(long oAuth2AuthorizationId) {
 		return fetchByPrimaryKey((Serializable)oAuth2AuthorizationId);
-	}
-
-	/**
-	 * Returns all the o auth2 authorizations.
-	 *
-	 * @return the o auth2 authorizations
-	 */
-	@Override
-	public List<OAuth2Authorization> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the o auth2 authorizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>OAuth2AuthorizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth2 authorizations
-	 * @param end the upper bound of the range of o auth2 authorizations (not inclusive)
-	 * @return the range of o auth2 authorizations
-	 */
-	@Override
-	public List<OAuth2Authorization> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the o auth2 authorizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>OAuth2AuthorizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth2 authorizations
-	 * @param end the upper bound of the range of o auth2 authorizations (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of o auth2 authorizations
-	 */
-	@Override
-	public List<OAuth2Authorization> findAll(
-		int start, int end,
-		OrderByComparator<OAuth2Authorization> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the o auth2 authorizations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>OAuth2AuthorizationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of o auth2 authorizations
-	 * @param end the upper bound of the range of o auth2 authorizations (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of o auth2 authorizations
-	 */
-	@Override
-	public List<OAuth2Authorization> findAll(
-		int start, int end,
-		OrderByComparator<OAuth2Authorization> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<OAuth2Authorization> list = null;
-
-		if (useFinderCache) {
-			list = (List<OAuth2Authorization>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_OAUTH2AUTHORIZATION);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_OAUTH2AUTHORIZATION;
-
-				sql = sql.concat(OAuth2AuthorizationModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<OAuth2Authorization>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the o auth2 authorizations from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (OAuth2Authorization oAuth2Authorization : findAll()) {
-			remove(oAuth2Authorization);
-		}
-	}
-
-	/**
-	 * Returns the number of o auth2 authorizations.
-	 *
-	 * @return the number of o auth2 authorizations
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_OAUTH2AUTHORIZATION);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	/**
@@ -1797,26 +1454,11 @@ public class OAuth2AuthorizationPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
 		oAuth2AuthorizationToOAuth2ScopeGrantTableMapper =
 			TableMapperFactory.getTableMapper(
 				"OA2Auths_OA2ScopeGrants#oAuth2AuthorizationId",
 				"OA2Auths_OA2ScopeGrants", "companyId", "oAuth2AuthorizationId",
 				"oAuth2ScopeGrantId", this, OAuth2ScopeGrant.class);
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
 
 		_finderPathWithPaginationFindByUserId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUserId",
@@ -1842,7 +1484,7 @@ public class OAuth2AuthorizationPersistenceImpl
 				_finderPathCountByUserId, _SQL_SELECT_OAUTH2AUTHORIZATION_WHERE,
 				_SQL_COUNT_OAUTH2AUTHORIZATION_WHERE,
 				OAuth2AuthorizationModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"oAuth2Authorization.", "userId", FinderColumn.Type.LONG,
 					"=", true, true, OAuth2Authorization::getUserId));
@@ -1873,7 +1515,7 @@ public class OAuth2AuthorizationPersistenceImpl
 				_SQL_SELECT_OAUTH2AUTHORIZATION_WHERE,
 				_SQL_COUNT_OAUTH2AUTHORIZATION_WHERE,
 				OAuth2AuthorizationModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"oAuth2Authorization.", "oAuth2ApplicationId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1905,10 +1547,10 @@ public class OAuth2AuthorizationPersistenceImpl
 				_finderPathCountByC_ATCH, _SQL_SELECT_OAUTH2AUTHORIZATION_WHERE,
 				_SQL_COUNT_OAUTH2AUTHORIZATION_WHERE,
 				OAuth2AuthorizationModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"oAuth2Authorization.", "companyId", FinderColumn.Type.LONG,
-					"=", true, false, OAuth2Authorization::getCompanyId),
+					"=", true, true, OAuth2Authorization::getCompanyId),
 				new FinderColumn<>(
 					"oAuth2Authorization.", "accessTokenContentHash",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1940,10 +1582,10 @@ public class OAuth2AuthorizationPersistenceImpl
 				_finderPathCountByC_RTCH, _SQL_SELECT_OAUTH2AUTHORIZATION_WHERE,
 				_SQL_COUNT_OAUTH2AUTHORIZATION_WHERE,
 				OAuth2AuthorizationModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"oAuth2Authorization.", "companyId", FinderColumn.Type.LONG,
-					"=", true, false, OAuth2Authorization::getCompanyId),
+					"=", true, true, OAuth2Authorization::getCompanyId),
 				new FinderColumn<>(
 					"oAuth2Authorization.", "refreshTokenContentHash",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1970,7 +1612,7 @@ public class OAuth2AuthorizationPersistenceImpl
 			new String[] {
 				"userId", "oAuth2ApplicationId", "rememberDeviceContent"
 			},
-			true);
+			0, 4, true, null);
 
 		_finderPathCountByU_O_R = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByU_O_R",
@@ -1981,20 +1623,21 @@ public class OAuth2AuthorizationPersistenceImpl
 			new String[] {
 				"userId", "oAuth2ApplicationId", "rememberDeviceContent"
 			},
-			false);
+			0, 4, false, null);
 
 		_collectionPersistenceFinderByU_O_R = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByU_O_R,
 			_finderPathWithoutPaginationFindByU_O_R, _finderPathCountByU_O_R,
 			_SQL_SELECT_OAUTH2AUTHORIZATION_WHERE,
 			_SQL_COUNT_OAUTH2AUTHORIZATION_WHERE,
-			OAuth2AuthorizationModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			OAuth2AuthorizationModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"oAuth2Authorization.", "userId", FinderColumn.Type.LONG, "=",
-				true, false, OAuth2Authorization::getUserId),
+				true, true, OAuth2Authorization::getUserId),
 			new FinderColumn<>(
 				"oAuth2Authorization.", "oAuth2ApplicationId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				OAuth2Authorization::getOAuth2ApplicationId),
 			new FinderColumn<>(
 				"oAuth2Authorization.", "rememberDeviceContent",
@@ -2049,28 +1692,20 @@ public class OAuth2AuthorizationPersistenceImpl
 	protected TableMapper<OAuth2Authorization, OAuth2ScopeGrant>
 		oAuth2AuthorizationToOAuth2ScopeGrantTableMapper;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		OAuth2AuthorizationModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_OAUTH2AUTHORIZATION =
 		"SELECT oAuth2Authorization FROM OAuth2Authorization oAuth2Authorization";
 
 	private static final String _SQL_SELECT_OAUTH2AUTHORIZATION_WHERE =
 		"SELECT oAuth2Authorization FROM OAuth2Authorization oAuth2Authorization WHERE ";
 
-	private static final String _SQL_COUNT_OAUTH2AUTHORIZATION =
-		"SELECT COUNT(oAuth2Authorization) FROM OAuth2Authorization oAuth2Authorization";
-
 	private static final String _SQL_COUNT_OAUTH2AUTHORIZATION_WHERE =
 		"SELECT COUNT(oAuth2Authorization) FROM OAuth2Authorization oAuth2Authorization WHERE ";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS = "oAuth2Authorization.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No OAuth2Authorization exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No OAuth2Authorization exists with the key {";
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		OAuth2AuthorizationPersistenceImpl.class);
 
 	private static final Set<String> _badColumnNames = SetUtil.fromArray(
 		new String[] {"oAuth2ApplicationScopeAliasesId"});
@@ -2081,4 +1716,4 @@ public class OAuth2AuthorizationPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-36284531
+// LIFERAY-SERVICE-BUILDER-HASH:-1215027337

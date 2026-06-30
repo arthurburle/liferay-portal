@@ -803,21 +803,6 @@ public interface ERCVersionedEntryVersionPersistence
 	public int countByUuid_C_Version(String uuid, long companyId, int version);
 
 	/**
-	 * Caches the erc versioned entry version in the entity cache if it is enabled.
-	 *
-	 * @param ercVersionedEntryVersion the erc versioned entry version
-	 */
-	public void cacheResult(ERCVersionedEntryVersion ercVersionedEntryVersion);
-
-	/**
-	 * Caches the erc versioned entry versions in the entity cache if it is enabled.
-	 *
-	 * @param ercVersionedEntryVersions the erc versioned entry versions
-	 */
-	public void cacheResult(
-		java.util.List<ERCVersionedEntryVersion> ercVersionedEntryVersions);
-
-	/**
 	 * Creates a new erc versioned entry version with the primary key. Does not add the erc versioned entry version to the database.
 	 *
 	 * @param ercVersionedEntryVersionId the primary key for the new erc versioned entry version
@@ -858,73 +843,5 @@ public interface ERCVersionedEntryVersionPersistence
 	public ERCVersionedEntryVersion fetchByPrimaryKey(
 		long ercVersionedEntryVersionId);
 
-	/**
-	 * Returns all the erc versioned entry versions.
-	 *
-	 * @return the erc versioned entry versions
-	 */
-	public java.util.List<ERCVersionedEntryVersion> findAll();
-
-	/**
-	 * Returns a range of all the erc versioned entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.ERCVersionedEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc versioned entry versions
-	 * @param end the upper bound of the range of erc versioned entry versions (not inclusive)
-	 * @return the range of erc versioned entry versions
-	 */
-	public java.util.List<ERCVersionedEntryVersion> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the erc versioned entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.ERCVersionedEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc versioned entry versions
-	 * @param end the upper bound of the range of erc versioned entry versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of erc versioned entry versions
-	 */
-	public java.util.List<ERCVersionedEntryVersion> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<ERCVersionedEntryVersion> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the erc versioned entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.ERCVersionedEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc versioned entry versions
-	 * @param end the upper bound of the range of erc versioned entry versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of erc versioned entry versions
-	 */
-	public java.util.List<ERCVersionedEntryVersion> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<ERCVersionedEntryVersion> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the erc versioned entry versions from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of erc versioned entry versions.
-	 *
-	 * @return the number of erc versioned entry versions
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:891979013
+// LIFERAY-SERVICE-BUILDER-HASH:385806467

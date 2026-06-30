@@ -503,6 +503,11 @@ components:
                             items:
                                 $ref: "#/components/schemas/CustomMetaTag"
                             type: array
+                        defaultAssetPublisherPortletId:
+                            # @review
+                            description:
+                                The portlet ID of the asset publisher configured as the default for this page, if any.
+                            type: string
                         openGraphSettings:
                             $ref: "#/components/schemas/OpenGraphSettings"
                             # @review
@@ -4729,6 +4734,11 @@ components:
                             items:
                                 type: string
                             type: array
+                        defaultAssetPublisherPortletId:
+                            # @review
+                            description:
+                                The portlet ID of the asset publisher configured as the default for this page, if any.
+                            type: string
                         inheritChanges:
                             # @review
                             description:
@@ -4881,7 +4891,7 @@ components:
 info:
     description:
         "A Java client JAR is available for use with the group ID 'com.liferay', artifact ID
-        'com.liferay.headless.admin.site.client', and version '1.0.29'."
+        'com.liferay.headless.admin.site.client', and version '1.0.30'."
     license:
         name: Apache 2.0
         url: http://www.apache.org/licenses/LICENSE-2.0.html

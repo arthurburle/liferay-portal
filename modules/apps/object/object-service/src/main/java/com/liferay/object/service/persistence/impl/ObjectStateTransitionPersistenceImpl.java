@@ -13,27 +13,20 @@ import com.liferay.object.model.impl.ObjectStateTransitionModelImpl;
 import com.liferay.object.service.persistence.ObjectStateTransitionPersistence;
 import com.liferay.object.service.persistence.ObjectStateTransitionUtil;
 import com.liferay.object.service.persistence.impl.constants.ObjectPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -68,7 +61,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ObjectStateTransitionPersistence.class)
 public class ObjectStateTransitionPersistenceImpl
-	extends BasePersistenceImpl<ObjectStateTransition>
+	extends BasePersistenceImpl
+		<ObjectStateTransition, NoSuchObjectStateTransitionException>
 	implements ObjectStateTransitionPersistence {
 
 	/*
@@ -85,9 +79,6 @@ public class ObjectStateTransitionPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -872,96 +863,6 @@ public class ObjectStateTransitionPersistenceImpl
 	}
 
 	/**
-	 * Caches the object state transition in the entity cache if it is enabled.
-	 *
-	 * @param objectStateTransition the object state transition
-	 */
-	@Override
-	public void cacheResult(ObjectStateTransition objectStateTransition) {
-		entityCache.putResult(
-			ObjectStateTransitionImpl.class,
-			objectStateTransition.getPrimaryKey(), objectStateTransition);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the object state transitions in the entity cache if it is enabled.
-	 *
-	 * @param objectStateTransitions the object state transitions
-	 */
-	@Override
-	public void cacheResult(
-		List<ObjectStateTransition> objectStateTransitions) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (objectStateTransitions.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ObjectStateTransition objectStateTransition :
-				objectStateTransitions) {
-
-			if (entityCache.getResult(
-					ObjectStateTransitionImpl.class,
-					objectStateTransition.getPrimaryKey()) == null) {
-
-				cacheResult(objectStateTransition);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all object state transitions.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ObjectStateTransitionImpl.class);
-
-		finderCache.clearCache(ObjectStateTransitionImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the object state transition.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ObjectStateTransition objectStateTransition) {
-		entityCache.removeResult(
-			ObjectStateTransitionImpl.class, objectStateTransition);
-	}
-
-	@Override
-	public void clearCache(List<ObjectStateTransition> objectStateTransitions) {
-		for (ObjectStateTransition objectStateTransition :
-				objectStateTransitions) {
-
-			entityCache.removeResult(
-				ObjectStateTransitionImpl.class, objectStateTransition);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ObjectStateTransitionImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				ObjectStateTransitionImpl.class, primaryKey);
-		}
-	}
-
-	/**
 	 * Creates a new object state transition with the primary key. Does not add the object state transition to the database.
 	 *
 	 * @param objectStateTransitionId the primary key for the new object state transition
@@ -996,48 +897,6 @@ public class ObjectStateTransitionPersistenceImpl
 		throws NoSuchObjectStateTransitionException {
 
 		return remove((Serializable)objectStateTransitionId);
-	}
-
-	/**
-	 * Removes the object state transition with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the object state transition
-	 * @return the object state transition that was removed
-	 * @throws NoSuchObjectStateTransitionException if a object state transition with the primary key could not be found
-	 */
-	@Override
-	public ObjectStateTransition remove(Serializable primaryKey)
-		throws NoSuchObjectStateTransitionException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ObjectStateTransition objectStateTransition =
-				(ObjectStateTransition)session.get(
-					ObjectStateTransitionImpl.class, primaryKey);
-
-			if (objectStateTransition == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchObjectStateTransitionException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(objectStateTransition);
-		}
-		catch (NoSuchObjectStateTransitionException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1152,41 +1011,13 @@ public class ObjectStateTransitionPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ObjectStateTransitionImpl.class, objectStateTransitionModelImpl,
-			false, true);
+		cacheUniqueFindersResult(objectStateTransition, false);
 
 		if (isNew) {
 			objectStateTransition.setNew(false);
 		}
 
 		objectStateTransition.resetOriginalValues();
-
-		return objectStateTransition;
-	}
-
-	/**
-	 * Returns the object state transition with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the object state transition
-	 * @return the object state transition
-	 * @throws NoSuchObjectStateTransitionException if a object state transition with the primary key could not be found
-	 */
-	@Override
-	public ObjectStateTransition findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchObjectStateTransitionException {
-
-		ObjectStateTransition objectStateTransition = fetchByPrimaryKey(
-			primaryKey);
-
-		if (objectStateTransition == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchObjectStateTransitionException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return objectStateTransition;
 	}
@@ -1216,188 +1047,6 @@ public class ObjectStateTransitionPersistenceImpl
 		long objectStateTransitionId) {
 
 		return fetchByPrimaryKey((Serializable)objectStateTransitionId);
-	}
-
-	/**
-	 * Returns all the object state transitions.
-	 *
-	 * @return the object state transitions
-	 */
-	@Override
-	public List<ObjectStateTransition> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the object state transitions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectStateTransitionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state transitions
-	 * @param end the upper bound of the range of object state transitions (not inclusive)
-	 * @return the range of object state transitions
-	 */
-	@Override
-	public List<ObjectStateTransition> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the object state transitions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectStateTransitionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state transitions
-	 * @param end the upper bound of the range of object state transitions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object state transitions
-	 */
-	@Override
-	public List<ObjectStateTransition> findAll(
-		int start, int end,
-		OrderByComparator<ObjectStateTransition> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the object state transitions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectStateTransitionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state transitions
-	 * @param end the upper bound of the range of object state transitions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object state transitions
-	 */
-	@Override
-	public List<ObjectStateTransition> findAll(
-		int start, int end,
-		OrderByComparator<ObjectStateTransition> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ObjectStateTransition> list = null;
-
-		if (useFinderCache) {
-			list = (List<ObjectStateTransition>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_OBJECTSTATETRANSITION);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_OBJECTSTATETRANSITION;
-
-				sql = sql.concat(ObjectStateTransitionModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ObjectStateTransition>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the object state transitions from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ObjectStateTransition objectStateTransition : findAll()) {
-			remove(objectStateTransition);
-		}
-	}
-
-	/**
-	 * Returns the number of object state transitions.
-	 *
-	 * @return the number of object state transitions
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_OBJECTSTATETRANSITION);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -1430,21 +1079,6 @@ public class ObjectStateTransitionPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1455,21 +1089,21 @@ public class ObjectStateTransitionPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_OBJECTSTATETRANSITION_WHERE,
 			_SQL_COUNT_OBJECTSTATETRANSITION_WHERE,
-			ObjectStateTransitionModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			ObjectStateTransitionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"objectStateTransition.", "uuid", FinderColumn.Type.STRING, "=",
 				true, true, ObjectStateTransition::getUuid));
@@ -1486,12 +1120,12 @@ public class ObjectStateTransitionPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1501,10 +1135,10 @@ public class ObjectStateTransitionPersistenceImpl
 				_SQL_SELECT_OBJECTSTATETRANSITION_WHERE,
 				_SQL_COUNT_OBJECTSTATETRANSITION_WHERE,
 				ObjectStateTransitionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectStateTransition.", "uuid", FinderColumn.Type.STRING,
-					"=", true, false, ObjectStateTransition::getUuid),
+					"=", true, true, ObjectStateTransition::getUuid),
 				new FinderColumn<>(
 					"objectStateTransition.", "companyId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1536,7 +1170,7 @@ public class ObjectStateTransitionPersistenceImpl
 				_SQL_SELECT_OBJECTSTATETRANSITION_WHERE,
 				_SQL_COUNT_OBJECTSTATETRANSITION_WHERE,
 				ObjectStateTransitionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectStateTransition.", "objectStateFlowId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1568,7 +1202,7 @@ public class ObjectStateTransitionPersistenceImpl
 				_SQL_SELECT_OBJECTSTATETRANSITION_WHERE,
 				_SQL_COUNT_OBJECTSTATETRANSITION_WHERE,
 				ObjectStateTransitionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectStateTransition.", "sourceObjectStateId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1600,7 +1234,7 @@ public class ObjectStateTransitionPersistenceImpl
 				_SQL_SELECT_OBJECTSTATETRANSITION_WHERE,
 				_SQL_COUNT_OBJECTSTATETRANSITION_WHERE,
 				ObjectStateTransitionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectStateTransition.", "targetObjectStateId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1648,29 +1282,20 @@ public class ObjectStateTransitionPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ObjectStateTransitionModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_OBJECTSTATETRANSITION =
 		"SELECT objectStateTransition FROM ObjectStateTransition objectStateTransition";
 
 	private static final String _SQL_SELECT_OBJECTSTATETRANSITION_WHERE =
 		"SELECT objectStateTransition FROM ObjectStateTransition objectStateTransition WHERE ";
 
-	private static final String _SQL_COUNT_OBJECTSTATETRANSITION =
-		"SELECT COUNT(objectStateTransition) FROM ObjectStateTransition objectStateTransition";
-
 	private static final String _SQL_COUNT_OBJECTSTATETRANSITION_WHERE =
 		"SELECT COUNT(objectStateTransition) FROM ObjectStateTransition objectStateTransition WHERE ";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"objectStateTransition.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ObjectStateTransition exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ObjectStateTransition exists with the key {";
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		ObjectStateTransitionPersistenceImpl.class);
 
 	private static final Set<String> _badColumnNames = SetUtil.fromArray(
 		new String[] {"uuid"});
@@ -1681,4 +1306,4 @@ public class ObjectStateTransitionPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1925218322
+// LIFERAY-SERVICE-BUILDER-HASH:-1675642567

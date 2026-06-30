@@ -36,6 +36,24 @@ public class CommerceDiscountOrderTypeRelUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CommerceDiscountOrderTypeRel> commerceDiscountOrderTypeRels) {
+
+		getPersistence().cacheResult(commerceDiscountOrderTypeRels);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		CommerceDiscountOrderTypeRel commerceDiscountOrderTypeRel) {
+
+		getPersistence().cacheResult(commerceDiscountOrderTypeRel);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -703,28 +721,6 @@ public class CommerceDiscountOrderTypeRelUtil {
 	}
 
 	/**
-	 * Caches the commerce discount order type rel in the entity cache if it is enabled.
-	 *
-	 * @param commerceDiscountOrderTypeRel the commerce discount order type rel
-	 */
-	public static void cacheResult(
-		CommerceDiscountOrderTypeRel commerceDiscountOrderTypeRel) {
-
-		getPersistence().cacheResult(commerceDiscountOrderTypeRel);
-	}
-
-	/**
-	 * Caches the commerce discount order type rels in the entity cache if it is enabled.
-	 *
-	 * @param commerceDiscountOrderTypeRels the commerce discount order type rels
-	 */
-	public static void cacheResult(
-		List<CommerceDiscountOrderTypeRel> commerceDiscountOrderTypeRels) {
-
-		getPersistence().cacheResult(commerceDiscountOrderTypeRels);
-	}
-
-	/**
 	 * Creates a new commerce discount order type rel with the primary key. Does not add the commerce discount order type rel to the database.
 	 *
 	 * @param commerceDiscountOrderTypeRelId the primary key for the new commerce discount order type rel
@@ -786,89 +782,6 @@ public class CommerceDiscountOrderTypeRelUtil {
 			commerceDiscountOrderTypeRelId);
 	}
 
-	/**
-	 * Returns all the commerce discount order type rels.
-	 *
-	 * @return the commerce discount order type rels
-	 */
-	public static List<CommerceDiscountOrderTypeRel> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce discount order type rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.discount.model.impl.CommerceDiscountOrderTypeRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce discount order type rels
-	 * @param end the upper bound of the range of commerce discount order type rels (not inclusive)
-	 * @return the range of commerce discount order type rels
-	 */
-	public static List<CommerceDiscountOrderTypeRel> findAll(
-		int start, int end) {
-
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce discount order type rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.discount.model.impl.CommerceDiscountOrderTypeRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce discount order type rels
-	 * @param end the upper bound of the range of commerce discount order type rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce discount order type rels
-	 */
-	public static List<CommerceDiscountOrderTypeRel> findAll(
-		int start, int end,
-		OrderByComparator<CommerceDiscountOrderTypeRel> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce discount order type rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.discount.model.impl.CommerceDiscountOrderTypeRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce discount order type rels
-	 * @param end the upper bound of the range of commerce discount order type rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce discount order type rels
-	 */
-	public static List<CommerceDiscountOrderTypeRel> findAll(
-		int start, int end,
-		OrderByComparator<CommerceDiscountOrderTypeRel> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce discount order type rels from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce discount order type rels.
-	 *
-	 * @return the number of commerce discount order type rels
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceDiscountOrderTypeRelPersistence getPersistence() {
 		return _persistence;
 	}
@@ -883,4 +796,4 @@ public class CommerceDiscountOrderTypeRelUtil {
 		_persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1186816364
+// LIFERAY-SERVICE-BUILDER-HASH:1282843196

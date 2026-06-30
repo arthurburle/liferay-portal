@@ -5,10 +5,12 @@
 
 package com.liferay.layout.internal.helper.structure;
 
+import com.liferay.dynamic.data.mapping.form.validation.util.DateParameterUtil;
 import com.liferay.info.field.InfoField;
 import com.liferay.info.field.InfoFieldValue;
 import com.liferay.info.field.type.DateInfoFieldType;
 import com.liferay.info.field.type.DateTimeInfoFieldType;
+import com.liferay.info.field.type.InfoFieldType;
 import com.liferay.info.field.type.PicklistMultiselectInfoFieldType;
 import com.liferay.info.field.type.PicklistSelectInfoFieldType;
 import com.liferay.info.item.InfoItemFieldValues;
@@ -30,12 +32,16 @@ import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 
+import java.math.BigDecimal;
+
 import java.text.DateFormat;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -60,7 +66,9 @@ public class LayoutStructureRulesHelperImpl
 		LayoutStructure layoutStructure, Locale locale,
 		PermissionChecker permissionChecker, long[] segmentsEntryIds) {
 
-		Map<String, Object> infoItemFieldValuesMap = _parseInfoItemFieldValues(
+		Map<String, String> infoItemFieldTypesMap = _getInfoItemFieldTypesMap(
+			infoItemFieldValues);
+		Map<String, Object> infoItemFieldValuesMap = _getInfoItemFieldValuesMap(
 			infoItemFieldValues, locale);
 		Map<String, List<String>> itemIdsMap = new HashMap<>();
 		JSONArray jsonArray = _jsonFactory.createJSONArray();
@@ -78,8 +86,8 @@ public class LayoutStructureRulesHelperImpl
 				_processActions(
 					layoutStructureRule.getActionsJSONArray(), jsonArray,
 					!_evaluateLayoutStructureRule(
-						infoItemFieldValuesMap, layoutStructureRule,
-						layoutStructureRulesContext));
+						infoItemFieldTypesMap, infoItemFieldValuesMap,
+						layoutStructureRule, layoutStructureRulesContext));
 
 				continue;
 			}
@@ -172,7 +180,7 @@ public class LayoutStructureRulesHelperImpl
 			_processActions(
 				layoutStructureRule.getActionsJSONArray(), jsonArray,
 				!_evaluateLayoutStructureRule(
-					fieldValuesMap, layoutStructureRule,
+					Collections.emptyMap(), fieldValuesMap, layoutStructureRule,
 					layoutStructureRulesContext));
 		}
 
@@ -180,7 +188,7 @@ public class LayoutStructureRulesHelperImpl
 	}
 
 	private boolean _evaluateLayoutStructureRule(
-		Map<String, Object> fieldValuesMap,
+		Map<String, String> fieldTypesMap, Map<String, Object> fieldValuesMap,
 		LayoutStructureRule layoutStructureRule,
 		LayoutStructureRulesContext layoutStructureRulesContext) {
 
@@ -201,7 +209,7 @@ public class LayoutStructureRulesHelperImpl
 				i);
 
 			if (_isConditionActive(
-					conditionJSONObject, fieldValuesMap,
+					conditionJSONObject, fieldTypesMap, fieldValuesMap,
 					layoutStructureRulesContext)) {
 
 				if (Objects.equals(
@@ -290,82 +298,29 @@ public class LayoutStructureRulesHelperImpl
 		throw new IllegalArgumentException("Unknown action type: " + type);
 	}
 
-	private List<String> _getItemIds(LayoutStructureRule layoutStructureRule) {
-		List<String> itemIds = new ArrayList<>();
+	private Map<String, String> _getInfoItemFieldTypesMap(
+		InfoItemFieldValues infoItemFieldValues) {
 
-		if (layoutStructureRule.isAdvancedRule()) {
-			itemIds.addAll(
-				_advancedLayoutStructureRuleEvaluator.getItemIds(
-					layoutStructureRule));
-		}
-		else {
-			JSONArray conditionsJSONArray =
-				layoutStructureRule.getConditionsJSONArray();
+		Map<String, String> map = new HashMap<>();
 
-			for (int i = 0; i < conditionsJSONArray.length(); i++) {
-				JSONObject conditionJSONObject =
-					conditionsJSONArray.getJSONObject(i);
-
-				if (Objects.equals(
-						conditionJSONObject.getString("type"), "field") ||
-					Objects.equals(
-						conditionJSONObject.getString("type"), "user")) {
-
-					continue;
-				}
-
-				itemIds.add(conditionJSONObject.getString("field"));
-			}
+		if (infoItemFieldValues == null) {
+			return map;
 		}
 
-		return itemIds;
+		for (InfoFieldValue<Object> infoFieldValue :
+				infoItemFieldValues.getInfoFieldValues()) {
+
+			InfoField<?> infoField = infoFieldValue.getInfoField();
+
+			InfoFieldType infoFieldType = infoField.getInfoFieldType();
+
+			map.put(infoField.getUniqueId(), infoFieldType.getName());
+		}
+
+		return map;
 	}
 
-	private boolean _isConditionActive(
-		JSONObject conditionJSONObject, Map<String, Object> fieldValuesMap,
-		LayoutStructureRulesContext layoutStructureRulesContext) {
-
-		boolean negated = false;
-		Object value = 0L;
-
-		JSONObject optionsJSONObject = conditionJSONObject.getJSONObject(
-			"options");
-
-		if (optionsJSONObject != null) {
-			if (Objects.equals(
-					optionsJSONObject.getString("type"), "not-equal")) {
-
-				negated = true;
-			}
-
-			value = optionsJSONObject.get("value");
-		}
-
-		if (Objects.equals(conditionJSONObject.getString("type"), "field") ||
-			Objects.equals(conditionJSONObject.getString("type"), "form")) {
-
-			if (negated) {
-				return !Objects.equals(
-					fieldValuesMap.get(conditionJSONObject.getString("field")),
-					value);
-			}
-
-			return Objects.equals(
-				fieldValuesMap.get(conditionJSONObject.getString("field")),
-				value);
-		}
-
-		if (Objects.equals(conditionJSONObject.getString("type"), "user")) {
-			return _evaluateUserTypeCondition(
-				conditionJSONObject.getString("field"),
-				layoutStructureRulesContext, negated,
-				GetterUtil.getLong(value));
-		}
-
-		return false;
-	}
-
-	private Map<String, Object> _parseInfoItemFieldValues(
+	private Map<String, Object> _getInfoItemFieldValuesMap(
 		InfoItemFieldValues infoItemFieldValues, Locale locale) {
 
 		Map<String, Object> map = new HashMap<>();
@@ -401,7 +356,7 @@ public class LayoutStructureRulesHelperImpl
 
 				try {
 					DateTimeFormatter dateTimeFormatter =
-						DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+						DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 					value = dateTimeFormatter.format((TemporalAccessor)value);
 				}
@@ -453,6 +408,231 @@ public class LayoutStructureRulesHelperImpl
 		return map;
 	}
 
+	private List<String> _getItemIds(LayoutStructureRule layoutStructureRule) {
+		List<String> itemIds = new ArrayList<>();
+
+		if (layoutStructureRule.isAdvancedRule()) {
+			itemIds.addAll(
+				_advancedLayoutStructureRuleEvaluator.getItemIds(
+					layoutStructureRule));
+		}
+		else {
+			JSONArray conditionsJSONArray =
+				layoutStructureRule.getConditionsJSONArray();
+
+			for (int i = 0; i < conditionsJSONArray.length(); i++) {
+				JSONObject conditionJSONObject =
+					conditionsJSONArray.getJSONObject(i);
+
+				if (Objects.equals(
+						conditionJSONObject.getString("type"), "field") ||
+					Objects.equals(
+						conditionJSONObject.getString("type"), "user")) {
+
+					continue;
+				}
+
+				itemIds.add(conditionJSONObject.getString("field"));
+			}
+		}
+
+		return itemIds;
+	}
+
+	private boolean _isConditionActive(
+		JSONObject conditionJSONObject, Map<String, String> fieldTypesMap,
+		Map<String, Object> fieldValuesMap,
+		LayoutStructureRulesContext layoutStructureRulesContext) {
+
+		String optionsType = null;
+		Object value = 0L;
+
+		JSONObject optionsJSONObject = conditionJSONObject.getJSONObject(
+			"options");
+
+		if (optionsJSONObject != null) {
+			optionsType = optionsJSONObject.getString("type");
+			value = optionsJSONObject.get("value");
+		}
+
+		if (Objects.equals(conditionJSONObject.getString("type"), "field") ||
+			Objects.equals(conditionJSONObject.getString("type"), "form")) {
+
+			String fieldName = conditionJSONObject.getString("field");
+
+			Object fieldValue = fieldValuesMap.get(fieldName);
+			String fieldType = fieldTypesMap.get(fieldName);
+
+			if (Objects.equals(optionsType, "greater-than")) {
+				return _isGreaterThan(fieldType, fieldValue, value);
+			}
+
+			if (Objects.equals(optionsType, "greater-than-or-equals")) {
+				return _isGreaterThanOrEqual(fieldType, fieldValue, value);
+			}
+
+			if (Objects.equals(optionsType, "less-than")) {
+				return _isLessThan(fieldType, fieldValue, value);
+			}
+
+			if (Objects.equals(optionsType, "less-than-or-equals")) {
+				return _isLessThanOrEqual(fieldType, fieldValue, value);
+			}
+
+			if (Objects.equals(optionsType, "not-equal")) {
+				return !Objects.equals(fieldValue, value);
+			}
+
+			return Objects.equals(fieldValue, value);
+		}
+
+		if (Objects.equals(conditionJSONObject.getString("type"), "user")) {
+			return _evaluateUserTypeCondition(
+				conditionJSONObject.getString("field"),
+				layoutStructureRulesContext,
+				Objects.equals(optionsType, "not-equal"),
+				GetterUtil.getLong(value));
+		}
+
+		return false;
+	}
+
+	private boolean _isGreaterThan(
+		String fieldType, Object fieldValue, Object value) {
+
+		if (Objects.equals(fieldType, "date") ||
+			Objects.equals(fieldType, "date-time")) {
+
+			LocalDateTime fieldLocalDateTime = _toLocalDateTime(fieldValue);
+			LocalDateTime valueLocalDateTime = _toLocalDateTime(value);
+
+			if ((fieldLocalDateTime == null) || (valueLocalDateTime == null)) {
+				return false;
+			}
+
+			return fieldLocalDateTime.isAfter(valueLocalDateTime);
+		}
+
+		if (Objects.equals(fieldType, "number")) {
+			BigDecimal fieldBigDecimal = _toBigDecimal(fieldValue);
+			BigDecimal valueBigDecimal = _toBigDecimal(value);
+
+			if ((fieldBigDecimal == null) || (valueBigDecimal == null)) {
+				return false;
+			}
+
+			if (fieldBigDecimal.compareTo(valueBigDecimal) > 0) {
+				return true;
+			}
+
+			return false;
+		}
+
+		return false;
+	}
+
+	private boolean _isGreaterThanOrEqual(
+		String fieldType, Object fieldValue, Object value) {
+
+		if (Objects.equals(fieldType, "date") ||
+			Objects.equals(fieldType, "date-time")) {
+
+			LocalDateTime fieldLocalDateTime = _toLocalDateTime(fieldValue);
+			LocalDateTime valueLocalDateTime = _toLocalDateTime(value);
+
+			if ((fieldLocalDateTime == null) || (valueLocalDateTime == null)) {
+				return false;
+			}
+
+			return !fieldLocalDateTime.isBefore(valueLocalDateTime);
+		}
+
+		if (Objects.equals(fieldType, "number")) {
+			BigDecimal fieldBigDecimal = _toBigDecimal(fieldValue);
+			BigDecimal valueBigDecimal = _toBigDecimal(value);
+
+			if ((fieldBigDecimal == null) || (valueBigDecimal == null)) {
+				return false;
+			}
+
+			if (fieldBigDecimal.compareTo(valueBigDecimal) >= 0) {
+				return true;
+			}
+
+			return false;
+		}
+
+		return false;
+	}
+
+	private boolean _isLessThan(
+		String fieldType, Object fieldValue, Object value) {
+
+		if (Objects.equals(fieldType, "date") ||
+			Objects.equals(fieldType, "date-time")) {
+
+			LocalDateTime fieldLocalDateTime = _toLocalDateTime(fieldValue);
+			LocalDateTime valueLocalDateTime = _toLocalDateTime(value);
+
+			if ((fieldLocalDateTime == null) || (valueLocalDateTime == null)) {
+				return false;
+			}
+
+			return fieldLocalDateTime.isBefore(valueLocalDateTime);
+		}
+
+		if (Objects.equals(fieldType, "number")) {
+			BigDecimal fieldBigDecimal = _toBigDecimal(fieldValue);
+			BigDecimal valueBigDecimal = _toBigDecimal(value);
+
+			if ((fieldBigDecimal == null) || (valueBigDecimal == null)) {
+				return false;
+			}
+
+			if (fieldBigDecimal.compareTo(valueBigDecimal) < 0) {
+				return true;
+			}
+
+			return false;
+		}
+
+		return false;
+	}
+
+	private boolean _isLessThanOrEqual(
+		String fieldType, Object fieldValue, Object value) {
+
+		if (Objects.equals(fieldType, "date") ||
+			Objects.equals(fieldType, "date-time")) {
+
+			LocalDateTime fieldLocalDateTime = _toLocalDateTime(fieldValue);
+			LocalDateTime valueLocalDateTime = _toLocalDateTime(value);
+
+			if ((fieldLocalDateTime == null) || (valueLocalDateTime == null)) {
+				return false;
+			}
+
+			return !fieldLocalDateTime.isAfter(valueLocalDateTime);
+		}
+
+		if (Objects.equals(fieldType, "number")) {
+			BigDecimal fieldBigDecimal = _toBigDecimal(fieldValue);
+			BigDecimal valueBigDecimal = _toBigDecimal(value);
+
+			if ((fieldBigDecimal == null) || (valueBigDecimal == null)) {
+				return false;
+			}
+
+			if (fieldBigDecimal.compareTo(valueBigDecimal) <= 0) {
+				return true;
+			}
+
+			return false;
+		}
+
+		return false;
+	}
+
 	private void _processActions(
 		JSONArray actionsJSONArray, JSONArray jsonArray, boolean negated) {
 
@@ -472,6 +652,33 @@ public class LayoutStructureRulesHelperImpl
 					"itemId", actionsJSONObject.getString("itemId")
 				));
 		}
+	}
+
+	private BigDecimal _toBigDecimal(Object value) {
+		if (value == null) {
+			return null;
+		}
+
+		try {
+			return new BigDecimal(value.toString());
+		}
+		catch (NumberFormatException numberFormatException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(
+					"Unable to parse number from " + value,
+					numberFormatException);
+			}
+
+			return null;
+		}
+	}
+
+	private LocalDateTime _toLocalDateTime(Object value) {
+		if (value == null) {
+			return null;
+		}
+
+		return DateParameterUtil.getLocalDateTime(value.toString());
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

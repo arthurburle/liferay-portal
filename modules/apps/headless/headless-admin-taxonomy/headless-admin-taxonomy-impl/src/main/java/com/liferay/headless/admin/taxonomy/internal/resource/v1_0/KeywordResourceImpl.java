@@ -13,6 +13,7 @@ import com.liferay.asset.tags.constants.AssetTagsAdminPortletKeys;
 import com.liferay.depot.constants.DepotConstants;
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryService;
+import com.liferay.exportimport.constants.ExportImportConstants;
 import com.liferay.exportimport.vulcan.batch.engine.ExportImportVulcanBatchEngineTaskItemDelegate;
 import com.liferay.headless.admin.taxonomy.dto.v1_0.Keyword;
 import com.liferay.headless.admin.taxonomy.internal.odata.entity.v1_0.KeywordEntityModel;
@@ -187,6 +188,11 @@ public class KeywordResourceImpl
 			}
 
 			@Override
+			public String getSectionKey() {
+				return ExportImportConstants.SECTION_KEY_CONTENT;
+			}
+
+			@Override
 			public boolean isStagingSupported() {
 				return true;
 			}
@@ -220,7 +226,7 @@ public class KeywordResourceImpl
 		}
 
 		dynamicQuery.addOrder(OrderFactoryUtil.desc("assetCount"));
-		dynamicQuery.setProjection(_getProjectionList(), true);
+		dynamicQuery.setProjection(_getProjectionList());
 
 		return Page.of(
 			transform(

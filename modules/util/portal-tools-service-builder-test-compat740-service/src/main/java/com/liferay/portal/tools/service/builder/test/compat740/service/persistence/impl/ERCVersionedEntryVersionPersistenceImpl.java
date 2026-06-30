@@ -5,12 +5,10 @@
 
 package com.liferay.portal.tools.service.builder.test.compat740.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -29,8 +27,6 @@ import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinde
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -72,7 +68,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ERCVersionedEntryVersionPersistence.class)
 public class ERCVersionedEntryVersionPersistenceImpl
-	extends BasePersistenceImpl<ERCVersionedEntryVersion>
+	extends BasePersistenceImpl
+		<ERCVersionedEntryVersion, NoSuchERCVersionedEntryVersionException>
 	implements ERCVersionedEntryVersionPersistence {
 
 	/*
@@ -89,9 +86,6 @@ public class ERCVersionedEntryVersionPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByErcVersionedEntryId;
 	private FinderPath _finderPathWithoutPaginationFindByErcVersionedEntryId;
 	private FinderPath _finderPathCountByErcVersionedEntryId;
@@ -1262,138 +1256,6 @@ public class ERCVersionedEntryVersionPersistenceImpl
 	}
 
 	/**
-	 * Caches the erc versioned entry version in the entity cache if it is enabled.
-	 *
-	 * @param ercVersionedEntryVersion the erc versioned entry version
-	 */
-	@Override
-	public void cacheResult(ERCVersionedEntryVersion ercVersionedEntryVersion) {
-		entityCache.putResult(
-			ERCVersionedEntryVersionImpl.class,
-			ercVersionedEntryVersion.getPrimaryKey(), ercVersionedEntryVersion);
-
-		finderCache.putResult(
-			_finderPathFetchByErcVersionedEntryId_Version,
-			new Object[] {
-				ercVersionedEntryVersion.getErcVersionedEntryId(),
-				ercVersionedEntryVersion.getVersion()
-			},
-			ercVersionedEntryVersion);
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G_Version,
-			new Object[] {
-				ercVersionedEntryVersion.getUuid(),
-				ercVersionedEntryVersion.getGroupId(),
-				ercVersionedEntryVersion.getVersion()
-			},
-			ercVersionedEntryVersion);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the erc versioned entry versions in the entity cache if it is enabled.
-	 *
-	 * @param ercVersionedEntryVersions the erc versioned entry versions
-	 */
-	@Override
-	public void cacheResult(
-		List<ERCVersionedEntryVersion> ercVersionedEntryVersions) {
-
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (ercVersionedEntryVersions.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ERCVersionedEntryVersion ercVersionedEntryVersion :
-				ercVersionedEntryVersions) {
-
-			if (entityCache.getResult(
-					ERCVersionedEntryVersionImpl.class,
-					ercVersionedEntryVersion.getPrimaryKey()) == null) {
-
-				cacheResult(ercVersionedEntryVersion);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all erc versioned entry versions.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ERCVersionedEntryVersionImpl.class);
-
-		finderCache.clearCache(ERCVersionedEntryVersionImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the erc versioned entry version.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ERCVersionedEntryVersion ercVersionedEntryVersion) {
-		entityCache.removeResult(
-			ERCVersionedEntryVersionImpl.class, ercVersionedEntryVersion);
-	}
-
-	@Override
-	public void clearCache(
-		List<ERCVersionedEntryVersion> ercVersionedEntryVersions) {
-
-		for (ERCVersionedEntryVersion ercVersionedEntryVersion :
-				ercVersionedEntryVersions) {
-
-			entityCache.removeResult(
-				ERCVersionedEntryVersionImpl.class, ercVersionedEntryVersion);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ERCVersionedEntryVersionImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				ERCVersionedEntryVersionImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		ERCVersionedEntryVersionModelImpl ercVersionedEntryVersionModelImpl) {
-
-		Object[] args = new Object[] {
-			ercVersionedEntryVersionModelImpl.getErcVersionedEntryId(),
-			ercVersionedEntryVersionModelImpl.getVersion()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByErcVersionedEntryId_Version, args,
-			ercVersionedEntryVersionModelImpl);
-
-		args = new Object[] {
-			ercVersionedEntryVersionModelImpl.getUuid(),
-			ercVersionedEntryVersionModelImpl.getGroupId(),
-			ercVersionedEntryVersionModelImpl.getVersion()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByUUID_G_Version, args,
-			ercVersionedEntryVersionModelImpl);
-	}
-
-	/**
 	 * Creates a new erc versioned entry version with the primary key. Does not add the erc versioned entry version to the database.
 	 *
 	 * @param ercVersionedEntryVersionId the primary key for the new erc versioned entry version
@@ -1425,48 +1287,6 @@ public class ERCVersionedEntryVersionPersistenceImpl
 		throws NoSuchERCVersionedEntryVersionException {
 
 		return remove((Serializable)ercVersionedEntryVersionId);
-	}
-
-	/**
-	 * Removes the erc versioned entry version with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the erc versioned entry version
-	 * @return the erc versioned entry version that was removed
-	 * @throws NoSuchERCVersionedEntryVersionException if a erc versioned entry version with the primary key could not be found
-	 */
-	@Override
-	public ERCVersionedEntryVersion remove(Serializable primaryKey)
-		throws NoSuchERCVersionedEntryVersionException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ERCVersionedEntryVersion ercVersionedEntryVersion =
-				(ERCVersionedEntryVersion)session.get(
-					ERCVersionedEntryVersionImpl.class, primaryKey);
-
-			if (ercVersionedEntryVersion == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchERCVersionedEntryVersionException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(ercVersionedEntryVersion);
-		}
-		catch (NoSuchERCVersionedEntryVersionException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1595,43 +1415,13 @@ public class ERCVersionedEntryVersionPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ERCVersionedEntryVersionImpl.class,
-			ercVersionedEntryVersionModelImpl, false, true);
-
-		cacheUniqueFindersCache(ercVersionedEntryVersionModelImpl);
+		cacheUniqueFindersResult(ercVersionedEntryVersion, false);
 
 		if (isNew) {
 			ercVersionedEntryVersion.setNew(false);
 		}
 
 		ercVersionedEntryVersion.resetOriginalValues();
-
-		return ercVersionedEntryVersion;
-	}
-
-	/**
-	 * Returns the erc versioned entry version with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the erc versioned entry version
-	 * @return the erc versioned entry version
-	 * @throws NoSuchERCVersionedEntryVersionException if a erc versioned entry version with the primary key could not be found
-	 */
-	@Override
-	public ERCVersionedEntryVersion findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchERCVersionedEntryVersionException {
-
-		ERCVersionedEntryVersion ercVersionedEntryVersion = fetchByPrimaryKey(
-			primaryKey);
-
-		if (ercVersionedEntryVersion == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchERCVersionedEntryVersionException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return ercVersionedEntryVersion;
 	}
@@ -1664,189 +1454,6 @@ public class ERCVersionedEntryVersionPersistenceImpl
 		return fetchByPrimaryKey((Serializable)ercVersionedEntryVersionId);
 	}
 
-	/**
-	 * Returns all the erc versioned entry versions.
-	 *
-	 * @return the erc versioned entry versions
-	 */
-	@Override
-	public List<ERCVersionedEntryVersion> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the erc versioned entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ERCVersionedEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc versioned entry versions
-	 * @param end the upper bound of the range of erc versioned entry versions (not inclusive)
-	 * @return the range of erc versioned entry versions
-	 */
-	@Override
-	public List<ERCVersionedEntryVersion> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the erc versioned entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ERCVersionedEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc versioned entry versions
-	 * @param end the upper bound of the range of erc versioned entry versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of erc versioned entry versions
-	 */
-	@Override
-	public List<ERCVersionedEntryVersion> findAll(
-		int start, int end,
-		OrderByComparator<ERCVersionedEntryVersion> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the erc versioned entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ERCVersionedEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of erc versioned entry versions
-	 * @param end the upper bound of the range of erc versioned entry versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of erc versioned entry versions
-	 */
-	@Override
-	public List<ERCVersionedEntryVersion> findAll(
-		int start, int end,
-		OrderByComparator<ERCVersionedEntryVersion> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ERCVersionedEntryVersion> list = null;
-
-		if (useFinderCache) {
-			list = (List<ERCVersionedEntryVersion>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_ERCVERSIONEDENTRYVERSION);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_ERCVERSIONEDENTRYVERSION;
-
-				sql = sql.concat(
-					ERCVersionedEntryVersionModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ERCVersionedEntryVersion>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the erc versioned entry versions from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ERCVersionedEntryVersion ercVersionedEntryVersion : findAll()) {
-			remove(ercVersionedEntryVersion);
-		}
-	}
-
-	/**
-	 * Returns the number of erc versioned entry versions.
-	 *
-	 * @return the number of erc versioned entry versions
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_ERCVERSIONEDENTRYVERSION);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	public Set<String> getBadColumnNames() {
 		return _badColumnNames;
@@ -1877,21 +1484,6 @@ public class ERCVersionedEntryVersionPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByErcVersionedEntryId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByErcVersionedEntryId",
 			new String[] {
@@ -1918,24 +1510,26 @@ public class ERCVersionedEntryVersionPersistenceImpl
 				_SQL_SELECT_ERCVERSIONEDENTRYVERSION_WHERE,
 				_SQL_COUNT_ERCVERSIONEDENTRYVERSION_WHERE,
 				ERCVersionedEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "ercVersionedEntryId",
 					FinderColumn.Type.LONG, "=", true, true,
 					ERCVersionedEntryVersion::getErcVersionedEntryId));
 
-		_finderPathFetchByErcVersionedEntryId_Version = new FinderPath(
+		_finderPathFetchByErcVersionedEntryId_Version = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByErcVersionedEntryId_Version",
 			new String[] {Long.class.getName(), Integer.class.getName()},
-			new String[] {"ercVersionedEntryId", "version"}, true);
+			new String[] {"ercVersionedEntryId", "version"}, 0, 0, false,
+			ERCVersionedEntryVersion::getErcVersionedEntryId,
+			ERCVersionedEntryVersion::getVersion);
 
 		_uniquePersistenceFinderByErcVersionedEntryId_Version =
 			new UniquePersistenceFinder<>(
 				this, _finderPathFetchByErcVersionedEntryId_Version,
-				_SQL_SELECT_ERCVERSIONEDENTRYVERSION_WHERE,
+				_SQL_SELECT_ERCVERSIONEDENTRYVERSION_WHERE, "",
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "ercVersionedEntryId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ERCVersionedEntryVersion::getErcVersionedEntryId),
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "version",
@@ -1952,13 +1546,13 @@ public class ERCVersionedEntryVersionPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
@@ -1966,7 +1560,7 @@ public class ERCVersionedEntryVersionPersistenceImpl
 			_SQL_SELECT_ERCVERSIONEDENTRYVERSION_WHERE,
 			_SQL_COUNT_ERCVERSIONEDENTRYVERSION_WHERE,
 			ERCVersionedEntryVersionModelImpl.ORDER_BY_JPQL,
-			_ORDER_BY_ENTITY_ALIAS,
+			_ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ercVersionedEntryVersion.", "uuid", FinderColumn.Type.STRING,
 				"=", true, true, ERCVersionedEntryVersion::getUuid));
@@ -1983,12 +1577,12 @@ public class ERCVersionedEntryVersionPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_Version = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_Version",
 			new String[] {String.class.getName(), Integer.class.getName()},
-			new String[] {"uuid_", "version"}, true);
+			new String[] {"uuid_", "version"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_Version = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_Version",
 			new String[] {String.class.getName(), Integer.class.getName()},
-			new String[] {"uuid_", "version"}, false);
+			new String[] {"uuid_", "version"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_Version =
 			new CollectionPersistenceFinder<>(
@@ -1998,10 +1592,10 @@ public class ERCVersionedEntryVersionPersistenceImpl
 				_SQL_SELECT_ERCVERSIONEDENTRYVERSION_WHERE,
 				_SQL_COUNT_ERCVERSIONEDENTRYVERSION_WHERE,
 				ERCVersionedEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					ERCVersionedEntryVersion::getUuid),
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "version",
@@ -2020,12 +1614,12 @@ public class ERCVersionedEntryVersionPersistenceImpl
 		_finderPathWithoutPaginationFindByUUID_G = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, true, null);
 
 		_finderPathCountByUUID_G = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, false);
+			new String[] {"uuid_", "groupId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUUID_G =
 			new CollectionPersistenceFinder<>(
@@ -2035,35 +1629,38 @@ public class ERCVersionedEntryVersionPersistenceImpl
 				_SQL_SELECT_ERCVERSIONEDENTRYVERSION_WHERE,
 				_SQL_COUNT_ERCVERSIONEDENTRYVERSION_WHERE,
 				ERCVersionedEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					ERCVersionedEntryVersion::getUuid),
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "groupId",
 					FinderColumn.Type.LONG, "=", true, true,
 					ERCVersionedEntryVersion::getGroupId));
 
-		_finderPathFetchByUUID_G_Version = new FinderPath(
+		_finderPathFetchByUUID_G_Version = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G_Version",
 			new String[] {
 				String.class.getName(), Long.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"uuid_", "groupId", "version"}, true);
+			new String[] {"uuid_", "groupId", "version"}, 0, 1, false,
+			convertNullFunction(ERCVersionedEntryVersion::getUuid),
+			ERCVersionedEntryVersion::getGroupId,
+			ERCVersionedEntryVersion::getVersion);
 
 		_uniquePersistenceFinderByUUID_G_Version =
 			new UniquePersistenceFinder<>(
 				this, _finderPathFetchByUUID_G_Version,
-				_SQL_SELECT_ERCVERSIONEDENTRYVERSION_WHERE,
+				_SQL_SELECT_ERCVERSIONEDENTRYVERSION_WHERE, "",
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					ERCVersionedEntryVersion::getUuid),
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "groupId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ERCVersionedEntryVersion::getGroupId),
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "version",
@@ -2082,12 +1679,12 @@ public class ERCVersionedEntryVersionPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -2097,10 +1694,10 @@ public class ERCVersionedEntryVersionPersistenceImpl
 				_SQL_SELECT_ERCVERSIONEDENTRYVERSION_WHERE,
 				_SQL_COUNT_ERCVERSIONEDENTRYVERSION_WHERE,
 				ERCVersionedEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					ERCVersionedEntryVersion::getUuid),
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "companyId",
@@ -2122,7 +1719,7 @@ public class ERCVersionedEntryVersionPersistenceImpl
 				String.class.getName(), Long.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"uuid_", "companyId", "version"}, true);
+			new String[] {"uuid_", "companyId", "version"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C_Version = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C_Version",
@@ -2130,7 +1727,7 @@ public class ERCVersionedEntryVersionPersistenceImpl
 				String.class.getName(), Long.class.getName(),
 				Integer.class.getName()
 			},
-			new String[] {"uuid_", "companyId", "version"}, false);
+			new String[] {"uuid_", "companyId", "version"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C_Version =
 			new CollectionPersistenceFinder<>(
@@ -2140,14 +1737,14 @@ public class ERCVersionedEntryVersionPersistenceImpl
 				_SQL_SELECT_ERCVERSIONEDENTRYVERSION_WHERE,
 				_SQL_COUNT_ERCVERSIONEDENTRYVERSION_WHERE,
 				ERCVersionedEntryVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "uuid",
-					FinderColumn.Type.STRING, "=", true, false,
+					FinderColumn.Type.STRING, "=", true, true,
 					ERCVersionedEntryVersion::getUuid),
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "companyId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					ERCVersionedEntryVersion::getCompanyId),
 				new FinderColumn<>(
 					"ercVersionedEntryVersion.", "version",
@@ -2196,23 +1793,17 @@ public class ERCVersionedEntryVersionPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ERCVersionedEntryVersionModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_ERCVERSIONEDENTRYVERSION =
 		"SELECT ercVersionedEntryVersion FROM ERCVersionedEntryVersion ercVersionedEntryVersion";
 
 	private static final String _SQL_SELECT_ERCVERSIONEDENTRYVERSION_WHERE =
 		"SELECT ercVersionedEntryVersion FROM ERCVersionedEntryVersion ercVersionedEntryVersion WHERE ";
 
-	private static final String _SQL_COUNT_ERCVERSIONEDENTRYVERSION =
-		"SELECT COUNT(ercVersionedEntryVersion) FROM ERCVersionedEntryVersion ercVersionedEntryVersion";
-
 	private static final String _SQL_COUNT_ERCVERSIONEDENTRYVERSION_WHERE =
 		"SELECT COUNT(ercVersionedEntryVersion) FROM ERCVersionedEntryVersion ercVersionedEntryVersion WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"ercVersionedEntryVersion.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ERCVersionedEntryVersion exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ERCVersionedEntryVersion exists with the key {";
@@ -2229,4 +1820,4 @@ public class ERCVersionedEntryVersionPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-623474286
+// LIFERAY-SERVICE-BUILDER-HASH:1993914145

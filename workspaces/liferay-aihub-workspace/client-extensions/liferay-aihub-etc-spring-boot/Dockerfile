@@ -1,14 +1,6 @@
-FROM docker.elastic.co/integrations/crawler:0.4.2 AS crawler
-FROM jruby:9.4.12.0-jdk21
+FROM eclipse-temurin:21-jre-alpine
 
-RUN groupadd liferay && useradd -g liferay -m -s /bin/bash liferay
-
-COPY --chown=liferay:liferay --from=crawler /home/app /opt/liferay/crawler
-COPY --chown=liferay:liferay --from=crawler /usr/local/bundle /usr/local/bundle
-
-ENV BUNDLE_APP_CONFIG=/usr/local/bundle
-ENV GEM_HOME=/usr/local/bundle
-ENV PATH=/usr/local/bundle/bin:$PATH
+RUN addgroup -S liferay && adduser -S liferay -G liferay
 
 COPY --chown=liferay:liferay *.jar /opt/liferay/jar-runner.jar
 

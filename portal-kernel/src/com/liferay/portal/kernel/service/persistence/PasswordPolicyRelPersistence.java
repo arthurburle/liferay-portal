@@ -185,21 +185,6 @@ public interface PasswordPolicyRelPersistence
 	public int countByC_C(long classNameId, long classPK);
 
 	/**
-	 * Caches the password policy rel in the entity cache if it is enabled.
-	 *
-	 * @param passwordPolicyRel the password policy rel
-	 */
-	public void cacheResult(PasswordPolicyRel passwordPolicyRel);
-
-	/**
-	 * Caches the password policy rels in the entity cache if it is enabled.
-	 *
-	 * @param passwordPolicyRels the password policy rels
-	 */
-	public void cacheResult(
-		java.util.List<PasswordPolicyRel> passwordPolicyRels);
-
-	/**
 	 * Creates a new password policy rel with the primary key. Does not add the password policy rel to the database.
 	 *
 	 * @param passwordPolicyRelId the primary key for the new password policy rel
@@ -237,73 +222,5 @@ public interface PasswordPolicyRelPersistence
 	 */
 	public PasswordPolicyRel fetchByPrimaryKey(long passwordPolicyRelId);
 
-	/**
-	 * Returns all the password policy rels.
-	 *
-	 * @return the password policy rels
-	 */
-	public java.util.List<PasswordPolicyRel> findAll();
-
-	/**
-	 * Returns a range of all the password policy rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.PasswordPolicyRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of password policy rels
-	 * @param end the upper bound of the range of password policy rels (not inclusive)
-	 * @return the range of password policy rels
-	 */
-	public java.util.List<PasswordPolicyRel> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the password policy rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.PasswordPolicyRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of password policy rels
-	 * @param end the upper bound of the range of password policy rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of password policy rels
-	 */
-	public java.util.List<PasswordPolicyRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<PasswordPolicyRel>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the password policy rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.PasswordPolicyRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of password policy rels
-	 * @param end the upper bound of the range of password policy rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of password policy rels
-	 */
-	public java.util.List<PasswordPolicyRel> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<PasswordPolicyRel>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the password policy rels from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of password policy rels.
-	 *
-	 * @return the number of password policy rels
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1948536942
+// LIFERAY-SERVICE-BUILDER-HASH:-1746654027

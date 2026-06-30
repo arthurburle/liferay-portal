@@ -36,6 +36,22 @@ public class CacheDisabledEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CacheDisabledEntry> cacheDisabledEntries) {
+
+		getPersistence().cacheResult(cacheDisabledEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CacheDisabledEntry cacheDisabledEntry) {
+		getPersistence().cacheResult(cacheDisabledEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -173,26 +189,6 @@ public class CacheDisabledEntryUtil {
 	}
 
 	/**
-	 * Caches the cache disabled entry in the entity cache if it is enabled.
-	 *
-	 * @param cacheDisabledEntry the cache disabled entry
-	 */
-	public static void cacheResult(CacheDisabledEntry cacheDisabledEntry) {
-		getPersistence().cacheResult(cacheDisabledEntry);
-	}
-
-	/**
-	 * Caches the cache disabled entries in the entity cache if it is enabled.
-	 *
-	 * @param cacheDisabledEntries the cache disabled entries
-	 */
-	public static void cacheResult(
-		List<CacheDisabledEntry> cacheDisabledEntries) {
-
-		getPersistence().cacheResult(cacheDisabledEntries);
-	}
-
-	/**
 	 * Creates a new cache disabled entry with the primary key. Does not add the cache disabled entry to the database.
 	 *
 	 * @param cacheDisabledEntryId the primary key for the new cache disabled entry
@@ -248,87 +244,6 @@ public class CacheDisabledEntryUtil {
 		return getPersistence().fetchByPrimaryKey(cacheDisabledEntryId);
 	}
 
-	/**
-	 * Returns all the cache disabled entries.
-	 *
-	 * @return the cache disabled entries
-	 */
-	public static List<CacheDisabledEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the cache disabled entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.CacheDisabledEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cache disabled entries
-	 * @param end the upper bound of the range of cache disabled entries (not inclusive)
-	 * @return the range of cache disabled entries
-	 */
-	public static List<CacheDisabledEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the cache disabled entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.CacheDisabledEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cache disabled entries
-	 * @param end the upper bound of the range of cache disabled entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cache disabled entries
-	 */
-	public static List<CacheDisabledEntry> findAll(
-		int start, int end,
-		OrderByComparator<CacheDisabledEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the cache disabled entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.CacheDisabledEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cache disabled entries
-	 * @param end the upper bound of the range of cache disabled entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cache disabled entries
-	 */
-	public static List<CacheDisabledEntry> findAll(
-		int start, int end,
-		OrderByComparator<CacheDisabledEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the cache disabled entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of cache disabled entries.
-	 *
-	 * @return the number of cache disabled entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CacheDisabledEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -342,4 +257,4 @@ public class CacheDisabledEntryUtil {
 	private static volatile CacheDisabledEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:313082549
+// LIFERAY-SERVICE-BUILDER-HASH:690039406

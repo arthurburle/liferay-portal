@@ -36,6 +36,22 @@ public class UserGroupGroupRoleUtil {
 	 */
 
 	/**
+	 * @see BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<UserGroupGroupRole> userGroupGroupRoles) {
+
+		getPersistence().cacheResult(userGroupGroupRoles);
+	}
+
+	/**
+	 * @see BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(UserGroupGroupRole userGroupGroupRole) {
+		getPersistence().cacheResult(userGroupGroupRole);
+	}
+
+	/**
 	 * @see BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -826,26 +842,6 @@ public class UserGroupGroupRoleUtil {
 	}
 
 	/**
-	 * Caches the user group group role in the entity cache if it is enabled.
-	 *
-	 * @param userGroupGroupRole the user group group role
-	 */
-	public static void cacheResult(UserGroupGroupRole userGroupGroupRole) {
-		getPersistence().cacheResult(userGroupGroupRole);
-	}
-
-	/**
-	 * Caches the user group group roles in the entity cache if it is enabled.
-	 *
-	 * @param userGroupGroupRoles the user group group roles
-	 */
-	public static void cacheResult(
-		List<UserGroupGroupRole> userGroupGroupRoles) {
-
-		getPersistence().cacheResult(userGroupGroupRoles);
-	}
-
-	/**
 	 * Creates a new user group group role with the primary key. Does not add the user group group role to the database.
 	 *
 	 * @param userGroupGroupRoleId the primary key for the new user group group role
@@ -901,87 +897,6 @@ public class UserGroupGroupRoleUtil {
 		return getPersistence().fetchByPrimaryKey(userGroupGroupRoleId);
 	}
 
-	/**
-	 * Returns all the user group group roles.
-	 *
-	 * @return the user group group roles
-	 */
-	public static List<UserGroupGroupRole> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the user group group roles.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.UserGroupGroupRoleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of user group group roles
-	 * @param end the upper bound of the range of user group group roles (not inclusive)
-	 * @return the range of user group group roles
-	 */
-	public static List<UserGroupGroupRole> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the user group group roles.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.UserGroupGroupRoleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of user group group roles
-	 * @param end the upper bound of the range of user group group roles (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of user group group roles
-	 */
-	public static List<UserGroupGroupRole> findAll(
-		int start, int end,
-		OrderByComparator<UserGroupGroupRole> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the user group group roles.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.UserGroupGroupRoleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of user group group roles
-	 * @param end the upper bound of the range of user group group roles (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of user group group roles
-	 */
-	public static List<UserGroupGroupRole> findAll(
-		int start, int end,
-		OrderByComparator<UserGroupGroupRole> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the user group group roles from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of user group group roles.
-	 *
-	 * @return the number of user group group roles
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static UserGroupGroupRolePersistence getPersistence() {
 		return _persistence;
 	}
@@ -995,4 +910,4 @@ public class UserGroupGroupRoleUtil {
 	private static volatile UserGroupGroupRolePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1427947320
+// LIFERAY-SERVICE-BUILDER-HASH:1310451088

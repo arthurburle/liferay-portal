@@ -13,15 +13,11 @@ import com.liferay.dynamic.data.mapping.model.impl.DDMFieldModelImpl;
 import com.liferay.dynamic.data.mapping.service.persistence.DDMFieldPersistence;
 import com.liferay.dynamic.data.mapping.service.persistence.DDMFieldUtil;
 import com.liferay.dynamic.data.mapping.service.persistence.impl.constants.DDMPersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -33,10 +29,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 
 import java.io.Serializable;
@@ -46,9 +39,7 @@ import java.lang.reflect.InvocationHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +63,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = DDMFieldPersistence.class)
 public class DDMFieldPersistenceImpl
-	extends BasePersistenceImpl<DDMField> implements DDMFieldPersistence {
+	extends BasePersistenceImpl<DDMField, NoSuchFieldException>
+	implements DDMFieldPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -88,9 +80,6 @@ public class DDMFieldPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByStorageId;
 	private FinderPath _finderPathWithoutPaginationFindByStorageId;
 	private FinderPath _finderPathCountByStorageId;
@@ -166,14 +155,9 @@ public class DDMFieldPersistenceImpl
 		long storageId, int start, int end,
 		OrderByComparator<DDMField> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMField.class)) {
-
-			return _collectionPersistenceFinderByStorageId.find(
-				finderCache, new Object[] {storageId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByStorageId.find(
+			finderCache, new Object[] {storageId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -235,13 +219,8 @@ public class DDMFieldPersistenceImpl
 	 */
 	@Override
 	public int countByStorageId(long storageId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMField.class)) {
-
-			return _collectionPersistenceFinderByStorageId.count(
-				finderCache, new Object[] {storageId});
-		}
+		return _collectionPersistenceFinderByStorageId.count(
+			finderCache, new Object[] {storageId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByStructureVersionId;
@@ -322,14 +301,9 @@ public class DDMFieldPersistenceImpl
 		long structureVersionId, int start, int end,
 		OrderByComparator<DDMField> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMField.class)) {
-
-			return _collectionPersistenceFinderByStructureVersionId.find(
-				finderCache, new Object[] {structureVersionId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByStructureVersionId.find(
+			finderCache, new Object[] {structureVersionId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -395,13 +369,8 @@ public class DDMFieldPersistenceImpl
 	 */
 	@Override
 	public int countByStructureVersionId(long structureVersionId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMField.class)) {
-
-			return _collectionPersistenceFinderByStructureVersionId.count(
-				finderCache, new Object[] {structureVersionId});
-		}
+		return _collectionPersistenceFinderByStructureVersionId.count(
+			finderCache, new Object[] {structureVersionId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByC_F;
@@ -486,14 +455,9 @@ public class DDMFieldPersistenceImpl
 		long companyId, String fieldType, int start, int end,
 		OrderByComparator<DDMField> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMField.class)) {
-
-			return _collectionPersistenceFinderByC_F.find(
-				finderCache, new Object[] {companyId, fieldType}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_F.find(
+			finderCache, new Object[] {companyId, fieldType}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -562,13 +526,8 @@ public class DDMFieldPersistenceImpl
 	 */
 	@Override
 	public int countByC_F(long companyId, String fieldType) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMField.class)) {
-
-			return _collectionPersistenceFinderByC_F.count(
-				finderCache, new Object[] {companyId, fieldType});
-		}
+		return _collectionPersistenceFinderByC_F.count(
+			finderCache, new Object[] {companyId, fieldType});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByS_F;
@@ -653,14 +612,9 @@ public class DDMFieldPersistenceImpl
 		long storageId, String fieldName, int start, int end,
 		OrderByComparator<DDMField> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMField.class)) {
-
-			return _collectionPersistenceFinderByS_F.find(
-				finderCache, new Object[] {storageId, fieldName}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByS_F.find(
+			finderCache, new Object[] {storageId, fieldName}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -729,13 +683,8 @@ public class DDMFieldPersistenceImpl
 	 */
 	@Override
 	public int countByS_F(long storageId, String fieldName) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMField.class)) {
-
-			return _collectionPersistenceFinderByS_F.count(
-				finderCache, new Object[] {storageId, fieldName});
-		}
+		return _collectionPersistenceFinderByS_F.count(
+			finderCache, new Object[] {storageId, fieldName});
 	}
 
 	private FinderPath _finderPathFetchByS_I;
@@ -795,14 +744,8 @@ public class DDMFieldPersistenceImpl
 	public DDMField fetchByS_I(
 		long storageId, String instanceId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMField.class)) {
-
-			return _uniquePersistenceFinderByS_I.fetch(
-				finderCache, new Object[] {storageId, instanceId},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByS_I.fetch(
+			finderCache, new Object[] {storageId, instanceId}, useFinderCache);
 	}
 
 	/**
@@ -844,118 +787,6 @@ public class DDMFieldPersistenceImpl
 	}
 
 	/**
-	 * Caches the ddm field in the entity cache if it is enabled.
-	 *
-	 * @param ddmField the ddm field
-	 */
-	@Override
-	public void cacheResult(DDMField ddmField) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ddmField.getCtCollectionId())) {
-
-			entityCache.putResult(
-				DDMFieldImpl.class, ddmField.getPrimaryKey(), ddmField);
-
-			finderCache.putResult(
-				_finderPathFetchByS_I,
-				new Object[] {
-					ddmField.getStorageId(), ddmField.getInstanceId()
-				},
-				ddmField);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the ddm fields in the entity cache if it is enabled.
-	 *
-	 * @param ddmFields the ddm fields
-	 */
-	@Override
-	public void cacheResult(List<DDMField> ddmFields) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (ddmFields.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (DDMField ddmField : ddmFields) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						ddmField.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						DDMFieldImpl.class, ddmField.getPrimaryKey()) == null) {
-
-					cacheResult(ddmField);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all ddm fields.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(DDMFieldImpl.class);
-
-		finderCache.clearCache(DDMFieldImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the ddm field.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(DDMField ddmField) {
-		entityCache.removeResult(DDMFieldImpl.class, ddmField);
-	}
-
-	@Override
-	public void clearCache(List<DDMField> ddmFields) {
-		for (DDMField ddmField : ddmFields) {
-			entityCache.removeResult(DDMFieldImpl.class, ddmField);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(DDMFieldImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(DDMFieldImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		DDMFieldModelImpl ddmFieldModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ddmFieldModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				ddmFieldModelImpl.getStorageId(),
-				ddmFieldModelImpl.getInstanceId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByS_I, args, ddmFieldModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new ddm field with the primary key. Does not add the ddm field to the database.
 	 *
 	 * @param fieldId the primary key for the new ddm field
@@ -983,47 +814,6 @@ public class DDMFieldPersistenceImpl
 	@Override
 	public DDMField remove(long fieldId) throws NoSuchFieldException {
 		return remove((Serializable)fieldId);
-	}
-
-	/**
-	 * Removes the ddm field with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the ddm field
-	 * @return the ddm field that was removed
-	 * @throws NoSuchFieldException if a ddm field with the primary key could not be found
-	 */
-	@Override
-	public DDMField remove(Serializable primaryKey)
-		throws NoSuchFieldException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			DDMField ddmField = (DDMField)session.get(
-				DDMFieldImpl.class, primaryKey);
-
-			if (ddmField == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchFieldException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(ddmField);
-		}
-		catch (NoSuchFieldException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1102,41 +892,13 @@ public class DDMFieldPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			DDMFieldImpl.class, ddmFieldModelImpl, false, true);
-
-		cacheUniqueFindersCache(ddmFieldModelImpl);
+		cacheUniqueFindersResult(ddmField, false);
 
 		if (isNew) {
 			ddmField.setNew(false);
 		}
 
 		ddmField.resetOriginalValues();
-
-		return ddmField;
-	}
-
-	/**
-	 * Returns the ddm field with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the ddm field
-	 * @return the ddm field
-	 * @throws NoSuchFieldException if a ddm field with the primary key could not be found
-	 */
-	@Override
-	public DDMField findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchFieldException {
-
-		DDMField ddmField = fetchByPrimaryKey(primaryKey);
-
-		if (ddmField == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchFieldException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return ddmField;
 	}
@@ -1153,49 +915,9 @@ public class DDMFieldPersistenceImpl
 		return findByPrimaryKey((Serializable)fieldId);
 	}
 
-	/**
-	 * Returns the ddm field with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the ddm field
-	 * @return the ddm field, or <code>null</code> if a ddm field with the primary key could not be found
-	 */
 	@Override
-	public DDMField fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(DDMField.class, primaryKey)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		DDMField ddmField = (DDMField)entityCache.getResult(
-			DDMFieldImpl.class, primaryKey);
-
-		if (ddmField != null) {
-			return ddmField;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ddmField = (DDMField)session.get(DDMFieldImpl.class, primaryKey);
-
-			if (ddmField != null) {
-				cacheResult(ddmField);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return ddmField;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -1207,317 +929,6 @@ public class DDMFieldPersistenceImpl
 	@Override
 	public DDMField fetchByPrimaryKey(long fieldId) {
 		return fetchByPrimaryKey((Serializable)fieldId);
-	}
-
-	@Override
-	public Map<Serializable, DDMField> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(DDMField.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, DDMField> map = new HashMap<Serializable, DDMField>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			DDMField ddmField = fetchByPrimaryKey(primaryKey);
-
-			if (ddmField != null) {
-				map.put(primaryKey, ddmField);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						DDMField.class, primaryKey)) {
-
-				DDMField ddmField = (DDMField)entityCache.getResult(
-					DDMFieldImpl.class, primaryKey);
-
-				if (ddmField == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, ddmField);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (DDMField ddmField : (List<DDMField>)query.list()) {
-				map.put(ddmField.getPrimaryKeyObj(), ddmField);
-
-				cacheResult(ddmField);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the ddm fields.
-	 *
-	 * @return the ddm fields
-	 */
-	@Override
-	public List<DDMField> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the ddm fields.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDMFieldModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm fields
-	 * @param end the upper bound of the range of ddm fields (not inclusive)
-	 * @return the range of ddm fields
-	 */
-	@Override
-	public List<DDMField> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm fields.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDMFieldModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm fields
-	 * @param end the upper bound of the range of ddm fields (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm fields
-	 */
-	@Override
-	public List<DDMField> findAll(
-		int start, int end, OrderByComparator<DDMField> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm fields.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDMFieldModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm fields
-	 * @param end the upper bound of the range of ddm fields (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm fields
-	 */
-	@Override
-	public List<DDMField> findAll(
-		int start, int end, OrderByComparator<DDMField> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMField.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<DDMField> list = null;
-
-			if (useFinderCache) {
-				list = (List<DDMField>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_DDMFIELD);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_DDMFIELD;
-
-					sql = sql.concat(DDMFieldModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<DDMField>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the ddm fields from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (DDMField ddmField : findAll()) {
-			remove(ddmField);
-		}
-	}
-
-	/**
-	 * Returns the number of ddm fields.
-	 *
-	 * @return the number of ddm fields
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMField.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(_SQL_COUNT_DDMFIELD);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1604,21 +1015,6 @@ public class DDMFieldPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByStorageId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByStorageId",
 			new String[] {
@@ -1643,7 +1039,7 @@ public class DDMFieldPersistenceImpl
 				_finderPathWithoutPaginationFindByStorageId,
 				_finderPathCountByStorageId, _SQL_SELECT_DDMFIELD_WHERE,
 				_SQL_COUNT_DDMFIELD_WHERE, DDMFieldModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ddmField.", "storageId", FinderColumn.Type.LONG, "=", true,
 					true, DDMField::getStorageId));
@@ -1672,7 +1068,7 @@ public class DDMFieldPersistenceImpl
 				_finderPathWithoutPaginationFindByStructureVersionId,
 				_finderPathCountByStructureVersionId,
 				_SQL_SELECT_DDMFIELD_WHERE, _SQL_COUNT_DDMFIELD_WHERE,
-				DDMFieldModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				DDMFieldModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ddmField.", "structureVersionId", FinderColumn.Type.LONG,
 					"=", true, true, DDMField::getStructureVersionId));
@@ -1689,21 +1085,21 @@ public class DDMFieldPersistenceImpl
 		_finderPathWithoutPaginationFindByC_F = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC_F",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "fieldType"}, true);
+			new String[] {"companyId", "fieldType"}, 0, 2, true, null);
 
 		_finderPathCountByC_F = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_F",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "fieldType"}, false);
+			new String[] {"companyId", "fieldType"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByC_F = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_F,
 			_finderPathWithoutPaginationFindByC_F, _finderPathCountByC_F,
 			_SQL_SELECT_DDMFIELD_WHERE, _SQL_COUNT_DDMFIELD_WHERE,
-			DDMFieldModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			DDMFieldModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ddmField.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, DDMField::getCompanyId),
+				true, DDMField::getCompanyId),
 			new FinderColumn<>(
 				"ddmField.", "fieldType", FinderColumn.Type.STRING, "=", true,
 				true, DDMField::getFieldType));
@@ -1720,35 +1116,37 @@ public class DDMFieldPersistenceImpl
 		_finderPathWithoutPaginationFindByS_F = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByS_F",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"storageId", "fieldName"}, true);
+			new String[] {"storageId", "fieldName"}, 0, 2, true, null);
 
 		_finderPathCountByS_F = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByS_F",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"storageId", "fieldName"}, false);
+			new String[] {"storageId", "fieldName"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByS_F = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByS_F,
 			_finderPathWithoutPaginationFindByS_F, _finderPathCountByS_F,
 			_SQL_SELECT_DDMFIELD_WHERE, _SQL_COUNT_DDMFIELD_WHERE,
-			DDMFieldModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			DDMFieldModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"ddmField.", "storageId", FinderColumn.Type.LONG, "=", true,
-				false, DDMField::getStorageId),
+				true, DDMField::getStorageId),
 			new FinderColumn<>(
 				"ddmField.", "fieldName", FinderColumn.Type.STRING, "=", true,
 				true, DDMField::getFieldName));
 
-		_finderPathFetchByS_I = new FinderPath(
+		_finderPathFetchByS_I = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByS_I",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"storageId", "instanceId"}, true);
+			new String[] {"storageId", "instanceId"}, 0, 2, false,
+			DDMField::getStorageId,
+			convertNullFunction(DDMField::getInstanceId));
 
 		_uniquePersistenceFinderByS_I = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByS_I, _SQL_SELECT_DDMFIELD_WHERE,
+			this, _finderPathFetchByS_I, _SQL_SELECT_DDMFIELD_WHERE, "",
 			new FinderColumn<>(
 				"ddmField.", "storageId", FinderColumn.Type.LONG, "=", true,
-				false, DDMField::getStorageId),
+				true, DDMField::getStorageId),
 			new FinderColumn<>(
 				"ddmField.", "instanceId", FinderColumn.Type.STRING, "=", true,
 				true, DDMField::getInstanceId));
@@ -1798,22 +1196,17 @@ public class DDMFieldPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		DDMFieldModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_DDMFIELD =
 		"SELECT ddmField FROM DDMField ddmField";
 
 	private static final String _SQL_SELECT_DDMFIELD_WHERE =
 		"SELECT ddmField FROM DDMField ddmField WHERE ";
 
-	private static final String _SQL_COUNT_DDMFIELD =
-		"SELECT COUNT(ddmField) FROM DDMField ddmField";
-
 	private static final String _SQL_COUNT_DDMFIELD_WHERE =
 		"SELECT COUNT(ddmField) FROM DDMField ddmField WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "ddmField.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No DDMField exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No DDMField exists with the key {";
@@ -1827,4 +1220,4 @@ public class DDMFieldPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1933809143
+// LIFERAY-SERVICE-BUILDER-HASH:660830429

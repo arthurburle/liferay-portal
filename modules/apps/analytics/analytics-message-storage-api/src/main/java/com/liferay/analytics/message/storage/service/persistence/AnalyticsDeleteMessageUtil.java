@@ -37,6 +37,24 @@ public class AnalyticsDeleteMessageUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<AnalyticsDeleteMessage> analyticsDeleteMessages) {
+
+		getPersistence().cacheResult(analyticsDeleteMessages);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		AnalyticsDeleteMessage analyticsDeleteMessage) {
+
+		getPersistence().cacheResult(analyticsDeleteMessage);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -513,28 +531,6 @@ public class AnalyticsDeleteMessageUtil {
 	}
 
 	/**
-	 * Caches the analytics delete message in the entity cache if it is enabled.
-	 *
-	 * @param analyticsDeleteMessage the analytics delete message
-	 */
-	public static void cacheResult(
-		AnalyticsDeleteMessage analyticsDeleteMessage) {
-
-		getPersistence().cacheResult(analyticsDeleteMessage);
-	}
-
-	/**
-	 * Caches the analytics delete messages in the entity cache if it is enabled.
-	 *
-	 * @param analyticsDeleteMessages the analytics delete messages
-	 */
-	public static void cacheResult(
-		List<AnalyticsDeleteMessage> analyticsDeleteMessages) {
-
-		getPersistence().cacheResult(analyticsDeleteMessages);
-	}
-
-	/**
 	 * Creates a new analytics delete message with the primary key. Does not add the analytics delete message to the database.
 	 *
 	 * @param analyticsDeleteMessageId the primary key for the new analytics delete message
@@ -591,87 +587,6 @@ public class AnalyticsDeleteMessageUtil {
 		return getPersistence().fetchByPrimaryKey(analyticsDeleteMessageId);
 	}
 
-	/**
-	 * Returns all the analytics delete messages.
-	 *
-	 * @return the analytics delete messages
-	 */
-	public static List<AnalyticsDeleteMessage> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the analytics delete messages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.analytics.message.storage.model.impl.AnalyticsDeleteMessageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of analytics delete messages
-	 * @param end the upper bound of the range of analytics delete messages (not inclusive)
-	 * @return the range of analytics delete messages
-	 */
-	public static List<AnalyticsDeleteMessage> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the analytics delete messages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.analytics.message.storage.model.impl.AnalyticsDeleteMessageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of analytics delete messages
-	 * @param end the upper bound of the range of analytics delete messages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of analytics delete messages
-	 */
-	public static List<AnalyticsDeleteMessage> findAll(
-		int start, int end,
-		OrderByComparator<AnalyticsDeleteMessage> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the analytics delete messages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.analytics.message.storage.model.impl.AnalyticsDeleteMessageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of analytics delete messages
-	 * @param end the upper bound of the range of analytics delete messages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of analytics delete messages
-	 */
-	public static List<AnalyticsDeleteMessage> findAll(
-		int start, int end,
-		OrderByComparator<AnalyticsDeleteMessage> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the analytics delete messages from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of analytics delete messages.
-	 *
-	 * @return the number of analytics delete messages
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static AnalyticsDeleteMessagePersistence getPersistence() {
 		return _persistence;
 	}
@@ -685,4 +600,4 @@ public class AnalyticsDeleteMessageUtil {
 	private static volatile AnalyticsDeleteMessagePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1857671594
+// LIFERAY-SERVICE-BUILDER-HASH:674309352

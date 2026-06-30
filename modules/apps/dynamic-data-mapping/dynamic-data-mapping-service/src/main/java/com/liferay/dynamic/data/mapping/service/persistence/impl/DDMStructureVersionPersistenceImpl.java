@@ -13,15 +13,11 @@ import com.liferay.dynamic.data.mapping.model.impl.DDMStructureVersionModelImpl;
 import com.liferay.dynamic.data.mapping.service.persistence.DDMStructureVersionPersistence;
 import com.liferay.dynamic.data.mapping.service.persistence.DDMStructureVersionUtil;
 import com.liferay.dynamic.data.mapping.service.persistence.impl.constants.DDMPersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -35,10 +31,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 
@@ -52,7 +45,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +68,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = DDMStructureVersionPersistence.class)
 public class DDMStructureVersionPersistenceImpl
-	extends BasePersistenceImpl<DDMStructureVersion>
+	extends BasePersistenceImpl
+		<DDMStructureVersion, NoSuchStructureVersionException>
 	implements DDMStructureVersionPersistence {
 
 	/*
@@ -93,9 +86,6 @@ public class DDMStructureVersionPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByStructureId;
 	private FinderPath _finderPathWithoutPaginationFindByStructureId;
 	private FinderPath _finderPathCountByStructureId;
@@ -175,14 +165,9 @@ public class DDMStructureVersionPersistenceImpl
 		OrderByComparator<DDMStructureVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMStructureVersion.class)) {
-
-			return _collectionPersistenceFinderByStructureId.find(
-				finderCache, new Object[] {structureId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByStructureId.find(
+			finderCache, new Object[] {structureId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -246,13 +231,8 @@ public class DDMStructureVersionPersistenceImpl
 	 */
 	@Override
 	public int countByStructureId(long structureId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMStructureVersion.class)) {
-
-			return _collectionPersistenceFinderByStructureId.count(
-				finderCache, new Object[] {structureId});
-		}
+		return _collectionPersistenceFinderByStructureId.count(
+			finderCache, new Object[] {structureId});
 	}
 
 	private FinderPath _finderPathFetchByS_V;
@@ -314,14 +294,8 @@ public class DDMStructureVersionPersistenceImpl
 	public DDMStructureVersion fetchByS_V(
 		long structureId, String version, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMStructureVersion.class)) {
-
-			return _uniquePersistenceFinderByS_V.fetch(
-				finderCache, new Object[] {structureId, version},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByS_V.fetch(
+			finderCache, new Object[] {structureId, version}, useFinderCache);
 	}
 
 	/**
@@ -437,14 +411,9 @@ public class DDMStructureVersionPersistenceImpl
 		OrderByComparator<DDMStructureVersion> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMStructureVersion.class)) {
-
-			return _collectionPersistenceFinderByS_S.find(
-				finderCache, new Object[] {structureId, status}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByS_S.find(
+			finderCache, new Object[] {structureId, status}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -512,13 +481,8 @@ public class DDMStructureVersionPersistenceImpl
 	 */
 	@Override
 	public int countByS_S(long structureId, int status) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMStructureVersion.class)) {
-
-			return _collectionPersistenceFinderByS_S.count(
-				finderCache, new Object[] {structureId, status});
-		}
+		return _collectionPersistenceFinderByS_S.count(
+			finderCache, new Object[] {structureId, status});
 	}
 
 	public DDMStructureVersionPersistenceImpl() {
@@ -534,137 +498,6 @@ public class DDMStructureVersionPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(DDMStructureVersionTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the ddm structure version in the entity cache if it is enabled.
-	 *
-	 * @param ddmStructureVersion the ddm structure version
-	 */
-	@Override
-	public void cacheResult(DDMStructureVersion ddmStructureVersion) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ddmStructureVersion.getCtCollectionId())) {
-
-			entityCache.putResult(
-				DDMStructureVersionImpl.class,
-				ddmStructureVersion.getPrimaryKey(), ddmStructureVersion);
-
-			finderCache.putResult(
-				_finderPathFetchByS_V,
-				new Object[] {
-					ddmStructureVersion.getStructureId(),
-					ddmStructureVersion.getVersion()
-				},
-				ddmStructureVersion);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the ddm structure versions in the entity cache if it is enabled.
-	 *
-	 * @param ddmStructureVersions the ddm structure versions
-	 */
-	@Override
-	public void cacheResult(List<DDMStructureVersion> ddmStructureVersions) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (ddmStructureVersions.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (DDMStructureVersion ddmStructureVersion : ddmStructureVersions) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						ddmStructureVersion.getCtCollectionId())) {
-
-				DDMStructureVersion cachedDDMStructureVersion =
-					(DDMStructureVersion)entityCache.getResult(
-						DDMStructureVersionImpl.class,
-						ddmStructureVersion.getPrimaryKey());
-
-				if (cachedDDMStructureVersion == null) {
-					cacheResult(ddmStructureVersion);
-				}
-				else {
-					DDMStructureVersionModelImpl ddmStructureVersionModelImpl =
-						(DDMStructureVersionModelImpl)ddmStructureVersion;
-					DDMStructureVersionModelImpl
-						cachedDDMStructureVersionModelImpl =
-							(DDMStructureVersionModelImpl)
-								cachedDDMStructureVersion;
-
-					ddmStructureVersionModelImpl.setDDMForm(
-						cachedDDMStructureVersionModelImpl.getDDMForm());
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all ddm structure versions.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(DDMStructureVersionImpl.class);
-
-		finderCache.clearCache(DDMStructureVersionImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the ddm structure version.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(DDMStructureVersion ddmStructureVersion) {
-		entityCache.removeResult(
-			DDMStructureVersionImpl.class, ddmStructureVersion);
-	}
-
-	@Override
-	public void clearCache(List<DDMStructureVersion> ddmStructureVersions) {
-		for (DDMStructureVersion ddmStructureVersion : ddmStructureVersions) {
-			entityCache.removeResult(
-				DDMStructureVersionImpl.class, ddmStructureVersion);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(DDMStructureVersionImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(DDMStructureVersionImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		DDMStructureVersionModelImpl ddmStructureVersionModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ddmStructureVersionModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				ddmStructureVersionModelImpl.getStructureId(),
-				ddmStructureVersionModelImpl.getVersion()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByS_V, args, ddmStructureVersionModelImpl);
-		}
 	}
 
 	/**
@@ -697,48 +530,6 @@ public class DDMStructureVersionPersistenceImpl
 		throws NoSuchStructureVersionException {
 
 		return remove((Serializable)structureVersionId);
-	}
-
-	/**
-	 * Removes the ddm structure version with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the ddm structure version
-	 * @return the ddm structure version that was removed
-	 * @throws NoSuchStructureVersionException if a ddm structure version with the primary key could not be found
-	 */
-	@Override
-	public DDMStructureVersion remove(Serializable primaryKey)
-		throws NoSuchStructureVersionException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			DDMStructureVersion ddmStructureVersion =
-				(DDMStructureVersion)session.get(
-					DDMStructureVersionImpl.class, primaryKey);
-
-			if (ddmStructureVersion == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchStructureVersionException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(ddmStructureVersion);
-		}
-		catch (NoSuchStructureVersionException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -843,42 +634,13 @@ public class DDMStructureVersionPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			DDMStructureVersionImpl.class, ddmStructureVersionModelImpl, false,
-			true);
-
-		cacheUniqueFindersCache(ddmStructureVersionModelImpl);
+		cacheUniqueFindersResult(ddmStructureVersion, false);
 
 		if (isNew) {
 			ddmStructureVersion.setNew(false);
 		}
 
 		ddmStructureVersion.resetOriginalValues();
-
-		return ddmStructureVersion;
-	}
-
-	/**
-	 * Returns the ddm structure version with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the ddm structure version
-	 * @return the ddm structure version
-	 * @throws NoSuchStructureVersionException if a ddm structure version with the primary key could not be found
-	 */
-	@Override
-	public DDMStructureVersion findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchStructureVersionException {
-
-		DDMStructureVersion ddmStructureVersion = fetchByPrimaryKey(primaryKey);
-
-		if (ddmStructureVersion == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchStructureVersionException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return ddmStructureVersion;
 	}
@@ -897,53 +659,9 @@ public class DDMStructureVersionPersistenceImpl
 		return findByPrimaryKey((Serializable)structureVersionId);
 	}
 
-	/**
-	 * Returns the ddm structure version with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the ddm structure version
-	 * @return the ddm structure version, or <code>null</code> if a ddm structure version with the primary key could not be found
-	 */
 	@Override
-	public DDMStructureVersion fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				DDMStructureVersion.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		DDMStructureVersion ddmStructureVersion =
-			(DDMStructureVersion)entityCache.getResult(
-				DDMStructureVersionImpl.class, primaryKey);
-
-		if (ddmStructureVersion != null) {
-			return ddmStructureVersion;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ddmStructureVersion = (DDMStructureVersion)session.get(
-				DDMStructureVersionImpl.class, primaryKey);
-
-			if (ddmStructureVersion != null) {
-				cacheResult(ddmStructureVersion);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return ddmStructureVersion;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -955,328 +673,6 @@ public class DDMStructureVersionPersistenceImpl
 	@Override
 	public DDMStructureVersion fetchByPrimaryKey(long structureVersionId) {
 		return fetchByPrimaryKey((Serializable)structureVersionId);
-	}
-
-	@Override
-	public Map<Serializable, DDMStructureVersion> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(DDMStructureVersion.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, DDMStructureVersion> map =
-			new HashMap<Serializable, DDMStructureVersion>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			DDMStructureVersion ddmStructureVersion = fetchByPrimaryKey(
-				primaryKey);
-
-			if (ddmStructureVersion != null) {
-				map.put(primaryKey, ddmStructureVersion);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						DDMStructureVersion.class, primaryKey)) {
-
-				DDMStructureVersion ddmStructureVersion =
-					(DDMStructureVersion)entityCache.getResult(
-						DDMStructureVersionImpl.class, primaryKey);
-
-				if (ddmStructureVersion == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, ddmStructureVersion);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (DDMStructureVersion ddmStructureVersion :
-					(List<DDMStructureVersion>)query.list()) {
-
-				map.put(
-					ddmStructureVersion.getPrimaryKeyObj(),
-					ddmStructureVersion);
-
-				cacheResult(ddmStructureVersion);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the ddm structure versions.
-	 *
-	 * @return the ddm structure versions
-	 */
-	@Override
-	public List<DDMStructureVersion> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the ddm structure versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDMStructureVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm structure versions
-	 * @param end the upper bound of the range of ddm structure versions (not inclusive)
-	 * @return the range of ddm structure versions
-	 */
-	@Override
-	public List<DDMStructureVersion> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm structure versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDMStructureVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm structure versions
-	 * @param end the upper bound of the range of ddm structure versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm structure versions
-	 */
-	@Override
-	public List<DDMStructureVersion> findAll(
-		int start, int end,
-		OrderByComparator<DDMStructureVersion> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm structure versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>DDMStructureVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm structure versions
-	 * @param end the upper bound of the range of ddm structure versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm structure versions
-	 */
-	@Override
-	public List<DDMStructureVersion> findAll(
-		int start, int end,
-		OrderByComparator<DDMStructureVersion> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMStructureVersion.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<DDMStructureVersion> list = null;
-
-			if (useFinderCache) {
-				list = (List<DDMStructureVersion>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_DDMSTRUCTUREVERSION);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_DDMSTRUCTUREVERSION;
-
-					sql = sql.concat(
-						DDMStructureVersionModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<DDMStructureVersion>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the ddm structure versions from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (DDMStructureVersion ddmStructureVersion : findAll()) {
-			remove(ddmStructureVersion);
-		}
-	}
-
-	/**
-	 * Returns the number of ddm structure versions.
-	 *
-	 * @return the number of ddm structure versions
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					DDMStructureVersion.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_DDMSTRUCTUREVERSION);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1377,21 +773,6 @@ public class DDMStructureVersionPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByStructureId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByStructureId",
 			new String[] {
@@ -1418,22 +799,25 @@ public class DDMStructureVersionPersistenceImpl
 				_SQL_SELECT_DDMSTRUCTUREVERSION_WHERE,
 				_SQL_COUNT_DDMSTRUCTUREVERSION_WHERE,
 				DDMStructureVersionModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ddmStructureVersion.", "structureId",
 					FinderColumn.Type.LONG, "=", true, true,
 					DDMStructureVersion::getStructureId));
 
-		_finderPathFetchByS_V = new FinderPath(
+		_finderPathFetchByS_V = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByS_V",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"structureId", "version"}, true);
+			new String[] {"structureId", "version"}, 0, 2, false,
+			DDMStructureVersion::getStructureId,
+			convertNullFunction(DDMStructureVersion::getVersion));
 
 		_uniquePersistenceFinderByS_V = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByS_V, _SQL_SELECT_DDMSTRUCTUREVERSION_WHERE,
+			"",
 			new FinderColumn<>(
 				"ddmStructureVersion.", "structureId", FinderColumn.Type.LONG,
-				"=", true, false, DDMStructureVersion::getStructureId),
+				"=", true, true, DDMStructureVersion::getStructureId),
 			new FinderColumn<>(
 				"ddmStructureVersion.", "version", FinderColumn.Type.STRING,
 				"=", true, true, DDMStructureVersion::getVersion));
@@ -1462,10 +846,11 @@ public class DDMStructureVersionPersistenceImpl
 			_finderPathWithoutPaginationFindByS_S, _finderPathCountByS_S,
 			_SQL_SELECT_DDMSTRUCTUREVERSION_WHERE,
 			_SQL_COUNT_DDMSTRUCTUREVERSION_WHERE,
-			DDMStructureVersionModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			DDMStructureVersionModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"ddmStructureVersion.", "structureId", FinderColumn.Type.LONG,
-				"=", true, false, DDMStructureVersion::getStructureId),
+				"=", true, true, DDMStructureVersion::getStructureId),
 			new FinderColumn<>(
 				"ddmStructureVersion.", "status", FinderColumn.Type.INTEGER,
 				"=", true, true, DDMStructureVersion::getStatus));
@@ -1515,22 +900,17 @@ public class DDMStructureVersionPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		DDMStructureVersionModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_DDMSTRUCTUREVERSION =
 		"SELECT ddmStructureVersion FROM DDMStructureVersion ddmStructureVersion";
 
 	private static final String _SQL_SELECT_DDMSTRUCTUREVERSION_WHERE =
 		"SELECT ddmStructureVersion FROM DDMStructureVersion ddmStructureVersion WHERE ";
 
-	private static final String _SQL_COUNT_DDMSTRUCTUREVERSION =
-		"SELECT COUNT(ddmStructureVersion) FROM DDMStructureVersion ddmStructureVersion";
-
 	private static final String _SQL_COUNT_DDMSTRUCTUREVERSION_WHERE =
 		"SELECT COUNT(ddmStructureVersion) FROM DDMStructureVersion ddmStructureVersion WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "ddmStructureVersion.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No DDMStructureVersion exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No DDMStructureVersion exists with the key {";
@@ -1547,4 +927,4 @@ public class DDMStructureVersionPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-646862396
+// LIFERAY-SERVICE-BUILDER-HASH:-566506530

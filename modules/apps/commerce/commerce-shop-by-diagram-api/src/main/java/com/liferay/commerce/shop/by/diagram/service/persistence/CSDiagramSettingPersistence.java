@@ -292,20 +292,6 @@ public interface CSDiagramSettingPersistence
 	public int countByCPDefinitionId(long CPDefinitionId);
 
 	/**
-	 * Caches the cs diagram setting in the entity cache if it is enabled.
-	 *
-	 * @param csDiagramSetting the cs diagram setting
-	 */
-	public void cacheResult(CSDiagramSetting csDiagramSetting);
-
-	/**
-	 * Caches the cs diagram settings in the entity cache if it is enabled.
-	 *
-	 * @param csDiagramSettings the cs diagram settings
-	 */
-	public void cacheResult(java.util.List<CSDiagramSetting> csDiagramSettings);
-
-	/**
 	 * Creates a new cs diagram setting with the primary key. Does not add the cs diagram setting to the database.
 	 *
 	 * @param CSDiagramSettingId the primary key for the new cs diagram setting
@@ -343,73 +329,5 @@ public interface CSDiagramSettingPersistence
 	 */
 	public CSDiagramSetting fetchByPrimaryKey(long CSDiagramSettingId);
 
-	/**
-	 * Returns all the cs diagram settings.
-	 *
-	 * @return the cs diagram settings
-	 */
-	public java.util.List<CSDiagramSetting> findAll();
-
-	/**
-	 * Returns a range of all the cs diagram settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.shop.by.diagram.model.impl.CSDiagramSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cs diagram settings
-	 * @param end the upper bound of the range of cs diagram settings (not inclusive)
-	 * @return the range of cs diagram settings
-	 */
-	public java.util.List<CSDiagramSetting> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the cs diagram settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.shop.by.diagram.model.impl.CSDiagramSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cs diagram settings
-	 * @param end the upper bound of the range of cs diagram settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of cs diagram settings
-	 */
-	public java.util.List<CSDiagramSetting> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CSDiagramSetting>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the cs diagram settings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.shop.by.diagram.model.impl.CSDiagramSettingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of cs diagram settings
-	 * @param end the upper bound of the range of cs diagram settings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of cs diagram settings
-	 */
-	public java.util.List<CSDiagramSetting> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CSDiagramSetting>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the cs diagram settings from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of cs diagram settings.
-	 *
-	 * @return the number of cs diagram settings
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1406010311
+// LIFERAY-SERVICE-BUILDER-HASH:-1151836043

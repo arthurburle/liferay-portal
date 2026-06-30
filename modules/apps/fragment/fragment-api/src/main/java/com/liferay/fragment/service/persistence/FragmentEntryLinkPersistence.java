@@ -2943,21 +2943,6 @@ public interface FragmentEntryLinkPersistence
 	public int countByERC_G(String externalReferenceCode, long groupId);
 
 	/**
-	 * Caches the fragment entry link in the entity cache if it is enabled.
-	 *
-	 * @param fragmentEntryLink the fragment entry link
-	 */
-	public void cacheResult(FragmentEntryLink fragmentEntryLink);
-
-	/**
-	 * Caches the fragment entry links in the entity cache if it is enabled.
-	 *
-	 * @param fragmentEntryLinks the fragment entry links
-	 */
-	public void cacheResult(
-		java.util.List<FragmentEntryLink> fragmentEntryLinks);
-
-	/**
 	 * Creates a new fragment entry link with the primary key. Does not add the fragment entry link to the database.
 	 *
 	 * @param fragmentEntryLinkId the primary key for the new fragment entry link
@@ -2995,73 +2980,5 @@ public interface FragmentEntryLinkPersistence
 	 */
 	public FragmentEntryLink fetchByPrimaryKey(long fragmentEntryLinkId);
 
-	/**
-	 * Returns all the fragment entry links.
-	 *
-	 * @return the fragment entry links
-	 */
-	public java.util.List<FragmentEntryLink> findAll();
-
-	/**
-	 * Returns a range of all the fragment entry links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.fragment.model.impl.FragmentEntryLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of fragment entry links
-	 * @param end the upper bound of the range of fragment entry links (not inclusive)
-	 * @return the range of fragment entry links
-	 */
-	public java.util.List<FragmentEntryLink> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the fragment entry links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.fragment.model.impl.FragmentEntryLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of fragment entry links
-	 * @param end the upper bound of the range of fragment entry links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of fragment entry links
-	 */
-	public java.util.List<FragmentEntryLink> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<FragmentEntryLink>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the fragment entry links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.fragment.model.impl.FragmentEntryLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of fragment entry links
-	 * @param end the upper bound of the range of fragment entry links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of fragment entry links
-	 */
-	public java.util.List<FragmentEntryLink> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<FragmentEntryLink>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the fragment entry links from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of fragment entry links.
-	 *
-	 * @return the number of fragment entry links
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-93139918
+// LIFERAY-SERVICE-BUILDER-HASH:-1798903477

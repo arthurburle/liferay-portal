@@ -36,6 +36,20 @@ public class SegmentsEntryRelUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<SegmentsEntryRel> segmentsEntryRels) {
+		getPersistence().cacheResult(segmentsEntryRels);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(SegmentsEntryRel segmentsEntryRel) {
+		getPersistence().cacheResult(segmentsEntryRel);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -598,24 +612,6 @@ public class SegmentsEntryRelUtil {
 	}
 
 	/**
-	 * Caches the segments entry rel in the entity cache if it is enabled.
-	 *
-	 * @param segmentsEntryRel the segments entry rel
-	 */
-	public static void cacheResult(SegmentsEntryRel segmentsEntryRel) {
-		getPersistence().cacheResult(segmentsEntryRel);
-	}
-
-	/**
-	 * Caches the segments entry rels in the entity cache if it is enabled.
-	 *
-	 * @param segmentsEntryRels the segments entry rels
-	 */
-	public static void cacheResult(List<SegmentsEntryRel> segmentsEntryRels) {
-		getPersistence().cacheResult(segmentsEntryRels);
-	}
-
-	/**
 	 * Creates a new segments entry rel with the primary key. Does not add the segments entry rel to the database.
 	 *
 	 * @param segmentsEntryRelId the primary key for the new segments entry rel
@@ -667,87 +663,6 @@ public class SegmentsEntryRelUtil {
 		return getPersistence().fetchByPrimaryKey(segmentsEntryRelId);
 	}
 
-	/**
-	 * Returns all the segments entry rels.
-	 *
-	 * @return the segments entry rels
-	 */
-	public static List<SegmentsEntryRel> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the segments entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.segments.model.impl.SegmentsEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of segments entry rels
-	 * @param end the upper bound of the range of segments entry rels (not inclusive)
-	 * @return the range of segments entry rels
-	 */
-	public static List<SegmentsEntryRel> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the segments entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.segments.model.impl.SegmentsEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of segments entry rels
-	 * @param end the upper bound of the range of segments entry rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of segments entry rels
-	 */
-	public static List<SegmentsEntryRel> findAll(
-		int start, int end,
-		OrderByComparator<SegmentsEntryRel> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the segments entry rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.segments.model.impl.SegmentsEntryRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of segments entry rels
-	 * @param end the upper bound of the range of segments entry rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of segments entry rels
-	 */
-	public static List<SegmentsEntryRel> findAll(
-		int start, int end,
-		OrderByComparator<SegmentsEntryRel> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the segments entry rels from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of segments entry rels.
-	 *
-	 * @return the number of segments entry rels
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static SegmentsEntryRelPersistence getPersistence() {
 		return _persistence;
 	}
@@ -759,4 +674,4 @@ public class SegmentsEntryRelUtil {
 	private static volatile SegmentsEntryRelPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:203326421
+// LIFERAY-SERVICE-BUILDER-HASH:-923367373

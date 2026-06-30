@@ -200,21 +200,6 @@ public interface BatchPlannerMappingPersistence
 		String internalFieldName);
 
 	/**
-	 * Caches the batch planner mapping in the entity cache if it is enabled.
-	 *
-	 * @param batchPlannerMapping the batch planner mapping
-	 */
-	public void cacheResult(BatchPlannerMapping batchPlannerMapping);
-
-	/**
-	 * Caches the batch planner mappings in the entity cache if it is enabled.
-	 *
-	 * @param batchPlannerMappings the batch planner mappings
-	 */
-	public void cacheResult(
-		java.util.List<BatchPlannerMapping> batchPlannerMappings);
-
-	/**
 	 * Creates a new batch planner mapping with the primary key. Does not add the batch planner mapping to the database.
 	 *
 	 * @param batchPlannerMappingId the primary key for the new batch planner mapping
@@ -253,73 +238,5 @@ public interface BatchPlannerMappingPersistence
 	 */
 	public BatchPlannerMapping fetchByPrimaryKey(long batchPlannerMappingId);
 
-	/**
-	 * Returns all the batch planner mappings.
-	 *
-	 * @return the batch planner mappings
-	 */
-	public java.util.List<BatchPlannerMapping> findAll();
-
-	/**
-	 * Returns a range of all the batch planner mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.batch.planner.model.impl.BatchPlannerMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of batch planner mappings
-	 * @param end the upper bound of the range of batch planner mappings (not inclusive)
-	 * @return the range of batch planner mappings
-	 */
-	public java.util.List<BatchPlannerMapping> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the batch planner mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.batch.planner.model.impl.BatchPlannerMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of batch planner mappings
-	 * @param end the upper bound of the range of batch planner mappings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of batch planner mappings
-	 */
-	public java.util.List<BatchPlannerMapping> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<BatchPlannerMapping>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the batch planner mappings.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.batch.planner.model.impl.BatchPlannerMappingModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of batch planner mappings
-	 * @param end the upper bound of the range of batch planner mappings (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of batch planner mappings
-	 */
-	public java.util.List<BatchPlannerMapping> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<BatchPlannerMapping>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the batch planner mappings from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of batch planner mappings.
-	 *
-	 * @return the number of batch planner mappings
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-920270907
+// LIFERAY-SERVICE-BUILDER-HASH:-899281896

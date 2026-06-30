@@ -5,13 +5,11 @@
 
 package com.liferay.portal.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.exception.NoSuchListTypeException;
@@ -28,10 +26,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -60,7 +55,8 @@ import java.util.Set;
  * @generated
  */
 public class ListTypePersistenceImpl
-	extends BasePersistenceImpl<ListType> implements ListTypePersistence {
+	extends BasePersistenceImpl<ListType, NoSuchListTypeException>
+	implements ListTypePersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -76,9 +72,6 @@ public class ListTypePersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -792,103 +785,6 @@ public class ListTypePersistenceImpl
 	}
 
 	/**
-	 * Caches the list type in the entity cache if it is enabled.
-	 *
-	 * @param listType the list type
-	 */
-	@Override
-	public void cacheResult(ListType listType) {
-		EntityCacheUtil.putResult(
-			ListTypeImpl.class, listType.getPrimaryKey(), listType);
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByC_N_T,
-			new Object[] {
-				listType.getCompanyId(), listType.getName(), listType.getType()
-			},
-			listType);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the list types in the entity cache if it is enabled.
-	 *
-	 * @param listTypes the list types
-	 */
-	@Override
-	public void cacheResult(List<ListType> listTypes) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (listTypes.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ListType listType : listTypes) {
-			if (EntityCacheUtil.getResult(
-					ListTypeImpl.class, listType.getPrimaryKey()) == null) {
-
-				cacheResult(listType);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all list types.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		EntityCacheUtil.clearCache(ListTypeImpl.class);
-
-		FinderCacheUtil.clearCache(ListTypeImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the list type.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ListType listType) {
-		EntityCacheUtil.removeResult(ListTypeImpl.class, listType);
-	}
-
-	@Override
-	public void clearCache(List<ListType> listTypes) {
-		for (ListType listType : listTypes) {
-			EntityCacheUtil.removeResult(ListTypeImpl.class, listType);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		FinderCacheUtil.clearCache(ListTypeImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			EntityCacheUtil.removeResult(ListTypeImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		ListTypeModelImpl listTypeModelImpl) {
-
-		Object[] args = new Object[] {
-			listTypeModelImpl.getCompanyId(), listTypeModelImpl.getName(),
-			listTypeModelImpl.getType()
-		};
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByC_N_T, args, listTypeModelImpl);
-	}
-
-	/**
 	 * Creates a new list type with the primary key. Does not add the list type to the database.
 	 *
 	 * @param listTypeId the primary key for the new list type
@@ -920,47 +816,6 @@ public class ListTypePersistenceImpl
 	@Override
 	public ListType remove(long listTypeId) throws NoSuchListTypeException {
 		return remove((Serializable)listTypeId);
-	}
-
-	/**
-	 * Removes the list type with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the list type
-	 * @return the list type that was removed
-	 * @throws NoSuchListTypeException if a list type with the primary key could not be found
-	 */
-	@Override
-	public ListType remove(Serializable primaryKey)
-		throws NoSuchListTypeException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ListType listType = (ListType)session.get(
-				ListTypeImpl.class, primaryKey);
-
-			if (listType == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchListTypeException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(listType);
-		}
-		catch (NoSuchListTypeException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1063,41 +918,13 @@ public class ListTypePersistenceImpl
 			closeSession(session);
 		}
 
-		EntityCacheUtil.putResult(
-			ListTypeImpl.class, listTypeModelImpl, false, true);
-
-		cacheUniqueFindersCache(listTypeModelImpl);
+		cacheUniqueFindersResult(listType, false);
 
 		if (isNew) {
 			listType.setNew(false);
 		}
 
 		listType.resetOriginalValues();
-
-		return listType;
-	}
-
-	/**
-	 * Returns the list type with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the list type
-	 * @return the list type
-	 * @throws NoSuchListTypeException if a list type with the primary key could not be found
-	 */
-	@Override
-	public ListType findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchListTypeException {
-
-		ListType listType = fetchByPrimaryKey(primaryKey);
-
-		if (listType == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchListTypeException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return listType;
 	}
@@ -1125,185 +952,6 @@ public class ListTypePersistenceImpl
 	@Override
 	public ListType fetchByPrimaryKey(long listTypeId) {
 		return fetchByPrimaryKey((Serializable)listTypeId);
-	}
-
-	/**
-	 * Returns all the list types.
-	 *
-	 * @return the list types
-	 */
-	@Override
-	public List<ListType> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the list types.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ListTypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of list types
-	 * @param end the upper bound of the range of list types (not inclusive)
-	 * @return the range of list types
-	 */
-	@Override
-	public List<ListType> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the list types.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ListTypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of list types
-	 * @param end the upper bound of the range of list types (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of list types
-	 */
-	@Override
-	public List<ListType> findAll(
-		int start, int end, OrderByComparator<ListType> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the list types.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ListTypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of list types
-	 * @param end the upper bound of the range of list types (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of list types
-	 */
-	@Override
-	public List<ListType> findAll(
-		int start, int end, OrderByComparator<ListType> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ListType> list = null;
-
-		if (useFinderCache) {
-			list = (List<ListType>)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_LISTTYPE);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_LISTTYPE;
-
-				sql = sql.concat(ListTypeModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ListType>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the list types from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ListType listType : findAll()) {
-			remove(listType);
-		}
-	}
-
-	/**
-	 * Returns the number of list types.
-	 *
-	 * @return the number of list types
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)FinderCacheUtil.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_LISTTYPE);
-
-				count = (Long)query.uniqueResult();
-
-				FinderCacheUtil.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -1335,21 +983,6 @@ public class ListTypePersistenceImpl
 	 * Initializes the list type persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1360,19 +993,19 @@ public class ListTypePersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_LISTTYPE_WHERE, _SQL_COUNT_LISTTYPE_WHERE,
-			ListTypeModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ListTypeModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"listType.", "uuid", FinderColumn.Type.STRING, "=", true, true,
 				ListType::getUuid));
@@ -1389,12 +1022,12 @@ public class ListTypePersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1402,10 +1035,10 @@ public class ListTypePersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_LISTTYPE_WHERE,
 				_SQL_COUNT_LISTTYPE_WHERE, ListTypeModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"listType.", "uuid", FinderColumn.Type.STRING, "=", true,
-					false, ListType::getUuid),
+					true, ListType::getUuid),
 				new FinderColumn<>(
 					"listType.", "companyId", FinderColumn.Type.LONG, "=", true,
 					true, ListType::getCompanyId));
@@ -1434,7 +1067,7 @@ public class ListTypePersistenceImpl
 				_finderPathWithoutPaginationFindByCompanyId,
 				_finderPathCountByCompanyId, _SQL_SELECT_LISTTYPE_WHERE,
 				_SQL_COUNT_LISTTYPE_WHERE, ListTypeModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"listType.", "companyId", FinderColumn.Type.LONG, "=", true,
 					true, ListType::getCompanyId));
@@ -1451,40 +1084,42 @@ public class ListTypePersistenceImpl
 		_finderPathWithoutPaginationFindByC_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByC_T",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "type_"}, true);
+			new String[] {"companyId", "type_"}, 0, 2, true, null);
 
 		_finderPathCountByC_T = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_T",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "type_"}, false);
+			new String[] {"companyId", "type_"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByC_T = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByC_T,
 			_finderPathWithoutPaginationFindByC_T, _finderPathCountByC_T,
 			_SQL_SELECT_LISTTYPE_WHERE, _SQL_COUNT_LISTTYPE_WHERE,
-			ListTypeModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ListTypeModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"listType.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, ListType::getCompanyId),
+				true, ListType::getCompanyId),
 			new FinderColumn<>(
 				"listType.", "type", FinderColumn.Type.STRING, "=", true, true,
 				ListType::getType));
 
-		_finderPathFetchByC_N_T = new FinderPath(
+		_finderPathFetchByC_N_T = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_N_T",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"companyId", "name", "type_"}, true);
+			new String[] {"companyId", "name", "type_"}, 0, 6, false,
+			ListType::getCompanyId, convertNullFunction(ListType::getName),
+			convertNullFunction(ListType::getType));
 
 		_uniquePersistenceFinderByC_N_T = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByC_N_T, _SQL_SELECT_LISTTYPE_WHERE,
+			this, _finderPathFetchByC_N_T, _SQL_SELECT_LISTTYPE_WHERE, "",
 			new FinderColumn<>(
 				"listType.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, ListType::getCompanyId),
+				true, ListType::getCompanyId),
 			new FinderColumn<>(
-				"listType.", "name", FinderColumn.Type.STRING, "=", true, false,
+				"listType.", "name", FinderColumn.Type.STRING, "=", true, true,
 				ListType::getName),
 			new FinderColumn<>(
 				"listType.", "type", FinderColumn.Type.STRING, "=", true, true,
@@ -1499,22 +1134,17 @@ public class ListTypePersistenceImpl
 		EntityCacheUtil.removeCache(ListTypeImpl.class.getName());
 	}
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ListTypeModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_LISTTYPE =
 		"SELECT listType FROM ListType listType";
 
 	private static final String _SQL_SELECT_LISTTYPE_WHERE =
 		"SELECT listType FROM ListType listType WHERE ";
 
-	private static final String _SQL_COUNT_LISTTYPE =
-		"SELECT COUNT(listType) FROM ListType listType";
-
 	private static final String _SQL_COUNT_LISTTYPE_WHERE =
 		"SELECT COUNT(listType) FROM ListType listType WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "listType.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ListType exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ListType exists with the key {";
@@ -1531,4 +1161,4 @@ public class ListTypePersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:859101337
+// LIFERAY-SERVICE-BUILDER-HASH:1068237188

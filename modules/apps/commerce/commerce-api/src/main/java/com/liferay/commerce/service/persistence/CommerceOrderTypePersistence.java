@@ -1051,21 +1051,6 @@ public interface CommerceOrderTypePersistence
 	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
-	 * Caches the commerce order type in the entity cache if it is enabled.
-	 *
-	 * @param commerceOrderType the commerce order type
-	 */
-	public void cacheResult(CommerceOrderType commerceOrderType);
-
-	/**
-	 * Caches the commerce order types in the entity cache if it is enabled.
-	 *
-	 * @param commerceOrderTypes the commerce order types
-	 */
-	public void cacheResult(
-		java.util.List<CommerceOrderType> commerceOrderTypes);
-
-	/**
 	 * Creates a new commerce order type with the primary key. Does not add the commerce order type to the database.
 	 *
 	 * @param commerceOrderTypeId the primary key for the new commerce order type
@@ -1103,73 +1088,5 @@ public interface CommerceOrderTypePersistence
 	 */
 	public CommerceOrderType fetchByPrimaryKey(long commerceOrderTypeId);
 
-	/**
-	 * Returns all the commerce order types.
-	 *
-	 * @return the commerce order types
-	 */
-	public java.util.List<CommerceOrderType> findAll();
-
-	/**
-	 * Returns a range of all the commerce order types.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderTypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order types
-	 * @param end the upper bound of the range of commerce order types (not inclusive)
-	 * @return the range of commerce order types
-	 */
-	public java.util.List<CommerceOrderType> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce order types.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderTypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order types
-	 * @param end the upper bound of the range of commerce order types (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce order types
-	 */
-	public java.util.List<CommerceOrderType> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CommerceOrderType>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce order types.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderTypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce order types
-	 * @param end the upper bound of the range of commerce order types (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce order types
-	 */
-	public java.util.List<CommerceOrderType> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<CommerceOrderType>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce order types from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce order types.
-	 *
-	 * @return the number of commerce order types
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2047297015
+// LIFERAY-SERVICE-BUILDER-HASH:-715233937

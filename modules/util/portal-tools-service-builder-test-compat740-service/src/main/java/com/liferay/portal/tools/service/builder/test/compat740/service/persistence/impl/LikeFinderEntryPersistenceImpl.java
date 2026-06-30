@@ -5,12 +5,10 @@
 
 package com.liferay.portal.tools.service.builder.test.compat740.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -21,10 +19,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.tools.service.builder.test.compat740.exception.NoSuchLikeFinderEntryException;
 import com.liferay.portal.tools.service.builder.test.compat740.model.LikeFinderEntry;
@@ -41,7 +36,6 @@ import java.lang.reflect.InvocationHandler;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -62,7 +56,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = LikeFinderEntryPersistence.class)
 public class LikeFinderEntryPersistenceImpl
-	extends BasePersistenceImpl<LikeFinderEntry>
+	extends BasePersistenceImpl<LikeFinderEntry, NoSuchLikeFinderEntryException>
 	implements LikeFinderEntryPersistence {
 
 	/*
@@ -79,9 +73,6 @@ public class LikeFinderEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathFetchByO_O_P;
 	private UniquePersistenceFinder<LikeFinderEntry>
 		_uniquePersistenceFinderByO_O_P;
@@ -385,109 +376,6 @@ public class LikeFinderEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the like finder entry in the entity cache if it is enabled.
-	 *
-	 * @param likeFinderEntry the like finder entry
-	 */
-	@Override
-	public void cacheResult(LikeFinderEntry likeFinderEntry) {
-		entityCache.putResult(
-			LikeFinderEntryImpl.class, likeFinderEntry.getPrimaryKey(),
-			likeFinderEntry);
-
-		finderCache.putResult(
-			_finderPathFetchByO_O_P,
-			new Object[] {
-				likeFinderEntry.getOwnerId(), likeFinderEntry.getOwnerType(),
-				likeFinderEntry.getPortletId()
-			},
-			likeFinderEntry);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the like finder entries in the entity cache if it is enabled.
-	 *
-	 * @param likeFinderEntries the like finder entries
-	 */
-	@Override
-	public void cacheResult(List<LikeFinderEntry> likeFinderEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (likeFinderEntries.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (LikeFinderEntry likeFinderEntry : likeFinderEntries) {
-			if (entityCache.getResult(
-					LikeFinderEntryImpl.class,
-					likeFinderEntry.getPrimaryKey()) == null) {
-
-				cacheResult(likeFinderEntry);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all like finder entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(LikeFinderEntryImpl.class);
-
-		finderCache.clearCache(LikeFinderEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the like finder entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(LikeFinderEntry likeFinderEntry) {
-		entityCache.removeResult(LikeFinderEntryImpl.class, likeFinderEntry);
-	}
-
-	@Override
-	public void clearCache(List<LikeFinderEntry> likeFinderEntries) {
-		for (LikeFinderEntry likeFinderEntry : likeFinderEntries) {
-			entityCache.removeResult(
-				LikeFinderEntryImpl.class, likeFinderEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(LikeFinderEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(LikeFinderEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		LikeFinderEntryModelImpl likeFinderEntryModelImpl) {
-
-		Object[] args = new Object[] {
-			likeFinderEntryModelImpl.getOwnerId(),
-			likeFinderEntryModelImpl.getOwnerType(),
-			likeFinderEntryModelImpl.getPortletId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByO_O_P, args, likeFinderEntryModelImpl);
-	}
-
-	/**
 	 * Creates a new like finder entry with the primary key. Does not add the like finder entry to the database.
 	 *
 	 * @param likeFinderEntryId the primary key for the new like finder entry
@@ -517,47 +405,6 @@ public class LikeFinderEntryPersistenceImpl
 		throws NoSuchLikeFinderEntryException {
 
 		return remove((Serializable)likeFinderEntryId);
-	}
-
-	/**
-	 * Removes the like finder entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the like finder entry
-	 * @return the like finder entry that was removed
-	 * @throws NoSuchLikeFinderEntryException if a like finder entry with the primary key could not be found
-	 */
-	@Override
-	public LikeFinderEntry remove(Serializable primaryKey)
-		throws NoSuchLikeFinderEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			LikeFinderEntry likeFinderEntry = (LikeFinderEntry)session.get(
-				LikeFinderEntryImpl.class, primaryKey);
-
-			if (likeFinderEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchLikeFinderEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(likeFinderEntry);
-		}
-		catch (NoSuchLikeFinderEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -635,41 +482,13 @@ public class LikeFinderEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			LikeFinderEntryImpl.class, likeFinderEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(likeFinderEntryModelImpl);
+		cacheUniqueFindersResult(likeFinderEntry, false);
 
 		if (isNew) {
 			likeFinderEntry.setNew(false);
 		}
 
 		likeFinderEntry.resetOriginalValues();
-
-		return likeFinderEntry;
-	}
-
-	/**
-	 * Returns the like finder entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the like finder entry
-	 * @return the like finder entry
-	 * @throws NoSuchLikeFinderEntryException if a like finder entry with the primary key could not be found
-	 */
-	@Override
-	public LikeFinderEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchLikeFinderEntryException {
-
-		LikeFinderEntry likeFinderEntry = fetchByPrimaryKey(primaryKey);
-
-		if (likeFinderEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchLikeFinderEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return likeFinderEntry;
 	}
@@ -699,187 +518,6 @@ public class LikeFinderEntryPersistenceImpl
 		return fetchByPrimaryKey((Serializable)likeFinderEntryId);
 	}
 
-	/**
-	 * Returns all the like finder entries.
-	 *
-	 * @return the like finder entries
-	 */
-	@Override
-	public List<LikeFinderEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the like finder entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LikeFinderEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of like finder entries
-	 * @param end the upper bound of the range of like finder entries (not inclusive)
-	 * @return the range of like finder entries
-	 */
-	@Override
-	public List<LikeFinderEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the like finder entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LikeFinderEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of like finder entries
-	 * @param end the upper bound of the range of like finder entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of like finder entries
-	 */
-	@Override
-	public List<LikeFinderEntry> findAll(
-		int start, int end,
-		OrderByComparator<LikeFinderEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the like finder entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>LikeFinderEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of like finder entries
-	 * @param end the upper bound of the range of like finder entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of like finder entries
-	 */
-	@Override
-	public List<LikeFinderEntry> findAll(
-		int start, int end,
-		OrderByComparator<LikeFinderEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<LikeFinderEntry> list = null;
-
-		if (useFinderCache) {
-			list = (List<LikeFinderEntry>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_LIKEFINDERENTRY);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_LIKEFINDERENTRY;
-
-				sql = sql.concat(LikeFinderEntryModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<LikeFinderEntry>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the like finder entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (LikeFinderEntry likeFinderEntry : findAll()) {
-			remove(likeFinderEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of like finder entries.
-	 *
-	 * @return the number of like finder entries
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_LIKEFINDERENTRY);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	protected EntityCache getEntityCache() {
 		return entityCache;
@@ -905,37 +543,25 @@ public class LikeFinderEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
-		_finderPathFetchByO_O_P = new FinderPath(
+		_finderPathFetchByO_O_P = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByO_O_P",
 			new String[] {
 				Long.class.getName(), Integer.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"ownerId", "ownerType", "portletId"}, true);
+			new String[] {"ownerId", "ownerType", "portletId"}, 0, 4, false,
+			LikeFinderEntry::getOwnerId, LikeFinderEntry::getOwnerType,
+			convertNullFunction(LikeFinderEntry::getPortletId));
 
 		_uniquePersistenceFinderByO_O_P = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByO_O_P, _SQL_SELECT_LIKEFINDERENTRY_WHERE,
+			"",
 			new FinderColumn<>(
 				"likeFinderEntry.", "ownerId", FinderColumn.Type.LONG, "=",
-				true, false, LikeFinderEntry::getOwnerId),
+				true, true, LikeFinderEntry::getOwnerId),
 			new FinderColumn<>(
 				"likeFinderEntry.", "ownerType", FinderColumn.Type.INTEGER, "=",
-				true, false, LikeFinderEntry::getOwnerType),
+				true, true, LikeFinderEntry::getOwnerType),
 			new FinderColumn<>(
 				"likeFinderEntry.", "portletId", FinderColumn.Type.STRING, "=",
 				true, true, LikeFinderEntry::getPortletId));
@@ -966,16 +592,17 @@ public class LikeFinderEntryPersistenceImpl
 				_finderPathWithPaginationCountByC_O_O_LikeP,
 				_SQL_SELECT_LIKEFINDERENTRY_WHERE,
 				_SQL_COUNT_LIKEFINDERENTRY_WHERE,
-				LikeFinderEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				LikeFinderEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"likeFinderEntry.", "companyId", FinderColumn.Type.LONG,
-					"=", true, false, LikeFinderEntry::getCompanyId),
+					"=", true, true, LikeFinderEntry::getCompanyId),
 				new FinderColumn<>(
 					"likeFinderEntry.", "ownerId", FinderColumn.Type.LONG, "=",
-					true, false, LikeFinderEntry::getOwnerId),
+					true, true, LikeFinderEntry::getOwnerId),
 				new FinderColumn<>(
 					"likeFinderEntry.", "ownerType", FinderColumn.Type.INTEGER,
-					"=", true, false, LikeFinderEntry::getOwnerType),
+					"=", true, true, LikeFinderEntry::getOwnerType),
 				new FinderColumn<>(
 					"likeFinderEntry.", "portletId", FinderColumn.Type.STRING,
 					"LIKE", true, true, LikeFinderEntry::getPortletId));
@@ -1022,22 +649,17 @@ public class LikeFinderEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		LikeFinderEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_LIKEFINDERENTRY =
 		"SELECT likeFinderEntry FROM LikeFinderEntry likeFinderEntry";
 
 	private static final String _SQL_SELECT_LIKEFINDERENTRY_WHERE =
 		"SELECT likeFinderEntry FROM LikeFinderEntry likeFinderEntry WHERE ";
 
-	private static final String _SQL_COUNT_LIKEFINDERENTRY =
-		"SELECT COUNT(likeFinderEntry) FROM LikeFinderEntry likeFinderEntry";
-
 	private static final String _SQL_COUNT_LIKEFINDERENTRY_WHERE =
 		"SELECT COUNT(likeFinderEntry) FROM LikeFinderEntry likeFinderEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "likeFinderEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No LikeFinderEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No LikeFinderEntry exists with the key {";
@@ -1051,4 +673,4 @@ public class LikeFinderEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1442231408
+// LIFERAY-SERVICE-BUILDER-HASH:663172879

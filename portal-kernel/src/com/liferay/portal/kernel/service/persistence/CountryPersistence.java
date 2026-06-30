@@ -2010,18 +2010,54 @@ public interface CountryPersistence
 		boolean groupFilterEnabled, boolean shippingAllowed);
 
 	/**
-	 * Caches the country in the entity cache if it is enabled.
+	 * Returns the country where externalReferenceCode = &#63; and companyId = &#63; or throws a <code>NoSuchCountryException</code> if it could not be found.
 	 *
-	 * @param country the country
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the matching country
+	 * @throws NoSuchCountryException if a matching country could not be found
 	 */
-	public void cacheResult(Country country);
+	public Country findByERC_C(String externalReferenceCode, long companyId)
+		throws NoSuchCountryException;
 
 	/**
-	 * Caches the countries in the entity cache if it is enabled.
+	 * Returns the country where externalReferenceCode = &#63; and companyId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
-	 * @param countries the countries
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the matching country, or <code>null</code> if a matching country could not be found
 	 */
-	public void cacheResult(java.util.List<Country> countries);
+	public Country fetchByERC_C(String externalReferenceCode, long companyId);
+
+	/**
+	 * Returns the country where externalReferenceCode = &#63; and companyId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 *
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the matching country, or <code>null</code> if a matching country could not be found
+	 */
+	public Country fetchByERC_C(
+		String externalReferenceCode, long companyId, boolean useFinderCache);
+
+	/**
+	 * Removes the country where externalReferenceCode = &#63; and companyId = &#63; from the database.
+	 *
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the country that was removed
+	 */
+	public Country removeByERC_C(String externalReferenceCode, long companyId)
+		throws NoSuchCountryException;
+
+	/**
+	 * Returns the number of countries where externalReferenceCode = &#63; and companyId = &#63;.
+	 *
+	 * @param externalReferenceCode the external reference code
+	 * @param companyId the company ID
+	 * @return the number of matching countries
+	 */
+	public int countByERC_C(String externalReferenceCode, long companyId);
 
 	/**
 	 * Creates a new country with the primary key. Does not add the country to the database.
@@ -2060,73 +2096,5 @@ public interface CountryPersistence
 	 */
 	public Country fetchByPrimaryKey(long countryId);
 
-	/**
-	 * Returns all the countries.
-	 *
-	 * @return the countries
-	 */
-	public java.util.List<Country> findAll();
-
-	/**
-	 * Returns a range of all the countries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.CountryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of countries
-	 * @param end the upper bound of the range of countries (not inclusive)
-	 * @return the range of countries
-	 */
-	public java.util.List<Country> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the countries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.CountryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of countries
-	 * @param end the upper bound of the range of countries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of countries
-	 */
-	public java.util.List<Country> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Country>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the countries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.CountryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of countries
-	 * @param end the upper bound of the range of countries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of countries
-	 */
-	public java.util.List<Country> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<Country>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the countries from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of countries.
-	 *
-	 * @return the number of countries
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-765022229
+// LIFERAY-SERVICE-BUILDER-HASH:-67827427

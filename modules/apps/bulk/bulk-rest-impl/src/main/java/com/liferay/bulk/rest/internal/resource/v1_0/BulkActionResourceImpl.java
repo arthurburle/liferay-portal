@@ -472,6 +472,11 @@ public class BulkActionResourceImpl extends BaseBulkActionResourceImpl {
 
 			return _dueDateObjectBulkSelectionAction;
 		}
+		else if (BulkAction.Type.DUPLICATE_OBJECT_BULK_SELECTION_ACTION.equals(
+					type)) {
+
+			return _duplicateObjectBulkSelectionAction;
+		}
 		else if (BulkAction.Type.EDIT_OBJECT_CATEGORIES_BULK_SELECTION_ACTION.
 					equals(type)) {
 
@@ -501,6 +506,11 @@ public class BulkActionResourceImpl extends BaseBulkActionResourceImpl {
 					equals(type)) {
 
 			return _resetPermissionObjectBulkSelectionAction;
+		}
+		else if (BulkAction.Type.RESTORE_OBJECT_BULK_SELECTION_ACTION.equals(
+					type)) {
+
+			return _restoreObjectBulkSelectionAction;
 		}
 		else if (BulkAction.Type.STATUS_OBJECT_BULK_SELECTION_ACTION.equals(
 					type)) {
@@ -623,6 +633,11 @@ public class BulkActionResourceImpl extends BaseBulkActionResourceImpl {
 				"dueDate", dueDateBulkAction.getDueDate()
 			).build();
 		}
+		else if (BulkAction.Type.DUPLICATE_OBJECT_BULK_SELECTION_ACTION.equals(
+					type)) {
+
+			return hashMapWrapper.build();
+		}
 		else if (BulkAction.Type.EDIT_OBJECT_CATEGORIES_BULK_SELECTION_ACTION.
 					equals(type)) {
 
@@ -688,6 +703,11 @@ public class BulkActionResourceImpl extends BaseBulkActionResourceImpl {
 		}
 		else if (BulkAction.Type.RESET_PERMISSION_OBJECT_BULK_SELECTION_ACTION.
 					equals(type)) {
+
+			return hashMapWrapper.build();
+		}
+		else if (BulkAction.Type.RESTORE_OBJECT_BULK_SELECTION_ACTION.equals(
+					type)) {
 
 			return hashMapWrapper.build();
 		}
@@ -1126,6 +1146,9 @@ public class BulkActionResourceImpl extends BaseBulkActionResourceImpl {
 	@Reference(target = "(bulk.selection.action.key=due.date.object)")
 	private BulkSelectionAction<Object> _dueDateObjectBulkSelectionAction;
 
+	@Reference(target = "(bulk.selection.action.key=duplicate.object)")
+	private BulkSelectionAction<Object> _duplicateObjectBulkSelectionAction;
+
 	@Reference(target = "(bulk.selection.action.key=edit.object.categories)")
 	private BulkSelectionAction<Object>
 		_editObjectCategoriesBulkSelectionAction;
@@ -1185,6 +1208,9 @@ public class BulkActionResourceImpl extends BaseBulkActionResourceImpl {
 	@Reference(target = "(bulk.selection.action.key=reset.permission.object)")
 	private BulkSelectionAction<Object>
 		_resetPermissionObjectBulkSelectionAction;
+
+	@Reference(target = "(bulk.selection.action.key=restore.object)")
+	private BulkSelectionAction<Object> _restoreObjectBulkSelectionAction;
 
 	@Reference
 	private RoleLocalService _roleLocalService;

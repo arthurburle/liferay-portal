@@ -11,6 +11,7 @@ import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.service.FragmentCollectionLocalService;
 import com.liferay.fragment.service.FragmentEntryLocalService;
 import com.liferay.headless.admin.fragment.dto.v1_0.Fragment;
+import com.liferay.headless.admin.fragment.dto.v1_0.FragmentSet;
 import com.liferay.headless.admin.fragment.dto.v1_0.FragmentVersion;
 import com.liferay.headless.admin.user.dto.v1_0.Creator;
 import com.liferay.petra.string.StringBundler;
@@ -117,19 +118,11 @@ public class FragmentDTOConverter
 				setDateModified(fragmentEntry::getModifiedDate);
 				setExternalReferenceCode(
 					fragmentEntry::getExternalReferenceCode);
-				setFragmentSetExternalReferenceCode(
-					() -> {
-						FragmentCollection fragmentCollection =
-							_fragmentCollectionLocalService.
-								fetchFragmentCollection(
-									fragmentEntry.getFragmentCollectionId());
-
-						if (fragmentCollection == null) {
-							return null;
-						}
-
-						return fragmentCollection.getExternalReferenceCode();
-					});
+				setFragmentSet(
+					() -> _fragmentSetDTOConverter.toDTO(
+						null,
+						_fragmentCollectionLocalService.getFragmentCollection(
+							fragmentEntry.getFragmentCollectionId())));
 				setFragmentVersions(
 					() -> fragmentVersionList.toArray(new FragmentVersion[0]));
 				setIcon(fragmentEntry::getIcon);
@@ -166,6 +159,12 @@ public class FragmentDTOConverter
 
 	@Reference
 	private FragmentEntryLocalService _fragmentEntryLocalService;
+
+	@Reference(
+		target = "(component.name=com.liferay.headless.admin.fragment.internal.dto.v1_0.converter.FragmentSetDTOConverter)"
+	)
+	private DTOConverter<FragmentCollection, FragmentSet>
+		_fragmentSetDTOConverter;
 
 	@Reference
 	private UserLocalService _userLocalService;

@@ -288,20 +288,6 @@ public interface ExpandoRowPersistence
 	public int countByT_C(long tableId, long classPK);
 
 	/**
-	 * Caches the expando row in the entity cache if it is enabled.
-	 *
-	 * @param expandoRow the expando row
-	 */
-	public void cacheResult(ExpandoRow expandoRow);
-
-	/**
-	 * Caches the expando rows in the entity cache if it is enabled.
-	 *
-	 * @param expandoRows the expando rows
-	 */
-	public void cacheResult(java.util.List<ExpandoRow> expandoRows);
-
-	/**
 	 * Creates a new expando row with the primary key. Does not add the expando row to the database.
 	 *
 	 * @param rowId the primary key for the new expando row
@@ -337,73 +323,5 @@ public interface ExpandoRowPersistence
 	 */
 	public ExpandoRow fetchByPrimaryKey(long rowId);
 
-	/**
-	 * Returns all the expando rows.
-	 *
-	 * @return the expando rows
-	 */
-	public java.util.List<ExpandoRow> findAll();
-
-	/**
-	 * Returns a range of all the expando rows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.expando.model.impl.ExpandoRowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of expando rows
-	 * @param end the upper bound of the range of expando rows (not inclusive)
-	 * @return the range of expando rows
-	 */
-	public java.util.List<ExpandoRow> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the expando rows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.expando.model.impl.ExpandoRowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of expando rows
-	 * @param end the upper bound of the range of expando rows (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of expando rows
-	 */
-	public java.util.List<ExpandoRow> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ExpandoRow>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the expando rows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.expando.model.impl.ExpandoRowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of expando rows
-	 * @param end the upper bound of the range of expando rows (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of expando rows
-	 */
-	public java.util.List<ExpandoRow> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ExpandoRow>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the expando rows from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of expando rows.
-	 *
-	 * @return the number of expando rows
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:686466542
+// LIFERAY-SERVICE-BUILDER-HASH:-1470183278

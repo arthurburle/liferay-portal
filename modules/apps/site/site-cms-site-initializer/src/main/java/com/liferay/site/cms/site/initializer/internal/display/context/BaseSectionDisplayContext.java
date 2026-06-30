@@ -9,6 +9,7 @@ import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalService;
 import com.liferay.document.library.configuration.DLConfiguration;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItem;
+import com.liferay.frontend.data.set.model.FDSActionDropdownItemBuilder;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.info.constants.InfoDisplayWebKeys;
@@ -101,14 +102,14 @@ public abstract class BaseSectionDisplayContext {
 			themeDisplay.getCompanyId(),
 			httpServletRequest.getAttribute(InfoDisplayWebKeys.INFO_ITEM));
 
-		_sectionDisplayContextHelper = new SectionDisplayContextHelper(
+		sectionDisplayContextHelper = new SectionDisplayContextHelper(
 			depotEntryLocalService, groupLocalService, language,
 			objectDefinitionSettingLocalService,
 			objectEntryFolderModelResourcePermission, portal);
 	}
 
 	public String getAdditionalAPIURLParameters() {
-		return _sectionDisplayContextHelper.getAdditionalAPIURLParameters(
+		return sectionDisplayContextHelper.getAdditionalAPIURLParameters(
 			getCMSSectionFilterString(), httpServletRequest,
 			getRootObjectEntryFolderExternalReferenceCode());
 	}
@@ -125,7 +126,7 @@ public abstract class BaseSectionDisplayContext {
 			}
 		).put(
 			"assetLibraries",
-			_sectionDisplayContextHelper.getDepotEntriesJSONArray(
+			sectionDisplayContextHelper.getDepotEntriesJSONArray(
 				httpServletRequest)
 		).put(
 			"autocompleteURL",
@@ -155,7 +156,7 @@ public abstract class BaseSectionDisplayContext {
 				PropsUtil.get(PropsKeys.CMS_BROKEN_LINKS_CHECKER_ENABLED))
 		).put(
 			"candidateAssetLibraries",
-			_sectionDisplayContextHelper.getDepotEntriesJSONArray(
+			sectionDisplayContextHelper.getDepotEntriesJSONArray(
 				httpServletRequest,
 				getRootObjectEntryFolderExternalReferenceCode())
 		).put(
@@ -292,14 +293,19 @@ public abstract class BaseSectionDisplayContext {
 
 	public List<DropdownItem> getBulkActionDropdownItems() {
 		return ListUtil.fromArray(
-			new FDSActionDropdownItem(
-				"#", "trash", "delete",
-				LanguageUtil.get(httpServletRequest, "delete"), null, null,
-				null));
+			FDSActionDropdownItemBuilder.setHref(
+				"#"
+			).setIcon(
+				"trash"
+			).setLabel(
+				LanguageUtil.get(httpServletRequest, "delete")
+			).build(
+				"delete"
+			));
 	}
 
 	public CreationMenu getCreationMenu() {
-		return _sectionDisplayContextHelper.getCreationMenu(
+		return sectionDisplayContextHelper.getCreationMenu(
 			getCreationMenuDropdownItems(), httpServletRequest,
 			getRootObjectEntryFolderExternalReferenceCode());
 	}
@@ -311,7 +317,7 @@ public abstract class BaseSectionDisplayContext {
 	public abstract Map<String, Object> getEmptyState();
 
 	public List<FDSActionDropdownItem> getFDSActionDropdownItems() {
-		return _sectionDisplayContextHelper.getFDSActionDropdownItems(
+		return sectionDisplayContextHelper.getFDSActionDropdownItems(
 			httpServletRequest);
 	}
 
@@ -329,12 +335,12 @@ public abstract class BaseSectionDisplayContext {
 	}
 
 	protected String appendGroupIds(String filterString) {
-		return _sectionDisplayContextHelper.appendGroupIds(
+		return sectionDisplayContextHelper.appendGroupIds(
 			filterString, httpServletRequest);
 	}
 
 	protected String appendStatus(String filterString) {
-		return _sectionDisplayContextHelper.appendStatus(filterString);
+		return sectionDisplayContextHelper.appendStatus(filterString);
 	}
 
 	protected abstract String getCMSSectionFilterString();
@@ -360,6 +366,7 @@ public abstract class BaseSectionDisplayContext {
 	protected final Language language;
 	protected final ObjectEntryFolder objectEntryFolder;
 	protected final Portal portal;
+	protected final SectionDisplayContextHelper sectionDisplayContextHelper;
 	protected final ThemeDisplay themeDisplay;
 
 	private JSONObject _getExportFileFormatJSONObject(
@@ -548,7 +555,6 @@ public abstract class BaseSectionDisplayContext {
 
 	private final DLConfiguration _dlConfiguration;
 	private final ObjectDefinitionService _objectDefinitionService;
-	private final SectionDisplayContextHelper _sectionDisplayContextHelper;
 	private final TranslationInfoItemFieldValuesExporterRegistry
 		_translationInfoItemFieldValuesExporterRegistry;
 

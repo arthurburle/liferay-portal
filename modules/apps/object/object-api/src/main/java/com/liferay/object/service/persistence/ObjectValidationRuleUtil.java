@@ -36,6 +36,22 @@ public class ObjectValidationRuleUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<ObjectValidationRule> objectValidationRules) {
+
+		getPersistence().cacheResult(objectValidationRules);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(ObjectValidationRule objectValidationRule) {
+		getPersistence().cacheResult(objectValidationRule);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -1125,26 +1141,6 @@ public class ObjectValidationRuleUtil {
 	}
 
 	/**
-	 * Caches the object validation rule in the entity cache if it is enabled.
-	 *
-	 * @param objectValidationRule the object validation rule
-	 */
-	public static void cacheResult(ObjectValidationRule objectValidationRule) {
-		getPersistence().cacheResult(objectValidationRule);
-	}
-
-	/**
-	 * Caches the object validation rules in the entity cache if it is enabled.
-	 *
-	 * @param objectValidationRules the object validation rules
-	 */
-	public static void cacheResult(
-		List<ObjectValidationRule> objectValidationRules) {
-
-		getPersistence().cacheResult(objectValidationRules);
-	}
-
-	/**
 	 * Creates a new object validation rule with the primary key. Does not add the object validation rule to the database.
 	 *
 	 * @param objectValidationRuleId the primary key for the new object validation rule
@@ -1201,87 +1197,6 @@ public class ObjectValidationRuleUtil {
 		return getPersistence().fetchByPrimaryKey(objectValidationRuleId);
 	}
 
-	/**
-	 * Returns all the object validation rules.
-	 *
-	 * @return the object validation rules
-	 */
-	public static List<ObjectValidationRule> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the object validation rules.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectValidationRuleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object validation rules
-	 * @param end the upper bound of the range of object validation rules (not inclusive)
-	 * @return the range of object validation rules
-	 */
-	public static List<ObjectValidationRule> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the object validation rules.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectValidationRuleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object validation rules
-	 * @param end the upper bound of the range of object validation rules (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object validation rules
-	 */
-	public static List<ObjectValidationRule> findAll(
-		int start, int end,
-		OrderByComparator<ObjectValidationRule> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the object validation rules.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectValidationRuleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object validation rules
-	 * @param end the upper bound of the range of object validation rules (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object validation rules
-	 */
-	public static List<ObjectValidationRule> findAll(
-		int start, int end,
-		OrderByComparator<ObjectValidationRule> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the object validation rules from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of object validation rules.
-	 *
-	 * @return the number of object validation rules
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static ObjectValidationRulePersistence getPersistence() {
 		return _persistence;
 	}
@@ -1295,4 +1210,4 @@ public class ObjectValidationRuleUtil {
 	private static volatile ObjectValidationRulePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-647035165
+// LIFERAY-SERVICE-BUILDER-HASH:1596372034

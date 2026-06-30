@@ -36,6 +36,20 @@ public class AssetTagGroupRelUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<AssetTagGroupRel> assetTagGroupRels) {
+		getPersistence().cacheResult(assetTagGroupRels);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(AssetTagGroupRel assetTagGroupRel) {
+		getPersistence().cacheResult(assetTagGroupRel);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -727,24 +741,6 @@ public class AssetTagGroupRelUtil {
 	}
 
 	/**
-	 * Caches the asset tag group rel in the entity cache if it is enabled.
-	 *
-	 * @param assetTagGroupRel the asset tag group rel
-	 */
-	public static void cacheResult(AssetTagGroupRel assetTagGroupRel) {
-		getPersistence().cacheResult(assetTagGroupRel);
-	}
-
-	/**
-	 * Caches the asset tag group rels in the entity cache if it is enabled.
-	 *
-	 * @param assetTagGroupRels the asset tag group rels
-	 */
-	public static void cacheResult(List<AssetTagGroupRel> assetTagGroupRels) {
-		getPersistence().cacheResult(assetTagGroupRels);
-	}
-
-	/**
 	 * Creates a new asset tag group rel with the primary key. Does not add the asset tag group rel to the database.
 	 *
 	 * @param assetTagGroupRelId the primary key for the new asset tag group rel
@@ -796,87 +792,6 @@ public class AssetTagGroupRelUtil {
 		return getPersistence().fetchByPrimaryKey(assetTagGroupRelId);
 	}
 
-	/**
-	 * Returns all the asset tag group rels.
-	 *
-	 * @return the asset tag group rels
-	 */
-	public static List<AssetTagGroupRel> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the asset tag group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.asset.model.impl.AssetTagGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset tag group rels
-	 * @param end the upper bound of the range of asset tag group rels (not inclusive)
-	 * @return the range of asset tag group rels
-	 */
-	public static List<AssetTagGroupRel> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the asset tag group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.asset.model.impl.AssetTagGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset tag group rels
-	 * @param end the upper bound of the range of asset tag group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of asset tag group rels
-	 */
-	public static List<AssetTagGroupRel> findAll(
-		int start, int end,
-		OrderByComparator<AssetTagGroupRel> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the asset tag group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.asset.model.impl.AssetTagGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of asset tag group rels
-	 * @param end the upper bound of the range of asset tag group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of asset tag group rels
-	 */
-	public static List<AssetTagGroupRel> findAll(
-		int start, int end,
-		OrderByComparator<AssetTagGroupRel> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the asset tag group rels from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of asset tag group rels.
-	 *
-	 * @return the number of asset tag group rels
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static AssetTagGroupRelPersistence getPersistence() {
 		return _persistence;
 	}
@@ -888,4 +803,4 @@ public class AssetTagGroupRelUtil {
 	private static volatile AssetTagGroupRelPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1755692946
+// LIFERAY-SERVICE-BUILDER-HASH:-690217374

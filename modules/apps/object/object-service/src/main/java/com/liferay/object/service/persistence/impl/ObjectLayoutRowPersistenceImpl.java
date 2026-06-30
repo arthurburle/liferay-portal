@@ -13,27 +13,20 @@ import com.liferay.object.model.impl.ObjectLayoutRowModelImpl;
 import com.liferay.object.service.persistence.ObjectLayoutRowPersistence;
 import com.liferay.object.service.persistence.ObjectLayoutRowUtil;
 import com.liferay.object.service.persistence.impl.constants.ObjectPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -68,7 +61,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ObjectLayoutRowPersistence.class)
 public class ObjectLayoutRowPersistenceImpl
-	extends BasePersistenceImpl<ObjectLayoutRow>
+	extends BasePersistenceImpl<ObjectLayoutRow, NoSuchObjectLayoutRowException>
 	implements ObjectLayoutRowPersistence {
 
 	/*
@@ -85,9 +78,6 @@ public class ObjectLayoutRowPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -557,88 +547,6 @@ public class ObjectLayoutRowPersistenceImpl
 	}
 
 	/**
-	 * Caches the object layout row in the entity cache if it is enabled.
-	 *
-	 * @param objectLayoutRow the object layout row
-	 */
-	@Override
-	public void cacheResult(ObjectLayoutRow objectLayoutRow) {
-		entityCache.putResult(
-			ObjectLayoutRowImpl.class, objectLayoutRow.getPrimaryKey(),
-			objectLayoutRow);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the object layout rows in the entity cache if it is enabled.
-	 *
-	 * @param objectLayoutRows the object layout rows
-	 */
-	@Override
-	public void cacheResult(List<ObjectLayoutRow> objectLayoutRows) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (objectLayoutRows.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ObjectLayoutRow objectLayoutRow : objectLayoutRows) {
-			if (entityCache.getResult(
-					ObjectLayoutRowImpl.class,
-					objectLayoutRow.getPrimaryKey()) == null) {
-
-				cacheResult(objectLayoutRow);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all object layout rows.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ObjectLayoutRowImpl.class);
-
-		finderCache.clearCache(ObjectLayoutRowImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the object layout row.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ObjectLayoutRow objectLayoutRow) {
-		entityCache.removeResult(ObjectLayoutRowImpl.class, objectLayoutRow);
-	}
-
-	@Override
-	public void clearCache(List<ObjectLayoutRow> objectLayoutRows) {
-		for (ObjectLayoutRow objectLayoutRow : objectLayoutRows) {
-			entityCache.removeResult(
-				ObjectLayoutRowImpl.class, objectLayoutRow);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ObjectLayoutRowImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(ObjectLayoutRowImpl.class, primaryKey);
-		}
-	}
-
-	/**
 	 * Creates a new object layout row with the primary key. Does not add the object layout row to the database.
 	 *
 	 * @param objectLayoutRowId the primary key for the new object layout row
@@ -672,47 +580,6 @@ public class ObjectLayoutRowPersistenceImpl
 		throws NoSuchObjectLayoutRowException {
 
 		return remove((Serializable)objectLayoutRowId);
-	}
-
-	/**
-	 * Removes the object layout row with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the object layout row
-	 * @return the object layout row that was removed
-	 * @throws NoSuchObjectLayoutRowException if a object layout row with the primary key could not be found
-	 */
-	@Override
-	public ObjectLayoutRow remove(Serializable primaryKey)
-		throws NoSuchObjectLayoutRowException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ObjectLayoutRow objectLayoutRow = (ObjectLayoutRow)session.get(
-				ObjectLayoutRowImpl.class, primaryKey);
-
-			if (objectLayoutRow == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchObjectLayoutRowException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(objectLayoutRow);
-		}
-		catch (NoSuchObjectLayoutRowException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -821,39 +688,13 @@ public class ObjectLayoutRowPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ObjectLayoutRowImpl.class, objectLayoutRowModelImpl, false, true);
+		cacheUniqueFindersResult(objectLayoutRow, false);
 
 		if (isNew) {
 			objectLayoutRow.setNew(false);
 		}
 
 		objectLayoutRow.resetOriginalValues();
-
-		return objectLayoutRow;
-	}
-
-	/**
-	 * Returns the object layout row with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the object layout row
-	 * @return the object layout row
-	 * @throws NoSuchObjectLayoutRowException if a object layout row with the primary key could not be found
-	 */
-	@Override
-	public ObjectLayoutRow findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchObjectLayoutRowException {
-
-		ObjectLayoutRow objectLayoutRow = fetchByPrimaryKey(primaryKey);
-
-		if (objectLayoutRow == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchObjectLayoutRowException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return objectLayoutRow;
 	}
@@ -881,187 +722,6 @@ public class ObjectLayoutRowPersistenceImpl
 	@Override
 	public ObjectLayoutRow fetchByPrimaryKey(long objectLayoutRowId) {
 		return fetchByPrimaryKey((Serializable)objectLayoutRowId);
-	}
-
-	/**
-	 * Returns all the object layout rows.
-	 *
-	 * @return the object layout rows
-	 */
-	@Override
-	public List<ObjectLayoutRow> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the object layout rows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectLayoutRowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object layout rows
-	 * @param end the upper bound of the range of object layout rows (not inclusive)
-	 * @return the range of object layout rows
-	 */
-	@Override
-	public List<ObjectLayoutRow> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the object layout rows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectLayoutRowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object layout rows
-	 * @param end the upper bound of the range of object layout rows (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object layout rows
-	 */
-	@Override
-	public List<ObjectLayoutRow> findAll(
-		int start, int end,
-		OrderByComparator<ObjectLayoutRow> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the object layout rows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectLayoutRowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object layout rows
-	 * @param end the upper bound of the range of object layout rows (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object layout rows
-	 */
-	@Override
-	public List<ObjectLayoutRow> findAll(
-		int start, int end,
-		OrderByComparator<ObjectLayoutRow> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ObjectLayoutRow> list = null;
-
-		if (useFinderCache) {
-			list = (List<ObjectLayoutRow>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_OBJECTLAYOUTROW);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_OBJECTLAYOUTROW;
-
-				sql = sql.concat(ObjectLayoutRowModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ObjectLayoutRow>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the object layout rows from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ObjectLayoutRow objectLayoutRow : findAll()) {
-			remove(objectLayoutRow);
-		}
-	}
-
-	/**
-	 * Returns the number of object layout rows.
-	 *
-	 * @return the number of object layout rows
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_OBJECTLAYOUTROW);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -1094,21 +754,6 @@ public class ObjectLayoutRowPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1119,19 +764,19 @@ public class ObjectLayoutRowPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_OBJECTLAYOUTROW_WHERE, _SQL_COUNT_OBJECTLAYOUTROW_WHERE,
-			ObjectLayoutRowModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectLayoutRowModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"objectLayoutRow.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, ObjectLayoutRow::getUuid));
@@ -1148,12 +793,12 @@ public class ObjectLayoutRowPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1161,10 +806,11 @@ public class ObjectLayoutRowPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_OBJECTLAYOUTROW_WHERE,
 				_SQL_COUNT_OBJECTLAYOUTROW_WHERE,
-				ObjectLayoutRowModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ObjectLayoutRowModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectLayoutRow.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, ObjectLayoutRow::getUuid),
+					true, true, ObjectLayoutRow::getUuid),
 				new FinderColumn<>(
 					"objectLayoutRow.", "companyId", FinderColumn.Type.LONG,
 					"=", true, true, ObjectLayoutRow::getCompanyId));
@@ -1194,7 +840,8 @@ public class ObjectLayoutRowPersistenceImpl
 				_finderPathCountByObjectLayoutBoxId,
 				_SQL_SELECT_OBJECTLAYOUTROW_WHERE,
 				_SQL_COUNT_OBJECTLAYOUTROW_WHERE,
-				ObjectLayoutRowModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ObjectLayoutRowModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectLayoutRow.", "objectLayoutBoxId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1242,28 +889,20 @@ public class ObjectLayoutRowPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ObjectLayoutRowModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_OBJECTLAYOUTROW =
 		"SELECT objectLayoutRow FROM ObjectLayoutRow objectLayoutRow";
 
 	private static final String _SQL_SELECT_OBJECTLAYOUTROW_WHERE =
 		"SELECT objectLayoutRow FROM ObjectLayoutRow objectLayoutRow WHERE ";
 
-	private static final String _SQL_COUNT_OBJECTLAYOUTROW =
-		"SELECT COUNT(objectLayoutRow) FROM ObjectLayoutRow objectLayoutRow";
-
 	private static final String _SQL_COUNT_OBJECTLAYOUTROW_WHERE =
 		"SELECT COUNT(objectLayoutRow) FROM ObjectLayoutRow objectLayoutRow WHERE ";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS = "objectLayoutRow.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ObjectLayoutRow exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ObjectLayoutRow exists with the key {";
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		ObjectLayoutRowPersistenceImpl.class);
 
 	private static final Set<String> _badColumnNames = SetUtil.fromArray(
 		new String[] {"uuid"});
@@ -1274,4 +913,4 @@ public class ObjectLayoutRowPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1673266730
+// LIFERAY-SERVICE-BUILDER-HASH:930219741

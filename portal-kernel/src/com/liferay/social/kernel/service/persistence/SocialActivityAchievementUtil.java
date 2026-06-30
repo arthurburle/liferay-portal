@@ -36,6 +36,24 @@ public class SocialActivityAchievementUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<SocialActivityAchievement> socialActivityAchievements) {
+
+		getPersistence().cacheResult(socialActivityAchievements);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		SocialActivityAchievement socialActivityAchievement) {
+
+		getPersistence().cacheResult(socialActivityAchievement);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -866,28 +884,6 @@ public class SocialActivityAchievementUtil {
 	}
 
 	/**
-	 * Caches the social activity achievement in the entity cache if it is enabled.
-	 *
-	 * @param socialActivityAchievement the social activity achievement
-	 */
-	public static void cacheResult(
-		SocialActivityAchievement socialActivityAchievement) {
-
-		getPersistence().cacheResult(socialActivityAchievement);
-	}
-
-	/**
-	 * Caches the social activity achievements in the entity cache if it is enabled.
-	 *
-	 * @param socialActivityAchievements the social activity achievements
-	 */
-	public static void cacheResult(
-		List<SocialActivityAchievement> socialActivityAchievements) {
-
-		getPersistence().cacheResult(socialActivityAchievements);
-	}
-
-	/**
 	 * Creates a new social activity achievement with the primary key. Does not add the social activity achievement to the database.
 	 *
 	 * @param activityAchievementId the primary key for the new social activity achievement
@@ -944,87 +940,6 @@ public class SocialActivityAchievementUtil {
 		return getPersistence().fetchByPrimaryKey(activityAchievementId);
 	}
 
-	/**
-	 * Returns all the social activity achievements.
-	 *
-	 * @return the social activity achievements
-	 */
-	public static List<SocialActivityAchievement> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the social activity achievements.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialActivityAchievementModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social activity achievements
-	 * @param end the upper bound of the range of social activity achievements (not inclusive)
-	 * @return the range of social activity achievements
-	 */
-	public static List<SocialActivityAchievement> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the social activity achievements.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialActivityAchievementModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social activity achievements
-	 * @param end the upper bound of the range of social activity achievements (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of social activity achievements
-	 */
-	public static List<SocialActivityAchievement> findAll(
-		int start, int end,
-		OrderByComparator<SocialActivityAchievement> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the social activity achievements.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialActivityAchievementModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social activity achievements
-	 * @param end the upper bound of the range of social activity achievements (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of social activity achievements
-	 */
-	public static List<SocialActivityAchievement> findAll(
-		int start, int end,
-		OrderByComparator<SocialActivityAchievement> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the social activity achievements from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of social activity achievements.
-	 *
-	 * @return the number of social activity achievements
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static SocialActivityAchievementPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1038,4 +953,4 @@ public class SocialActivityAchievementUtil {
 	private static volatile SocialActivityAchievementPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:41397115
+// LIFERAY-SERVICE-BUILDER-HASH:2010706832

@@ -189,20 +189,6 @@ public interface KaleoProcessLinkPersistence
 	public int countByKPI_WTN(long kaleoProcessId, String workflowTaskName);
 
 	/**
-	 * Caches the kaleo process link in the entity cache if it is enabled.
-	 *
-	 * @param kaleoProcessLink the kaleo process link
-	 */
-	public void cacheResult(KaleoProcessLink kaleoProcessLink);
-
-	/**
-	 * Caches the kaleo process links in the entity cache if it is enabled.
-	 *
-	 * @param kaleoProcessLinks the kaleo process links
-	 */
-	public void cacheResult(java.util.List<KaleoProcessLink> kaleoProcessLinks);
-
-	/**
 	 * Creates a new kaleo process link with the primary key. Does not add the kaleo process link to the database.
 	 *
 	 * @param kaleoProcessLinkId the primary key for the new kaleo process link
@@ -240,73 +226,5 @@ public interface KaleoProcessLinkPersistence
 	 */
 	public KaleoProcessLink fetchByPrimaryKey(long kaleoProcessLinkId);
 
-	/**
-	 * Returns all the kaleo process links.
-	 *
-	 * @return the kaleo process links
-	 */
-	public java.util.List<KaleoProcessLink> findAll();
-
-	/**
-	 * Returns a range of all the kaleo process links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.forms.model.impl.KaleoProcessLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo process links
-	 * @param end the upper bound of the range of kaleo process links (not inclusive)
-	 * @return the range of kaleo process links
-	 */
-	public java.util.List<KaleoProcessLink> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the kaleo process links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.forms.model.impl.KaleoProcessLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo process links
-	 * @param end the upper bound of the range of kaleo process links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of kaleo process links
-	 */
-	public java.util.List<KaleoProcessLink> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<KaleoProcessLink>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the kaleo process links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.workflow.kaleo.forms.model.impl.KaleoProcessLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of kaleo process links
-	 * @param end the upper bound of the range of kaleo process links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of kaleo process links
-	 */
-	public java.util.List<KaleoProcessLink> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<KaleoProcessLink>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the kaleo process links from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of kaleo process links.
-	 *
-	 * @return the number of kaleo process links
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1386914850
+// LIFERAY-SERVICE-BUILDER-HASH:-60853411

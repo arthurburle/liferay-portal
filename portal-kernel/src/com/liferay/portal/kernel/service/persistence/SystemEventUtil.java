@@ -36,6 +36,20 @@ public class SystemEventUtil {
 	 */
 
 	/**
+	 * @see BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<SystemEvent> systemEvents) {
+		getPersistence().cacheResult(systemEvents);
+	}
+
+	/**
+	 * @see BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(SystemEvent systemEvent) {
+		getPersistence().cacheResult(systemEvent);
+	}
+
+	/**
 	 * @see BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -671,24 +685,6 @@ public class SystemEventUtil {
 	}
 
 	/**
-	 * Caches the system event in the entity cache if it is enabled.
-	 *
-	 * @param systemEvent the system event
-	 */
-	public static void cacheResult(SystemEvent systemEvent) {
-		getPersistence().cacheResult(systemEvent);
-	}
-
-	/**
-	 * Caches the system events in the entity cache if it is enabled.
-	 *
-	 * @param systemEvents the system events
-	 */
-	public static void cacheResult(List<SystemEvent> systemEvents) {
-		getPersistence().cacheResult(systemEvents);
-	}
-
-	/**
 	 * Creates a new system event with the primary key. Does not add the system event to the database.
 	 *
 	 * @param systemEventId the primary key for the new system event
@@ -738,85 +734,6 @@ public class SystemEventUtil {
 		return getPersistence().fetchByPrimaryKey(systemEventId);
 	}
 
-	/**
-	 * Returns all the system events.
-	 *
-	 * @return the system events
-	 */
-	public static List<SystemEvent> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the system events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.SystemEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of system events
-	 * @param end the upper bound of the range of system events (not inclusive)
-	 * @return the range of system events
-	 */
-	public static List<SystemEvent> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the system events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.SystemEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of system events
-	 * @param end the upper bound of the range of system events (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of system events
-	 */
-	public static List<SystemEvent> findAll(
-		int start, int end, OrderByComparator<SystemEvent> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the system events.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.SystemEventModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of system events
-	 * @param end the upper bound of the range of system events (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of system events
-	 */
-	public static List<SystemEvent> findAll(
-		int start, int end, OrderByComparator<SystemEvent> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the system events from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of system events.
-	 *
-	 * @return the number of system events
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static SystemEventPersistence getPersistence() {
 		return _persistence;
 	}
@@ -828,4 +745,4 @@ public class SystemEventUtil {
 	private static volatile SystemEventPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-366995553
+// LIFERAY-SERVICE-BUILDER-HASH:-1630735255

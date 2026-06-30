@@ -36,6 +36,20 @@ public class TranslationEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<TranslationEntry> translationEntries) {
+		getPersistence().cacheResult(translationEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(TranslationEntry translationEntry) {
+		getPersistence().cacheResult(translationEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -635,24 +649,6 @@ public class TranslationEntryUtil {
 	}
 
 	/**
-	 * Caches the translation entry in the entity cache if it is enabled.
-	 *
-	 * @param translationEntry the translation entry
-	 */
-	public static void cacheResult(TranslationEntry translationEntry) {
-		getPersistence().cacheResult(translationEntry);
-	}
-
-	/**
-	 * Caches the translation entries in the entity cache if it is enabled.
-	 *
-	 * @param translationEntries the translation entries
-	 */
-	public static void cacheResult(List<TranslationEntry> translationEntries) {
-		getPersistence().cacheResult(translationEntries);
-	}
-
-	/**
 	 * Creates a new translation entry with the primary key. Does not add the translation entry to the database.
 	 *
 	 * @param translationEntryId the primary key for the new translation entry
@@ -704,87 +700,6 @@ public class TranslationEntryUtil {
 		return getPersistence().fetchByPrimaryKey(translationEntryId);
 	}
 
-	/**
-	 * Returns all the translation entries.
-	 *
-	 * @return the translation entries
-	 */
-	public static List<TranslationEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the translation entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.translation.model.impl.TranslationEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of translation entries
-	 * @param end the upper bound of the range of translation entries (not inclusive)
-	 * @return the range of translation entries
-	 */
-	public static List<TranslationEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the translation entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.translation.model.impl.TranslationEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of translation entries
-	 * @param end the upper bound of the range of translation entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of translation entries
-	 */
-	public static List<TranslationEntry> findAll(
-		int start, int end,
-		OrderByComparator<TranslationEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the translation entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.translation.model.impl.TranslationEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of translation entries
-	 * @param end the upper bound of the range of translation entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of translation entries
-	 */
-	public static List<TranslationEntry> findAll(
-		int start, int end,
-		OrderByComparator<TranslationEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the translation entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of translation entries.
-	 *
-	 * @return the number of translation entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static TranslationEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -796,4 +711,4 @@ public class TranslationEntryUtil {
 	private static volatile TranslationEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1546430876
+// LIFERAY-SERVICE-BUILDER-HASH:-1193546689

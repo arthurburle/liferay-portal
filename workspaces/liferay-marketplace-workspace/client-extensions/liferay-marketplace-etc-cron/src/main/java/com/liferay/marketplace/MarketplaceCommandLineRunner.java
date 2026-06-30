@@ -486,18 +486,6 @@ public class MarketplaceCommandLineRunner
 			).toUri());
 	}
 
-	private void _patchReport(String data, String externalReferenceCode) {
-		patch(
-			_liferayOAuth2AccessTokenManager.getAuthorization(
-				_liferayOAuthApplicationExternalReferenceCodes),
-			data,
-			UriComponentsBuilder.fromPath(
-				"/o/c/reports/by-external-reference-code/" +
-					externalReferenceCode
-			).build(
-			).toUri());
-	}
-
 	private void _postRequestProductFeedback(long orderId) throws Exception {
 		post(
 			_liferayOAuth2AccessTokenManager.getAuthorization(
@@ -700,12 +688,12 @@ public class MarketplaceCommandLineRunner
 				}
 			});
 
-		_patchReport(
+		_putReportByExternalReferenceCode(
 			new JSONObject(
 			).put(
 				"value",
-				new JSONObject(
-					productPurchases
+				new JSONArray(
+					productPurchases.values()
 				).toString()
 			).toString(),
 			"PRODUCT-PURCHASES-COUNT");
@@ -809,9 +797,12 @@ public class MarketplaceCommandLineRunner
 
 		_forEachOrder(
 			StringBundler.concat(
-				"createDate gt ",
+				"createDate ge ",
 				LocalDate.of(
-					2025, 1, 1
+					ZonedDateTime.now(
+						ZoneOffset.UTC
+					).getYear(),
+					1, 1
 				).atStartOfDay(
 					ZoneOffset.UTC
 				),
@@ -887,15 +878,27 @@ public class MarketplaceCommandLineRunner
 				);
 			});
 
-		_patchReport(
-			new JSONObject(
-			).put(
-				"value",
-				new JSONObject(
-					projectsUsingMarketplace
-				).toString()
-			).toString(),
-			"PROJECTS-USING-MARKETPLACE");
+		for (Map.Entry<String, JSONObject> entry :
+				projectsUsingMarketplace.entrySet()) {
+
+			String name = "KORONEIKI-PROJECT-" + entry.getKey();
+
+			try {
+				_putReportByExternalReferenceCode(
+					new JSONObject(
+					).put(
+						"name", name
+					).put(
+						"value",
+						entry.getValue(
+						).toString()
+					).toString(),
+					name);
+			}
+			catch (Exception exception) {
+				_log.error("Unable to put report " + name, exception);
+			}
+		}
 
 		if (_log.isInfoEnabled()) {
 			_log.info(
@@ -1019,6 +1022,20 @@ public class MarketplaceCommandLineRunner
 					exception);
 			}
 		}
+	}
+
+	private void _putReportByExternalReferenceCode(
+		String body, String externalReferenceCode) {
+
+		put(
+			_liferayOAuth2AccessTokenManager.getAuthorization(
+				_liferayOAuthApplicationExternalReferenceCodes),
+			body,
+			UriComponentsBuilder.fromPath(
+				"/o/c/reports/by-external-reference-code/" +
+					externalReferenceCode
+			).build(
+			).toUri());
 	}
 
 	private void _updateOrder(long orderId, int orderStatus) throws Exception {

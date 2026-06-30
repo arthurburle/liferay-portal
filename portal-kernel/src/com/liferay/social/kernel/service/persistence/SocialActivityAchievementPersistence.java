@@ -648,22 +648,6 @@ public interface SocialActivityAchievementPersistence
 	public int countByG_U_F(long groupId, long userId, boolean firstInGroup);
 
 	/**
-	 * Caches the social activity achievement in the entity cache if it is enabled.
-	 *
-	 * @param socialActivityAchievement the social activity achievement
-	 */
-	public void cacheResult(
-		SocialActivityAchievement socialActivityAchievement);
-
-	/**
-	 * Caches the social activity achievements in the entity cache if it is enabled.
-	 *
-	 * @param socialActivityAchievements the social activity achievements
-	 */
-	public void cacheResult(
-		java.util.List<SocialActivityAchievement> socialActivityAchievements);
-
-	/**
 	 * Creates a new social activity achievement with the primary key. Does not add the social activity achievement to the database.
 	 *
 	 * @param activityAchievementId the primary key for the new social activity achievement
@@ -704,74 +688,5 @@ public interface SocialActivityAchievementPersistence
 	public SocialActivityAchievement fetchByPrimaryKey(
 		long activityAchievementId);
 
-	/**
-	 * Returns all the social activity achievements.
-	 *
-	 * @return the social activity achievements
-	 */
-	public java.util.List<SocialActivityAchievement> findAll();
-
-	/**
-	 * Returns a range of all the social activity achievements.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialActivityAchievementModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social activity achievements
-	 * @param end the upper bound of the range of social activity achievements (not inclusive)
-	 * @return the range of social activity achievements
-	 */
-	public java.util.List<SocialActivityAchievement> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the social activity achievements.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialActivityAchievementModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social activity achievements
-	 * @param end the upper bound of the range of social activity achievements (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of social activity achievements
-	 */
-	public java.util.List<SocialActivityAchievement> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<SocialActivityAchievement> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the social activity achievements.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialActivityAchievementModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social activity achievements
-	 * @param end the upper bound of the range of social activity achievements (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of social activity achievements
-	 */
-	public java.util.List<SocialActivityAchievement> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<SocialActivityAchievement> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the social activity achievements from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of social activity achievements.
-	 *
-	 * @return the number of social activity achievements
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1081448143
+// LIFERAY-SERVICE-BUILDER-HASH:937065989

@@ -10,16 +10,34 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import {NewImport} from '../../../../../src/main/resources/META-INF/resources/revamp/js/pages/import/NewImport';
+import {mockPortletDataHandlerSections} from '../../mocks/mockPortletDataHandlerSections';
+
+jest.mock('frontend-js-web', () => {
+	const actual = jest.requireActual('frontend-js-web');
+
+	return {
+		...actual,
+		dateUtils: {
+			...actual.dateUtils,
+			fromNow: jest.fn(() => '5 days ago'),
+		},
+	};
+});
 
 jest.mock(
-	'../../../../../src/main/resources/META-INF/resources/revamp/js/utils/getValidateLarFile',
+	'../../../../../src/main/resources/META-INF/resources/revamp/js/services/postImportPreview',
 	() => ({
-		getValidateLarFile: jest.fn(() =>
+		postImportPreview: jest.fn(() =>
 			Promise.resolve({
 				data: {
-					errorMessages: [],
-					success: true,
-					tempFilePath: '/tmp/site.lar',
+					additionCount: 0,
+					author: 'Test User',
+					deletionCount: 0,
+					exportDate: '2000-07-27T00:00:00Z',
+					fileEntryId: 1,
+					fileName: 'site.lar',
+					fileSize: 4096,
+					portletDataHandlerSections: mockPortletDataHandlerSections,
 				},
 				error: null,
 			})
@@ -28,7 +46,12 @@ jest.mock(
 );
 
 const renderComponent = () =>
-	render(<NewImport backURL="/some/back/url" groupId={0} />);
+	render(
+		<NewImport
+			backURL="/some/back/url"
+			importPreviewAPIURL="/o/export-import/v1.0/import-preview"
+		/>
+	);
 
 let user: ReturnType<typeof userEvent.setup>;
 
@@ -54,12 +77,6 @@ const uploadFile = async (fileName = 'site.lar') => {
 };
 
 describe('NewImport', () => {
-	beforeAll(() => {
-		global.Liferay.Util.formatStorage = jest.fn(
-			(bytes: number) => `${bytes} B`
-		);
-	});
-
 	beforeEach(() => {
 		user = userEvent.setup();
 	});
@@ -177,5 +194,30 @@ describe('NewImport', () => {
 		await user.clear(nameInput);
 
 		expect(nameInput).toHaveValue('');
+	});
+
+	it('shows the file summary and the lar contents on the Data Selection step after uploading a file and clicking Continue', async () => {
+		renderComponent();
+
+		await user.type(screen.getByLabelText(/^name/i), 'My import');
+
+		await uploadFile('site.lar');
+
+		await waitFor(() => {
+			expect(
+				screen.getByRole('button', {name: /continue/i})
+			).toBeEnabled();
+		});
+
+		await user.click(screen.getByRole('button', {name: /continue/i}));
+
+		expect(screen.getByText('file-summary')).toBeInTheDocument();
+		expect(screen.getAllByText('site.lar').length).toBeGreaterThan(0);
+		expect(screen.getByText('Test User')).toBeInTheDocument();
+		expect(screen.getByText('5 days ago')).toBeInTheDocument();
+		expect(screen.getByText('4 KB')).toBeInTheDocument();
+
+		expect(screen.getByText('Design')).toBeInTheDocument();
+		expect(screen.getByText('Theme Settings')).toBeInTheDocument();
 	});
 });

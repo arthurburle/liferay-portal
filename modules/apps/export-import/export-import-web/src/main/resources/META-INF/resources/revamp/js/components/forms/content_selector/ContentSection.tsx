@@ -7,16 +7,17 @@ import {ClayCheckbox} from '@clayui/form';
 import ClayLayout from '@clayui/layout';
 import React from 'react';
 
+import '../../../../css/utilities.scss';
+import {
+	PortletDataHandlerBoolean,
+	PortletDataHandlerSection as PortletDataHandlerSectionType,
+} from '../../../types/portletDataHandler';
 import {
 	HandlerSelection,
 	getInitialSelection,
 	isSelected,
 	updateSelection,
 } from '../../../utils/contentSelection';
-import {
-	PortletDataHandlerBoolean,
-	PortletDataHandlerSection as PortletDataHandlerSectionType,
-} from '../../../utils/mockPortletDataHandlerSections';
 import PortletDataControl from './PortletDataControl';
 
 export type SectionSelection = Record<string, HandlerSelection>;
@@ -35,7 +36,7 @@ export default function ContentSection({
 	const portletContextsValue = value || {};
 
 	const controls = section.portletDataHandlers.map<PortletDataHandlerBoolean>(
-		(handler) => ({...handler, type: 'boolean'})
+		(handler) => ({...handler, type: 'Boolean'})
 	);
 
 	const selected = controls.every((context) =>
@@ -78,12 +79,7 @@ export default function ContentSection({
 				</ClayLayout.ContentCol>
 			</ClayLayout.ContentRow>
 
-			<div
-				className="overflow-auto pl-4"
-				style={{
-					maxHeight: '400px',
-				}}
-			>
+			<div className="content-section-controls overflow-auto pl-4">
 				{controls.map((context) => (
 					<PortletDataControl
 						control={context}

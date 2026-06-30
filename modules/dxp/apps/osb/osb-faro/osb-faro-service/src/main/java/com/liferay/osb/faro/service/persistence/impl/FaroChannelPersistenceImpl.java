@@ -13,12 +13,10 @@ import com.liferay.osb.faro.model.impl.FaroChannelModelImpl;
 import com.liferay.osb.faro.service.persistence.FaroChannelPersistence;
 import com.liferay.osb.faro.service.persistence.FaroChannelUtil;
 import com.liferay.osb.faro.service.persistence.impl.constants.OSBFaroPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -29,10 +27,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 
 import java.io.Serializable;
@@ -41,7 +36,6 @@ import java.lang.reflect.InvocationHandler;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -62,7 +56,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = FaroChannelPersistence.class)
 public class FaroChannelPersistenceImpl
-	extends BasePersistenceImpl<FaroChannel> implements FaroChannelPersistence {
+	extends BasePersistenceImpl<FaroChannel, NoSuchFaroChannelException>
+	implements FaroChannelPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -78,9 +73,6 @@ public class FaroChannelPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByGroupId;
 	private FinderPath _finderPathWithoutPaginationFindByGroupId;
 	private FinderPath _finderPathCountByGroupId;
@@ -632,104 +624,6 @@ public class FaroChannelPersistenceImpl
 	}
 
 	/**
-	 * Caches the faro channel in the entity cache if it is enabled.
-	 *
-	 * @param faroChannel the faro channel
-	 */
-	@Override
-	public void cacheResult(FaroChannel faroChannel) {
-		entityCache.putResult(
-			FaroChannelImpl.class, faroChannel.getPrimaryKey(), faroChannel);
-
-		finderCache.putResult(
-			_finderPathFetchByC_W,
-			new Object[] {
-				faroChannel.getChannelId(), faroChannel.getWorkspaceGroupId()
-			},
-			faroChannel);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the faro channels in the entity cache if it is enabled.
-	 *
-	 * @param faroChannels the faro channels
-	 */
-	@Override
-	public void cacheResult(List<FaroChannel> faroChannels) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (faroChannels.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (FaroChannel faroChannel : faroChannels) {
-			if (entityCache.getResult(
-					FaroChannelImpl.class, faroChannel.getPrimaryKey()) ==
-						null) {
-
-				cacheResult(faroChannel);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all faro channels.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(FaroChannelImpl.class);
-
-		finderCache.clearCache(FaroChannelImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the faro channel.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(FaroChannel faroChannel) {
-		entityCache.removeResult(FaroChannelImpl.class, faroChannel);
-	}
-
-	@Override
-	public void clearCache(List<FaroChannel> faroChannels) {
-		for (FaroChannel faroChannel : faroChannels) {
-			entityCache.removeResult(FaroChannelImpl.class, faroChannel);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(FaroChannelImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(FaroChannelImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		FaroChannelModelImpl faroChannelModelImpl) {
-
-		Object[] args = new Object[] {
-			faroChannelModelImpl.getChannelId(),
-			faroChannelModelImpl.getWorkspaceGroupId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByC_W, args, faroChannelModelImpl);
-	}
-
-	/**
 	 * Creates a new faro channel with the primary key. Does not add the faro channel to the database.
 	 *
 	 * @param faroChannelId the primary key for the new faro channel
@@ -759,47 +653,6 @@ public class FaroChannelPersistenceImpl
 		throws NoSuchFaroChannelException {
 
 		return remove((Serializable)faroChannelId);
-	}
-
-	/**
-	 * Removes the faro channel with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the faro channel
-	 * @return the faro channel that was removed
-	 * @throws NoSuchFaroChannelException if a faro channel with the primary key could not be found
-	 */
-	@Override
-	public FaroChannel remove(Serializable primaryKey)
-		throws NoSuchFaroChannelException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			FaroChannel faroChannel = (FaroChannel)session.get(
-				FaroChannelImpl.class, primaryKey);
-
-			if (faroChannel == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchFaroChannelException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(faroChannel);
-		}
-		catch (NoSuchFaroChannelException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -874,41 +727,13 @@ public class FaroChannelPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			FaroChannelImpl.class, faroChannelModelImpl, false, true);
-
-		cacheUniqueFindersCache(faroChannelModelImpl);
+		cacheUniqueFindersResult(faroChannel, false);
 
 		if (isNew) {
 			faroChannel.setNew(false);
 		}
 
 		faroChannel.resetOriginalValues();
-
-		return faroChannel;
-	}
-
-	/**
-	 * Returns the faro channel with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the faro channel
-	 * @return the faro channel
-	 * @throws NoSuchFaroChannelException if a faro channel with the primary key could not be found
-	 */
-	@Override
-	public FaroChannel findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchFaroChannelException {
-
-		FaroChannel faroChannel = fetchByPrimaryKey(primaryKey);
-
-		if (faroChannel == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchFaroChannelException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return faroChannel;
 	}
@@ -938,185 +763,6 @@ public class FaroChannelPersistenceImpl
 		return fetchByPrimaryKey((Serializable)faroChannelId);
 	}
 
-	/**
-	 * Returns all the faro channels.
-	 *
-	 * @return the faro channels
-	 */
-	@Override
-	public List<FaroChannel> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the faro channels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FaroChannelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of faro channels
-	 * @param end the upper bound of the range of faro channels (not inclusive)
-	 * @return the range of faro channels
-	 */
-	@Override
-	public List<FaroChannel> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the faro channels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FaroChannelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of faro channels
-	 * @param end the upper bound of the range of faro channels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of faro channels
-	 */
-	@Override
-	public List<FaroChannel> findAll(
-		int start, int end, OrderByComparator<FaroChannel> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the faro channels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>FaroChannelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of faro channels
-	 * @param end the upper bound of the range of faro channels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of faro channels
-	 */
-	@Override
-	public List<FaroChannel> findAll(
-		int start, int end, OrderByComparator<FaroChannel> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<FaroChannel> list = null;
-
-		if (useFinderCache) {
-			list = (List<FaroChannel>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_FAROCHANNEL);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_FAROCHANNEL;
-
-				sql = sql.concat(FaroChannelModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<FaroChannel>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the faro channels from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (FaroChannel faroChannel : findAll()) {
-			remove(faroChannel);
-		}
-	}
-
-	/**
-	 * Returns the number of faro channels.
-	 *
-	 * @return the number of faro channels
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_FAROCHANNEL);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	protected EntityCache getEntityCache() {
 		return entityCache;
@@ -1142,21 +788,6 @@ public class FaroChannelPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByGroupId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByGroupId",
 			new String[] {
@@ -1181,7 +812,7 @@ public class FaroChannelPersistenceImpl
 				_finderPathWithoutPaginationFindByGroupId,
 				_finderPathCountByGroupId, _SQL_SELECT_FAROCHANNEL_WHERE,
 				_SQL_COUNT_FAROCHANNEL_WHERE,
-				FaroChannelModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FaroChannelModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"faroChannel.", "groupId", FinderColumn.Type.LONG, "=",
 					true, true, FaroChannel::getGroupId));
@@ -1210,7 +841,7 @@ public class FaroChannelPersistenceImpl
 				_finderPathWithoutPaginationFindByWorkspaceGroupId,
 				_finderPathCountByWorkspaceGroupId,
 				_SQL_SELECT_FAROCHANNEL_WHERE, _SQL_COUNT_FAROCHANNEL_WHERE,
-				FaroChannelModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				FaroChannelModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"faroChannel.", "workspaceGroupId", FinderColumn.Type.LONG,
 					"=", true, true, FaroChannel::getWorkspaceGroupId));
@@ -1238,24 +869,26 @@ public class FaroChannelPersistenceImpl
 			this, _finderPathWithPaginationFindByG_U,
 			_finderPathWithoutPaginationFindByG_U, _finderPathCountByG_U,
 			_SQL_SELECT_FAROCHANNEL_WHERE, _SQL_COUNT_FAROCHANNEL_WHERE,
-			FaroChannelModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			FaroChannelModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"faroChannel.", "groupId", FinderColumn.Type.LONG, "=", true,
-				false, FaroChannel::getGroupId),
+				true, FaroChannel::getGroupId),
 			new FinderColumn<>(
 				"faroChannel.", "userId", FinderColumn.Type.LONG, "=", true,
 				true, FaroChannel::getUserId));
 
-		_finderPathFetchByC_W = new FinderPath(
+		_finderPathFetchByC_W = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_W",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"channelId", "workspaceGroupId"}, true);
+			new String[] {"channelId", "workspaceGroupId"}, 0, 1, false,
+			convertNullFunction(FaroChannel::getChannelId),
+			FaroChannel::getWorkspaceGroupId);
 
 		_uniquePersistenceFinderByC_W = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByC_W, _SQL_SELECT_FAROCHANNEL_WHERE,
+			this, _finderPathFetchByC_W, _SQL_SELECT_FAROCHANNEL_WHERE, "",
 			new FinderColumn<>(
 				"faroChannel.", "channelId", FinderColumn.Type.STRING, "=",
-				true, false, FaroChannel::getChannelId),
+				true, true, FaroChannel::getChannelId),
 			new FinderColumn<>(
 				"faroChannel.", "workspaceGroupId", FinderColumn.Type.LONG, "=",
 				true, true, FaroChannel::getWorkspaceGroupId));
@@ -1302,22 +935,17 @@ public class FaroChannelPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		FaroChannelModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_FAROCHANNEL =
 		"SELECT faroChannel FROM FaroChannel faroChannel";
 
 	private static final String _SQL_SELECT_FAROCHANNEL_WHERE =
 		"SELECT faroChannel FROM FaroChannel faroChannel WHERE ";
 
-	private static final String _SQL_COUNT_FAROCHANNEL =
-		"SELECT COUNT(faroChannel) FROM FaroChannel faroChannel";
-
 	private static final String _SQL_COUNT_FAROCHANNEL_WHERE =
 		"SELECT COUNT(faroChannel) FROM FaroChannel faroChannel WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "faroChannel.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No FaroChannel exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No FaroChannel exists with the key {";
@@ -1331,4 +959,4 @@ public class FaroChannelPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-68757371
+// LIFERAY-SERVICE-BUILDER-HASH:487338489

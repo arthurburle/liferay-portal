@@ -36,6 +36,20 @@ public class FaroProjectUsageUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<FaroProjectUsage> faroProjectUsages) {
+		getPersistence().cacheResult(faroProjectUsages);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(FaroProjectUsage faroProjectUsage) {
+		getPersistence().cacheResult(faroProjectUsage);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -178,24 +192,6 @@ public class FaroProjectUsageUtil {
 	}
 
 	/**
-	 * Caches the faro project usage in the entity cache if it is enabled.
-	 *
-	 * @param faroProjectUsage the faro project usage
-	 */
-	public static void cacheResult(FaroProjectUsage faroProjectUsage) {
-		getPersistence().cacheResult(faroProjectUsage);
-	}
-
-	/**
-	 * Caches the faro project usages in the entity cache if it is enabled.
-	 *
-	 * @param faroProjectUsages the faro project usages
-	 */
-	public static void cacheResult(List<FaroProjectUsage> faroProjectUsages) {
-		getPersistence().cacheResult(faroProjectUsages);
-	}
-
-	/**
 	 * Creates a new faro project usage with the primary key. Does not add the faro project usage to the database.
 	 *
 	 * @param faroProjectUsageId the primary key for the new faro project usage
@@ -247,87 +243,6 @@ public class FaroProjectUsageUtil {
 		return getPersistence().fetchByPrimaryKey(faroProjectUsageId);
 	}
 
-	/**
-	 * Returns all the faro project usages.
-	 *
-	 * @return the faro project usages
-	 */
-	public static List<FaroProjectUsage> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the faro project usages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.faro.model.impl.FaroProjectUsageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of faro project usages
-	 * @param end the upper bound of the range of faro project usages (not inclusive)
-	 * @return the range of faro project usages
-	 */
-	public static List<FaroProjectUsage> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the faro project usages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.faro.model.impl.FaroProjectUsageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of faro project usages
-	 * @param end the upper bound of the range of faro project usages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of faro project usages
-	 */
-	public static List<FaroProjectUsage> findAll(
-		int start, int end,
-		OrderByComparator<FaroProjectUsage> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the faro project usages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.osb.faro.model.impl.FaroProjectUsageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of faro project usages
-	 * @param end the upper bound of the range of faro project usages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of faro project usages
-	 */
-	public static List<FaroProjectUsage> findAll(
-		int start, int end,
-		OrderByComparator<FaroProjectUsage> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the faro project usages from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of faro project usages.
-	 *
-	 * @return the number of faro project usages
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static FaroProjectUsagePersistence getPersistence() {
 		return _persistence;
 	}
@@ -339,4 +254,4 @@ public class FaroProjectUsageUtil {
 	private static volatile FaroProjectUsagePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:293813526
+// LIFERAY-SERVICE-BUILDER-HASH:-435856538

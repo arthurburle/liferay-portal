@@ -845,21 +845,6 @@ public interface DDMStructureLayoutPersistence
 		long groupId, long classNameId, long structureVersionId);
 
 	/**
-	 * Caches the ddm structure layout in the entity cache if it is enabled.
-	 *
-	 * @param ddmStructureLayout the ddm structure layout
-	 */
-	public void cacheResult(DDMStructureLayout ddmStructureLayout);
-
-	/**
-	 * Caches the ddm structure layouts in the entity cache if it is enabled.
-	 *
-	 * @param ddmStructureLayouts the ddm structure layouts
-	 */
-	public void cacheResult(
-		java.util.List<DDMStructureLayout> ddmStructureLayouts);
-
-	/**
 	 * Creates a new ddm structure layout with the primary key. Does not add the ddm structure layout to the database.
 	 *
 	 * @param structureLayoutId the primary key for the new ddm structure layout
@@ -897,73 +882,5 @@ public interface DDMStructureLayoutPersistence
 	 */
 	public DDMStructureLayout fetchByPrimaryKey(long structureLayoutId);
 
-	/**
-	 * Returns all the ddm structure layouts.
-	 *
-	 * @return the ddm structure layouts
-	 */
-	public java.util.List<DDMStructureLayout> findAll();
-
-	/**
-	 * Returns a range of all the ddm structure layouts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMStructureLayoutModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm structure layouts
-	 * @param end the upper bound of the range of ddm structure layouts (not inclusive)
-	 * @return the range of ddm structure layouts
-	 */
-	public java.util.List<DDMStructureLayout> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the ddm structure layouts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMStructureLayoutModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm structure layouts
-	 * @param end the upper bound of the range of ddm structure layouts (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm structure layouts
-	 */
-	public java.util.List<DDMStructureLayout> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DDMStructureLayout>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the ddm structure layouts.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMStructureLayoutModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm structure layouts
-	 * @param end the upper bound of the range of ddm structure layouts (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm structure layouts
-	 */
-	public java.util.List<DDMStructureLayout> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DDMStructureLayout>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the ddm structure layouts from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of ddm structure layouts.
-	 *
-	 * @return the number of ddm structure layouts
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:583644255
+// LIFERAY-SERVICE-BUILDER-HASH:2083224111

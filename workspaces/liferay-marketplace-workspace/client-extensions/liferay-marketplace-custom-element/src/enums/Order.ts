@@ -33,6 +33,7 @@ export enum OrderTypes {
 	CLOUD_APP = 'CLOUD_APP',
 	CMP = 'CMP_BETA',
 	COMPOSITE_APP = 'COMPOSITE_APP',
+	DSR = 'DSR',
 	DXP = 'DXP',
 	DXP_APP = 'DXP_APP',
 	LOW_CODE_CONFIGURATION = 'LOW_CODE_CONFIGURATION',
@@ -60,8 +61,25 @@ export enum PaymentStatus {
 	PENDING = 1,
 }
 
+export const APP_ORDER_TYPES: readonly OrderTypes[] = [
+	OrderTypes.CLIENT_EXTENSION,
+	OrderTypes.CLOUD_APP,
+	OrderTypes.COMPOSITE_APP,
+	OrderTypes.DXP_APP,
+	OrderTypes.LOW_CODE_CONFIGURATION,
+	OrderTypes.OTHER,
+];
+
+export const LIFERAY_PRODUCT_ORDER_TYPES: readonly OrderTypes[] = [
+	OrderTypes.ADDONS,
+	OrderTypes.AI_HUB,
+	OrderTypes.CMP,
+	OrderTypes.DXP,
+];
+
 export const orderTypeDocumentationURL: Partial<Record<OrderTypes, string>> = {
 	[OrderTypes.CMP]: 'https://learn.liferay.com/content-marketing-platform',
+	[OrderTypes.DSR]: 'https://learn.liferay.com/w/digital-sales-room/index',
 	[OrderTypes.DXP]:
 		'https://learn.liferay.com/w/dxp/self-hosted-installation-and-upgrades/setting-up-liferay/activating-liferay-dxp',
 };
@@ -73,6 +91,7 @@ export const orderTypeLabel = {
 	[OrderTypes.CLOUD_APP]: 'Cloud',
 	[OrderTypes.CMP]: 'Content Marketing Platform',
 	[OrderTypes.COMPOSITE_APP]: 'Composite App',
+	[OrderTypes.DSR]: 'Digital Sales Room',
 	[OrderTypes.DXP_APP]: 'DXP',
 	[OrderTypes.DXP]: 'DXP Free',
 	[OrderTypes.LOW_CODE_CONFIGURATION]: 'Low-Code Configuration',

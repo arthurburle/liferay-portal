@@ -36,6 +36,20 @@ public class ObjectStateFlowUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<ObjectStateFlow> objectStateFlows) {
+		getPersistence().cacheResult(objectStateFlows);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(ObjectStateFlow objectStateFlow) {
+		getPersistence().cacheResult(objectStateFlow);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -421,24 +435,6 @@ public class ObjectStateFlowUtil {
 	}
 
 	/**
-	 * Caches the object state flow in the entity cache if it is enabled.
-	 *
-	 * @param objectStateFlow the object state flow
-	 */
-	public static void cacheResult(ObjectStateFlow objectStateFlow) {
-		getPersistence().cacheResult(objectStateFlow);
-	}
-
-	/**
-	 * Caches the object state flows in the entity cache if it is enabled.
-	 *
-	 * @param objectStateFlows the object state flows
-	 */
-	public static void cacheResult(List<ObjectStateFlow> objectStateFlows) {
-		getPersistence().cacheResult(objectStateFlows);
-	}
-
-	/**
 	 * Creates a new object state flow with the primary key. Does not add the object state flow to the database.
 	 *
 	 * @param objectStateFlowId the primary key for the new object state flow
@@ -488,87 +484,6 @@ public class ObjectStateFlowUtil {
 		return getPersistence().fetchByPrimaryKey(objectStateFlowId);
 	}
 
-	/**
-	 * Returns all the object state flows.
-	 *
-	 * @return the object state flows
-	 */
-	public static List<ObjectStateFlow> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the object state flows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectStateFlowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state flows
-	 * @param end the upper bound of the range of object state flows (not inclusive)
-	 * @return the range of object state flows
-	 */
-	public static List<ObjectStateFlow> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the object state flows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectStateFlowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state flows
-	 * @param end the upper bound of the range of object state flows (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object state flows
-	 */
-	public static List<ObjectStateFlow> findAll(
-		int start, int end,
-		OrderByComparator<ObjectStateFlow> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the object state flows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.object.model.impl.ObjectStateFlowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state flows
-	 * @param end the upper bound of the range of object state flows (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object state flows
-	 */
-	public static List<ObjectStateFlow> findAll(
-		int start, int end,
-		OrderByComparator<ObjectStateFlow> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the object state flows from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of object state flows.
-	 *
-	 * @return the number of object state flows
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static ObjectStateFlowPersistence getPersistence() {
 		return _persistence;
 	}
@@ -580,4 +495,4 @@ public class ObjectStateFlowUtil {
 	private static volatile ObjectStateFlowPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1341576750
+// LIFERAY-SERVICE-BUILDER-HASH:78988535

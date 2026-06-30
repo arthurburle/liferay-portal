@@ -7,6 +7,7 @@ package com.liferay.mcp.server.internal.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.liferay.mcp.server.internal.configuration.MCPServerConfiguration;
 import com.liferay.mcp.server.internal.constants.MCPServerConstants;
 import com.liferay.mcp.server.internal.util.OpenAPIUtil;
 import com.liferay.object.model.ObjectDefinition;
@@ -16,6 +17,7 @@ import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONException;
@@ -23,6 +25,7 @@ import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.module.configuration.ConfigurationException;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Http;
@@ -33,10 +36,9 @@ import com.liferay.portal.kernel.util.Validator;
 import io.modelcontextprotocol.common.McpTransportContext;
 import io.modelcontextprotocol.json.jackson2.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
-import io.modelcontextprotocol.server.McpServerFeatures;
-import io.modelcontextprotocol.server.McpSyncServer;
-import io.modelcontextprotocol.server.McpSyncServerExchange;
-import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
+import io.modelcontextprotocol.server.McpStatelessServerFeatures;
+import io.modelcontextprotocol.server.McpStatelessSyncServer;
+import io.modelcontextprotocol.server.transport.HttpServletStatelessServerTransport;
 import io.modelcontextprotocol.spec.McpSchema;
 
 import jakarta.servlet.GenericServlet;
@@ -56,6 +58,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.osgi.service.component.annotations.Component;
@@ -128,7 +131,7 @@ public class MCPServerServlet extends HttpServlet {
 
 		long companyId = _portal.getCompanyId(httpServletRequest);
 
-		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-63311")) {
+		if (!_isEnabled(companyId)) {
 			httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
 
 			return;
@@ -157,15 +160,12 @@ public class MCPServerServlet extends HttpServlet {
 	}
 
 	private Servlet _buildServlet(
-		String baseURL, long companyId, String authorization,
+		String authorization, String baseURL, long companyId,
 		MCPServerProfile mcpServerProfile) {
 
-		HttpServletStreamableServerTransportProvider
-			httpServletStreamableServerTransportProvider =
-				HttpServletStreamableServerTransportProvider.builder(
-				).mcpEndpoint(
-					(mcpServerProfile != null) ?
-						"/mcp/" + mcpServerProfile._name : "/mcp"
+		HttpServletStatelessServerTransport
+			httpServletStatelessServerTransport =
+				HttpServletStatelessServerTransport.builder(
 				).contextExtractor(
 					request -> McpTransportContext.create(
 						HashMapBuilder.<String, Object>put(
@@ -175,10 +175,13 @@ public class MCPServerServlet extends HttpServlet {
 							request.getHeader(
 								"Liferay-AI-Hub-Cell-On-Behalf-Of")
 						).build())
+				).messageEndpoint(
+					(mcpServerProfile != null) ?
+						"/mcp/" + mcpServerProfile._name : "/mcp"
 				).build();
 
-		List<McpServerFeatures.SyncToolSpecification> syncToolSpecifications =
-			new ArrayList<>();
+		List<McpStatelessServerFeatures.SyncToolSpecification>
+			syncToolSpecifications = new ArrayList<>();
 
 		if (mcpServerProfile != null) {
 			Map<String, String> openAPIJSONStringCache = new HashMap<>();
@@ -186,33 +189,35 @@ public class MCPServerServlet extends HttpServlet {
 			syncToolSpecifications.addAll(
 				TransformUtil.transformToList(
 					mcpServerProfile._endpoints,
-					endpoint -> new McpServerFeatures.SyncToolSpecification(
-						OpenAPIUtil.getTool(
-							endpoint,
-							openAPIJSONStringCache.computeIfAbsent(
-								OpenAPIUtil.getOpenAPIURL(endpoint),
-								key -> _getOpenAPIJSONString(
-									baseURL, authorization, key))),
-						(mcpSyncServerExchange, callToolRequest) -> {
-							OpenAPIUtil.HttpCallArguments httpCallArguments =
-								OpenAPIUtil.getHttpCallArguments(
-									callToolRequest.arguments(), baseURL,
-									endpoint);
+					endpoint ->
+						new McpStatelessServerFeatures.SyncToolSpecification(
+							OpenAPIUtil.getTool(
+								endpoint,
+								openAPIJSONStringCache.computeIfAbsent(
+									OpenAPIUtil.getOpenAPIURL(endpoint),
+									key -> _getOpenAPIJSONString(
+										baseURL, authorization, key))),
+							(mcpTransportContext, callToolRequest) -> {
+								OpenAPIUtil.HttpCallArguments
+									httpCallArguments =
+										OpenAPIUtil.getHttpCallArguments(
+											callToolRequest.arguments(),
+											baseURL, endpoint);
 
-							return _call(
-								httpCallArguments.getBody(),
-								httpCallArguments.getURL(),
-								mcpSyncServerExchange,
-								httpCallArguments.getMethod());
-						})));
+								return _call(
+									httpCallArguments.getBody(),
+									httpCallArguments.getURL(),
+									mcpTransportContext,
+									httpCallArguments.getMethod());
+							})));
 		}
 		else {
 			JSONObject toolsJSONObject = _getToolsJSONObject(baseURL);
 
 			syncToolSpecifications.add(
-				new McpServerFeatures.SyncToolSpecification(
+				new McpStatelessServerFeatures.SyncToolSpecification(
 					_getTool("call-http-endpoint", toolsJSONObject),
-					(mcpSyncServerExchange, callToolRequest) -> {
+					(mcpTransportContext, callToolRequest) -> {
 						Map<String, Object> arguments =
 							callToolRequest.arguments();
 
@@ -224,48 +229,48 @@ public class MCPServerServlet extends HttpServlet {
 
 						return _call(
 							String.valueOf(arguments.get("payload")),
-							baseURL + path, mcpSyncServerExchange,
+							baseURL + path, mcpTransportContext,
 							String.valueOf(arguments.get("method")));
 					}));
 			syncToolSpecifications.add(
-				new McpServerFeatures.SyncToolSpecification(
+				new McpStatelessServerFeatures.SyncToolSpecification(
 					_getTool("get-openapi", toolsJSONObject),
-					(mcpSyncServerExchange, callToolRequest) -> _call(
+					(mcpTransportContext, callToolRequest) -> _call(
 						null,
 						String.valueOf(
 							callToolRequest.arguments(
 							).get(
 								"url"
 							)),
-						mcpSyncServerExchange, "GET")));
+						mcpTransportContext, "GET")));
 			syncToolSpecifications.add(
-				new McpServerFeatures.SyncToolSpecification(
+				new McpStatelessServerFeatures.SyncToolSpecification(
 					_getTool("get-openapis", toolsJSONObject),
-					(mcpSyncServerExchange, callToolRequest) -> _call(
-						null, baseURL + "/openapi", mcpSyncServerExchange,
+					(mcpTransportContext, callToolRequest) -> _call(
+						null, baseURL + "/openapi", mcpTransportContext,
 						"GET")));
 		}
 
-		McpSyncServer mcpSyncServer = McpServer.sync(
-			httpServletStreamableServerTransportProvider
+		McpStatelessSyncServer mcpStatelessSyncServer = McpServer.sync(
+			httpServletStatelessServerTransport
 		).capabilities(
 			McpSchema.ServerCapabilities.builder(
-			).tools(
-				true
 			).prompts(
 				true
+			).tools(
+				true
 			).build()
-		).tools(
-			syncToolSpecifications
 		).prompts(
 			_getSyncPromptSpecifications(companyId)
+		).tools(
+			syncToolSpecifications
 		).build();
 
 		return new GenericServlet() {
 
 			@Override
 			public void destroy() {
-				mcpSyncServer.closeGracefully();
+				mcpStatelessSyncServer.closeGracefully();
 			}
 
 			@Override
@@ -274,7 +279,23 @@ public class MCPServerServlet extends HttpServlet {
 					ServletResponse servletResponse)
 				throws IOException, ServletException {
 
-				httpServletStreamableServerTransportProvider.service(
+				HttpServletRequest httpServletRequest =
+					(HttpServletRequest)servletRequest;
+
+				if (Objects.equals(httpServletRequest.getMethod(), "GET")) {
+					HttpServletResponse httpServletResponse =
+						(HttpServletResponse)servletResponse;
+
+					httpServletResponse.setContentType("text/event-stream");
+					httpServletResponse.setHeader("Cache-Control", "no-cache");
+					httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+
+					httpServletResponse.flushBuffer();
+
+					return;
+				}
+
+				httpServletStatelessServerTransport.service(
 					servletRequest, servletResponse);
 			}
 
@@ -282,8 +303,8 @@ public class MCPServerServlet extends HttpServlet {
 	}
 
 	private McpSchema.CallToolResult _call(
-		String body, String location,
-		McpSyncServerExchange mcpSyncServerExchange, String method) {
+		String body, String location, McpTransportContext mcpTransportContext,
+		String method) {
 
 		Http.Options options = new Http.Options();
 
@@ -291,9 +312,6 @@ public class MCPServerServlet extends HttpServlet {
 			options.setBody(
 				body, ContentTypes.APPLICATION_JSON, StringPool.UTF8);
 		}
-
-		McpTransportContext mcpTransportContext =
-			mcpSyncServerExchange.transportContext();
 
 		Object liferayAIHubCellOnBehalfOf = mcpTransportContext.get(
 			"liferayAIHubCellOnBehalfOf");
@@ -391,8 +409,8 @@ public class MCPServerServlet extends HttpServlet {
 
 			if (profileName.equals(values.get("name"))) {
 				return new MCPServerProfile(
-					profileName,
-					StringUtil.splitLines((String)values.get("endpoints")));
+					StringUtil.splitLines((String)values.get("endpoints")),
+					profileName);
 			}
 		}
 
@@ -453,7 +471,7 @@ public class MCPServerServlet extends HttpServlet {
 					companyId,
 					(mcpServerProfile != null) ? mcpServerProfile._name : null),
 				servletKey -> _buildServlet(
-					baseURL, companyId, authorization, mcpServerProfile));
+					authorization, baseURL, companyId, mcpServerProfile));
 		}
 	}
 
@@ -467,7 +485,7 @@ public class MCPServerServlet extends HttpServlet {
 		return servletKey;
 	}
 
-	private List<McpServerFeatures.SyncPromptSpecification>
+	private List<McpStatelessServerFeatures.SyncPromptSpecification>
 		_getSyncPromptSpecifications(long companyId) {
 
 		ObjectDefinition objectDefinition =
@@ -488,12 +506,12 @@ public class MCPServerServlet extends HttpServlet {
 			objectEntry -> {
 				Map<String, Serializable> values = objectEntry.getValues();
 
-				return new McpServerFeatures.SyncPromptSpecification(
+				return new McpStatelessServerFeatures.SyncPromptSpecification(
 					new McpSchema.Prompt(
 						(String)values.get("name"),
 						(String)values.get("description"),
 						Collections.emptyList()),
-					(mcpSyncServerExchange, request) ->
+					(mcpTransportContext, request) ->
 						new McpSchema.GetPromptResult(
 							(String)values.get("description"),
 							List.of(
@@ -508,8 +526,6 @@ public class MCPServerServlet extends HttpServlet {
 		JSONObject toolJSONObject = toolsJSONObject.getJSONObject(name);
 
 		return McpSchema.Tool.builder(
-		).name(
-			name
 		).description(
 			toolJSONObject.getString("description")
 		).inputSchema(
@@ -517,6 +533,8 @@ public class MCPServerServlet extends HttpServlet {
 			toolJSONObject.getJSONObject(
 				"schema"
 			).toString()
+		).name(
+			name
 		).build();
 	}
 
@@ -533,8 +551,28 @@ public class MCPServerServlet extends HttpServlet {
 		}
 	}
 
+	private boolean _isEnabled(long companyId) {
+		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-63311")) {
+			return false;
+		}
+
+		try {
+			MCPServerConfiguration mcpServerConfiguration =
+				_configurationProvider.getCompanyConfiguration(
+					MCPServerConfiguration.class, companyId);
+
+			return mcpServerConfiguration.enabled();
+		}
+		catch (ConfigurationException configurationException) {
+			throw new RuntimeException(configurationException);
+		}
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		MCPServerServlet.class);
+
+	@Reference
+	private ConfigurationProvider _configurationProvider;
 
 	@Reference
 	private Http _http;
@@ -555,9 +593,9 @@ public class MCPServerServlet extends HttpServlet {
 
 	private static class MCPServerProfile {
 
-		public MCPServerProfile(String name, String[] endpoints) {
-			_name = name;
+		public MCPServerProfile(String[] endpoints, String name) {
 			_endpoints = endpoints;
+			_name = name;
 		}
 
 		private final String[] _endpoints;

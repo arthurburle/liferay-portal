@@ -980,23 +980,6 @@ public interface CommerceMLForecastAlertEntryPersistence
 		int status);
 
 	/**
-	 * Caches the commerce ml forecast alert entry in the entity cache if it is enabled.
-	 *
-	 * @param commerceMLForecastAlertEntry the commerce ml forecast alert entry
-	 */
-	public void cacheResult(
-		CommerceMLForecastAlertEntry commerceMLForecastAlertEntry);
-
-	/**
-	 * Caches the commerce ml forecast alert entries in the entity cache if it is enabled.
-	 *
-	 * @param commerceMLForecastAlertEntries the commerce ml forecast alert entries
-	 */
-	public void cacheResult(
-		java.util.List<CommerceMLForecastAlertEntry>
-			commerceMLForecastAlertEntries);
-
-	/**
 	 * Creates a new commerce ml forecast alert entry with the primary key. Does not add the commerce ml forecast alert entry to the database.
 	 *
 	 * @param commerceMLForecastAlertEntryId the primary key for the new commerce ml forecast alert entry
@@ -1039,74 +1022,5 @@ public interface CommerceMLForecastAlertEntryPersistence
 	public CommerceMLForecastAlertEntry fetchByPrimaryKey(
 		long commerceMLForecastAlertEntryId);
 
-	/**
-	 * Returns all the commerce ml forecast alert entries.
-	 *
-	 * @return the commerce ml forecast alert entries
-	 */
-	public java.util.List<CommerceMLForecastAlertEntry> findAll();
-
-	/**
-	 * Returns a range of all the commerce ml forecast alert entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.machine.learning.forecast.alert.model.impl.CommerceMLForecastAlertEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce ml forecast alert entries
-	 * @param end the upper bound of the range of commerce ml forecast alert entries (not inclusive)
-	 * @return the range of commerce ml forecast alert entries
-	 */
-	public java.util.List<CommerceMLForecastAlertEntry> findAll(
-		int start, int end);
-
-	/**
-	 * Returns an ordered range of all the commerce ml forecast alert entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.machine.learning.forecast.alert.model.impl.CommerceMLForecastAlertEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce ml forecast alert entries
-	 * @param end the upper bound of the range of commerce ml forecast alert entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce ml forecast alert entries
-	 */
-	public java.util.List<CommerceMLForecastAlertEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceMLForecastAlertEntry> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the commerce ml forecast alert entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.machine.learning.forecast.alert.model.impl.CommerceMLForecastAlertEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce ml forecast alert entries
-	 * @param end the upper bound of the range of commerce ml forecast alert entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce ml forecast alert entries
-	 */
-	public java.util.List<CommerceMLForecastAlertEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<CommerceMLForecastAlertEntry> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the commerce ml forecast alert entries from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of commerce ml forecast alert entries.
-	 *
-	 * @return the number of commerce ml forecast alert entries
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1316261725
+// LIFERAY-SERVICE-BUILDER-HASH:266076254

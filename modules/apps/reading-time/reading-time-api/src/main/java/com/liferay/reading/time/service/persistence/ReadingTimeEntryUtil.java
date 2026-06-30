@@ -36,6 +36,20 @@ public class ReadingTimeEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<ReadingTimeEntry> readingTimeEntries) {
+		getPersistence().cacheResult(readingTimeEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(ReadingTimeEntry readingTimeEntry) {
+		getPersistence().cacheResult(readingTimeEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -500,24 +514,6 @@ public class ReadingTimeEntryUtil {
 	}
 
 	/**
-	 * Caches the reading time entry in the entity cache if it is enabled.
-	 *
-	 * @param readingTimeEntry the reading time entry
-	 */
-	public static void cacheResult(ReadingTimeEntry readingTimeEntry) {
-		getPersistence().cacheResult(readingTimeEntry);
-	}
-
-	/**
-	 * Caches the reading time entries in the entity cache if it is enabled.
-	 *
-	 * @param readingTimeEntries the reading time entries
-	 */
-	public static void cacheResult(List<ReadingTimeEntry> readingTimeEntries) {
-		getPersistence().cacheResult(readingTimeEntries);
-	}
-
-	/**
 	 * Creates a new reading time entry with the primary key. Does not add the reading time entry to the database.
 	 *
 	 * @param readingTimeEntryId the primary key for the new reading time entry
@@ -569,87 +565,6 @@ public class ReadingTimeEntryUtil {
 		return getPersistence().fetchByPrimaryKey(readingTimeEntryId);
 	}
 
-	/**
-	 * Returns all the reading time entries.
-	 *
-	 * @return the reading time entries
-	 */
-	public static List<ReadingTimeEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the reading time entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.reading.time.model.impl.ReadingTimeEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of reading time entries
-	 * @param end the upper bound of the range of reading time entries (not inclusive)
-	 * @return the range of reading time entries
-	 */
-	public static List<ReadingTimeEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the reading time entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.reading.time.model.impl.ReadingTimeEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of reading time entries
-	 * @param end the upper bound of the range of reading time entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of reading time entries
-	 */
-	public static List<ReadingTimeEntry> findAll(
-		int start, int end,
-		OrderByComparator<ReadingTimeEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the reading time entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.reading.time.model.impl.ReadingTimeEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of reading time entries
-	 * @param end the upper bound of the range of reading time entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of reading time entries
-	 */
-	public static List<ReadingTimeEntry> findAll(
-		int start, int end,
-		OrderByComparator<ReadingTimeEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the reading time entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of reading time entries.
-	 *
-	 * @return the number of reading time entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static ReadingTimeEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -661,4 +576,4 @@ public class ReadingTimeEntryUtil {
 	private static volatile ReadingTimeEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1616328675
+// LIFERAY-SERVICE-BUILDER-HASH:-1966389258

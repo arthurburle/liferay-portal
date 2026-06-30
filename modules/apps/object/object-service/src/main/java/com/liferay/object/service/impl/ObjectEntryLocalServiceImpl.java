@@ -58,6 +58,7 @@ import com.liferay.object.definition.setting.util.ObjectDefinitionSettingUtil;
 import com.liferay.object.definition.util.ObjectDefinitionThreadLocal;
 import com.liferay.object.definition.util.ObjectDefinitionUtil;
 import com.liferay.object.entry.ObjectEntryContext;
+import com.liferay.object.entry.contributor.ObjectEntryReviewNotificationContributor;
 import com.liferay.object.entry.contributor.ObjectEntryValuesContributor;
 import com.liferay.object.entry.folder.subscription.util.ObjectEntryFolderSubscriptionUtil;
 import com.liferay.object.entry.folder.util.ObjectEntryFolderUtil;
@@ -1851,6 +1852,20 @@ public class ObjectEntryLocalServiceImpl
 			this::getValues);
 	}
 
+	@Override
+	public int getValuesListCount(
+			long companyId, Long[] groupIds, Long[] objectDefinitionIds,
+			Predicate predicate)
+		throws PortalException {
+
+		return objectEntryPersistence.dslQueryCount(
+			_getObjectEntriesGroupByStep(
+				companyId,
+				DSLQueryFactoryUtil.countDistinct(
+					ObjectEntryTable.INSTANCE.objectEntryId),
+				groupIds, objectDefinitionIds, predicate));
+	}
+
 	public int getValuesListCount(
 			Long[] groupIds, long companyId, long userId,
 			long objectDefinitionId, Predicate predicate,
@@ -2538,6 +2553,9 @@ public class ObjectEntryLocalServiceImpl
 			ObjectFilterConstants.TYPE_EXCLUDES,
 			ObjectFilterConstants.TYPE_INCLUDES);
 
+		_objectEntryReviewNotificationContributors =
+			ServiceTrackerListFactory.open(
+				bundleContext, ObjectEntryReviewNotificationContributor.class);
 		_serviceTrackerList = ServiceTrackerListFactory.open(
 			bundleContext, ObjectEntryValuesContributor.class);
 	}
@@ -2547,6 +2565,7 @@ public class ObjectEntryLocalServiceImpl
 	protected void deactivate() {
 		super.deactivate();
 
+		_objectEntryReviewNotificationContributors.close();
 		_serviceTrackerList.close();
 	}
 
@@ -3250,6 +3269,22 @@ public class ObjectEntryLocalServiceImpl
 			));
 
 		for (ObjectEntry objectEntry : objectEntries) {
+			JSONObject payloadJSONObject = JSONUtil.put(
+				"classPK", objectEntry.getObjectEntryId()
+			).put(
+				"notificationMessageArg", objectEntry.getTitleValue()
+			).put(
+				"notificationMessageKey", "x-has-reached-its-review-date"
+			);
+
+			for (ObjectEntryReviewNotificationContributor contributor :
+					_objectEntryReviewNotificationContributors) {
+
+				if (contributor.isApplicable(objectEntry)) {
+					contributor.contribute(objectEntry, payloadJSONObject);
+				}
+			}
+
 			ObjectDefinition objectDefinition =
 				_objectDefinitionPersistence.fetchByPrimaryKey(
 					objectEntry.getObjectDefinitionId());
@@ -3257,14 +3292,7 @@ public class ObjectEntryLocalServiceImpl
 			_userNotificationEventLocalService.sendUserNotificationEvents(
 				objectEntry.getUserId(), objectDefinition.getPortletId(),
 				UserNotificationDeliveryConstants.TYPE_WEBSITE, false,
-				JSONUtil.put(
-					"classPK", objectEntry.getObjectEntryId()
-				).put(
-					"notificationMessage",
-					StringBundler.concat(
-						"The object entry ", objectEntry.getTitleValue(),
-						" has reached its review date.")
-				));
+				payloadJSONObject);
 		}
 	}
 
@@ -3815,31 +3843,8 @@ public class ObjectEntryLocalServiceImpl
 		Predicate searchPredicate = null;
 
 		for (ObjectField objectField : objectFields) {
-			Table<?> table = _objectFieldLocalService.getTable(
-				objectDefinitionId, objectField.getName());
-
-			Column<?, ?> column = table.getColumn(
-				objectField.getDBColumnName());
-
-			if (column == null) {
-				continue;
-			}
-
-			Predicate objectFieldPredicate = null;
-
-			if (Objects.equals(
-					objectField.getRelationshipType(),
-					ObjectRelationshipConstants.TYPE_ONE_TO_MANY)) {
-
-				objectFieldPredicate = _getRelationshipObjectFieldPredicate(
-					column, objectField, search);
-			}
-			else {
-				objectFieldPredicate =
-					ObjectEntrySearchUtil.getObjectFieldPredicate(
-						objectField.getBusinessType(), column,
-						objectField.getDBType(), search);
-			}
+			Predicate objectFieldPredicate = _getObjectFieldPredicate(
+				objectDefinitionId, objectField, search);
 
 			if (objectFieldPredicate == null) {
 				continue;
@@ -4656,6 +4661,52 @@ public class ObjectEntryLocalServiceImpl
 	}
 
 	private GroupByStep _getObjectEntriesGroupByStep(
+			long companyId, FromStep fromStep, Long[] groupIds,
+			Long[] objectDefinitionIds, Predicate predicate)
+		throws PortalException {
+
+		return fromStep.from(
+			ObjectEntryTable.INSTANCE
+		).where(
+			ObjectEntryTable.INSTANCE.companyId.eq(
+				companyId
+			).and(
+				ObjectEntryTable.INSTANCE.rootObjectEntryId.eq(
+					ObjectEntryTable.INSTANCE.objectEntryId
+				).or(
+					ObjectEntryTable.INSTANCE.rootObjectEntryId.eq(0L)
+				).withParentheses()
+			).and(
+				ObjectEntryTable.INSTANCE.status.neq(
+					WorkflowConstants.STATUS_IN_TRASH)
+			).and(
+				() -> {
+					if (ArrayUtil.isEmpty(groupIds)) {
+						return null;
+					}
+
+					return ObjectEntryTable.INSTANCE.groupId.in(groupIds);
+				}
+			).and(
+				() -> {
+					if (ArrayUtil.isEmpty(objectDefinitionIds)) {
+						return null;
+					}
+
+					return ObjectEntryTable.INSTANCE.objectDefinitionId.in(
+						objectDefinitionIds);
+				}
+			).and(
+				predicate
+			).and(
+				_getHeadObjectEntryPredicate(false)
+			).and(
+				_getPermissionWherePredicate(groupIds, objectDefinitionIds)
+			)
+		);
+	}
+
+	private GroupByStep _getObjectEntriesGroupByStep(
 			Long[] groupIds, FromStep fromStep,
 			ObjectDefinition objectDefinition, Predicate predicate,
 			boolean preferApproved, String search)
@@ -4735,6 +4786,39 @@ public class ObjectEntryLocalServiceImpl
 		catch (PortalException portalException) {
 			throw new RuntimeException(portalException);
 		}
+	}
+
+	private Predicate _getObjectFieldPredicate(
+			long objectDefinitionId, ObjectField objectField, String search)
+		throws PortalException {
+
+		Table<?> table = _objectFieldLocalService.getTable(
+			objectDefinitionId, objectField.getName());
+
+		if (objectField.compareBusinessType(
+				ObjectFieldConstants.BUSINESS_TYPE_ASSIGNEE)) {
+
+			return ObjectEntrySearchUtil.getAssigneeFieldPredicate(
+				table, objectField.getDBColumnName(), search);
+		}
+
+		Column<?, ?> column = table.getColumn(objectField.getDBColumnName());
+
+		if (column == null) {
+			return null;
+		}
+
+		if (Objects.equals(
+				objectField.getRelationshipType(),
+				ObjectRelationshipConstants.TYPE_ONE_TO_MANY)) {
+
+			return _getRelationshipObjectFieldPredicate(
+				column, objectField, search);
+		}
+
+		return ObjectEntrySearchUtil.getObjectFieldPredicate(
+			objectField.getBusinessType(), column, objectField.getDBType(),
+			search);
 	}
 
 	private GroupByStep _getOneToManyObjectEntriesGroupByStep(
@@ -4933,6 +5017,59 @@ public class ObjectEntryLocalServiceImpl
 		}
 
 		return permissionWherePredicate;
+	}
+
+	private Predicate _getPermissionWherePredicate(
+			Long[] groupIds, Long[] objectDefinitionIds)
+		throws PortalException {
+
+		if (ArrayUtil.isEmpty(groupIds) ||
+			ArrayUtil.isEmpty(objectDefinitionIds) ||
+			(PermissionThreadLocal.getPermissionChecker() == null)) {
+
+			return null;
+		}
+
+		Predicate permissionWherePredicate = null;
+
+		for (Long objectDefinitionId : objectDefinitionIds) {
+			ObjectDefinition objectDefinition =
+				_objectDefinitionPersistence.findByPrimaryKey(
+					objectDefinitionId);
+
+			if (objectDefinition.isAccountEntryRestricted()) {
+				throw new PortalException(
+					"Account entry restricted object definitions are not " +
+						"supported");
+			}
+
+			Predicate objectDefinitionPermissionWherePredicate =
+				_getPermissionWherePredicate(
+					DynamicObjectDefinitionTableUtil.
+						getDynamicObjectDefinitionTable(
+							false, objectDefinition, _objectFieldLocalService),
+					groupIds);
+
+			Predicate objectDefinitionPredicate =
+				ObjectEntryTable.INSTANCE.objectDefinitionId.eq(
+					objectDefinitionId);
+
+			if (objectDefinitionPermissionWherePredicate != null) {
+				objectDefinitionPredicate = objectDefinitionPredicate.and(
+					Predicate.withParentheses(
+						objectDefinitionPermissionWherePredicate));
+			}
+
+			if (permissionWherePredicate == null) {
+				permissionWherePredicate = objectDefinitionPredicate;
+			}
+			else {
+				permissionWherePredicate = permissionWherePredicate.or(
+					objectDefinitionPredicate);
+			}
+		}
+
+		return Predicate.withParentheses(permissionWherePredicate);
 	}
 
 	private Column<?, Long> _getPrimaryKeyColumn(
@@ -8033,16 +8170,19 @@ public class ObjectEntryLocalServiceImpl
 			if (!objectField.isLocalized() &&
 				(values.get(objectField.getName()) != null)) {
 
-				values.put(
-					objectField.getName(),
-					objectFieldBusinessType.processValue(
-						objectField, values.get(objectField.getName())));
+				Serializable value = values.get(objectField.getName());
+
+				Serializable processedValue =
+					objectFieldBusinessType.processValue(objectField, value);
+
+				if (!Objects.equals(value, processedValue)) {
+					values.put(objectField.getName(), processedValue);
+				}
 
 				_validateValues(
 					dlFileEntriesMap, existingValues, groupId, guestUser,
 					objectDefinition, objectEntryId, objectField, userId,
-					validationErrors, values.get(objectField.getName()),
-					StringPool.BLANK);
+					validationErrors, processedValue, StringPool.BLANK);
 			}
 
 			Map<String, Serializable> localizedValues =
@@ -8056,14 +8196,19 @@ public class ObjectEntryLocalServiceImpl
 			for (Map.Entry<String, Serializable> entry :
 					localizedValues.entrySet()) {
 
-				entry.setValue(
-					objectFieldBusinessType.processValue(
-						objectField, entry.getValue()));
+				Serializable value = entry.getValue();
+
+				Serializable processedValue =
+					objectFieldBusinessType.processValue(objectField, value);
+
+				if (!Objects.equals(value, processedValue)) {
+					entry.setValue(processedValue);
+				}
 
 				_validateValues(
 					dlFileEntriesMap, existingValues, groupId, guestUser,
 					objectDefinition, objectEntryId, objectField, userId,
-					validationErrors, entry.getValue(), entry.getKey());
+					validationErrors, processedValue, entry.getKey());
 			}
 		}
 	}
@@ -8402,6 +8547,9 @@ public class ObjectEntryLocalServiceImpl
 
 	@Reference
 	private ObjectEntryFolderPersistence _objectEntryFolderPersistence;
+
+	private ServiceTrackerList<ObjectEntryReviewNotificationContributor>
+		_objectEntryReviewNotificationContributors;
 
 	@Reference
 	private ObjectEntryVersionLocalService _objectEntryVersionLocalService;

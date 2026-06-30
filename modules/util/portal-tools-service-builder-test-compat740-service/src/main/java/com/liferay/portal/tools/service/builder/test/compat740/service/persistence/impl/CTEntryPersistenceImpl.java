@@ -5,15 +5,11 @@
 
 package com.liferay.portal.tools.service.builder.test.compat740.service.persistence.impl;
 
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -25,10 +21,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.tools.service.builder.test.compat740.exception.NoSuchCTEntryException;
 import com.liferay.portal.tools.service.builder.test.compat740.model.CTEntry;
@@ -46,9 +39,7 @@ import java.lang.reflect.InvocationHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +63,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = CTEntryPersistence.class)
 public class CTEntryPersistenceImpl
-	extends BasePersistenceImpl<CTEntry> implements CTEntryPersistence {
+	extends BasePersistenceImpl<CTEntry, NoSuchCTEntryException>
+	implements CTEntryPersistence {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -88,9 +80,6 @@ public class CTEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByCompanyId;
 	private FinderPath _finderPathWithoutPaginationFindByCompanyId;
 	private FinderPath _finderPathCountByCompanyId;
@@ -166,14 +155,9 @@ public class CTEntryPersistenceImpl
 		long companyId, int start, int end,
 		OrderByComparator<CTEntry> orderByComparator, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTEntry.class)) {
-
-			return _collectionPersistenceFinderByCompanyId.find(
-				dummyFinderCache, new Object[] {companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByCompanyId.find(
+			dummyFinderCache, new Object[] {companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -234,13 +218,8 @@ public class CTEntryPersistenceImpl
 	 */
 	@Override
 	public int countByCompanyId(long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTEntry.class)) {
-
-			return _collectionPersistenceFinderByCompanyId.count(
-				dummyFinderCache, new Object[] {companyId});
-		}
+		return _collectionPersistenceFinderByCompanyId.count(
+			dummyFinderCache, new Object[] {companyId});
 	}
 
 	private FinderPath _finderPathFetchByC_N;
@@ -299,14 +278,8 @@ public class CTEntryPersistenceImpl
 	public CTEntry fetchByC_N(
 		long companyId, String name, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTEntry.class)) {
-
-			return _uniquePersistenceFinderByC_N.fetch(
-				dummyFinderCache, new Object[] {companyId, name},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByC_N.fetch(
+			dummyFinderCache, new Object[] {companyId, name}, useFinderCache);
 	}
 
 	/**
@@ -348,113 +321,6 @@ public class CTEntryPersistenceImpl
 	}
 
 	/**
-	 * Caches the ct entry in the entity cache if it is enabled.
-	 *
-	 * @param ctEntry the ct entry
-	 */
-	@Override
-	public void cacheResult(CTEntry ctEntry) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ctEntry.getCtCollectionId())) {
-
-			dummyEntityCache.putResult(
-				CTEntryImpl.class, ctEntry.getPrimaryKey(), ctEntry);
-
-			dummyFinderCache.putResult(
-				_finderPathFetchByC_N,
-				new Object[] {ctEntry.getCompanyId(), ctEntry.getName()},
-				ctEntry);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the ct entries in the entity cache if it is enabled.
-	 *
-	 * @param ctEntries the ct entries
-	 */
-	@Override
-	public void cacheResult(List<CTEntry> ctEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (ctEntries.size() > _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (CTEntry ctEntry : ctEntries) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						ctEntry.getCtCollectionId())) {
-
-				if (dummyEntityCache.getResult(
-						CTEntryImpl.class, ctEntry.getPrimaryKey()) == null) {
-
-					cacheResult(ctEntry);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all ct entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		dummyEntityCache.clearCache(CTEntryImpl.class);
-
-		dummyFinderCache.clearCache(CTEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the ct entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(CTEntry ctEntry) {
-		dummyEntityCache.removeResult(CTEntryImpl.class, ctEntry);
-	}
-
-	@Override
-	public void clearCache(List<CTEntry> ctEntries) {
-		for (CTEntry ctEntry : ctEntries) {
-			dummyEntityCache.removeResult(CTEntryImpl.class, ctEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		dummyFinderCache.clearCache(CTEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			dummyEntityCache.removeResult(CTEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(CTEntryModelImpl ctEntryModelImpl) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					ctEntryModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				ctEntryModelImpl.getCompanyId(), ctEntryModelImpl.getName()
-			};
-
-			dummyFinderCache.putResult(
-				_finderPathFetchByC_N, args, ctEntryModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new ct entry with the primary key. Does not add the ct entry to the database.
 	 *
 	 * @param ctEntryId the primary key for the new ct entry
@@ -482,47 +348,6 @@ public class CTEntryPersistenceImpl
 	@Override
 	public CTEntry remove(long ctEntryId) throws NoSuchCTEntryException {
 		return remove((Serializable)ctEntryId);
-	}
-
-	/**
-	 * Removes the ct entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the ct entry
-	 * @return the ct entry that was removed
-	 * @throws NoSuchCTEntryException if a ct entry with the primary key could not be found
-	 */
-	@Override
-	public CTEntry remove(Serializable primaryKey)
-		throws NoSuchCTEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			CTEntry ctEntry = (CTEntry)session.get(
-				CTEntryImpl.class, primaryKey);
-
-			if (ctEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchCTEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(ctEntry);
-		}
-		catch (NoSuchCTEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -601,41 +426,13 @@ public class CTEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		dummyEntityCache.putResult(
-			CTEntryImpl.class, ctEntryModelImpl, false, true);
-
-		cacheUniqueFindersCache(ctEntryModelImpl);
+		cacheUniqueFindersResult(ctEntry, false);
 
 		if (isNew) {
 			ctEntry.setNew(false);
 		}
 
 		ctEntry.resetOriginalValues();
-
-		return ctEntry;
-	}
-
-	/**
-	 * Returns the ct entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the ct entry
-	 * @return the ct entry
-	 * @throws NoSuchCTEntryException if a ct entry with the primary key could not be found
-	 */
-	@Override
-	public CTEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchCTEntryException {
-
-		CTEntry ctEntry = fetchByPrimaryKey(primaryKey);
-
-		if (ctEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchCTEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return ctEntry;
 	}
@@ -654,49 +451,9 @@ public class CTEntryPersistenceImpl
 		return findByPrimaryKey((Serializable)ctEntryId);
 	}
 
-	/**
-	 * Returns the ct entry with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the ct entry
-	 * @return the ct entry, or <code>null</code> if a ct entry with the primary key could not be found
-	 */
 	@Override
-	public CTEntry fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(CTEntry.class, primaryKey)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		CTEntry ctEntry = (CTEntry)dummyEntityCache.getResult(
-			CTEntryImpl.class, primaryKey);
-
-		if (ctEntry != null) {
-			return ctEntry;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ctEntry = (CTEntry)session.get(CTEntryImpl.class, primaryKey);
-
-			if (ctEntry != null) {
-				cacheResult(ctEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return ctEntry;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -708,318 +465,6 @@ public class CTEntryPersistenceImpl
 	@Override
 	public CTEntry fetchByPrimaryKey(long ctEntryId) {
 		return fetchByPrimaryKey((Serializable)ctEntryId);
-	}
-
-	@Override
-	public Map<Serializable, CTEntry> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(CTEntry.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, CTEntry> map = new HashMap<Serializable, CTEntry>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			CTEntry ctEntry = fetchByPrimaryKey(primaryKey);
-
-			if (ctEntry != null) {
-				map.put(primaryKey, ctEntry);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						CTEntry.class, primaryKey)) {
-
-				CTEntry ctEntry = (CTEntry)dummyEntityCache.getResult(
-					CTEntryImpl.class, primaryKey);
-
-				if (ctEntry == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, ctEntry);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (CTEntry ctEntry : (List<CTEntry>)query.list()) {
-				map.put(ctEntry.getPrimaryKeyObj(), ctEntry);
-
-				cacheResult(ctEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the ct entries.
-	 *
-	 * @return the ct entries
-	 */
-	@Override
-	public List<CTEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the ct entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ct entries
-	 * @param end the upper bound of the range of ct entries (not inclusive)
-	 * @return the range of ct entries
-	 */
-	@Override
-	public List<CTEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the ct entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ct entries
-	 * @param end the upper bound of the range of ct entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ct entries
-	 */
-	@Override
-	public List<CTEntry> findAll(
-		int start, int end, OrderByComparator<CTEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the ct entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ct entries
-	 * @param end the upper bound of the range of ct entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ct entries
-	 */
-	@Override
-	public List<CTEntry> findAll(
-		int start, int end, OrderByComparator<CTEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTEntry.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<CTEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<CTEntry>)dummyFinderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_CTENTRY);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_CTENTRY;
-
-					sql = sql.concat(CTEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<CTEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						dummyFinderCache.putResult(
-							finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the ct entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (CTEntry ctEntry : findAll()) {
-			remove(ctEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of ct entries.
-	 *
-	 * @return the number of ct entries
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					CTEntry.class)) {
-
-			Long count = (Long)dummyFinderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(_SQL_COUNT_CTENTRY);
-
-					count = (Long)query.uniqueResult();
-
-					dummyFinderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1099,21 +544,6 @@ public class CTEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByCompanyId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByCompanyId",
 			new String[] {
@@ -1138,21 +568,22 @@ public class CTEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByCompanyId,
 				_finderPathCountByCompanyId, _SQL_SELECT_CTENTRY_WHERE,
 				_SQL_COUNT_CTENTRY_WHERE, CTEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"ctEntry.", "companyId", FinderColumn.Type.LONG, "=", true,
 					true, CTEntry::getCompanyId));
 
-		_finderPathFetchByC_N = new FinderPath(
+		_finderPathFetchByC_N = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_N",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"companyId", "name"}, true);
+			new String[] {"companyId", "name"}, 0, 2, false,
+			CTEntry::getCompanyId, convertNullFunction(CTEntry::getName));
 
 		_uniquePersistenceFinderByC_N = new UniquePersistenceFinder<>(
-			this, _finderPathFetchByC_N, _SQL_SELECT_CTENTRY_WHERE,
+			this, _finderPathFetchByC_N, _SQL_SELECT_CTENTRY_WHERE, "",
 			new FinderColumn<>(
 				"ctEntry.", "companyId", FinderColumn.Type.LONG, "=", true,
-				false, CTEntry::getCompanyId),
+				true, CTEntry::getCompanyId),
 			new FinderColumn<>(
 				"ctEntry.", "name", FinderColumn.Type.STRING, "=", true, true,
 				CTEntry::getName));
@@ -1196,22 +627,17 @@ public class CTEntryPersistenceImpl
 	@Reference
 	protected CTPersistenceHelper ctPersistenceHelper;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		CTEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_CTENTRY =
 		"SELECT ctEntry FROM CTEntry ctEntry";
 
 	private static final String _SQL_SELECT_CTENTRY_WHERE =
 		"SELECT ctEntry FROM CTEntry ctEntry WHERE ";
 
-	private static final String _SQL_COUNT_CTENTRY =
-		"SELECT COUNT(ctEntry) FROM CTEntry ctEntry";
-
 	private static final String _SQL_COUNT_CTENTRY_WHERE =
 		"SELECT COUNT(ctEntry) FROM CTEntry ctEntry WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "ctEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No CTEntry exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No CTEntry exists with the key {";
@@ -1225,4 +651,4 @@ public class CTEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:890294144
+// LIFERAY-SERVICE-BUILDER-HASH:-1769451214

@@ -33,6 +33,7 @@ export default function ({
 	consentRenewalPeriodTimeUnit = 'months',
 	dissentRenewalPeriod = consentRenewalPeriod,
 	dissentRenewalPeriodTimeUnit = consentRenewalPeriodTimeUnit,
+	globalPrivacyControlSignalActive = false,
 	includeDeclineAllButton,
 	modifiedDate = 0,
 	namespace,
@@ -56,26 +57,33 @@ export default function ({
 	const editMode = document.body.classList.contains('has-edit-mode-menu');
 
 	if (!editMode) {
-		isCookiesPreferenceHandlingConfigurationModified(modifiedDate).then(
-			(value) => {
-				if (value) {
-					removeAllCookies(
-						optionalConsentCookieTypeNames,
-						requiredConsentCookieTypeNames
-					);
+		if (!globalPrivacyControlSignalActive) {
+			isCookiesPreferenceHandlingConfigurationModified(modifiedDate).then(
+				(value) => {
+					if (value) {
+						removeAllCookies(
+							optionalConsentCookieTypeNames,
+							requiredConsentCookieTypeNames
+						);
+					}
 				}
-			}
-		);
+			);
 
-		if (Liferay.ThemeDisplay.isSignedIn() && hasGuestUserConfigCookie()) {
-			hasPreviouslyStoredConsent().then((hasPreviouslyStoredConsent) => {
-				if (hasPreviouslyStoredConsent) {
-					removeAllCookies(
-						optionalConsentCookieTypeNames,
-						requiredConsentCookieTypeNames
-					);
-				}
-			});
+			if (
+				Liferay.ThemeDisplay.isSignedIn() &&
+				hasGuestUserConfigCookie()
+			) {
+				hasPreviouslyStoredConsent().then(
+					(hasPreviouslyStoredConsent) => {
+						if (hasPreviouslyStoredConsent) {
+							removeAllCookies(
+								optionalConsentCookieTypeNames,
+								requiredConsentCookieTypeNames
+							);
+						}
+					}
+				);
+			}
 		}
 
 		const consentManager = document.getElementById(
@@ -86,6 +94,7 @@ export default function ({
 		);
 
 		if (
+			globalPrivacyControlSignalActive ||
 			consentManager ||
 			(productAnalyticsBanner &&
 				productAnalyticsBanner.style.display === 'block')

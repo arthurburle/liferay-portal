@@ -3,19 +3,29 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import ClayLayout from '@clayui/layout';
 import React from 'react';
 
-export default function DataSelectionStep() {
+import {FormikFieldContentSelector} from '../../../components/forms/formik';
+import {ImportPreview} from '../../../types/exportImportPreview';
+import FileSummary from './FileSummary';
+
+export default function DataSelectionStep({
+	importPreview,
+}: {
+	importPreview?: ImportPreview;
+}) {
+	if (!importPreview) {
+		return null;
+	}
+
 	return (
 		<>
-			<ClayLayout.Sheet>
-				{Liferay.Language.get('file-summary')}
-			</ClayLayout.Sheet>
+			<FileSummary importPreview={importPreview} />
 
-			<ClayLayout.Sheet>
-				{Liferay.Language.get('Portlets')}
-			</ClayLayout.Sheet>
+			<FormikFieldContentSelector
+				name="contentSelection"
+				sections={importPreview.portletDataHandlerSections}
+			/>
 		</>
 	);
 }

@@ -17,7 +17,9 @@ metadata:
     name: {{ include "liferay.name" .root }}{{ $suffix }}
     namespace: {{ include "liferay.namespace" .root }}
 spec:
+    {{- if not .statefulset.autoscaling.enabled }}
     replicas: {{ .statefulset.replicaCount }}
+    {{- end }}
     selector:
         matchLabels:
             app: {{ include "liferay.name" .root }}{{ $suffix }}
@@ -27,6 +29,7 @@ spec:
         metadata:
             annotations:
                 checksum/config: {{ include (print .root.Template.BasePath "/configmap.yaml") .root | sha256sum }}
+                checksum/init-scripts: {{ include (print .root.Template.BasePath "/liferay-init-scripts-cm.yaml") .root | sha256sum }}
                 {{- with .statefulset.annotations }}
                 {{- toYaml . | nindent 16 }}
                 {{- end }}
@@ -158,11 +161,6 @@ spec:
                 {{- with .statefulset.volumes }}
                 {{- toYaml . | nindent 16 }}
                 {{- end }}
-                {{- if and .statefulset.overlay .statefulset.overlay.enabled }}
-                -   name: {{ .statefulset.overlay.bucketName }}
-                    persistentVolumeClaim:
-                        claimName: {{ .statefulset.overlay.bucketName }}
-                {{- end }}
                 {{- range $k, $v := .statefulset.customVolumes }}
                 {{- toYaml $v | nindent 16 }}
                 {{- end }}
@@ -181,6 +179,7 @@ spec:
         {{- end }}
     {{- end }}
 {{- if and .statefulset.network .statefulset.network.enabled }}
+{{- $perHost := and .statefulset.network.perHostnameRoutes (gt (len .statefulset.network.hostnames) 0) }}
 ---
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
@@ -199,10 +198,86 @@ spec:
             type: Cookie
         type: ConsistentHash
     targetRefs:
+        {{- if $perHost }}
+        {{- range $hostname := .statefulset.network.hostnames }}
+        {{- $slug := include "liferay.hostnameSlug" $hostname }}
+        -   group: gateway.networking.k8s.io
+            kind: HTTPRoute
+            name: {{ include "liferay.name" $.root }}-httproute-{{ $slug }}
+        {{- end }}
+        {{- else }}
         -   group: gateway.networking.k8s.io
             kind: HTTPRoute
             name: {{ include "liferay.name" .root }}-httproute
+        {{- end }}
+{{- with .statefulset.network.securityPolicyAuthorizationSpec }}
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+    labels:
+        app: {{ include "liferay.name" $.root }}{{ $suffix }}
+        {{- include "liferay.labels" $.root | nindent 8 }}
+    name: {{ include "liferay.name" $.root }}-securitypolicy
+    namespace: {{ include "liferay.namespace" $.root }}
+spec:
+    authorization:
+        {{- toYaml . | nindent 8 }}
+    targetRefs:
+        {{- if $perHost }}
+        {{- range $hostname := $.statefulset.network.hostnames }}
+        {{- $slug := include "liferay.hostnameSlug" $hostname }}
+        -   group: gateway.networking.k8s.io
+            kind: HTTPRoute
+            name: {{ include "liferay.name" $.root }}-httproute-{{ $slug }}
+        {{- end }}
+        {{- else }}
+        -   group: gateway.networking.k8s.io
+            kind: HTTPRoute
+            name: {{ include "liferay.name" $.root }}-httproute
+        {{- end }}
+{{- end }}
 {{- if .statefulset.network.gatewayName }}
+{{- if $perHost }}
+{{- $ctx := . }}
+{{- range $hostname := .statefulset.network.hostnames }}
+{{- $slug := include "liferay.hostnameSlug" $hostname }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+    {{- with $ctx.statefulset.network.annotations }}
+    annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    labels:
+        app: {{ include "liferay.name" $ctx.root }}{{ $suffix }}
+        {{- include "liferay.labels" $ctx.root | nindent 8 }}
+    name: {{ include "liferay.name" $ctx.root }}-httproute-{{ $slug }}
+    namespace: {{ include "liferay.namespace" $ctx.root }}
+spec:
+    hostnames:
+        -   {{ $hostname | quote }}
+    parentRefs:
+        -   group: gateway.networking.k8s.io
+            kind: Gateway
+            name: {{ $ctx.statefulset.network.gatewayName }}
+            sectionName: {{ printf "%s-%s" $ctx.statefulset.network.endpointRef $slug }}
+    rules:
+        -   backendRefs:
+                -   name: {{ include "liferay.name" $ctx.root }}{{ $suffix }}
+                    port: {{ $backendPort }}
+            matches:
+                -   path:
+                        type: PathPrefix
+                        value: /
+            {{- with $ctx.statefulset.network.timeouts }}
+            timeouts:
+                backendRequest: {{ .backendRequest }}
+                request: {{ .request }}
+            {{- end }}
+{{- end }}
+{{- else }}
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -245,6 +320,7 @@ spec:
         {{- with .statefulset.network.extraRules }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+{{- end }}
 {{- if and .statefulset.network.forceHttpsRedirect (ne .statefulset.network.endpointRef "http") }}
 ---
 apiVersion: gateway.networking.k8s.io/v1
@@ -339,6 +415,36 @@ metadata:
     name: {{ include "liferay.name" .root }}{{ $suffix }}
     namespace: {{ include "liferay.namespace" .root }}
 spec:
+    egress:
+        -   ports:
+                -   port: 53
+                    protocol: UDP
+                -   port: 53
+                    protocol: TCP
+            to:
+                -   namespaceSelector:
+                        matchLabels:
+                            kubernetes.io/metadata.name: kube-system
+                    podSelector:
+                        matchLabels:
+                            k8s-app: kube-dns
+        -   to:
+                -   podSelector:
+                        matchLabels:
+                            {{- include "liferay.selectorLabels" .root | nindent 28 }}
+        {{- if .statefulset.networkPolicy.cluster.kubernetesEndpointCidrs }}
+        {{- range (splitList "," .statefulset.networkPolicy.cluster.kubernetesEndpointCidrs) }}
+        -   ports:
+                -   port: 443
+                    protocol: TCP
+            to:
+                -   ipBlock:
+                        cidr: {{ . | trim }}
+        {{- end }}
+        {{- end }}
+        {{- with .statefulset.networkPolicy.extraEgress }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     ingress:
         {{- if and .statefulset.network .statefulset.network.enabled .statefulset.networkPolicy.allowGatewayIngress }}
         -   from:
@@ -371,6 +477,7 @@ spec:
             app: {{ include "liferay.name" .root }}{{ $suffix }}
             {{- include "liferay.selectorLabels" .root | nindent 12 }}
     policyTypes:
+        -   Egress
         -   Ingress
 {{- end }}
 {{- end -}}

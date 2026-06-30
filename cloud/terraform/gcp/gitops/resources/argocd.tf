@@ -218,6 +218,10 @@ resource "kubernetes_manifest" "infrastructure_provider_application" {
 						helm={
 							parameters=[
 								{
+									name="crossplaneGsaEmail"
+									value=google_service_account.cloudplatform_gsa.email
+								},
+								{
 									name="crossplaneNamespace"
 									value=var.crossplane_namespace
 								},
@@ -240,6 +244,10 @@ resource "kubernetes_manifest" "infrastructure_provider_application" {
 								{
 									name="global.gcp.projectNumber"
 									value=data.google_project.project.number
+								},
+								{
+									name="global.gcp.vpcName"
+									value=local.vpc_name
 								},
 							]
 							valueFiles=[

@@ -498,20 +498,6 @@ public interface JournalFeedPersistence
 	public int countByG_F(long groupId, String feedId);
 
 	/**
-	 * Caches the journal feed in the entity cache if it is enabled.
-	 *
-	 * @param journalFeed the journal feed
-	 */
-	public void cacheResult(JournalFeed journalFeed);
-
-	/**
-	 * Caches the journal feeds in the entity cache if it is enabled.
-	 *
-	 * @param journalFeeds the journal feeds
-	 */
-	public void cacheResult(java.util.List<JournalFeed> journalFeeds);
-
-	/**
 	 * Creates a new journal feed with the primary key. Does not add the journal feed to the database.
 	 *
 	 * @param id the primary key for the new journal feed
@@ -547,73 +533,5 @@ public interface JournalFeedPersistence
 	 */
 	public JournalFeed fetchByPrimaryKey(long id);
 
-	/**
-	 * Returns all the journal feeds.
-	 *
-	 * @return the journal feeds
-	 */
-	public java.util.List<JournalFeed> findAll();
-
-	/**
-	 * Returns a range of all the journal feeds.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.journal.model.impl.JournalFeedModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of journal feeds
-	 * @param end the upper bound of the range of journal feeds (not inclusive)
-	 * @return the range of journal feeds
-	 */
-	public java.util.List<JournalFeed> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the journal feeds.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.journal.model.impl.JournalFeedModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of journal feeds
-	 * @param end the upper bound of the range of journal feeds (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of journal feeds
-	 */
-	public java.util.List<JournalFeed> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<JournalFeed>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the journal feeds.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.journal.model.impl.JournalFeedModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of journal feeds
-	 * @param end the upper bound of the range of journal feeds (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of journal feeds
-	 */
-	public java.util.List<JournalFeed> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<JournalFeed>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the journal feeds from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of journal feeds.
-	 *
-	 * @return the number of journal feeds
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1990372623
+// LIFERAY-SERVICE-BUILDER-HASH:1533605859

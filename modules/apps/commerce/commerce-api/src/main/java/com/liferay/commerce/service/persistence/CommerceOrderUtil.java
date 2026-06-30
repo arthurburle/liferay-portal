@@ -37,6 +37,20 @@ public class CommerceOrderUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<CommerceOrder> commerceOrders) {
+		getPersistence().cacheResult(commerceOrders);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(CommerceOrder commerceOrder) {
+		getPersistence().cacheResult(commerceOrder);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -2326,24 +2340,6 @@ public class CommerceOrderUtil {
 	}
 
 	/**
-	 * Caches the commerce order in the entity cache if it is enabled.
-	 *
-	 * @param commerceOrder the commerce order
-	 */
-	public static void cacheResult(CommerceOrder commerceOrder) {
-		getPersistence().cacheResult(commerceOrder);
-	}
-
-	/**
-	 * Caches the commerce orders in the entity cache if it is enabled.
-	 *
-	 * @param commerceOrders the commerce orders
-	 */
-	public static void cacheResult(List<CommerceOrder> commerceOrders) {
-		getPersistence().cacheResult(commerceOrders);
-	}
-
-	/**
 	 * Creates a new commerce order with the primary key. Does not add the commerce order to the database.
 	 *
 	 * @param commerceOrderId the primary key for the new commerce order
@@ -2393,86 +2389,6 @@ public class CommerceOrderUtil {
 		return getPersistence().fetchByPrimaryKey(commerceOrderId);
 	}
 
-	/**
-	 * Returns all the commerce orders.
-	 *
-	 * @return the commerce orders
-	 */
-	public static List<CommerceOrder> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce orders.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce orders
-	 * @param end the upper bound of the range of commerce orders (not inclusive)
-	 * @return the range of commerce orders
-	 */
-	public static List<CommerceOrder> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce orders.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce orders
-	 * @param end the upper bound of the range of commerce orders (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce orders
-	 */
-	public static List<CommerceOrder> findAll(
-		int start, int end,
-		OrderByComparator<CommerceOrder> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce orders.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceOrderModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce orders
-	 * @param end the upper bound of the range of commerce orders (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce orders
-	 */
-	public static List<CommerceOrder> findAll(
-		int start, int end, OrderByComparator<CommerceOrder> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce orders from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce orders.
-	 *
-	 * @return the number of commerce orders
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceOrderPersistence getPersistence() {
 		return _persistence;
 	}
@@ -2484,4 +2400,4 @@ public class CommerceOrderUtil {
 	private static volatile CommerceOrderPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-98272307
+// LIFERAY-SERVICE-BUILDER-HASH:1493772136

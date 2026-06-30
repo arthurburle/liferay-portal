@@ -1,8 +1,16 @@
-import React, {createContext, ReactNode, useContext, useState} from 'react';
+import React, {
+	createContext,
+	ReactNode,
+	useCallback,
+	useContext,
+	useMemo,
+	useState
+} from 'react';
 import {
 	buildQueryString,
 	ILifecycleFilterValues
 } from '../utils/buildQueryString';
+import {LifecycleStages} from 'contacts/pages/account/utils/constants';
 
 interface ILifecycleFilters extends ILifecycleFilterValues {
 	filterString: string;
@@ -18,7 +26,8 @@ const LifecycleContext = createContext<ILifecycleContext>({
 	filters: {
 		countryFilter: '',
 		filterString: '',
-		industryFilter: ''
+		industryFilter: '',
+		lifecycleStageFilter: LifecycleStages.AT_RISK
 	},
 	resetFilters: () => {},
 	updateFilters: () => {}
@@ -27,30 +36,39 @@ const LifecycleContext = createContext<ILifecycleContext>({
 export const useLifecycle = (): ILifecycleContext =>
 	useContext(LifecycleContext);
 
+const initialValues: ILifecycleFilterValues = {
+	countryFilter: '',
+	industryFilter: '',
+	lifecycleStageFilter: LifecycleStages.AT_RISK
+};
+
 export const LifecycleContextProvider = ({children}: {children: ReactNode}) => {
-	const initialValues: ILifecycleFilterValues = {
-		countryFilter: '',
-		industryFilter: ''
-	};
+	const [filterValues, setFilterValues] =
+		useState<ILifecycleFilterValues>(initialValues);
 
-	const [filters, setFilters] = useState<ILifecycleFilters>({
-		...initialValues,
-		filterString: ''
-	});
+	const filters = useMemo<ILifecycleFilters>(
+		() => ({
+			...filterValues,
+			filterString: buildQueryString(filterValues)
+		}),
+		[filterValues]
+	);
 
-	const updateFilters = (newValues: Partial<ILifecycleFilterValues>) => {
-		setFilters(prev => {
-			const merged = {...prev, ...newValues};
-			return {...merged, filterString: buildQueryString(merged)};
-		});
-	};
+	const updateFilters = useCallback(
+		(newValues: Partial<ILifecycleFilterValues>) =>
+			setFilterValues(prev => ({...prev, ...newValues})),
+		[]
+	);
 
-	const resetFilters = () => setFilters({...initialValues, filterString: ''});
+	const resetFilters = useCallback(() => setFilterValues(initialValues), []);
+
+	const value = useMemo(
+		() => ({filters, resetFilters, updateFilters}),
+		[filters, resetFilters, updateFilters]
+	);
 
 	return (
-		<LifecycleContext.Provider
-			value={{filters, resetFilters, updateFilters}}
-		>
+		<LifecycleContext.Provider value={value}>
 			{children}
 		</LifecycleContext.Provider>
 	);

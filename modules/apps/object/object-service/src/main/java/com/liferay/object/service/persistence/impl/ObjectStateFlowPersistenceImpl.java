@@ -13,12 +13,10 @@ import com.liferay.object.model.impl.ObjectStateFlowModelImpl;
 import com.liferay.object.service.persistence.ObjectStateFlowPersistence;
 import com.liferay.object.service.persistence.ObjectStateFlowUtil;
 import com.liferay.object.service.persistence.impl.constants.ObjectPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -31,10 +29,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -69,7 +64,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ObjectStateFlowPersistence.class)
 public class ObjectStateFlowPersistenceImpl
-	extends BasePersistenceImpl<ObjectStateFlow>
+	extends BasePersistenceImpl<ObjectStateFlow, NoSuchObjectStateFlowException>
 	implements ObjectStateFlowPersistence {
 
 	/*
@@ -86,9 +81,6 @@ public class ObjectStateFlowPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -490,103 +482,6 @@ public class ObjectStateFlowPersistenceImpl
 	}
 
 	/**
-	 * Caches the object state flow in the entity cache if it is enabled.
-	 *
-	 * @param objectStateFlow the object state flow
-	 */
-	@Override
-	public void cacheResult(ObjectStateFlow objectStateFlow) {
-		entityCache.putResult(
-			ObjectStateFlowImpl.class, objectStateFlow.getPrimaryKey(),
-			objectStateFlow);
-
-		finderCache.putResult(
-			_finderPathFetchByObjectFieldId,
-			new Object[] {objectStateFlow.getObjectFieldId()}, objectStateFlow);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the object state flows in the entity cache if it is enabled.
-	 *
-	 * @param objectStateFlows the object state flows
-	 */
-	@Override
-	public void cacheResult(List<ObjectStateFlow> objectStateFlows) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (objectStateFlows.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ObjectStateFlow objectStateFlow : objectStateFlows) {
-			if (entityCache.getResult(
-					ObjectStateFlowImpl.class,
-					objectStateFlow.getPrimaryKey()) == null) {
-
-				cacheResult(objectStateFlow);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all object state flows.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ObjectStateFlowImpl.class);
-
-		finderCache.clearCache(ObjectStateFlowImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the object state flow.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ObjectStateFlow objectStateFlow) {
-		entityCache.removeResult(ObjectStateFlowImpl.class, objectStateFlow);
-	}
-
-	@Override
-	public void clearCache(List<ObjectStateFlow> objectStateFlows) {
-		for (ObjectStateFlow objectStateFlow : objectStateFlows) {
-			entityCache.removeResult(
-				ObjectStateFlowImpl.class, objectStateFlow);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ObjectStateFlowImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(ObjectStateFlowImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		ObjectStateFlowModelImpl objectStateFlowModelImpl) {
-
-		Object[] args = new Object[] {
-			objectStateFlowModelImpl.getObjectFieldId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByObjectFieldId, args, objectStateFlowModelImpl);
-	}
-
-	/**
 	 * Creates a new object state flow with the primary key. Does not add the object state flow to the database.
 	 *
 	 * @param objectStateFlowId the primary key for the new object state flow
@@ -620,47 +515,6 @@ public class ObjectStateFlowPersistenceImpl
 		throws NoSuchObjectStateFlowException {
 
 		return remove((Serializable)objectStateFlowId);
-	}
-
-	/**
-	 * Removes the object state flow with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the object state flow
-	 * @return the object state flow that was removed
-	 * @throws NoSuchObjectStateFlowException if a object state flow with the primary key could not be found
-	 */
-	@Override
-	public ObjectStateFlow remove(Serializable primaryKey)
-		throws NoSuchObjectStateFlowException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ObjectStateFlow objectStateFlow = (ObjectStateFlow)session.get(
-				ObjectStateFlowImpl.class, primaryKey);
-
-			if (objectStateFlow == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchObjectStateFlowException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(objectStateFlow);
-		}
-		catch (NoSuchObjectStateFlowException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -769,41 +623,13 @@ public class ObjectStateFlowPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ObjectStateFlowImpl.class, objectStateFlowModelImpl, false, true);
-
-		cacheUniqueFindersCache(objectStateFlowModelImpl);
+		cacheUniqueFindersResult(objectStateFlow, false);
 
 		if (isNew) {
 			objectStateFlow.setNew(false);
 		}
 
 		objectStateFlow.resetOriginalValues();
-
-		return objectStateFlow;
-	}
-
-	/**
-	 * Returns the object state flow with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the object state flow
-	 * @return the object state flow
-	 * @throws NoSuchObjectStateFlowException if a object state flow with the primary key could not be found
-	 */
-	@Override
-	public ObjectStateFlow findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchObjectStateFlowException {
-
-		ObjectStateFlow objectStateFlow = fetchByPrimaryKey(primaryKey);
-
-		if (objectStateFlow == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchObjectStateFlowException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return objectStateFlow;
 	}
@@ -831,187 +657,6 @@ public class ObjectStateFlowPersistenceImpl
 	@Override
 	public ObjectStateFlow fetchByPrimaryKey(long objectStateFlowId) {
 		return fetchByPrimaryKey((Serializable)objectStateFlowId);
-	}
-
-	/**
-	 * Returns all the object state flows.
-	 *
-	 * @return the object state flows
-	 */
-	@Override
-	public List<ObjectStateFlow> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the object state flows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectStateFlowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state flows
-	 * @param end the upper bound of the range of object state flows (not inclusive)
-	 * @return the range of object state flows
-	 */
-	@Override
-	public List<ObjectStateFlow> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the object state flows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectStateFlowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state flows
-	 * @param end the upper bound of the range of object state flows (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object state flows
-	 */
-	@Override
-	public List<ObjectStateFlow> findAll(
-		int start, int end,
-		OrderByComparator<ObjectStateFlow> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the object state flows.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectStateFlowModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object state flows
-	 * @param end the upper bound of the range of object state flows (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object state flows
-	 */
-	@Override
-	public List<ObjectStateFlow> findAll(
-		int start, int end,
-		OrderByComparator<ObjectStateFlow> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ObjectStateFlow> list = null;
-
-		if (useFinderCache) {
-			list = (List<ObjectStateFlow>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_OBJECTSTATEFLOW);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_OBJECTSTATEFLOW;
-
-				sql = sql.concat(ObjectStateFlowModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ObjectStateFlow>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the object state flows from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ObjectStateFlow objectStateFlow : findAll()) {
-			remove(objectStateFlow);
-		}
-	}
-
-	/**
-	 * Returns the number of object state flows.
-	 *
-	 * @return the number of object state flows
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_OBJECTSTATEFLOW);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -1044,21 +689,6 @@ public class ObjectStateFlowPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1069,19 +699,19 @@ public class ObjectStateFlowPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_OBJECTSTATEFLOW_WHERE, _SQL_COUNT_OBJECTSTATEFLOW_WHERE,
-			ObjectStateFlowModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectStateFlowModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"objectStateFlow.", "uuid", FinderColumn.Type.STRING, "=", true,
 				true, ObjectStateFlow::getUuid));
@@ -1098,12 +728,12 @@ public class ObjectStateFlowPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -1111,22 +741,23 @@ public class ObjectStateFlowPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_OBJECTSTATEFLOW_WHERE,
 				_SQL_COUNT_OBJECTSTATEFLOW_WHERE,
-				ObjectStateFlowModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+				ObjectStateFlowModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"objectStateFlow.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, ObjectStateFlow::getUuid),
+					true, true, ObjectStateFlow::getUuid),
 				new FinderColumn<>(
 					"objectStateFlow.", "companyId", FinderColumn.Type.LONG,
 					"=", true, true, ObjectStateFlow::getCompanyId));
 
-		_finderPathFetchByObjectFieldId = new FinderPath(
+		_finderPathFetchByObjectFieldId = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByObjectFieldId",
 			new String[] {Long.class.getName()}, new String[] {"objectFieldId"},
-			true);
+			0, 0, false, ObjectStateFlow::getObjectFieldId);
 
 		_uniquePersistenceFinderByObjectFieldId = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByObjectFieldId,
-			_SQL_SELECT_OBJECTSTATEFLOW_WHERE,
+			_SQL_SELECT_OBJECTSTATEFLOW_WHERE, "",
 			new FinderColumn<>(
 				"objectStateFlow.", "objectFieldId", FinderColumn.Type.LONG,
 				"=", true, true, ObjectStateFlow::getObjectFieldId));
@@ -1173,22 +804,17 @@ public class ObjectStateFlowPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ObjectStateFlowModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_OBJECTSTATEFLOW =
 		"SELECT objectStateFlow FROM ObjectStateFlow objectStateFlow";
 
 	private static final String _SQL_SELECT_OBJECTSTATEFLOW_WHERE =
 		"SELECT objectStateFlow FROM ObjectStateFlow objectStateFlow WHERE ";
 
-	private static final String _SQL_COUNT_OBJECTSTATEFLOW =
-		"SELECT COUNT(objectStateFlow) FROM ObjectStateFlow objectStateFlow";
-
 	private static final String _SQL_COUNT_OBJECTSTATEFLOW_WHERE =
 		"SELECT COUNT(objectStateFlow) FROM ObjectStateFlow objectStateFlow WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "objectStateFlow.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ObjectStateFlow exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ObjectStateFlow exists with the key {";
@@ -1205,4 +831,4 @@ public class ObjectStateFlowPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-709500989
+// LIFERAY-SERVICE-BUILDER-HASH:1802950992

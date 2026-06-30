@@ -36,6 +36,26 @@ public class CommercePriceListCommerceAccountGroupRelUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CommercePriceListCommerceAccountGroupRel>
+			commercePriceListCommerceAccountGroupRels) {
+
+		getPersistence().cacheResult(commercePriceListCommerceAccountGroupRels);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		CommercePriceListCommerceAccountGroupRel
+			commercePriceListCommerceAccountGroupRel) {
+
+		getPersistence().cacheResult(commercePriceListCommerceAccountGroupRel);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -601,30 +621,6 @@ public class CommercePriceListCommerceAccountGroupRelUtil {
 	}
 
 	/**
-	 * Caches the commerce price list commerce account group rel in the entity cache if it is enabled.
-	 *
-	 * @param commercePriceListCommerceAccountGroupRel the commerce price list commerce account group rel
-	 */
-	public static void cacheResult(
-		CommercePriceListCommerceAccountGroupRel
-			commercePriceListCommerceAccountGroupRel) {
-
-		getPersistence().cacheResult(commercePriceListCommerceAccountGroupRel);
-	}
-
-	/**
-	 * Caches the commerce price list commerce account group rels in the entity cache if it is enabled.
-	 *
-	 * @param commercePriceListCommerceAccountGroupRels the commerce price list commerce account group rels
-	 */
-	public static void cacheResult(
-		List<CommercePriceListCommerceAccountGroupRel>
-			commercePriceListCommerceAccountGroupRels) {
-
-		getPersistence().cacheResult(commercePriceListCommerceAccountGroupRels);
-	}
-
-	/**
 	 * Creates a new commerce price list commerce account group rel with the primary key. Does not add the commerce price list commerce account group rel to the database.
 	 *
 	 * @param commercePriceListCommerceAccountGroupRelId the primary key for the new commerce price list commerce account group rel
@@ -690,91 +686,6 @@ public class CommercePriceListCommerceAccountGroupRelUtil {
 			commercePriceListCommerceAccountGroupRelId);
 	}
 
-	/**
-	 * Returns all the commerce price list commerce account group rels.
-	 *
-	 * @return the commerce price list commerce account group rels
-	 */
-	public static List<CommercePriceListCommerceAccountGroupRel> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce price list commerce account group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.price.list.model.impl.CommercePriceListCommerceAccountGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce price list commerce account group rels
-	 * @param end the upper bound of the range of commerce price list commerce account group rels (not inclusive)
-	 * @return the range of commerce price list commerce account group rels
-	 */
-	public static List<CommercePriceListCommerceAccountGroupRel> findAll(
-		int start, int end) {
-
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce price list commerce account group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.price.list.model.impl.CommercePriceListCommerceAccountGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce price list commerce account group rels
-	 * @param end the upper bound of the range of commerce price list commerce account group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce price list commerce account group rels
-	 */
-	public static List<CommercePriceListCommerceAccountGroupRel> findAll(
-		int start, int end,
-		OrderByComparator<CommercePriceListCommerceAccountGroupRel>
-			orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce price list commerce account group rels.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.price.list.model.impl.CommercePriceListCommerceAccountGroupRelModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce price list commerce account group rels
-	 * @param end the upper bound of the range of commerce price list commerce account group rels (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce price list commerce account group rels
-	 */
-	public static List<CommercePriceListCommerceAccountGroupRel> findAll(
-		int start, int end,
-		OrderByComparator<CommercePriceListCommerceAccountGroupRel>
-			orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce price list commerce account group rels from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce price list commerce account group rels.
-	 *
-	 * @return the number of commerce price list commerce account group rels
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommercePriceListCommerceAccountGroupRelPersistence
 		getPersistence() {
 
@@ -791,4 +702,4 @@ public class CommercePriceListCommerceAccountGroupRelUtil {
 		_persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-493685779
+// LIFERAY-SERVICE-BUILDER-HASH:1412514319

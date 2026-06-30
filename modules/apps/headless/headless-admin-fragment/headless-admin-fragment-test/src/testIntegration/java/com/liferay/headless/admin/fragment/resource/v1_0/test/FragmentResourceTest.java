@@ -6,19 +6,26 @@
 package com.liferay.headless.admin.fragment.resource.v1_0.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.exportimport.test.util.LazyReferencingTestUtil;
 import com.liferay.fragment.model.FragmentCollection;
 import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.model.FragmentEntryVersion;
 import com.liferay.fragment.service.FragmentCollectionLocalService;
 import com.liferay.fragment.service.FragmentEntryLocalService;
+import com.liferay.headless.admin.fragment.client.dto.v1_0.Creator;
 import com.liferay.headless.admin.fragment.client.dto.v1_0.Fragment;
+import com.liferay.headless.admin.fragment.client.dto.v1_0.FragmentSet;
 import com.liferay.headless.admin.fragment.client.dto.v1_0.FragmentVersion;
 import com.liferay.headless.admin.fragment.client.pagination.Page;
 import com.liferay.headless.admin.fragment.client.pagination.Pagination;
 import com.liferay.headless.admin.fragment.client.problem.Problem;
+import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.petra.function.UnsafeRunnable;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -65,7 +72,7 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 	public void testDeleteSiteFragment() throws Exception {
 		super.testDeleteSiteFragment();
 
-		Fragment postFragment = _postFragment(randomFragment());
+		Fragment postFragment = _postSiteFragmentSetFragment(randomFragment());
 
 		FragmentEntry fragmentEntry =
 			_fragmentEntryLocalService.getFragmentEntryByExternalReferenceCode(
@@ -101,10 +108,12 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 	public void testGetSiteFragmentSetFragmentsPage() throws Exception {
 		super.testGetSiteFragmentSetFragmentsPage();
 
-		Fragment approvedAndDraftFragment = _postFragment(
+		Fragment approvedAndDraftFragment = _postSiteFragmentSetFragment(
 			_randomFragment(true, true));
-		Fragment approvedFragment = _postFragment(_randomFragment(true, false));
-		Fragment draftFragment = _postFragment(_randomFragment(false, true));
+		Fragment approvedFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, false));
+		Fragment draftFragment = _postSiteFragmentSetFragment(
+			_randomFragment(false, true));
 
 		Page<Fragment> page = fragmentResource.getSiteFragmentSetFragmentsPage(
 			testGroup.getExternalReferenceCode(),
@@ -120,43 +129,73 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 
 	@Override
 	@Test
+	public void testPostSiteFragment() throws Exception {
+		super.testPostSiteFragment();
+
+		_testPostSiteFragmentApproved();
+		_testPostSiteFragmentApprovedAndDraft();
+		_testPostSiteFragmentDraft();
+		_testPostSiteFragmentDuplicateKeyProblemException();
+		_testPostSiteFragmentEmpty();
+		_testPostSiteFragmentFragmentSetExisting();
+		_testPostSiteFragmentFragmentSetExternalReferenceCodeNullProblemException();
+		_testPostSiteFragmentFragmentSetNonexisting();
+		_testPostSiteFragmentFragmentSetNonexistingProblemException();
+		_testPostSiteFragmentFragmentSetNullProblemException();
+	}
+
+	@Override
+	@Test
 	public void testPostSiteFragmentSetFragment() throws Exception {
 		super.testPostSiteFragmentSetFragment();
 
-		_assertPostSiteFragmentSetFragmentDuplicateKeyProblemException();
 		_testPostSiteFragmentSetFragmentApproved();
 		_testPostSiteFragmentSetFragmentApprovedAndDraft();
 		_testPostSiteFragmentSetFragmentDraft();
+		_testPostSiteFragmentSetFragmentDuplicateKeyProblemException();
 		_testPostSiteFragmentSetFragmentEmpty();
+		_testPostSiteFragmentSetFragmentFragmentSetExisting();
+		_testPostSiteFragmentSetFragmentFragmentSetExternalReferenceCodeNull();
+		_testPostSiteFragmentSetFragmentFragmentSetInPathNonexistingProblemException();
+		_testPostSiteFragmentSetFragmentFragmentSetNonexisting();
+		_testPostSiteFragmentSetFragmentFragmentSetNull();
 	}
 
 	@Override
 	@Test
 	public void testPutSiteFragment() throws Exception {
-		_assertPutSiteFragmentCreateMissingFragmentSetExternalReferenceCodeProblemException();
-		_assertPutSiteFragmentUpdateApprovedAndDraftToEmptyProblemException();
-		_assertPutSiteFragmentUpdateApprovedAndDraftToDraftProblemException();
-		_assertPutSiteFragmentUpdateApprovedToDraftProblemException();
-		_assertPutSiteFragmentUpdateDraftToEmptyProblemException();
 		_testPutSiteFragmentCreateApproved();
 		_testPutSiteFragmentCreateApprovedAndDraft();
 		_testPutSiteFragmentCreateDraft();
 		_testPutSiteFragmentCreateEmpty();
+		_testPutSiteFragmentCreateFragmentSetExisting();
+		_testPutSiteFragmentCreateFragmentSetExternalReferenceCodeNullProblemException();
+		_testPutSiteFragmentCreateFragmentSetNonexisting();
+		_testPutSiteFragmentCreateFragmentSetNonexistingProblemException();
+		_testPutSiteFragmentCreateFragmentSetNullProblemException();
 		_testPutSiteFragmentUpdateApprovedAddDraft();
 		_testPutSiteFragmentUpdateApprovedAddDraftModifyApproved();
+		_testPutSiteFragmentUpdateApprovedAndDraftToDraftProblemException();
+		_testPutSiteFragmentUpdateApprovedAndDraftToEmptyProblemException();
 		_testPutSiteFragmentUpdateApprovedModifyApproved();
 		_testPutSiteFragmentUpdateApprovedModifyApprovedAndDraft();
+		_testPutSiteFragmentUpdateApprovedToDraftProblemException();
 		_testPutSiteFragmentUpdateApprovedToEmpty();
 		_testPutSiteFragmentUpdateDraft();
 		_testPutSiteFragmentUpdateDraftToApproved();
+		_testPutSiteFragmentUpdateDraftToEmptyProblemException();
+		_testPutSiteFragmentUpdateFragmentSetExisting();
+		_testPutSiteFragmentUpdateFragmentSetExternalReferenceCodeNull();
+		_testPutSiteFragmentUpdateFragmentSetNonexisting();
+		_testPutSiteFragmentUpdateFragmentSetNonexistingProblemException();
+		_testPutSiteFragmentUpdateFragmentSetNull();
 	}
 
 	@Override
 	protected String[] getAdditionalAssertFieldNames() {
 		return new String[] {
-			"cacheable", "externalReferenceCode",
-			"fragmentSetExternalReferenceCode", "fragmentVersions", "key",
-			"marketplace", "name", "readOnly"
+			"cacheable", "externalReferenceCode", "fragmentSet",
+			"fragmentVersions", "key", "marketplace", "name", "readOnly"
 		};
 	}
 
@@ -164,8 +203,7 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 	protected Fragment randomFragment() throws Exception {
 		Fragment fragment = super.randomFragment();
 
-		fragment.setFragmentSetExternalReferenceCode(
-			_fragmentCollection.getExternalReferenceCode());
+		fragment.setFragmentSet(_toFragmentSet(_fragmentCollection));
 		fragment.setFragmentVersions(
 			new FragmentVersion[] {
 				new FragmentVersion() {
@@ -193,12 +231,12 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 
 	@Override
 	protected Fragment testDeleteSiteFragment_addFragment() throws Exception {
-		return _postFragment(randomFragment());
+		return _postSiteFragmentSetFragment(randomFragment());
 	}
 
 	@Override
 	protected Fragment testGetSiteFragment_addFragment() throws Exception {
-		return _postFragment(randomFragment());
+		return _postSiteFragmentSetFragment(randomFragment());
 	}
 
 	@Override
@@ -207,7 +245,7 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 			String fragmentSetExternalReferenceCode, Fragment fragment)
 		throws Exception {
 
-		return _postFragment(fragment);
+		return _postSiteFragmentSetFragment(fragment);
 	}
 
 	@Override
@@ -219,16 +257,24 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 	}
 
 	@Override
+	protected Fragment testPostSiteFragment_addFragment(Fragment fragment)
+		throws Exception {
+
+		return fragmentResource.postSiteFragment(
+			testGroup.getExternalReferenceCode(), fragment);
+	}
+
+	@Override
 	protected Fragment testPostSiteFragmentSetFragment_addFragment(
 			Fragment fragment)
 		throws Exception {
 
-		return _postFragment(fragment);
+		return _postSiteFragmentSetFragment(fragment);
 	}
 
 	@Override
 	protected Fragment testPutSiteFragment_addFragment() throws Exception {
-		return _postFragment(randomFragment());
+		return _postSiteFragmentSetFragment(randomFragment());
 	}
 
 	private FragmentCollection _addFragmentCollection() throws Exception {
@@ -241,18 +287,30 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 			serviceContext);
 	}
 
-	private void _assertPostSiteFragmentSetFragmentDuplicateKeyProblemException()
-		throws Exception {
+	private void _assertFragmentSet(
+		FragmentCollection expectedFragmentCollection,
+		FragmentSet fragmentSet) {
 
-		Fragment postFragment = _postFragment(randomFragment());
+		Assert.assertEquals(
+			expectedFragmentCollection.getExternalReferenceCode(),
+			fragmentSet.getExternalReferenceCode());
+		Assert.assertEquals(
+			expectedFragmentCollection.getName(), fragmentSet.getName());
+		Assert.assertEquals(
+			expectedFragmentCollection.getDescription(),
+			fragmentSet.getDescription());
+	}
 
-		Fragment duplicateFragment = randomFragment();
+	private void _assertFragmentSet(
+		FragmentSet expectedFragmentSet, FragmentSet fragmentSet) {
 
-		duplicateFragment.setKey(postFragment.getKey());
-
-		_assertProblemException(
-			"CONFLICT", "a-fragment-entry-with-the-key-x-already-exists",
-			() -> _postFragment(duplicateFragment), postFragment.getKey());
+		Assert.assertEquals(
+			expectedFragmentSet.getDescription(), fragmentSet.getDescription());
+		Assert.assertEquals(
+			expectedFragmentSet.getExternalReferenceCode(),
+			fragmentSet.getExternalReferenceCode());
+		Assert.assertEquals(
+			expectedFragmentSet.getName(), fragmentSet.getName());
 	}
 
 	private void _assertProblemException(
@@ -284,85 +342,6 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 			"BAD_REQUEST", titleKey, unsafeRunnable, titleArguments);
 	}
 
-	private void _assertPutSiteFragmentCreateMissingFragmentSetExternalReferenceCodeProblemException()
-		throws Exception {
-
-		String externalReferenceCode = RandomTestUtil.randomString();
-
-		Fragment fragment = _randomFragment(
-			true, false, externalReferenceCode, null);
-
-		fragment.setFragmentSetExternalReferenceCode((String)null);
-
-		_assertPutSiteFragmentProblemException(
-			externalReferenceCode, fragment,
-			"a-fragment-set-external-reference-code-is-required-to-create-a-" +
-				"new-fragment");
-	}
-
-	private void _assertPutSiteFragmentProblemException(
-			String externalReferenceCode, Fragment fragment, String titleKey)
-		throws Exception {
-
-		_assertProblemException(
-			titleKey,
-			() -> fragmentResource.putSiteFragment(
-				testGroup.getExternalReferenceCode(), externalReferenceCode,
-				fragment));
-	}
-
-	private void _assertPutSiteFragmentUpdateApprovedAndDraftToDraftProblemException()
-		throws Exception {
-
-		Fragment postFragment = _postFragment(_randomFragment(true, true));
-
-		_assertPutSiteFragmentProblemException(
-			postFragment.getExternalReferenceCode(),
-			_randomFragment(
-				false, true, postFragment.getExternalReferenceCode(),
-				postFragment.getKey()),
-			"unpublishing-a-fragment-entry-is-not-supported");
-	}
-
-	private void _assertPutSiteFragmentUpdateApprovedAndDraftToEmptyProblemException()
-		throws Exception {
-
-		Fragment postFragment = _postFragment(_randomFragment(true, true));
-
-		_assertPutSiteFragmentProblemException(
-			postFragment.getExternalReferenceCode(),
-			_randomFragment(
-				false, false, postFragment.getExternalReferenceCode(),
-				postFragment.getKey()),
-			"at-least-one-fragment-entry-version-is-required");
-	}
-
-	private void _assertPutSiteFragmentUpdateApprovedToDraftProblemException()
-		throws Exception {
-
-		Fragment postFragment = _postFragment(_randomFragment(true, false));
-
-		_assertPutSiteFragmentProblemException(
-			postFragment.getExternalReferenceCode(),
-			_randomFragment(
-				false, true, postFragment.getExternalReferenceCode(),
-				postFragment.getKey()),
-			"unpublishing-a-fragment-entry-is-not-supported");
-	}
-
-	private void _assertPutSiteFragmentUpdateDraftToEmptyProblemException()
-		throws Exception {
-
-		Fragment postFragment = _postFragment(_randomFragment(false, true));
-
-		_assertPutSiteFragmentProblemException(
-			postFragment.getExternalReferenceCode(),
-			_randomFragment(
-				false, false, postFragment.getExternalReferenceCode(),
-				postFragment.getKey()),
-			"at-least-one-fragment-entry-version-is-required");
-	}
-
 	private FragmentVersion _getFragmentVersion(
 		Fragment fragment, FragmentVersion.Status status) {
 
@@ -381,7 +360,14 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 		return null;
 	}
 
-	private Fragment _postFragment(Fragment fragment) throws Exception {
+	private Fragment _postSiteFragment(Fragment fragment) throws Exception {
+		return fragmentResource.postSiteFragment(
+			testGroup.getExternalReferenceCode(), fragment);
+	}
+
+	private Fragment _postSiteFragmentSetFragment(Fragment fragment)
+		throws Exception {
+
 		return fragmentResource.postSiteFragmentSetFragment(
 			testGroup.getExternalReferenceCode(),
 			_fragmentCollection.getExternalReferenceCode(), fragment);
@@ -429,8 +415,7 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 		}
 
 		fragment.setExternalReferenceCode(externalReferenceCode);
-		fragment.setFragmentSetExternalReferenceCode(
-			_fragmentCollection.getExternalReferenceCode());
+		fragment.setFragmentSet(_toFragmentSet(_fragmentCollection));
 		fragment.setFragmentVersions(
 			fragmentVersions.toArray(new FragmentVersion[0]));
 
@@ -443,10 +428,21 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 		return fragment;
 	}
 
+	private FragmentSet _randomFragmentSet(String externalReferenceCode) {
+		FragmentSet fragmentSet = new FragmentSet();
+
+		fragmentSet.setExternalReferenceCode(externalReferenceCode);
+		fragmentSet.setDescription(RandomTestUtil.randomString());
+		fragmentSet.setName(RandomTestUtil.randomString());
+
+		return fragmentSet;
+	}
+
 	private void _testGetSiteFragment(boolean approved, boolean draft)
 		throws Exception {
 
-		Fragment postFragment = _postFragment(_randomFragment(approved, draft));
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(approved, draft));
 
 		Fragment getFragment = fragmentResource.getSiteFragment(
 			testGroup.getExternalReferenceCode(),
@@ -468,15 +464,14 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 		_testGetSiteFragment(false, true);
 	}
 
-	private void _testPostSiteFragmentSetFragmentApproved() throws Exception {
-		_testPostSiteFragmentSetFragmentApproved(true, false);
-	}
-
-	private void _testPostSiteFragmentSetFragmentApproved(
-			boolean approved, boolean draft)
+	private void _testPostFragmentApproved(
+			boolean approved, boolean draft,
+			UnsafeFunction<Fragment, Fragment, Exception>
+				postFragmentUnsafeFunction)
 		throws Exception {
 
-		Fragment postFragment = _postFragment(_randomFragment(approved, draft));
+		Fragment postFragment = postFragmentUnsafeFunction.apply(
+			_randomFragment(approved, draft));
 
 		Fragment getFragment = fragmentResource.getSiteFragment(
 			testGroup.getExternalReferenceCode(),
@@ -486,18 +481,274 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 		assertValid(getFragment);
 	}
 
+	private void _testPostFragmentApproved(
+			UnsafeFunction<Fragment, Fragment, Exception>
+				postFragmentUnsafeFunction)
+		throws Exception {
+
+		_testPostFragmentApproved(true, false, postFragmentUnsafeFunction);
+	}
+
+	private void _testPostFragmentApprovedAndDraft(
+			UnsafeFunction<Fragment, Fragment, Exception>
+				postFragmentUnsafeFunction)
+		throws Exception {
+
+		_testPostFragmentApproved(true, true, postFragmentUnsafeFunction);
+	}
+
+	private void _testPostFragmentDraft(
+			UnsafeFunction<Fragment, Fragment, Exception>
+				postFragmentUnsafeFunction)
+		throws Exception {
+
+		_testPostFragmentApproved(false, true, postFragmentUnsafeFunction);
+	}
+
+	private void _testPostFragmentDuplicateKeyProblemException(
+			UnsafeFunction<Fragment, Fragment, Exception>
+				postFragmentUnsafeFunction)
+		throws Exception {
+
+		Fragment postFragment = postFragmentUnsafeFunction.apply(
+			randomFragment());
+
+		Fragment duplicateFragment = randomFragment();
+
+		duplicateFragment.setKey(postFragment.getKey());
+
+		_assertProblemException(
+			"CONFLICT", "a-fragment-entry-with-the-key-x-already-exists",
+			() -> postFragmentUnsafeFunction.apply(duplicateFragment),
+			postFragment.getKey());
+	}
+
+	private void _testPostFragmentEmpty(
+			UnsafeFunction<Fragment, Fragment, Exception>
+				postFragmentUnsafeFunction)
+		throws Exception {
+
+		_testPostFragmentApproved(false, false, postFragmentUnsafeFunction);
+	}
+
+	private void _testPostSiteFragmentApproved() throws Exception {
+		_testPostFragmentApproved(this::_postSiteFragment);
+	}
+
+	private void _testPostSiteFragmentApprovedAndDraft() throws Exception {
+		_testPostFragmentApprovedAndDraft(this::_postSiteFragment);
+	}
+
+	private void _testPostSiteFragmentDraft() throws Exception {
+		_testPostFragmentDraft(this::_postSiteFragment);
+	}
+
+	private void _testPostSiteFragmentDuplicateKeyProblemException()
+		throws Exception {
+
+		_testPostFragmentDuplicateKeyProblemException(this::_postSiteFragment);
+	}
+
+	private void _testPostSiteFragmentEmpty() throws Exception {
+		_testPostFragmentEmpty(this::_postSiteFragment);
+	}
+
+	private void _testPostSiteFragmentFragmentSetExisting() throws Exception {
+		Fragment fragment = randomFragment();
+
+		FragmentCollection fragmentCollection = _addFragmentCollection();
+
+		fragment.setFragmentSet(
+			_randomFragmentSet(fragmentCollection.getExternalReferenceCode()));
+
+		Fragment postFragment = _postSiteFragment(fragment);
+
+		_assertFragmentSet(fragmentCollection, postFragment.getFragmentSet());
+	}
+
+	private void _testPostSiteFragmentFragmentSetExternalReferenceCodeNullProblemException()
+		throws Exception {
+
+		Fragment fragment = randomFragment();
+
+		fragment.setFragmentSet(_randomFragmentSet(null));
+
+		_assertProblemException(
+			"a-fragment-set-external-reference-code-is-required-to-create-a-" +
+				"new-fragment",
+			() -> _postSiteFragment(fragment));
+	}
+
+	private void _testPostSiteFragmentFragmentSetNonexisting()
+		throws Exception {
+
+		Fragment fragment = randomFragment();
+
+		String fragmentSetExternalReferenceCode = RandomTestUtil.randomString();
+
+		FragmentSet fragmentSet = _randomFragmentSet(
+			fragmentSetExternalReferenceCode);
+
+		fragment.setFragmentSet(fragmentSet);
+
+		try (SafeCloseable safeCloseable =
+				LazyReferencingTestUtil.setLazyReferencingWithSafeCloseable(
+					true)) {
+
+			Fragment postFragment = _postSiteFragment(fragment);
+
+			_assertFragmentSet(fragmentSet, postFragment.getFragmentSet());
+
+			Assert.assertNotNull(
+				_fragmentCollectionLocalService.
+					fetchFragmentCollectionByExternalReferenceCode(
+						fragmentSetExternalReferenceCode,
+						testGroup.getGroupId()));
+		}
+	}
+
+	private void _testPostSiteFragmentFragmentSetNonexistingProblemException()
+		throws Exception {
+
+		Fragment fragment = randomFragment();
+
+		String fragmentSetExternalReferenceCode = RandomTestUtil.randomString();
+
+		fragment.setFragmentSet(
+			_randomFragmentSet(fragmentSetExternalReferenceCode));
+
+		_assertProblemException(
+			"no-fragment-set-was-found-with-external-reference-code-x",
+			() -> _postSiteFragment(fragment),
+			fragmentSetExternalReferenceCode);
+
+		Assert.assertNull(
+			_fragmentCollectionLocalService.
+				fetchFragmentCollectionByExternalReferenceCode(
+					fragmentSetExternalReferenceCode, testGroup.getGroupId()));
+	}
+
+	private void _testPostSiteFragmentFragmentSetNullProblemException()
+		throws Exception {
+
+		Fragment fragment = randomFragment();
+
+		fragment.setFragmentSet((FragmentSet)null);
+
+		_assertProblemException(
+			"a-fragment-set-external-reference-code-is-required-to-create-a-" +
+				"new-fragment",
+			() -> _postSiteFragment(fragment));
+	}
+
+	private void _testPostSiteFragmentSetFragmentApproved() throws Exception {
+		_testPostFragmentApproved(this::_postSiteFragmentSetFragment);
+	}
+
 	private void _testPostSiteFragmentSetFragmentApprovedAndDraft()
 		throws Exception {
 
-		_testPostSiteFragmentSetFragmentApproved(true, true);
+		_testPostFragmentApprovedAndDraft(this::_postSiteFragmentSetFragment);
 	}
 
 	private void _testPostSiteFragmentSetFragmentDraft() throws Exception {
-		_testPostSiteFragmentSetFragmentApproved(false, true);
+		_testPostFragmentDraft(this::_postSiteFragmentSetFragment);
+	}
+
+	private void _testPostSiteFragmentSetFragmentDuplicateKeyProblemException()
+		throws Exception {
+
+		_testPostFragmentDuplicateKeyProblemException(
+			this::_postSiteFragmentSetFragment);
 	}
 
 	private void _testPostSiteFragmentSetFragmentEmpty() throws Exception {
-		_testPostSiteFragmentSetFragmentApproved(false, false);
+		_testPostFragmentEmpty(this::_postSiteFragmentSetFragment);
+	}
+
+	private void _testPostSiteFragmentSetFragmentFragmentSetExisting()
+		throws Exception {
+
+		Fragment fragment = randomFragment();
+
+		FragmentCollection fragmentCollection = _addFragmentCollection();
+
+		fragment.setFragmentSet(
+			_randomFragmentSet(fragmentCollection.getExternalReferenceCode()));
+
+		Fragment postFragment = _postSiteFragmentSetFragment(fragment);
+
+		_assertFragmentSet(_fragmentCollection, postFragment.getFragmentSet());
+	}
+
+	private void _testPostSiteFragmentSetFragmentFragmentSetExternalReferenceCodeNull()
+		throws Exception {
+
+		Fragment fragment = randomFragment();
+
+		fragment.setFragmentSet(_randomFragmentSet(null));
+
+		Fragment postFragment = _postSiteFragmentSetFragment(fragment);
+
+		_assertFragmentSet(_fragmentCollection, postFragment.getFragmentSet());
+	}
+
+	private void _testPostSiteFragmentSetFragmentFragmentSetInPathNonexistingProblemException()
+		throws Exception {
+
+		Fragment fragment = randomFragment();
+
+		fragment.setFragmentSet((FragmentSet)null);
+
+		try {
+			fragmentResource.postSiteFragmentSetFragment(
+				testGroup.getExternalReferenceCode(),
+				RandomTestUtil.randomString(), fragment);
+
+			Assert.fail();
+		}
+		catch (Problem.ProblemException problemException) {
+			Problem problem = problemException.getProblem();
+
+			Assert.assertEquals("NOT_FOUND", problem.getStatus());
+			Assert.assertNull(problem.getTitle());
+		}
+	}
+
+	private void _testPostSiteFragmentSetFragmentFragmentSetNonexisting()
+		throws Exception {
+
+		Fragment fragment = randomFragment();
+
+		String fragmentSetExternalReferenceCode = RandomTestUtil.randomString();
+
+		fragment.setFragmentSet(
+			_randomFragmentSet(fragmentSetExternalReferenceCode));
+
+		Fragment postFragment = _postSiteFragmentSetFragment(fragment);
+
+		FragmentSet postFragmentSet = postFragment.getFragmentSet();
+
+		Assert.assertEquals(
+			_fragmentCollection.getExternalReferenceCode(),
+			postFragmentSet.getExternalReferenceCode());
+
+		Assert.assertNull(
+			_fragmentCollectionLocalService.
+				fetchFragmentCollectionByExternalReferenceCode(
+					fragmentSetExternalReferenceCode, testGroup.getGroupId()));
+	}
+
+	private void _testPostSiteFragmentSetFragmentFragmentSetNull()
+		throws Exception {
+
+		Fragment fragment = randomFragment();
+
+		fragment.setFragmentSet((FragmentSet)null);
+
+		Fragment postFragment = _postSiteFragmentSetFragment(fragment);
+
+		_assertFragmentSet(_fragmentCollection, postFragment.getFragmentSet());
 	}
 
 	private void _testPutFragment(
@@ -559,8 +810,131 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 			_getFragmentVersion(putFragment, FragmentVersion.Status.DRAFT));
 	}
 
+	private void _testPutSiteFragmentCreateFragmentSetExisting()
+		throws Exception {
+
+		String externalReferenceCode = RandomTestUtil.randomString();
+
+		Fragment fragment = _randomFragment(
+			true, false, externalReferenceCode, null);
+
+		FragmentCollection fragmentCollection = _addFragmentCollection();
+
+		fragment.setFragmentSet(
+			_randomFragmentSet(fragmentCollection.getExternalReferenceCode()));
+
+		Fragment putFragment = fragmentResource.putSiteFragment(
+			testGroup.getExternalReferenceCode(), externalReferenceCode,
+			fragment);
+
+		_assertFragmentSet(fragmentCollection, putFragment.getFragmentSet());
+	}
+
+	private void _testPutSiteFragmentCreateFragmentSetExternalReferenceCodeNullProblemException()
+		throws Exception {
+
+		String externalReferenceCode = RandomTestUtil.randomString();
+
+		Fragment fragment = _randomFragment(
+			true, false, externalReferenceCode, null);
+
+		fragment.setFragmentSet(_randomFragmentSet(null));
+
+		_testPutSiteFragmentProblemException(
+			externalReferenceCode, fragment,
+			"a-fragment-set-external-reference-code-is-required-to-create-a-" +
+				"new-fragment");
+	}
+
+	private void _testPutSiteFragmentCreateFragmentSetNonexisting()
+		throws Exception {
+
+		String externalReferenceCode = RandomTestUtil.randomString();
+
+		Fragment fragment = _randomFragment(
+			true, false, externalReferenceCode, null);
+
+		String fragmentSetExternalReferenceCode = RandomTestUtil.randomString();
+
+		FragmentSet fragmentSet = _randomFragmentSet(
+			fragmentSetExternalReferenceCode);
+
+		fragment.setFragmentSet(fragmentSet);
+
+		try (SafeCloseable safeCloseable =
+				LazyReferencingTestUtil.setLazyReferencingWithSafeCloseable(
+					true)) {
+
+			Fragment putFragment = fragmentResource.putSiteFragment(
+				testGroup.getExternalReferenceCode(), externalReferenceCode,
+				fragment);
+
+			_assertFragmentSet(fragmentSet, putFragment.getFragmentSet());
+
+			Assert.assertNotNull(
+				_fragmentCollectionLocalService.
+					fetchFragmentCollectionByExternalReferenceCode(
+						fragmentSetExternalReferenceCode,
+						testGroup.getGroupId()));
+		}
+	}
+
+	private void _testPutSiteFragmentCreateFragmentSetNonexistingProblemException()
+		throws Exception {
+
+		String externalReferenceCode = RandomTestUtil.randomString();
+
+		Fragment fragment = _randomFragment(
+			true, false, externalReferenceCode, null);
+
+		String fragmentSetExternalReferenceCode = RandomTestUtil.randomString();
+
+		fragment.setFragmentSet(
+			_randomFragmentSet(fragmentSetExternalReferenceCode));
+
+		_assertProblemException(
+			"no-fragment-set-was-found-with-external-reference-code-x",
+			() -> fragmentResource.putSiteFragment(
+				testGroup.getExternalReferenceCode(), externalReferenceCode,
+				fragment),
+			fragmentSetExternalReferenceCode);
+
+		Assert.assertNull(
+			_fragmentCollectionLocalService.
+				fetchFragmentCollectionByExternalReferenceCode(
+					fragmentSetExternalReferenceCode, testGroup.getGroupId()));
+	}
+
+	private void _testPutSiteFragmentCreateFragmentSetNullProblemException()
+		throws Exception {
+
+		String externalReferenceCode = RandomTestUtil.randomString();
+
+		Fragment fragment = _randomFragment(
+			true, false, externalReferenceCode, null);
+
+		fragment.setFragmentSet((FragmentSet)null);
+
+		_testPutSiteFragmentProblemException(
+			externalReferenceCode, fragment,
+			"a-fragment-set-external-reference-code-is-required-to-create-a-" +
+				"new-fragment");
+	}
+
+	private void _testPutSiteFragmentProblemException(
+			String externalReferenceCode, Fragment fragment, String titleKey)
+		throws Exception {
+
+		_assertProblemException(
+			titleKey,
+			() -> fragmentResource.putSiteFragment(
+				testGroup.getExternalReferenceCode(), externalReferenceCode,
+				fragment));
+	}
+
 	private void _testPutSiteFragmentUpdateApprovedAddDraft() throws Exception {
-		Fragment postFragment = _postFragment(_randomFragment(true, false));
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, false));
 
 		FragmentVersion approvedVersion = _getFragmentVersion(
 			postFragment, FragmentVersion.Status.APPROVED);
@@ -581,7 +955,8 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 	private void _testPutSiteFragmentUpdateApprovedAddDraftModifyApproved()
 		throws Exception {
 
-		Fragment postFragment = _postFragment(_randomFragment(true, false));
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, false));
 
 		_testPutFragment(
 			postFragment.getExternalReferenceCode(),
@@ -590,10 +965,39 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 				postFragment.getKey()));
 	}
 
+	private void _testPutSiteFragmentUpdateApprovedAndDraftToDraftProblemException()
+		throws Exception {
+
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, true));
+
+		_testPutSiteFragmentProblemException(
+			postFragment.getExternalReferenceCode(),
+			_randomFragment(
+				false, true, postFragment.getExternalReferenceCode(),
+				postFragment.getKey()),
+			"unpublishing-a-fragment-entry-is-not-supported");
+	}
+
+	private void _testPutSiteFragmentUpdateApprovedAndDraftToEmptyProblemException()
+		throws Exception {
+
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, true));
+
+		_testPutSiteFragmentProblemException(
+			postFragment.getExternalReferenceCode(),
+			_randomFragment(
+				false, false, postFragment.getExternalReferenceCode(),
+				postFragment.getKey()),
+			"at-least-one-fragment-entry-version-is-required");
+	}
+
 	private void _testPutSiteFragmentUpdateApprovedModifyApproved()
 		throws Exception {
 
-		Fragment postFragment = _postFragment(_randomFragment(true, false));
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, false));
 
 		_testPutFragment(
 			postFragment.getExternalReferenceCode(),
@@ -605,7 +1009,8 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 	private void _testPutSiteFragmentUpdateApprovedModifyApprovedAndDraft()
 		throws Exception {
 
-		Fragment postFragment = _postFragment(_randomFragment(true, true));
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, true));
 
 		_testPutFragment(
 			postFragment.getExternalReferenceCode(),
@@ -614,10 +1019,25 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 				postFragment.getKey()));
 	}
 
-	private void _testPutSiteFragmentUpdateApprovedToEmpty() throws Exception {
-		Fragment postFragment = _postFragment(_randomFragment(true, false));
+	private void _testPutSiteFragmentUpdateApprovedToDraftProblemException()
+		throws Exception {
 
-		_assertPutSiteFragmentProblemException(
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, false));
+
+		_testPutSiteFragmentProblemException(
+			postFragment.getExternalReferenceCode(),
+			_randomFragment(
+				false, true, postFragment.getExternalReferenceCode(),
+				postFragment.getKey()),
+			"unpublishing-a-fragment-entry-is-not-supported");
+	}
+
+	private void _testPutSiteFragmentUpdateApprovedToEmpty() throws Exception {
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, false));
+
+		_testPutSiteFragmentProblemException(
 			postFragment.getExternalReferenceCode(),
 			_randomFragment(
 				false, false, postFragment.getExternalReferenceCode(),
@@ -626,7 +1046,8 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 	}
 
 	private void _testPutSiteFragmentUpdateDraft() throws Exception {
-		Fragment postFragment = _postFragment(_randomFragment(false, true));
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(false, true));
 
 		_testPutFragment(
 			postFragment.getExternalReferenceCode(),
@@ -636,13 +1057,180 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 	}
 
 	private void _testPutSiteFragmentUpdateDraftToApproved() throws Exception {
-		Fragment postFragment = _postFragment(_randomFragment(false, true));
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(false, true));
 
 		_testPutFragment(
 			postFragment.getExternalReferenceCode(),
 			_randomFragment(
 				true, false, postFragment.getExternalReferenceCode(),
 				postFragment.getKey()));
+	}
+
+	private void _testPutSiteFragmentUpdateDraftToEmptyProblemException()
+		throws Exception {
+
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(false, true));
+
+		_testPutSiteFragmentProblemException(
+			postFragment.getExternalReferenceCode(),
+			_randomFragment(
+				false, false, postFragment.getExternalReferenceCode(),
+				postFragment.getKey()),
+			"at-least-one-fragment-entry-version-is-required");
+	}
+
+	private void _testPutSiteFragmentUpdateFragmentSetExisting()
+		throws Exception {
+
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, false));
+
+		Fragment fragment = _randomFragment(
+			true, false, postFragment.getExternalReferenceCode(),
+			postFragment.getKey());
+
+		FragmentCollection fragmentCollection = _addFragmentCollection();
+
+		fragment.setFragmentSet(
+			_randomFragmentSet(fragmentCollection.getExternalReferenceCode()));
+
+		Fragment putFragment = fragmentResource.putSiteFragment(
+			testGroup.getExternalReferenceCode(),
+			postFragment.getExternalReferenceCode(), fragment);
+
+		_assertFragmentSet(fragmentCollection, putFragment.getFragmentSet());
+	}
+
+	private void _testPutSiteFragmentUpdateFragmentSetExternalReferenceCodeNull()
+		throws Exception {
+
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, false));
+
+		Fragment fragment = _randomFragment(
+			true, false, postFragment.getExternalReferenceCode(),
+			postFragment.getKey());
+
+		fragment.setFragmentSet(_randomFragmentSet(null));
+
+		Fragment putFragment = fragmentResource.putSiteFragment(
+			testGroup.getExternalReferenceCode(),
+			postFragment.getExternalReferenceCode(), fragment);
+
+		_assertFragmentSet(_fragmentCollection, putFragment.getFragmentSet());
+	}
+
+	private void _testPutSiteFragmentUpdateFragmentSetNonexisting()
+		throws Exception {
+
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, false));
+
+		Fragment fragment = _randomFragment(
+			true, false, postFragment.getExternalReferenceCode(),
+			postFragment.getKey());
+
+		String fragmentSetExternalReferenceCode = RandomTestUtil.randomString();
+
+		FragmentSet fragmentSet = _randomFragmentSet(
+			fragmentSetExternalReferenceCode);
+
+		fragment.setFragmentSet(fragmentSet);
+
+		try (SafeCloseable safeCloseable =
+				LazyReferencingTestUtil.setLazyReferencingWithSafeCloseable(
+					true)) {
+
+			Fragment putFragment = fragmentResource.putSiteFragment(
+				testGroup.getExternalReferenceCode(),
+				postFragment.getExternalReferenceCode(), fragment);
+
+			_assertFragmentSet(fragmentSet, putFragment.getFragmentSet());
+
+			Assert.assertNotNull(
+				_fragmentCollectionLocalService.
+					fetchFragmentCollectionByExternalReferenceCode(
+						fragmentSetExternalReferenceCode,
+						testGroup.getGroupId()));
+		}
+	}
+
+	private void _testPutSiteFragmentUpdateFragmentSetNonexistingProblemException()
+		throws Exception {
+
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, false));
+
+		Fragment fragment = _randomFragment(
+			true, false, postFragment.getExternalReferenceCode(),
+			postFragment.getKey());
+
+		String fragmentSetExternalReferenceCode = RandomTestUtil.randomString();
+
+		fragment.setFragmentSet(
+			_randomFragmentSet(fragmentSetExternalReferenceCode));
+
+		_assertProblemException(
+			"no-fragment-set-was-found-with-external-reference-code-x",
+			() -> fragmentResource.putSiteFragment(
+				testGroup.getExternalReferenceCode(),
+				postFragment.getExternalReferenceCode(), fragment),
+			fragmentSetExternalReferenceCode);
+
+		Assert.assertNull(
+			_fragmentCollectionLocalService.
+				fetchFragmentCollectionByExternalReferenceCode(
+					fragmentSetExternalReferenceCode, testGroup.getGroupId()));
+	}
+
+	private void _testPutSiteFragmentUpdateFragmentSetNull() throws Exception {
+		Fragment postFragment = _postSiteFragmentSetFragment(
+			_randomFragment(true, false));
+
+		Fragment fragment = _randomFragment(
+			true, false, postFragment.getExternalReferenceCode(),
+			postFragment.getKey());
+
+		fragment.setFragmentSet((FragmentSet)null);
+
+		Fragment putFragment = fragmentResource.putSiteFragment(
+			testGroup.getExternalReferenceCode(),
+			postFragment.getExternalReferenceCode(), fragment);
+
+		_assertFragmentSet(_fragmentCollection, putFragment.getFragmentSet());
+	}
+
+	private FragmentSet _toFragmentSet(FragmentCollection fragmentCollection) {
+		return new FragmentSet() {
+			{
+				setCreator(
+					() -> {
+						User user = _userLocalService.fetchUser(
+							fragmentCollection.getUserId());
+
+						if (user == null) {
+							return null;
+						}
+
+						return new Creator() {
+							{
+								setExternalReferenceCode(
+									user::getExternalReferenceCode);
+							}
+						};
+					});
+				setDateCreated(fragmentCollection::getCreateDate);
+				setDateModified(fragmentCollection::getModifiedDate);
+				setDescription(fragmentCollection::getDescription);
+				setExternalReferenceCode(
+					fragmentCollection::getExternalReferenceCode);
+				setKey(fragmentCollection::getFragmentCollectionKey);
+				setMarketplace(fragmentCollection::isMarketplace);
+				setName(fragmentCollection::getName);
+			}
+		};
 	}
 
 	private FragmentCollection _fragmentCollection;
@@ -655,5 +1243,8 @@ public class FragmentResourceTest extends BaseFragmentResourceTestCase {
 
 	@Inject
 	private Language _language;
+
+	@Inject
+	private UserLocalService _userLocalService;
 
 }

@@ -13,15 +13,11 @@ import com.liferay.journal.model.impl.JournalContentSearchModelImpl;
 import com.liferay.journal.service.persistence.JournalContentSearchPersistence;
 import com.liferay.journal.service.persistence.JournalContentSearchUtil;
 import com.liferay.journal.service.persistence.impl.constants.JournalPersistenceConstants;
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -33,10 +29,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 
 import java.io.Serializable;
@@ -46,9 +39,7 @@ import java.lang.reflect.InvocationHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +63,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = JournalContentSearchPersistence.class)
 public class JournalContentSearchPersistenceImpl
-	extends BasePersistenceImpl<JournalContentSearch>
+	extends BasePersistenceImpl
+		<JournalContentSearch, NoSuchContentSearchException>
 	implements JournalContentSearchPersistence {
 
 	/*
@@ -89,9 +81,6 @@ public class JournalContentSearchPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByCompanyId;
 	private FinderPath _finderPathWithoutPaginationFindByCompanyId;
 	private FinderPath _finderPathCountByCompanyId;
@@ -170,14 +159,9 @@ public class JournalContentSearchPersistenceImpl
 		OrderByComparator<JournalContentSearch> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByCompanyId.find(
-				finderCache, new Object[] {companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByCompanyId.find(
+			finderCache, new Object[] {companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -241,13 +225,8 @@ public class JournalContentSearchPersistenceImpl
 	 */
 	@Override
 	public int countByCompanyId(long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByCompanyId.count(
-				finderCache, new Object[] {companyId});
-		}
+		return _collectionPersistenceFinderByCompanyId.count(
+			finderCache, new Object[] {companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByPortletId;
@@ -328,14 +307,9 @@ public class JournalContentSearchPersistenceImpl
 		OrderByComparator<JournalContentSearch> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByPortletId.find(
-				finderCache, new Object[] {portletId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByPortletId.find(
+			finderCache, new Object[] {portletId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -399,13 +373,8 @@ public class JournalContentSearchPersistenceImpl
 	 */
 	@Override
 	public int countByPortletId(String portletId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByPortletId.count(
-				finderCache, new Object[] {portletId});
-		}
+		return _collectionPersistenceFinderByPortletId.count(
+			finderCache, new Object[] {portletId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByArticleId;
@@ -486,14 +455,9 @@ public class JournalContentSearchPersistenceImpl
 		OrderByComparator<JournalContentSearch> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByArticleId.find(
-				finderCache, new Object[] {articleId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByArticleId.find(
+			finderCache, new Object[] {articleId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -557,13 +521,8 @@ public class JournalContentSearchPersistenceImpl
 	 */
 	@Override
 	public int countByArticleId(String articleId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByArticleId.count(
-				finderCache, new Object[] {articleId});
-		}
+		return _collectionPersistenceFinderByArticleId.count(
+			finderCache, new Object[] {articleId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_P;
@@ -651,14 +610,9 @@ public class JournalContentSearchPersistenceImpl
 		OrderByComparator<JournalContentSearch> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByG_P.find(
-				finderCache, new Object[] {groupId, privateLayout}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_P.find(
+			finderCache, new Object[] {groupId, privateLayout}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -728,13 +682,8 @@ public class JournalContentSearchPersistenceImpl
 	 */
 	@Override
 	public int countByG_P(long groupId, boolean privateLayout) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByG_P.count(
-				finderCache, new Object[] {groupId, privateLayout});
-		}
+		return _collectionPersistenceFinderByG_P.count(
+			finderCache, new Object[] {groupId, privateLayout});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_A;
@@ -822,14 +771,9 @@ public class JournalContentSearchPersistenceImpl
 		OrderByComparator<JournalContentSearch> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByG_A.find(
-				finderCache, new Object[] {groupId, articleId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_A.find(
+			finderCache, new Object[] {groupId, articleId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -897,13 +841,8 @@ public class JournalContentSearchPersistenceImpl
 	 */
 	@Override
 	public int countByG_A(long groupId, String articleId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByG_A.count(
-				finderCache, new Object[] {groupId, articleId});
-		}
+		return _collectionPersistenceFinderByG_A.count(
+			finderCache, new Object[] {groupId, articleId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_P_L;
@@ -998,14 +937,9 @@ public class JournalContentSearchPersistenceImpl
 		OrderByComparator<JournalContentSearch> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByG_P_L.find(
-				finderCache, new Object[] {groupId, privateLayout, layoutId},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_P_L.find(
+			finderCache, new Object[] {groupId, privateLayout, layoutId}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1083,13 +1017,8 @@ public class JournalContentSearchPersistenceImpl
 	public int countByG_P_L(
 		long groupId, boolean privateLayout, long layoutId) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByG_P_L.count(
-				finderCache, new Object[] {groupId, privateLayout, layoutId});
-		}
+		return _collectionPersistenceFinderByG_P_L.count(
+			finderCache, new Object[] {groupId, privateLayout, layoutId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_P_A;
@@ -1184,14 +1113,9 @@ public class JournalContentSearchPersistenceImpl
 		int end, OrderByComparator<JournalContentSearch> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByG_P_A.find(
-				finderCache, new Object[] {groupId, privateLayout, articleId},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_P_A.find(
+			finderCache, new Object[] {groupId, privateLayout, articleId},
+			start, end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1269,13 +1193,8 @@ public class JournalContentSearchPersistenceImpl
 	public int countByG_P_A(
 		long groupId, boolean privateLayout, String articleId) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByG_P_A.count(
-				finderCache, new Object[] {groupId, privateLayout, articleId});
-		}
+		return _collectionPersistenceFinderByG_P_A.count(
+			finderCache, new Object[] {groupId, privateLayout, articleId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_P_L_P;
@@ -1377,15 +1296,10 @@ public class JournalContentSearchPersistenceImpl
 		OrderByComparator<JournalContentSearch> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByG_P_L_P.find(
-				finderCache,
-				new Object[] {groupId, privateLayout, layoutId, portletId},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_P_L_P.find(
+			finderCache,
+			new Object[] {groupId, privateLayout, layoutId, portletId}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1470,14 +1384,9 @@ public class JournalContentSearchPersistenceImpl
 	public int countByG_P_L_P(
 		long groupId, boolean privateLayout, long layoutId, String portletId) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _collectionPersistenceFinderByG_P_L_P.count(
-				finderCache,
-				new Object[] {groupId, privateLayout, layoutId, portletId});
-		}
+		return _collectionPersistenceFinderByG_P_L_P.count(
+			finderCache,
+			new Object[] {groupId, privateLayout, layoutId, portletId});
 	}
 
 	private FinderPath _finderPathFetchByG_P_L_P_A;
@@ -1557,17 +1466,12 @@ public class JournalContentSearchPersistenceImpl
 		long groupId, boolean privateLayout, long layoutId, String portletId,
 		String articleId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			return _uniquePersistenceFinderByG_P_L_P_A.fetch(
-				finderCache,
-				new Object[] {
-					groupId, privateLayout, layoutId, portletId, articleId
-				},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByG_P_L_P_A.fetch(
+			finderCache,
+			new Object[] {
+				groupId, privateLayout, layoutId, portletId, articleId
+			},
+			useFinderCache);
 	}
 
 	/**
@@ -1624,136 +1528,6 @@ public class JournalContentSearchPersistenceImpl
 	}
 
 	/**
-	 * Caches the journal content search in the entity cache if it is enabled.
-	 *
-	 * @param journalContentSearch the journal content search
-	 */
-	@Override
-	public void cacheResult(JournalContentSearch journalContentSearch) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					journalContentSearch.getCtCollectionId())) {
-
-			entityCache.putResult(
-				JournalContentSearchImpl.class,
-				journalContentSearch.getPrimaryKey(), journalContentSearch);
-
-			finderCache.putResult(
-				_finderPathFetchByG_P_L_P_A,
-				new Object[] {
-					journalContentSearch.getGroupId(),
-					journalContentSearch.isPrivateLayout(),
-					journalContentSearch.getLayoutId(),
-					journalContentSearch.getPortletId(),
-					journalContentSearch.getArticleId()
-				},
-				journalContentSearch);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the journal content searches in the entity cache if it is enabled.
-	 *
-	 * @param journalContentSearchs the journal content searches
-	 */
-	@Override
-	public void cacheResult(List<JournalContentSearch> journalContentSearchs) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (journalContentSearchs.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (JournalContentSearch journalContentSearch :
-				journalContentSearchs) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						journalContentSearch.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						JournalContentSearchImpl.class,
-						journalContentSearch.getPrimaryKey()) == null) {
-
-					cacheResult(journalContentSearch);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all journal content searches.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(JournalContentSearchImpl.class);
-
-		finderCache.clearCache(JournalContentSearchImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the journal content search.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(JournalContentSearch journalContentSearch) {
-		entityCache.removeResult(
-			JournalContentSearchImpl.class, journalContentSearch);
-	}
-
-	@Override
-	public void clearCache(List<JournalContentSearch> journalContentSearchs) {
-		for (JournalContentSearch journalContentSearch :
-				journalContentSearchs) {
-
-			entityCache.removeResult(
-				JournalContentSearchImpl.class, journalContentSearch);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(JournalContentSearchImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				JournalContentSearchImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		JournalContentSearchModelImpl journalContentSearchModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					journalContentSearchModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				journalContentSearchModelImpl.getGroupId(),
-				journalContentSearchModelImpl.isPrivateLayout(),
-				journalContentSearchModelImpl.getLayoutId(),
-				journalContentSearchModelImpl.getPortletId(),
-				journalContentSearchModelImpl.getArticleId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByG_P_L_P_A, args,
-				journalContentSearchModelImpl);
-		}
-	}
-
-	/**
 	 * Creates a new journal content search with the primary key. Does not add the journal content search to the database.
 	 *
 	 * @param contentSearchId the primary key for the new journal content search
@@ -1784,48 +1558,6 @@ public class JournalContentSearchPersistenceImpl
 		throws NoSuchContentSearchException {
 
 		return remove((Serializable)contentSearchId);
-	}
-
-	/**
-	 * Removes the journal content search with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the journal content search
-	 * @return the journal content search that was removed
-	 * @throws NoSuchContentSearchException if a journal content search with the primary key could not be found
-	 */
-	@Override
-	public JournalContentSearch remove(Serializable primaryKey)
-		throws NoSuchContentSearchException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			JournalContentSearch journalContentSearch =
-				(JournalContentSearch)session.get(
-					JournalContentSearchImpl.class, primaryKey);
-
-			if (journalContentSearch == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchContentSearchException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(journalContentSearch);
-		}
-		catch (NoSuchContentSearchException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1915,43 +1647,13 @@ public class JournalContentSearchPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			JournalContentSearchImpl.class, journalContentSearchModelImpl,
-			false, true);
-
-		cacheUniqueFindersCache(journalContentSearchModelImpl);
+		cacheUniqueFindersResult(journalContentSearch, false);
 
 		if (isNew) {
 			journalContentSearch.setNew(false);
 		}
 
 		journalContentSearch.resetOriginalValues();
-
-		return journalContentSearch;
-	}
-
-	/**
-	 * Returns the journal content search with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the journal content search
-	 * @return the journal content search
-	 * @throws NoSuchContentSearchException if a journal content search with the primary key could not be found
-	 */
-	@Override
-	public JournalContentSearch findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchContentSearchException {
-
-		JournalContentSearch journalContentSearch = fetchByPrimaryKey(
-			primaryKey);
-
-		if (journalContentSearch == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchContentSearchException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return journalContentSearch;
 	}
@@ -1970,53 +1672,9 @@ public class JournalContentSearchPersistenceImpl
 		return findByPrimaryKey((Serializable)contentSearchId);
 	}
 
-	/**
-	 * Returns the journal content search with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the journal content search
-	 * @return the journal content search, or <code>null</code> if a journal content search with the primary key could not be found
-	 */
 	@Override
-	public JournalContentSearch fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				JournalContentSearch.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		JournalContentSearch journalContentSearch =
-			(JournalContentSearch)entityCache.getResult(
-				JournalContentSearchImpl.class, primaryKey);
-
-		if (journalContentSearch != null) {
-			return journalContentSearch;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			journalContentSearch = (JournalContentSearch)session.get(
-				JournalContentSearchImpl.class, primaryKey);
-
-			if (journalContentSearch != null) {
-				cacheResult(journalContentSearch);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return journalContentSearch;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -2028,328 +1686,6 @@ public class JournalContentSearchPersistenceImpl
 	@Override
 	public JournalContentSearch fetchByPrimaryKey(long contentSearchId) {
 		return fetchByPrimaryKey((Serializable)contentSearchId);
-	}
-
-	@Override
-	public Map<Serializable, JournalContentSearch> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(JournalContentSearch.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, JournalContentSearch> map =
-			new HashMap<Serializable, JournalContentSearch>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			JournalContentSearch journalContentSearch = fetchByPrimaryKey(
-				primaryKey);
-
-			if (journalContentSearch != null) {
-				map.put(primaryKey, journalContentSearch);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						JournalContentSearch.class, primaryKey)) {
-
-				JournalContentSearch journalContentSearch =
-					(JournalContentSearch)entityCache.getResult(
-						JournalContentSearchImpl.class, primaryKey);
-
-				if (journalContentSearch == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, journalContentSearch);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (JournalContentSearch journalContentSearch :
-					(List<JournalContentSearch>)query.list()) {
-
-				map.put(
-					journalContentSearch.getPrimaryKeyObj(),
-					journalContentSearch);
-
-				cacheResult(journalContentSearch);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the journal content searches.
-	 *
-	 * @return the journal content searches
-	 */
-	@Override
-	public List<JournalContentSearch> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the journal content searches.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>JournalContentSearchModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of journal content searches
-	 * @param end the upper bound of the range of journal content searches (not inclusive)
-	 * @return the range of journal content searches
-	 */
-	@Override
-	public List<JournalContentSearch> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the journal content searches.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>JournalContentSearchModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of journal content searches
-	 * @param end the upper bound of the range of journal content searches (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of journal content searches
-	 */
-	@Override
-	public List<JournalContentSearch> findAll(
-		int start, int end,
-		OrderByComparator<JournalContentSearch> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the journal content searches.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>JournalContentSearchModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of journal content searches
-	 * @param end the upper bound of the range of journal content searches (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of journal content searches
-	 */
-	@Override
-	public List<JournalContentSearch> findAll(
-		int start, int end,
-		OrderByComparator<JournalContentSearch> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<JournalContentSearch> list = null;
-
-			if (useFinderCache) {
-				list = (List<JournalContentSearch>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_JOURNALCONTENTSEARCH);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_JOURNALCONTENTSEARCH;
-
-					sql = sql.concat(
-						JournalContentSearchModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<JournalContentSearch>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the journal content searches from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (JournalContentSearch journalContentSearch : findAll()) {
-			remove(journalContentSearch);
-		}
-	}
-
-	/**
-	 * Returns the number of journal content searches.
-	 *
-	 * @return the number of journal content searches
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					JournalContentSearch.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_JOURNALCONTENTSEARCH);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -2437,21 +1773,6 @@ public class JournalContentSearchPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByCompanyId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByCompanyId",
 			new String[] {
@@ -2478,7 +1799,7 @@ public class JournalContentSearchPersistenceImpl
 				_SQL_SELECT_JOURNALCONTENTSEARCH_WHERE,
 				_SQL_COUNT_JOURNALCONTENTSEARCH_WHERE,
 				JournalContentSearchModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"journalContentSearch.", "companyId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2495,12 +1816,12 @@ public class JournalContentSearchPersistenceImpl
 		_finderPathWithoutPaginationFindByPortletId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByPortletId",
 			new String[] {String.class.getName()}, new String[] {"portletId"},
-			true);
+			0, 1, true, null);
 
 		_finderPathCountByPortletId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByPortletId",
 			new String[] {String.class.getName()}, new String[] {"portletId"},
-			false);
+			0, 1, false, null);
 
 		_collectionPersistenceFinderByPortletId =
 			new CollectionPersistenceFinder<>(
@@ -2510,7 +1831,7 @@ public class JournalContentSearchPersistenceImpl
 				_SQL_SELECT_JOURNALCONTENTSEARCH_WHERE,
 				_SQL_COUNT_JOURNALCONTENTSEARCH_WHERE,
 				JournalContentSearchModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"journalContentSearch.", "portletId",
 					FinderColumn.Type.STRING, "=", true, true,
@@ -2527,12 +1848,12 @@ public class JournalContentSearchPersistenceImpl
 		_finderPathWithoutPaginationFindByArticleId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByArticleId",
 			new String[] {String.class.getName()}, new String[] {"articleId"},
-			true);
+			0, 1, true, null);
 
 		_finderPathCountByArticleId = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByArticleId",
 			new String[] {String.class.getName()}, new String[] {"articleId"},
-			false);
+			0, 1, false, null);
 
 		_collectionPersistenceFinderByArticleId =
 			new CollectionPersistenceFinder<>(
@@ -2542,7 +1863,7 @@ public class JournalContentSearchPersistenceImpl
 				_SQL_SELECT_JOURNALCONTENTSEARCH_WHERE,
 				_SQL_COUNT_JOURNALCONTENTSEARCH_WHERE,
 				JournalContentSearchModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"journalContentSearch.", "articleId",
 					FinderColumn.Type.STRING, "=", true, true,
@@ -2572,10 +1893,11 @@ public class JournalContentSearchPersistenceImpl
 			_finderPathWithoutPaginationFindByG_P, _finderPathCountByG_P,
 			_SQL_SELECT_JOURNALCONTENTSEARCH_WHERE,
 			_SQL_COUNT_JOURNALCONTENTSEARCH_WHERE,
-			JournalContentSearchModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			JournalContentSearchModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"journalContentSearch.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, JournalContentSearch::getGroupId),
+				true, true, JournalContentSearch::getGroupId),
 			new FinderColumn<>(
 				"journalContentSearch.", "privateLayout",
 				FinderColumn.Type.BOOLEAN, "=", true, true,
@@ -2593,22 +1915,23 @@ public class JournalContentSearchPersistenceImpl
 		_finderPathWithoutPaginationFindByG_A = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByG_A",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "articleId"}, true);
+			new String[] {"groupId", "articleId"}, 0, 2, true, null);
 
 		_finderPathCountByG_A = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_A",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"groupId", "articleId"}, false);
+			new String[] {"groupId", "articleId"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByG_A = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByG_A,
 			_finderPathWithoutPaginationFindByG_A, _finderPathCountByG_A,
 			_SQL_SELECT_JOURNALCONTENTSEARCH_WHERE,
 			_SQL_COUNT_JOURNALCONTENTSEARCH_WHERE,
-			JournalContentSearchModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			JournalContentSearchModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"journalContentSearch.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, JournalContentSearch::getGroupId),
+				true, true, JournalContentSearch::getGroupId),
 			new FinderColumn<>(
 				"journalContentSearch.", "articleId", FinderColumn.Type.STRING,
 				"=", true, true, JournalContentSearch::getArticleId));
@@ -2643,13 +1966,14 @@ public class JournalContentSearchPersistenceImpl
 			_finderPathWithoutPaginationFindByG_P_L, _finderPathCountByG_P_L,
 			_SQL_SELECT_JOURNALCONTENTSEARCH_WHERE,
 			_SQL_COUNT_JOURNALCONTENTSEARCH_WHERE,
-			JournalContentSearchModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			JournalContentSearchModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"journalContentSearch.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, JournalContentSearch::getGroupId),
+				true, true, JournalContentSearch::getGroupId),
 			new FinderColumn<>(
 				"journalContentSearch.", "privateLayout",
-				FinderColumn.Type.BOOLEAN, "=", true, false,
+				FinderColumn.Type.BOOLEAN, "=", true, true,
 				JournalContentSearch::isPrivateLayout),
 			new FinderColumn<>(
 				"journalContentSearch.", "layoutId", FinderColumn.Type.LONG,
@@ -2670,7 +1994,8 @@ public class JournalContentSearchPersistenceImpl
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"groupId", "privateLayout", "articleId"}, true);
+			new String[] {"groupId", "privateLayout", "articleId"}, 0, 4, true,
+			null);
 
 		_finderPathCountByG_P_A = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_P_A",
@@ -2678,20 +2003,22 @@ public class JournalContentSearchPersistenceImpl
 				Long.class.getName(), Boolean.class.getName(),
 				String.class.getName()
 			},
-			new String[] {"groupId", "privateLayout", "articleId"}, false);
+			new String[] {"groupId", "privateLayout", "articleId"}, 0, 4, false,
+			null);
 
 		_collectionPersistenceFinderByG_P_A = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByG_P_A,
 			_finderPathWithoutPaginationFindByG_P_A, _finderPathCountByG_P_A,
 			_SQL_SELECT_JOURNALCONTENTSEARCH_WHERE,
 			_SQL_COUNT_JOURNALCONTENTSEARCH_WHERE,
-			JournalContentSearchModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			JournalContentSearchModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"journalContentSearch.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, JournalContentSearch::getGroupId),
+				true, true, JournalContentSearch::getGroupId),
 			new FinderColumn<>(
 				"journalContentSearch.", "privateLayout",
-				FinderColumn.Type.BOOLEAN, "=", true, false,
+				FinderColumn.Type.BOOLEAN, "=", true, true,
 				JournalContentSearch::isPrivateLayout),
 			new FinderColumn<>(
 				"journalContentSearch.", "articleId", FinderColumn.Type.STRING,
@@ -2715,7 +2042,7 @@ public class JournalContentSearchPersistenceImpl
 				Long.class.getName(), String.class.getName()
 			},
 			new String[] {"groupId", "privateLayout", "layoutId", "portletId"},
-			true);
+			0, 8, true, null);
 
 		_finderPathCountByG_P_L_P = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_P_L_P",
@@ -2724,7 +2051,7 @@ public class JournalContentSearchPersistenceImpl
 				Long.class.getName(), String.class.getName()
 			},
 			new String[] {"groupId", "privateLayout", "layoutId", "portletId"},
-			false);
+			0, 8, false, null);
 
 		_collectionPersistenceFinderByG_P_L_P =
 			new CollectionPersistenceFinder<>(
@@ -2734,23 +2061,23 @@ public class JournalContentSearchPersistenceImpl
 				_SQL_SELECT_JOURNALCONTENTSEARCH_WHERE,
 				_SQL_COUNT_JOURNALCONTENTSEARCH_WHERE,
 				JournalContentSearchModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"journalContentSearch.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, JournalContentSearch::getGroupId),
+					"=", true, true, JournalContentSearch::getGroupId),
 				new FinderColumn<>(
 					"journalContentSearch.", "privateLayout",
-					FinderColumn.Type.BOOLEAN, "=", true, false,
+					FinderColumn.Type.BOOLEAN, "=", true, true,
 					JournalContentSearch::isPrivateLayout),
 				new FinderColumn<>(
 					"journalContentSearch.", "layoutId", FinderColumn.Type.LONG,
-					"=", true, false, JournalContentSearch::getLayoutId),
+					"=", true, true, JournalContentSearch::getLayoutId),
 				new FinderColumn<>(
 					"journalContentSearch.", "portletId",
 					FinderColumn.Type.STRING, "=", true, true,
 					JournalContentSearch::getPortletId));
 
-		_finderPathFetchByG_P_L_P_A = new FinderPath(
+		_finderPathFetchByG_P_L_P_A = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByG_P_L_P_A",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
@@ -2760,24 +2087,28 @@ public class JournalContentSearchPersistenceImpl
 			new String[] {
 				"groupId", "privateLayout", "layoutId", "portletId", "articleId"
 			},
-			true);
+			0, 24, false, JournalContentSearch::getGroupId,
+			JournalContentSearch::isPrivateLayout,
+			JournalContentSearch::getLayoutId,
+			convertNullFunction(JournalContentSearch::getPortletId),
+			convertNullFunction(JournalContentSearch::getArticleId));
 
 		_uniquePersistenceFinderByG_P_L_P_A = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByG_P_L_P_A,
-			_SQL_SELECT_JOURNALCONTENTSEARCH_WHERE,
+			_SQL_SELECT_JOURNALCONTENTSEARCH_WHERE, "",
 			new FinderColumn<>(
 				"journalContentSearch.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, JournalContentSearch::getGroupId),
+				true, true, JournalContentSearch::getGroupId),
 			new FinderColumn<>(
 				"journalContentSearch.", "privateLayout",
-				FinderColumn.Type.BOOLEAN, "=", true, false,
+				FinderColumn.Type.BOOLEAN, "=", true, true,
 				JournalContentSearch::isPrivateLayout),
 			new FinderColumn<>(
 				"journalContentSearch.", "layoutId", FinderColumn.Type.LONG,
-				"=", true, false, JournalContentSearch::getLayoutId),
+				"=", true, true, JournalContentSearch::getLayoutId),
 			new FinderColumn<>(
 				"journalContentSearch.", "portletId", FinderColumn.Type.STRING,
-				"=", true, false, JournalContentSearch::getPortletId),
+				"=", true, true, JournalContentSearch::getPortletId),
 			new FinderColumn<>(
 				"journalContentSearch.", "articleId", FinderColumn.Type.STRING,
 				"=", true, true, JournalContentSearch::getArticleId));
@@ -2827,23 +2158,17 @@ public class JournalContentSearchPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		JournalContentSearchModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_JOURNALCONTENTSEARCH =
 		"SELECT journalContentSearch FROM JournalContentSearch journalContentSearch";
 
 	private static final String _SQL_SELECT_JOURNALCONTENTSEARCH_WHERE =
 		"SELECT journalContentSearch FROM JournalContentSearch journalContentSearch WHERE ";
 
-	private static final String _SQL_COUNT_JOURNALCONTENTSEARCH =
-		"SELECT COUNT(journalContentSearch) FROM JournalContentSearch journalContentSearch";
-
 	private static final String _SQL_COUNT_JOURNALCONTENTSEARCH_WHERE =
 		"SELECT COUNT(journalContentSearch) FROM JournalContentSearch journalContentSearch WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"journalContentSearch.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No JournalContentSearch exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No JournalContentSearch exists with the key {";
@@ -2857,4 +2182,4 @@ public class JournalContentSearchPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2105654140
+// LIFERAY-SERVICE-BUILDER-HASH:587724583

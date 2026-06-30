@@ -5,16 +5,12 @@
 
 package com.liferay.portal.service.persistence.impl;
 
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.exception.NoSuchWorkflowInstanceLinkException;
@@ -27,15 +23,13 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.WorkflowInstanceLinkPersistence;
 import com.liferay.portal.kernel.service.persistence.WorkflowInstanceLinkUtil;
+import com.liferay.portal.kernel.service.persistence.change.tracking.helper.CTPersistenceHelper;
 import com.liferay.portal.kernel.service.persistence.change.tracking.helper.CTPersistenceHelperUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.model.impl.WorkflowInstanceLinkImpl;
 import com.liferay.portal.model.impl.WorkflowInstanceLinkModelImpl;
@@ -48,9 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +58,8 @@ import java.util.Set;
  * @generated
  */
 public class WorkflowInstanceLinkPersistenceImpl
-	extends BasePersistenceImpl<WorkflowInstanceLink>
+	extends BasePersistenceImpl
+		<WorkflowInstanceLink, NoSuchWorkflowInstanceLinkException>
 	implements WorkflowInstanceLinkPersistence {
 
 	/*
@@ -83,9 +76,6 @@ public class WorkflowInstanceLinkPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathFetchByWorkflowInstanceId;
 	private UniquePersistenceFinder<WorkflowInstanceLink>
 		_uniquePersistenceFinderByWorkflowInstanceId;
@@ -146,14 +136,9 @@ public class WorkflowInstanceLinkPersistenceImpl
 	public WorkflowInstanceLink fetchByWorkflowInstanceId(
 		long workflowInstanceId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					WorkflowInstanceLink.class)) {
-
-			return _uniquePersistenceFinderByWorkflowInstanceId.fetch(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {workflowInstanceId}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByWorkflowInstanceId.fetch(
+			FinderCacheUtil.getFinderCache(), new Object[] {workflowInstanceId},
+			useFinderCache);
 	}
 
 	/**
@@ -271,15 +256,10 @@ public class WorkflowInstanceLinkPersistenceImpl
 		OrderByComparator<WorkflowInstanceLink> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					WorkflowInstanceLink.class)) {
-
-			return _collectionPersistenceFinderByC_C.find(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {companyId, classNameId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_C.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {companyId, classNameId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -350,14 +330,9 @@ public class WorkflowInstanceLinkPersistenceImpl
 	 */
 	@Override
 	public int countByC_C(long companyId, long classNameId) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					WorkflowInstanceLink.class)) {
-
-			return _collectionPersistenceFinderByC_C.count(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {companyId, classNameId});
-		}
+		return _collectionPersistenceFinderByC_C.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {companyId, classNameId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_C_C;
@@ -451,15 +426,10 @@ public class WorkflowInstanceLinkPersistenceImpl
 		OrderByComparator<WorkflowInstanceLink> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					WorkflowInstanceLink.class)) {
-
-			return _collectionPersistenceFinderByG_C_C.find(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, companyId, classNameId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_C_C.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, companyId, classNameId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -534,14 +504,9 @@ public class WorkflowInstanceLinkPersistenceImpl
 	 */
 	@Override
 	public int countByG_C_C(long groupId, long companyId, long classNameId) {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					WorkflowInstanceLink.class)) {
-
-			return _collectionPersistenceFinderByG_C_C.count(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, companyId, classNameId});
-		}
+		return _collectionPersistenceFinderByG_C_C.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, companyId, classNameId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_C_C_C;
@@ -641,15 +606,10 @@ public class WorkflowInstanceLinkPersistenceImpl
 		int end, OrderByComparator<WorkflowInstanceLink> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					WorkflowInstanceLink.class)) {
-
-			return _collectionPersistenceFinderByG_C_C_C.find(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, companyId, classNameId, classPK}, start,
-				end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_C_C_C.find(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, companyId, classNameId, classPK}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -733,14 +693,9 @@ public class WorkflowInstanceLinkPersistenceImpl
 	public int countByG_C_C_C(
 		long groupId, long companyId, long classNameId, long classPK) {
 
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					WorkflowInstanceLink.class)) {
-
-			return _collectionPersistenceFinderByG_C_C_C.count(
-				FinderCacheUtil.getFinderCache(),
-				new Object[] {groupId, companyId, classNameId, classPK});
-		}
+		return _collectionPersistenceFinderByG_C_C_C.count(
+			FinderCacheUtil.getFinderCache(),
+			new Object[] {groupId, companyId, classNameId, classPK});
 	}
 
 	public WorkflowInstanceLinkPersistenceImpl() {
@@ -750,126 +705,6 @@ public class WorkflowInstanceLinkPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(WorkflowInstanceLinkTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the workflow instance link in the entity cache if it is enabled.
-	 *
-	 * @param workflowInstanceLink the workflow instance link
-	 */
-	@Override
-	public void cacheResult(WorkflowInstanceLink workflowInstanceLink) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					workflowInstanceLink.getCtCollectionId())) {
-
-			EntityCacheUtil.putResult(
-				WorkflowInstanceLinkImpl.class,
-				workflowInstanceLink.getPrimaryKey(), workflowInstanceLink);
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByWorkflowInstanceId,
-				new Object[] {workflowInstanceLink.getWorkflowInstanceId()},
-				workflowInstanceLink);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the workflow instance links in the entity cache if it is enabled.
-	 *
-	 * @param workflowInstanceLinks the workflow instance links
-	 */
-	@Override
-	public void cacheResult(List<WorkflowInstanceLink> workflowInstanceLinks) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (workflowInstanceLinks.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (WorkflowInstanceLink workflowInstanceLink :
-				workflowInstanceLinks) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						workflowInstanceLink.getCtCollectionId())) {
-
-				if (EntityCacheUtil.getResult(
-						WorkflowInstanceLinkImpl.class,
-						workflowInstanceLink.getPrimaryKey()) == null) {
-
-					cacheResult(workflowInstanceLink);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all workflow instance links.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		EntityCacheUtil.clearCache(WorkflowInstanceLinkImpl.class);
-
-		FinderCacheUtil.clearCache(WorkflowInstanceLinkImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the workflow instance link.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(WorkflowInstanceLink workflowInstanceLink) {
-		EntityCacheUtil.removeResult(
-			WorkflowInstanceLinkImpl.class, workflowInstanceLink);
-	}
-
-	@Override
-	public void clearCache(List<WorkflowInstanceLink> workflowInstanceLinks) {
-		for (WorkflowInstanceLink workflowInstanceLink :
-				workflowInstanceLinks) {
-
-			EntityCacheUtil.removeResult(
-				WorkflowInstanceLinkImpl.class, workflowInstanceLink);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		FinderCacheUtil.clearCache(WorkflowInstanceLinkImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			EntityCacheUtil.removeResult(
-				WorkflowInstanceLinkImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		WorkflowInstanceLinkModelImpl workflowInstanceLinkModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					workflowInstanceLinkModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				workflowInstanceLinkModelImpl.getWorkflowInstanceId()
-			};
-
-			FinderCacheUtil.putResult(
-				_finderPathFetchByWorkflowInstanceId, args,
-				workflowInstanceLinkModelImpl);
-		}
 	}
 
 	/**
@@ -903,48 +738,6 @@ public class WorkflowInstanceLinkPersistenceImpl
 		throws NoSuchWorkflowInstanceLinkException {
 
 		return remove((Serializable)workflowInstanceLinkId);
-	}
-
-	/**
-	 * Removes the workflow instance link with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the workflow instance link
-	 * @return the workflow instance link that was removed
-	 * @throws NoSuchWorkflowInstanceLinkException if a workflow instance link with the primary key could not be found
-	 */
-	@Override
-	public WorkflowInstanceLink remove(Serializable primaryKey)
-		throws NoSuchWorkflowInstanceLinkException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			WorkflowInstanceLink workflowInstanceLink =
-				(WorkflowInstanceLink)session.get(
-					WorkflowInstanceLinkImpl.class, primaryKey);
-
-			if (workflowInstanceLink == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchWorkflowInstanceLinkException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(workflowInstanceLink);
-		}
-		catch (NoSuchWorkflowInstanceLinkException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1059,43 +852,13 @@ public class WorkflowInstanceLinkPersistenceImpl
 			closeSession(session);
 		}
 
-		EntityCacheUtil.putResult(
-			WorkflowInstanceLinkImpl.class, workflowInstanceLinkModelImpl,
-			false, true);
-
-		cacheUniqueFindersCache(workflowInstanceLinkModelImpl);
+		cacheUniqueFindersResult(workflowInstanceLink, false);
 
 		if (isNew) {
 			workflowInstanceLink.setNew(false);
 		}
 
 		workflowInstanceLink.resetOriginalValues();
-
-		return workflowInstanceLink;
-	}
-
-	/**
-	 * Returns the workflow instance link with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the workflow instance link
-	 * @return the workflow instance link
-	 * @throws NoSuchWorkflowInstanceLinkException if a workflow instance link with the primary key could not be found
-	 */
-	@Override
-	public WorkflowInstanceLink findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchWorkflowInstanceLinkException {
-
-		WorkflowInstanceLink workflowInstanceLink = fetchByPrimaryKey(
-			primaryKey);
-
-		if (workflowInstanceLink == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchWorkflowInstanceLinkException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return workflowInstanceLink;
 	}
@@ -1114,53 +877,9 @@ public class WorkflowInstanceLinkPersistenceImpl
 		return findByPrimaryKey((Serializable)workflowInstanceLinkId);
 	}
 
-	/**
-	 * Returns the workflow instance link with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the workflow instance link
-	 * @return the workflow instance link, or <code>null</code> if a workflow instance link with the primary key could not be found
-	 */
 	@Override
-	public WorkflowInstanceLink fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(
-				WorkflowInstanceLink.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		WorkflowInstanceLink workflowInstanceLink =
-			(WorkflowInstanceLink)EntityCacheUtil.getResult(
-				WorkflowInstanceLinkImpl.class, primaryKey);
-
-		if (workflowInstanceLink != null) {
-			return workflowInstanceLink;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			workflowInstanceLink = (WorkflowInstanceLink)session.get(
-				WorkflowInstanceLinkImpl.class, primaryKey);
-
-			if (workflowInstanceLink != null) {
-				cacheResult(workflowInstanceLink);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return workflowInstanceLink;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return CTPersistenceHelperUtil.getCTPersistenceHelper();
 	}
 
 	/**
@@ -1172,330 +891,6 @@ public class WorkflowInstanceLinkPersistenceImpl
 	@Override
 	public WorkflowInstanceLink fetchByPrimaryKey(long workflowInstanceLinkId) {
 		return fetchByPrimaryKey((Serializable)workflowInstanceLinkId);
-	}
-
-	@Override
-	public Map<Serializable, WorkflowInstanceLink> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (CTPersistenceHelperUtil.isProductionMode(
-				WorkflowInstanceLink.class)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, WorkflowInstanceLink> map =
-			new HashMap<Serializable, WorkflowInstanceLink>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			WorkflowInstanceLink workflowInstanceLink = fetchByPrimaryKey(
-				primaryKey);
-
-			if (workflowInstanceLink != null) {
-				map.put(primaryKey, workflowInstanceLink);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-						WorkflowInstanceLink.class, primaryKey)) {
-
-				WorkflowInstanceLink workflowInstanceLink =
-					(WorkflowInstanceLink)EntityCacheUtil.getResult(
-						WorkflowInstanceLinkImpl.class, primaryKey);
-
-				if (workflowInstanceLink == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, workflowInstanceLink);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (WorkflowInstanceLink workflowInstanceLink :
-					(List<WorkflowInstanceLink>)query.list()) {
-
-				map.put(
-					workflowInstanceLink.getPrimaryKeyObj(),
-					workflowInstanceLink);
-
-				cacheResult(workflowInstanceLink);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the workflow instance links.
-	 *
-	 * @return the workflow instance links
-	 */
-	@Override
-	public List<WorkflowInstanceLink> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the workflow instance links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>WorkflowInstanceLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of workflow instance links
-	 * @param end the upper bound of the range of workflow instance links (not inclusive)
-	 * @return the range of workflow instance links
-	 */
-	@Override
-	public List<WorkflowInstanceLink> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the workflow instance links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>WorkflowInstanceLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of workflow instance links
-	 * @param end the upper bound of the range of workflow instance links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of workflow instance links
-	 */
-	@Override
-	public List<WorkflowInstanceLink> findAll(
-		int start, int end,
-		OrderByComparator<WorkflowInstanceLink> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the workflow instance links.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>WorkflowInstanceLinkModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of workflow instance links
-	 * @param end the upper bound of the range of workflow instance links (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of workflow instance links
-	 */
-	@Override
-	public List<WorkflowInstanceLink> findAll(
-		int start, int end,
-		OrderByComparator<WorkflowInstanceLink> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					WorkflowInstanceLink.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<WorkflowInstanceLink> list = null;
-
-			if (useFinderCache) {
-				list = (List<WorkflowInstanceLink>)FinderCacheUtil.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_WORKFLOWINSTANCELINK);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_WORKFLOWINSTANCELINK;
-
-					sql = sql.concat(
-						WorkflowInstanceLinkModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<WorkflowInstanceLink>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						FinderCacheUtil.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the workflow instance links from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (WorkflowInstanceLink workflowInstanceLink : findAll()) {
-			remove(workflowInstanceLink);
-		}
-	}
-
-	/**
-	 * Returns the number of workflow instance links.
-	 *
-	 * @return the number of workflow instance links
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				CTPersistenceHelperUtil.setCTCollectionIdWithSafeCloseable(
-					WorkflowInstanceLink.class)) {
-
-			Long count = (Long)FinderCacheUtil.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_WORKFLOWINSTANCELINK);
-
-					count = (Long)query.uniqueResult();
-
-					FinderCacheUtil.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -1585,30 +980,16 @@ public class WorkflowInstanceLinkPersistenceImpl
 	 * Initializes the workflow instance link persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
-		_finderPathFetchByWorkflowInstanceId = new FinderPath(
+		_finderPathFetchByWorkflowInstanceId = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByWorkflowInstanceId",
 			new String[] {Long.class.getName()},
-			new String[] {"workflowInstanceId"}, true);
+			new String[] {"workflowInstanceId"}, 0, 0, false,
+			WorkflowInstanceLink::getWorkflowInstanceId);
 
 		_uniquePersistenceFinderByWorkflowInstanceId =
 			new UniquePersistenceFinder<>(
 				this, _finderPathFetchByWorkflowInstanceId,
-				_SQL_SELECT_WORKFLOWINSTANCELINK_WHERE,
+				_SQL_SELECT_WORKFLOWINSTANCELINK_WHERE, "",
 				new FinderColumn<>(
 					"workflowInstanceLink.", "workflowInstanceId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -1638,10 +1019,11 @@ public class WorkflowInstanceLinkPersistenceImpl
 			_finderPathWithoutPaginationFindByC_C, _finderPathCountByC_C,
 			_SQL_SELECT_WORKFLOWINSTANCELINK_WHERE,
 			_SQL_COUNT_WORKFLOWINSTANCELINK_WHERE,
-			WorkflowInstanceLinkModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			WorkflowInstanceLinkModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"workflowInstanceLink.", "companyId", FinderColumn.Type.LONG,
-				"=", true, false, WorkflowInstanceLink::getCompanyId),
+				"=", true, true, WorkflowInstanceLink::getCompanyId),
 			new FinderColumn<>(
 				"workflowInstanceLink.", "classNameId", FinderColumn.Type.LONG,
 				"=", true, true, WorkflowInstanceLink::getClassNameId));
@@ -1674,13 +1056,14 @@ public class WorkflowInstanceLinkPersistenceImpl
 			_finderPathWithoutPaginationFindByG_C_C, _finderPathCountByG_C_C,
 			_SQL_SELECT_WORKFLOWINSTANCELINK_WHERE,
 			_SQL_COUNT_WORKFLOWINSTANCELINK_WHERE,
-			WorkflowInstanceLinkModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			WorkflowInstanceLinkModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"workflowInstanceLink.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, WorkflowInstanceLink::getGroupId),
+				true, true, WorkflowInstanceLink::getGroupId),
 			new FinderColumn<>(
 				"workflowInstanceLink.", "companyId", FinderColumn.Type.LONG,
-				"=", true, false, WorkflowInstanceLink::getCompanyId),
+				"=", true, true, WorkflowInstanceLink::getCompanyId),
 			new FinderColumn<>(
 				"workflowInstanceLink.", "classNameId", FinderColumn.Type.LONG,
 				"=", true, true, WorkflowInstanceLink::getClassNameId));
@@ -1722,17 +1105,17 @@ public class WorkflowInstanceLinkPersistenceImpl
 				_SQL_SELECT_WORKFLOWINSTANCELINK_WHERE,
 				_SQL_COUNT_WORKFLOWINSTANCELINK_WHERE,
 				WorkflowInstanceLinkModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"workflowInstanceLink.", "groupId", FinderColumn.Type.LONG,
-					"=", true, false, WorkflowInstanceLink::getGroupId),
+					"=", true, true, WorkflowInstanceLink::getGroupId),
 				new FinderColumn<>(
 					"workflowInstanceLink.", "companyId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					WorkflowInstanceLink::getCompanyId),
 				new FinderColumn<>(
 					"workflowInstanceLink.", "classNameId",
-					FinderColumn.Type.LONG, "=", true, false,
+					FinderColumn.Type.LONG, "=", true, true,
 					WorkflowInstanceLink::getClassNameId),
 				new FinderColumn<>(
 					"workflowInstanceLink.", "classPK", FinderColumn.Type.LONG,
@@ -1747,23 +1130,17 @@ public class WorkflowInstanceLinkPersistenceImpl
 		EntityCacheUtil.removeCache(WorkflowInstanceLinkImpl.class.getName());
 	}
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		WorkflowInstanceLinkModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_WORKFLOWINSTANCELINK =
 		"SELECT workflowInstanceLink FROM WorkflowInstanceLink workflowInstanceLink";
 
 	private static final String _SQL_SELECT_WORKFLOWINSTANCELINK_WHERE =
 		"SELECT workflowInstanceLink FROM WorkflowInstanceLink workflowInstanceLink WHERE ";
 
-	private static final String _SQL_COUNT_WORKFLOWINSTANCELINK =
-		"SELECT COUNT(workflowInstanceLink) FROM WorkflowInstanceLink workflowInstanceLink";
-
 	private static final String _SQL_COUNT_WORKFLOWINSTANCELINK_WHERE =
 		"SELECT COUNT(workflowInstanceLink) FROM WorkflowInstanceLink workflowInstanceLink WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"workflowInstanceLink.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No WorkflowInstanceLink exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No WorkflowInstanceLink exists with the key {";
@@ -1777,4 +1154,4 @@ public class WorkflowInstanceLinkPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:220078228
+// LIFERAY-SERVICE-BUILDER-HASH:-1173154472

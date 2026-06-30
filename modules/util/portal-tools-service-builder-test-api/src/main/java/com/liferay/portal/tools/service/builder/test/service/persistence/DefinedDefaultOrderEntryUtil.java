@@ -36,6 +36,24 @@ public class DefinedDefaultOrderEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<DefinedDefaultOrderEntry> definedDefaultOrderEntries) {
+
+		getPersistence().cacheResult(definedDefaultOrderEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		DefinedDefaultOrderEntry definedDefaultOrderEntry) {
+
+		getPersistence().cacheResult(definedDefaultOrderEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -303,28 +321,6 @@ public class DefinedDefaultOrderEntryUtil {
 	}
 
 	/**
-	 * Caches the defined default order entry in the entity cache if it is enabled.
-	 *
-	 * @param definedDefaultOrderEntry the defined default order entry
-	 */
-	public static void cacheResult(
-		DefinedDefaultOrderEntry definedDefaultOrderEntry) {
-
-		getPersistence().cacheResult(definedDefaultOrderEntry);
-	}
-
-	/**
-	 * Caches the defined default order entries in the entity cache if it is enabled.
-	 *
-	 * @param definedDefaultOrderEntries the defined default order entries
-	 */
-	public static void cacheResult(
-		List<DefinedDefaultOrderEntry> definedDefaultOrderEntries) {
-
-		getPersistence().cacheResult(definedDefaultOrderEntries);
-	}
-
-	/**
 	 * Creates a new defined default order entry with the primary key. Does not add the defined default order entry to the database.
 	 *
 	 * @param definedDefaultOrderEntryId the primary key for the new defined default order entry
@@ -384,87 +380,6 @@ public class DefinedDefaultOrderEntryUtil {
 		return getPersistence().fetchByPrimaryKey(definedDefaultOrderEntryId);
 	}
 
-	/**
-	 * Returns all the defined default order entries.
-	 *
-	 * @return the defined default order entries
-	 */
-	public static List<DefinedDefaultOrderEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the defined default order entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.DefinedDefaultOrderEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of defined default order entries
-	 * @param end the upper bound of the range of defined default order entries (not inclusive)
-	 * @return the range of defined default order entries
-	 */
-	public static List<DefinedDefaultOrderEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the defined default order entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.DefinedDefaultOrderEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of defined default order entries
-	 * @param end the upper bound of the range of defined default order entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of defined default order entries
-	 */
-	public static List<DefinedDefaultOrderEntry> findAll(
-		int start, int end,
-		OrderByComparator<DefinedDefaultOrderEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the defined default order entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.DefinedDefaultOrderEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of defined default order entries
-	 * @param end the upper bound of the range of defined default order entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of defined default order entries
-	 */
-	public static List<DefinedDefaultOrderEntry> findAll(
-		int start, int end,
-		OrderByComparator<DefinedDefaultOrderEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the defined default order entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of defined default order entries.
-	 *
-	 * @return the number of defined default order entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static DefinedDefaultOrderEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -478,4 +393,4 @@ public class DefinedDefaultOrderEntryUtil {
 	private static volatile DefinedDefaultOrderEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1117092075
+// LIFERAY-SERVICE-BUILDER-HASH:1363128256

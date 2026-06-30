@@ -5,13 +5,11 @@
 
 package com.liferay.portal.service.persistence.impl;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.exception.NoSuchPreferencesException;
@@ -26,10 +24,7 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.model.impl.PortalPreferencesImpl;
 import com.liferay.portal.model.impl.PortalPreferencesModelImpl;
@@ -40,7 +35,6 @@ import java.lang.reflect.InvocationHandler;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The persistence implementation for the portal preferences service.
@@ -53,7 +47,7 @@ import java.util.Set;
  * @generated
  */
 public class PortalPreferencesPersistenceImpl
-	extends BasePersistenceImpl<PortalPreferences>
+	extends BasePersistenceImpl<PortalPreferences, NoSuchPreferencesException>
 	implements PortalPreferencesPersistence {
 
 	/*
@@ -70,9 +64,6 @@ public class PortalPreferencesPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByOwnerType;
 	private FinderPath _finderPathWithoutPaginationFindByOwnerType;
 	private FinderPath _finderPathCountByOwnerType;
@@ -324,109 +315,6 @@ public class PortalPreferencesPersistenceImpl
 	}
 
 	/**
-	 * Caches the portal preferences in the entity cache if it is enabled.
-	 *
-	 * @param portalPreferences the portal preferences
-	 */
-	@Override
-	public void cacheResult(PortalPreferences portalPreferences) {
-		EntityCacheUtil.putResult(
-			PortalPreferencesImpl.class, portalPreferences.getPrimaryKey(),
-			portalPreferences);
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByO_O,
-			new Object[] {
-				portalPreferences.getOwnerId(), portalPreferences.getOwnerType()
-			},
-			portalPreferences);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the portal preferenceses in the entity cache if it is enabled.
-	 *
-	 * @param portalPreferenceses the portal preferenceses
-	 */
-	@Override
-	public void cacheResult(List<PortalPreferences> portalPreferenceses) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (portalPreferenceses.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (PortalPreferences portalPreferences : portalPreferenceses) {
-			if (EntityCacheUtil.getResult(
-					PortalPreferencesImpl.class,
-					portalPreferences.getPrimaryKey()) == null) {
-
-				cacheResult(portalPreferences);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all portal preferenceses.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		EntityCacheUtil.clearCache(PortalPreferencesImpl.class);
-
-		FinderCacheUtil.clearCache(PortalPreferencesImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the portal preferences.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(PortalPreferences portalPreferences) {
-		EntityCacheUtil.removeResult(
-			PortalPreferencesImpl.class, portalPreferences);
-	}
-
-	@Override
-	public void clearCache(List<PortalPreferences> portalPreferenceses) {
-		for (PortalPreferences portalPreferences : portalPreferenceses) {
-			EntityCacheUtil.removeResult(
-				PortalPreferencesImpl.class, portalPreferences);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		FinderCacheUtil.clearCache(PortalPreferencesImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			EntityCacheUtil.removeResult(
-				PortalPreferencesImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		PortalPreferencesModelImpl portalPreferencesModelImpl) {
-
-		Object[] args = new Object[] {
-			portalPreferencesModelImpl.getOwnerId(),
-			portalPreferencesModelImpl.getOwnerType()
-		};
-
-		FinderCacheUtil.putResult(
-			_finderPathFetchByO_O, args, portalPreferencesModelImpl);
-	}
-
-	/**
 	 * Creates a new portal preferences with the primary key. Does not add the portal preferences to the database.
 	 *
 	 * @param portalPreferencesId the primary key for the new portal preferences
@@ -456,48 +344,6 @@ public class PortalPreferencesPersistenceImpl
 		throws NoSuchPreferencesException {
 
 		return remove((Serializable)portalPreferencesId);
-	}
-
-	/**
-	 * Removes the portal preferences with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the portal preferences
-	 * @return the portal preferences that was removed
-	 * @throws NoSuchPreferencesException if a portal preferences with the primary key could not be found
-	 */
-	@Override
-	public PortalPreferences remove(Serializable primaryKey)
-		throws NoSuchPreferencesException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			PortalPreferences portalPreferences =
-				(PortalPreferences)session.get(
-					PortalPreferencesImpl.class, primaryKey);
-
-			if (portalPreferences == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchPreferencesException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(portalPreferences);
-		}
-		catch (NoSuchPreferencesException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -577,42 +423,13 @@ public class PortalPreferencesPersistenceImpl
 			closeSession(session);
 		}
 
-		EntityCacheUtil.putResult(
-			PortalPreferencesImpl.class, portalPreferencesModelImpl, false,
-			true);
-
-		cacheUniqueFindersCache(portalPreferencesModelImpl);
+		cacheUniqueFindersResult(portalPreferences, false);
 
 		if (isNew) {
 			portalPreferences.setNew(false);
 		}
 
 		portalPreferences.resetOriginalValues();
-
-		return portalPreferences;
-	}
-
-	/**
-	 * Returns the portal preferences with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the portal preferences
-	 * @return the portal preferences
-	 * @throws NoSuchPreferencesException if a portal preferences with the primary key could not be found
-	 */
-	@Override
-	public PortalPreferences findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchPreferencesException {
-
-		PortalPreferences portalPreferences = fetchByPrimaryKey(primaryKey);
-
-		if (portalPreferences == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchPreferencesException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return portalPreferences;
 	}
@@ -642,187 +459,6 @@ public class PortalPreferencesPersistenceImpl
 		return fetchByPrimaryKey((Serializable)portalPreferencesId);
 	}
 
-	/**
-	 * Returns all the portal preferenceses.
-	 *
-	 * @return the portal preferenceses
-	 */
-	@Override
-	public List<PortalPreferences> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the portal preferenceses.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>PortalPreferencesModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of portal preferenceses
-	 * @param end the upper bound of the range of portal preferenceses (not inclusive)
-	 * @return the range of portal preferenceses
-	 */
-	@Override
-	public List<PortalPreferences> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the portal preferenceses.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>PortalPreferencesModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of portal preferenceses
-	 * @param end the upper bound of the range of portal preferenceses (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of portal preferenceses
-	 */
-	@Override
-	public List<PortalPreferences> findAll(
-		int start, int end,
-		OrderByComparator<PortalPreferences> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the portal preferenceses.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>PortalPreferencesModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of portal preferenceses
-	 * @param end the upper bound of the range of portal preferenceses (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of portal preferenceses
-	 */
-	@Override
-	public List<PortalPreferences> findAll(
-		int start, int end,
-		OrderByComparator<PortalPreferences> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<PortalPreferences> list = null;
-
-		if (useFinderCache) {
-			list = (List<PortalPreferences>)FinderCacheUtil.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_PORTALPREFERENCES);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_PORTALPREFERENCES;
-
-				sql = sql.concat(PortalPreferencesModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<PortalPreferences>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					FinderCacheUtil.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the portal preferenceses from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (PortalPreferences portalPreferences : findAll()) {
-			remove(portalPreferences);
-		}
-	}
-
-	/**
-	 * Returns the number of portal preferenceses.
-	 *
-	 * @return the number of portal preferenceses
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)FinderCacheUtil.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(_SQL_COUNT_PORTALPREFERENCES);
-
-				count = (Long)query.uniqueResult();
-
-				FinderCacheUtil.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
-	}
-
 	@Override
 	protected EntityCache getEntityCache() {
 		return EntityCacheUtil.getEntityCache();
@@ -847,21 +483,6 @@ public class PortalPreferencesPersistenceImpl
 	 * Initializes the portal preferences persistence.
 	 */
 	public void afterPropertiesSet() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByOwnerType = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByOwnerType",
 			new String[] {
@@ -887,23 +508,25 @@ public class PortalPreferencesPersistenceImpl
 				_finderPathCountByOwnerType,
 				_SQL_SELECT_PORTALPREFERENCES_WHERE,
 				_SQL_COUNT_PORTALPREFERENCES_WHERE,
-				PortalPreferencesModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				PortalPreferencesModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"portalPreferences.", "ownerType",
 					FinderColumn.Type.INTEGER, "=", true, true,
 					PortalPreferences::getOwnerType));
 
-		_finderPathFetchByO_O = new FinderPath(
+		_finderPathFetchByO_O = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByO_O",
 			new String[] {Long.class.getName(), Integer.class.getName()},
-			new String[] {"ownerId", "ownerType"}, true);
+			new String[] {"ownerId", "ownerType"}, 0, 0, false,
+			PortalPreferences::getOwnerId, PortalPreferences::getOwnerType);
 
 		_uniquePersistenceFinderByO_O = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByO_O, _SQL_SELECT_PORTALPREFERENCES_WHERE,
+			"",
 			new FinderColumn<>(
 				"portalPreferences.", "ownerId", FinderColumn.Type.LONG, "=",
-				true, false, PortalPreferences::getOwnerId),
+				true, true, PortalPreferences::getOwnerId),
 			new FinderColumn<>(
 				"portalPreferences.", "ownerType", FinderColumn.Type.INTEGER,
 				"=", true, true, PortalPreferences::getOwnerType));
@@ -917,22 +540,17 @@ public class PortalPreferencesPersistenceImpl
 		EntityCacheUtil.removeCache(PortalPreferencesImpl.class.getName());
 	}
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		PortalPreferencesModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_PORTALPREFERENCES =
 		"SELECT portalPreferences FROM PortalPreferences portalPreferences";
 
 	private static final String _SQL_SELECT_PORTALPREFERENCES_WHERE =
 		"SELECT portalPreferences FROM PortalPreferences portalPreferences WHERE ";
 
-	private static final String _SQL_COUNT_PORTALPREFERENCES =
-		"SELECT COUNT(portalPreferences) FROM PortalPreferences portalPreferences";
-
 	private static final String _SQL_COUNT_PORTALPREFERENCES_WHERE =
 		"SELECT COUNT(portalPreferences) FROM PortalPreferences portalPreferences WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS = "portalPreferences.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No PortalPreferences exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No PortalPreferences exists with the key {";
@@ -946,4 +564,4 @@ public class PortalPreferencesPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1219811562
+// LIFERAY-SERVICE-BUILDER-HASH:-1166031600

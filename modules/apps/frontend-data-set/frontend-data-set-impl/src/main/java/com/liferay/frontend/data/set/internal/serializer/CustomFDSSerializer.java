@@ -167,8 +167,9 @@ public class CustomFDSSerializer
 			tokenResolutionsJSONObject
 		);
 
-		List<ObjectEntry> objectEntries = getSortedRelatedObjectEntries(
-			fdsName, httpServletRequest, (Predicate)null, "tableSectionsOrder",
+		List<ObjectEntry> objectEntries = getRelatedObjectEntries(
+			fdsName, httpServletRequest, (Predicate)null,
+			"dataSetToDataSetCardsSections", "dataSetToDataSetListSections",
 			"dataSetToDataSetTableSections");
 
 		if (objectEntries == null) {
@@ -482,6 +483,16 @@ public class CustomFDSSerializer
 			fdsName, httpServletRequest);
 
 		return String.valueOf(properties.get("propsTransformer"));
+	}
+
+	@Override
+	public boolean serializeShowSearch(
+		String fdsName, HttpServletRequest httpServletRequest) {
+
+		Map<String, Object> properties = getDataSetObjectEntryProperties(
+			fdsName, httpServletRequest);
+
+		return GetterUtil.getBoolean(properties.get("showSearch"), true);
 	}
 
 	@Override

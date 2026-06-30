@@ -529,21 +529,6 @@ public interface OpenIdConnectSessionPersistence
 		long userId, String authServerWellKnownURI, String clientId);
 
 	/**
-	 * Caches the open ID connect session in the entity cache if it is enabled.
-	 *
-	 * @param openIdConnectSession the open ID connect session
-	 */
-	public void cacheResult(OpenIdConnectSession openIdConnectSession);
-
-	/**
-	 * Caches the open ID connect sessions in the entity cache if it is enabled.
-	 *
-	 * @param openIdConnectSessions the open ID connect sessions
-	 */
-	public void cacheResult(
-		java.util.List<OpenIdConnectSession> openIdConnectSessions);
-
-	/**
 	 * Creates a new open ID connect session with the primary key. Does not add the open ID connect session to the database.
 	 *
 	 * @param openIdConnectSessionId the primary key for the new open ID connect session
@@ -582,73 +567,5 @@ public interface OpenIdConnectSessionPersistence
 	 */
 	public OpenIdConnectSession fetchByPrimaryKey(long openIdConnectSessionId);
 
-	/**
-	 * Returns all the open ID connect sessions.
-	 *
-	 * @return the open ID connect sessions
-	 */
-	public java.util.List<OpenIdConnectSession> findAll();
-
-	/**
-	 * Returns a range of all the open ID connect sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.security.sso.openid.connect.persistence.model.impl.OpenIdConnectSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of open ID connect sessions
-	 * @param end the upper bound of the range of open ID connect sessions (not inclusive)
-	 * @return the range of open ID connect sessions
-	 */
-	public java.util.List<OpenIdConnectSession> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the open ID connect sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.security.sso.openid.connect.persistence.model.impl.OpenIdConnectSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of open ID connect sessions
-	 * @param end the upper bound of the range of open ID connect sessions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of open ID connect sessions
-	 */
-	public java.util.List<OpenIdConnectSession> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<OpenIdConnectSession>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the open ID connect sessions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.security.sso.openid.connect.persistence.model.impl.OpenIdConnectSessionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of open ID connect sessions
-	 * @param end the upper bound of the range of open ID connect sessions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of open ID connect sessions
-	 */
-	public java.util.List<OpenIdConnectSession> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<OpenIdConnectSession>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the open ID connect sessions from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of open ID connect sessions.
-	 *
-	 * @return the number of open ID connect sessions
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1151427958
+// LIFERAY-SERVICE-BUILDER-HASH:-926267120

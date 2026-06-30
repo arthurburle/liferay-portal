@@ -13,12 +13,10 @@ import com.liferay.object.model.impl.ObjectValidationRuleModelImpl;
 import com.liferay.object.service.persistence.ObjectValidationRulePersistence;
 import com.liferay.object.service.persistence.ObjectValidationRuleUtil;
 import com.liferay.object.service.persistence.impl.constants.ObjectPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
@@ -39,8 +37,6 @@ import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinde
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -76,7 +72,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ObjectValidationRulePersistence.class)
 public class ObjectValidationRulePersistenceImpl
-	extends BasePersistenceImpl<ObjectValidationRule>
+	extends BasePersistenceImpl
+		<ObjectValidationRule, NoSuchObjectValidationRuleException>
 	implements ObjectValidationRulePersistence {
 
 	/*
@@ -93,9 +90,6 @@ public class ObjectValidationRulePersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -1332,116 +1326,6 @@ public class ObjectValidationRulePersistenceImpl
 	}
 
 	/**
-	 * Caches the object validation rule in the entity cache if it is enabled.
-	 *
-	 * @param objectValidationRule the object validation rule
-	 */
-	@Override
-	public void cacheResult(ObjectValidationRule objectValidationRule) {
-		entityCache.putResult(
-			ObjectValidationRuleImpl.class,
-			objectValidationRule.getPrimaryKey(), objectValidationRule);
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C_ODI,
-			new Object[] {
-				objectValidationRule.getExternalReferenceCode(),
-				objectValidationRule.getCompanyId(),
-				objectValidationRule.getObjectDefinitionId()
-			},
-			objectValidationRule);
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the object validation rules in the entity cache if it is enabled.
-	 *
-	 * @param objectValidationRules the object validation rules
-	 */
-	@Override
-	public void cacheResult(List<ObjectValidationRule> objectValidationRules) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (objectValidationRules.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (ObjectValidationRule objectValidationRule :
-				objectValidationRules) {
-
-			if (entityCache.getResult(
-					ObjectValidationRuleImpl.class,
-					objectValidationRule.getPrimaryKey()) == null) {
-
-				cacheResult(objectValidationRule);
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all object validation rules.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(ObjectValidationRuleImpl.class);
-
-		finderCache.clearCache(ObjectValidationRuleImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the object validation rule.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(ObjectValidationRule objectValidationRule) {
-		entityCache.removeResult(
-			ObjectValidationRuleImpl.class, objectValidationRule);
-	}
-
-	@Override
-	public void clearCache(List<ObjectValidationRule> objectValidationRules) {
-		for (ObjectValidationRule objectValidationRule :
-				objectValidationRules) {
-
-			entityCache.removeResult(
-				ObjectValidationRuleImpl.class, objectValidationRule);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(ObjectValidationRuleImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				ObjectValidationRuleImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		ObjectValidationRuleModelImpl objectValidationRuleModelImpl) {
-
-		Object[] args = new Object[] {
-			objectValidationRuleModelImpl.getExternalReferenceCode(),
-			objectValidationRuleModelImpl.getCompanyId(),
-			objectValidationRuleModelImpl.getObjectDefinitionId()
-		};
-
-		finderCache.putResult(
-			_finderPathFetchByERC_C_ODI, args, objectValidationRuleModelImpl);
-	}
-
-	/**
 	 * Creates a new object validation rule with the primary key. Does not add the object validation rule to the database.
 	 *
 	 * @param objectValidationRuleId the primary key for the new object validation rule
@@ -1476,48 +1360,6 @@ public class ObjectValidationRulePersistenceImpl
 		throws NoSuchObjectValidationRuleException {
 
 		return remove((Serializable)objectValidationRuleId);
-	}
-
-	/**
-	 * Removes the object validation rule with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the object validation rule
-	 * @return the object validation rule that was removed
-	 * @throws NoSuchObjectValidationRuleException if a object validation rule with the primary key could not be found
-	 */
-	@Override
-	public ObjectValidationRule remove(Serializable primaryKey)
-		throws NoSuchObjectValidationRuleException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			ObjectValidationRule objectValidationRule =
-				(ObjectValidationRule)session.get(
-					ObjectValidationRuleImpl.class, primaryKey);
-
-			if (objectValidationRule == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchObjectValidationRuleException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(objectValidationRule);
-		}
-		catch (NoSuchObjectValidationRuleException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -1670,43 +1512,13 @@ public class ObjectValidationRulePersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			ObjectValidationRuleImpl.class, objectValidationRuleModelImpl,
-			false, true);
-
-		cacheUniqueFindersCache(objectValidationRuleModelImpl);
+		cacheUniqueFindersResult(objectValidationRule, false);
 
 		if (isNew) {
 			objectValidationRule.setNew(false);
 		}
 
 		objectValidationRule.resetOriginalValues();
-
-		return objectValidationRule;
-	}
-
-	/**
-	 * Returns the object validation rule with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the object validation rule
-	 * @return the object validation rule
-	 * @throws NoSuchObjectValidationRuleException if a object validation rule with the primary key could not be found
-	 */
-	@Override
-	public ObjectValidationRule findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchObjectValidationRuleException {
-
-		ObjectValidationRule objectValidationRule = fetchByPrimaryKey(
-			primaryKey);
-
-		if (objectValidationRule == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchObjectValidationRuleException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return objectValidationRule;
 	}
@@ -1734,188 +1546,6 @@ public class ObjectValidationRulePersistenceImpl
 	@Override
 	public ObjectValidationRule fetchByPrimaryKey(long objectValidationRuleId) {
 		return fetchByPrimaryKey((Serializable)objectValidationRuleId);
-	}
-
-	/**
-	 * Returns all the object validation rules.
-	 *
-	 * @return the object validation rules
-	 */
-	@Override
-	public List<ObjectValidationRule> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the object validation rules.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectValidationRuleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object validation rules
-	 * @param end the upper bound of the range of object validation rules (not inclusive)
-	 * @return the range of object validation rules
-	 */
-	@Override
-	public List<ObjectValidationRule> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the object validation rules.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectValidationRuleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object validation rules
-	 * @param end the upper bound of the range of object validation rules (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of object validation rules
-	 */
-	@Override
-	public List<ObjectValidationRule> findAll(
-		int start, int end,
-		OrderByComparator<ObjectValidationRule> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the object validation rules.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>ObjectValidationRuleModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of object validation rules
-	 * @param end the upper bound of the range of object validation rules (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of object validation rules
-	 */
-	@Override
-	public List<ObjectValidationRule> findAll(
-		int start, int end,
-		OrderByComparator<ObjectValidationRule> orderByComparator,
-		boolean useFinderCache) {
-
-		FinderPath finderPath = null;
-		Object[] finderArgs = null;
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			(orderByComparator == null)) {
-
-			if (useFinderCache) {
-				finderPath = _finderPathWithoutPaginationFindAll;
-				finderArgs = FINDER_ARGS_EMPTY;
-			}
-		}
-		else if (useFinderCache) {
-			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] {start, end, orderByComparator};
-		}
-
-		List<ObjectValidationRule> list = null;
-
-		if (useFinderCache) {
-			list = (List<ObjectValidationRule>)finderCache.getResult(
-				finderPath, finderArgs, this);
-		}
-
-		if (list == null) {
-			StringBundler sb = null;
-			String sql = null;
-
-			if (orderByComparator != null) {
-				sb = new StringBundler(
-					2 + (orderByComparator.getOrderByFields().length * 2));
-
-				sb.append(_SQL_SELECT_OBJECTVALIDATIONRULE);
-
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-				sql = sb.toString();
-			}
-			else {
-				sql = _SQL_SELECT_OBJECTVALIDATIONRULE;
-
-				sql = sql.concat(ObjectValidationRuleModelImpl.ORDER_BY_JPQL);
-			}
-
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(sql);
-
-				list = (List<ObjectValidationRule>)QueryUtil.list(
-					query, getDialect(), start, end);
-
-				cacheResult(list);
-
-				if (useFinderCache) {
-					finderCache.putResult(finderPath, finderArgs, list);
-				}
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return list;
-	}
-
-	/**
-	 * Removes all the object validation rules from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (ObjectValidationRule objectValidationRule : findAll()) {
-			remove(objectValidationRule);
-		}
-	}
-
-	/**
-	 * Returns the number of object validation rules.
-	 *
-	 * @return the number of object validation rules
-	 */
-	@Override
-	public int countAll() {
-		Long count = (Long)finderCache.getResult(
-			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-		if (count == null) {
-			Session session = null;
-
-			try {
-				session = openSession();
-
-				Query query = session.createQuery(
-					_SQL_COUNT_OBJECTVALIDATIONRULE);
-
-				count = (Long)query.uniqueResult();
-
-				finderCache.putResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-			}
-			catch (Exception exception) {
-				throw processException(exception);
-			}
-			finally {
-				closeSession(session);
-			}
-		}
-
-		return count.intValue();
 	}
 
 	@Override
@@ -1948,21 +1578,6 @@ public class ObjectValidationRulePersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -1973,20 +1588,21 @@ public class ObjectValidationRulePersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_OBJECTVALIDATIONRULE_WHERE,
 			_SQL_COUNT_OBJECTVALIDATIONRULE_WHERE,
-			ObjectValidationRuleModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectValidationRuleModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"objectValidationRule.", "uuid", FinderColumn.Type.STRING, "=",
 				true, true, ObjectValidationRule::getUuid));
@@ -2003,12 +1619,12 @@ public class ObjectValidationRulePersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -2018,10 +1634,10 @@ public class ObjectValidationRulePersistenceImpl
 				_SQL_SELECT_OBJECTVALIDATIONRULE_WHERE,
 				_SQL_COUNT_OBJECTVALIDATIONRULE_WHERE,
 				ObjectValidationRuleModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectValidationRule.", "uuid", FinderColumn.Type.STRING,
-					"=", true, false, ObjectValidationRule::getUuid),
+					"=", true, true, ObjectValidationRule::getUuid),
 				new FinderColumn<>(
 					"objectValidationRule.", "companyId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2053,7 +1669,7 @@ public class ObjectValidationRulePersistenceImpl
 				_SQL_SELECT_OBJECTVALIDATIONRULE_WHERE,
 				_SQL_COUNT_OBJECTVALIDATIONRULE_WHERE,
 				ObjectValidationRuleModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				_ENTITY_ALIAS_PREFIX, "",
 				new FinderColumn<>(
 					"objectValidationRule.", "objectDefinitionId",
 					FinderColumn.Type.LONG, "=", true, true,
@@ -2083,10 +1699,11 @@ public class ObjectValidationRulePersistenceImpl
 			_finderPathWithoutPaginationFindByODI_A, _finderPathCountByODI_A,
 			_SQL_SELECT_OBJECTVALIDATIONRULE_WHERE,
 			_SQL_COUNT_OBJECTVALIDATIONRULE_WHERE,
-			ObjectValidationRuleModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectValidationRuleModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"objectValidationRule.", "objectDefinitionId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				ObjectValidationRule::getObjectDefinitionId),
 			new FinderColumn<>(
 				"objectValidationRule.", "active", FinderColumn.Type.BOOLEAN,
@@ -2104,22 +1721,23 @@ public class ObjectValidationRulePersistenceImpl
 		_finderPathWithoutPaginationFindByODI_E = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByODI_E",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"objectDefinitionId", "engine"}, true);
+			new String[] {"objectDefinitionId", "engine"}, 0, 2, true, null);
 
 		_finderPathCountByODI_E = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByODI_E",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"objectDefinitionId", "engine"}, false);
+			new String[] {"objectDefinitionId", "engine"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByODI_E = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByODI_E,
 			_finderPathWithoutPaginationFindByODI_E, _finderPathCountByODI_E,
 			_SQL_SELECT_OBJECTVALIDATIONRULE_WHERE,
 			_SQL_COUNT_OBJECTVALIDATIONRULE_WHERE,
-			ObjectValidationRuleModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectValidationRuleModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"objectValidationRule.", "objectDefinitionId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				ObjectValidationRule::getObjectDefinitionId),
 			new FinderColumn<>(
 				"objectValidationRule.", "engine", FinderColumn.Type.STRING,
@@ -2137,22 +1755,25 @@ public class ObjectValidationRulePersistenceImpl
 		_finderPathWithoutPaginationFindByODI_O = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByODI_O",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"objectDefinitionId", "outputType"}, true);
+			new String[] {"objectDefinitionId", "outputType"}, 0, 2, true,
+			null);
 
 		_finderPathCountByODI_O = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByODI_O",
 			new String[] {Long.class.getName(), String.class.getName()},
-			new String[] {"objectDefinitionId", "outputType"}, false);
+			new String[] {"objectDefinitionId", "outputType"}, 0, 2, false,
+			null);
 
 		_collectionPersistenceFinderByODI_O = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByODI_O,
 			_finderPathWithoutPaginationFindByODI_O, _finderPathCountByODI_O,
 			_SQL_SELECT_OBJECTVALIDATIONRULE_WHERE,
 			_SQL_COUNT_OBJECTVALIDATIONRULE_WHERE,
-			ObjectValidationRuleModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectValidationRuleModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"objectValidationRule.", "objectDefinitionId",
-				FinderColumn.Type.LONG, "=", true, false,
+				FinderColumn.Type.LONG, "=", true, true,
 				ObjectValidationRule::getObjectDefinitionId),
 			new FinderColumn<>(
 				"objectValidationRule.", "outputType", FinderColumn.Type.STRING,
@@ -2170,27 +1791,28 @@ public class ObjectValidationRulePersistenceImpl
 		_finderPathWithoutPaginationFindByA_E = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByA_E",
 			new String[] {Boolean.class.getName(), String.class.getName()},
-			new String[] {"active_", "engine"}, true);
+			new String[] {"active_", "engine"}, 0, 2, true, null);
 
 		_finderPathCountByA_E = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByA_E",
 			new String[] {Boolean.class.getName(), String.class.getName()},
-			new String[] {"active_", "engine"}, false);
+			new String[] {"active_", "engine"}, 0, 2, false, null);
 
 		_collectionPersistenceFinderByA_E = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByA_E,
 			_finderPathWithoutPaginationFindByA_E, _finderPathCountByA_E,
 			_SQL_SELECT_OBJECTVALIDATIONRULE_WHERE,
 			_SQL_COUNT_OBJECTVALIDATIONRULE_WHERE,
-			ObjectValidationRuleModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			ObjectValidationRuleModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+			"",
 			new FinderColumn<>(
 				"objectValidationRule.", "active", FinderColumn.Type.BOOLEAN,
-				"=", true, false, ObjectValidationRule::isActive),
+				"=", true, true, ObjectValidationRule::isActive),
 			new FinderColumn<>(
 				"objectValidationRule.", "engine", FinderColumn.Type.STRING,
 				"=", true, true, ObjectValidationRule::getEngine));
 
-		_finderPathFetchByERC_C_ODI = new FinderPath(
+		_finderPathFetchByERC_C_ODI = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByERC_C_ODI",
 			new String[] {
 				String.class.getName(), Long.class.getName(),
@@ -2199,18 +1821,21 @@ public class ObjectValidationRulePersistenceImpl
 			new String[] {
 				"externalReferenceCode", "companyId", "objectDefinitionId"
 			},
-			true);
+			0, 1, false,
+			convertNullFunction(ObjectValidationRule::getExternalReferenceCode),
+			ObjectValidationRule::getCompanyId,
+			ObjectValidationRule::getObjectDefinitionId);
 
 		_uniquePersistenceFinderByERC_C_ODI = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByERC_C_ODI,
-			_SQL_SELECT_OBJECTVALIDATIONRULE_WHERE,
+			_SQL_SELECT_OBJECTVALIDATIONRULE_WHERE, "",
 			new FinderColumn<>(
 				"objectValidationRule.", "externalReferenceCode",
-				FinderColumn.Type.STRING, "=", true, false,
+				FinderColumn.Type.STRING, "=", true, true,
 				ObjectValidationRule::getExternalReferenceCode),
 			new FinderColumn<>(
 				"objectValidationRule.", "companyId", FinderColumn.Type.LONG,
-				"=", true, false, ObjectValidationRule::getCompanyId),
+				"=", true, true, ObjectValidationRule::getCompanyId),
 			new FinderColumn<>(
 				"objectValidationRule.", "objectDefinitionId",
 				FinderColumn.Type.LONG, "=", true, true,
@@ -2258,23 +1883,17 @@ public class ObjectValidationRulePersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		ObjectValidationRuleModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_OBJECTVALIDATIONRULE =
 		"SELECT objectValidationRule FROM ObjectValidationRule objectValidationRule";
 
 	private static final String _SQL_SELECT_OBJECTVALIDATIONRULE_WHERE =
 		"SELECT objectValidationRule FROM ObjectValidationRule objectValidationRule WHERE ";
 
-	private static final String _SQL_COUNT_OBJECTVALIDATIONRULE =
-		"SELECT COUNT(objectValidationRule) FROM ObjectValidationRule objectValidationRule";
-
 	private static final String _SQL_COUNT_OBJECTVALIDATIONRULE_WHERE =
 		"SELECT COUNT(objectValidationRule) FROM ObjectValidationRule objectValidationRule WHERE ";
-
-	private static final String _ORDER_BY_ENTITY_ALIAS =
-		"objectValidationRule.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No ObjectValidationRule exists with the primary key ";
 
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No ObjectValidationRule exists with the key {";
@@ -2291,4 +1910,4 @@ public class ObjectValidationRulePersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-5827463
+// LIFERAY-SERVICE-BUILDER-HASH:2018856164

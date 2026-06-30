@@ -181,21 +181,6 @@ public interface DefinedDefaultOrderEntryPersistence
 	public int countByName_Collection(String name);
 
 	/**
-	 * Caches the defined default order entry in the entity cache if it is enabled.
-	 *
-	 * @param definedDefaultOrderEntry the defined default order entry
-	 */
-	public void cacheResult(DefinedDefaultOrderEntry definedDefaultOrderEntry);
-
-	/**
-	 * Caches the defined default order entries in the entity cache if it is enabled.
-	 *
-	 * @param definedDefaultOrderEntries the defined default order entries
-	 */
-	public void cacheResult(
-		java.util.List<DefinedDefaultOrderEntry> definedDefaultOrderEntries);
-
-	/**
 	 * Creates a new defined default order entry with the primary key. Does not add the defined default order entry to the database.
 	 *
 	 * @param definedDefaultOrderEntryId the primary key for the new defined default order entry
@@ -236,73 +221,5 @@ public interface DefinedDefaultOrderEntryPersistence
 	public DefinedDefaultOrderEntry fetchByPrimaryKey(
 		long definedDefaultOrderEntryId);
 
-	/**
-	 * Returns all the defined default order entries.
-	 *
-	 * @return the defined default order entries
-	 */
-	public java.util.List<DefinedDefaultOrderEntry> findAll();
-
-	/**
-	 * Returns a range of all the defined default order entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.DefinedDefaultOrderEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of defined default order entries
-	 * @param end the upper bound of the range of defined default order entries (not inclusive)
-	 * @return the range of defined default order entries
-	 */
-	public java.util.List<DefinedDefaultOrderEntry> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the defined default order entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.DefinedDefaultOrderEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of defined default order entries
-	 * @param end the upper bound of the range of defined default order entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of defined default order entries
-	 */
-	public java.util.List<DefinedDefaultOrderEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<DefinedDefaultOrderEntry> orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the defined default order entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.DefinedDefaultOrderEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of defined default order entries
-	 * @param end the upper bound of the range of defined default order entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of defined default order entries
-	 */
-	public java.util.List<DefinedDefaultOrderEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator
-			<DefinedDefaultOrderEntry> orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the defined default order entries from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of defined default order entries.
-	 *
-	 * @return the number of defined default order entries
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-2053663463
+// LIFERAY-SERVICE-BUILDER-HASH:1334538098

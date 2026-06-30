@@ -36,6 +36,24 @@ public class CommerceAddressRestrictionUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CommerceAddressRestriction> commerceAddressRestrictions) {
+
+		getPersistence().cacheResult(commerceAddressRestrictions);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		CommerceAddressRestriction commerceAddressRestriction) {
+
+		getPersistence().cacheResult(commerceAddressRestriction);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -456,28 +474,6 @@ public class CommerceAddressRestrictionUtil {
 	}
 
 	/**
-	 * Caches the commerce address restriction in the entity cache if it is enabled.
-	 *
-	 * @param commerceAddressRestriction the commerce address restriction
-	 */
-	public static void cacheResult(
-		CommerceAddressRestriction commerceAddressRestriction) {
-
-		getPersistence().cacheResult(commerceAddressRestriction);
-	}
-
-	/**
-	 * Caches the commerce address restrictions in the entity cache if it is enabled.
-	 *
-	 * @param commerceAddressRestrictions the commerce address restrictions
-	 */
-	public static void cacheResult(
-		List<CommerceAddressRestriction> commerceAddressRestrictions) {
-
-		getPersistence().cacheResult(commerceAddressRestrictions);
-	}
-
-	/**
 	 * Creates a new commerce address restriction with the primary key. Does not add the commerce address restriction to the database.
 	 *
 	 * @param commerceAddressRestrictionId the primary key for the new commerce address restriction
@@ -537,87 +533,6 @@ public class CommerceAddressRestrictionUtil {
 		return getPersistence().fetchByPrimaryKey(commerceAddressRestrictionId);
 	}
 
-	/**
-	 * Returns all the commerce address restrictions.
-	 *
-	 * @return the commerce address restrictions
-	 */
-	public static List<CommerceAddressRestriction> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce address restrictions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceAddressRestrictionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce address restrictions
-	 * @param end the upper bound of the range of commerce address restrictions (not inclusive)
-	 * @return the range of commerce address restrictions
-	 */
-	public static List<CommerceAddressRestriction> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce address restrictions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceAddressRestrictionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce address restrictions
-	 * @param end the upper bound of the range of commerce address restrictions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce address restrictions
-	 */
-	public static List<CommerceAddressRestriction> findAll(
-		int start, int end,
-		OrderByComparator<CommerceAddressRestriction> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce address restrictions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.model.impl.CommerceAddressRestrictionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce address restrictions
-	 * @param end the upper bound of the range of commerce address restrictions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce address restrictions
-	 */
-	public static List<CommerceAddressRestriction> findAll(
-		int start, int end,
-		OrderByComparator<CommerceAddressRestriction> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce address restrictions from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce address restrictions.
-	 *
-	 * @return the number of commerce address restrictions
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceAddressRestrictionPersistence getPersistence() {
 		return _persistence;
 	}
@@ -631,4 +546,4 @@ public class CommerceAddressRestrictionUtil {
 	private static volatile CommerceAddressRestrictionPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2006504338
+// LIFERAY-SERVICE-BUILDER-HASH:1257062765

@@ -193,21 +193,6 @@ public interface SamlSpAuthRequestPersistence
 		String samlIdpEntityId, String samlSpAuthRequestKey);
 
 	/**
-	 * Caches the saml sp auth request in the entity cache if it is enabled.
-	 *
-	 * @param samlSpAuthRequest the saml sp auth request
-	 */
-	public void cacheResult(SamlSpAuthRequest samlSpAuthRequest);
-
-	/**
-	 * Caches the saml sp auth requests in the entity cache if it is enabled.
-	 *
-	 * @param samlSpAuthRequests the saml sp auth requests
-	 */
-	public void cacheResult(
-		java.util.List<SamlSpAuthRequest> samlSpAuthRequests);
-
-	/**
 	 * Creates a new saml sp auth request with the primary key. Does not add the saml sp auth request to the database.
 	 *
 	 * @param samlSpAuthnRequestId the primary key for the new saml sp auth request
@@ -245,73 +230,5 @@ public interface SamlSpAuthRequestPersistence
 	 */
 	public SamlSpAuthRequest fetchByPrimaryKey(long samlSpAuthnRequestId);
 
-	/**
-	 * Returns all the saml sp auth requests.
-	 *
-	 * @return the saml sp auth requests
-	 */
-	public java.util.List<SamlSpAuthRequest> findAll();
-
-	/**
-	 * Returns a range of all the saml sp auth requests.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.saml.persistence.model.impl.SamlSpAuthRequestModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml sp auth requests
-	 * @param end the upper bound of the range of saml sp auth requests (not inclusive)
-	 * @return the range of saml sp auth requests
-	 */
-	public java.util.List<SamlSpAuthRequest> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the saml sp auth requests.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.saml.persistence.model.impl.SamlSpAuthRequestModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml sp auth requests
-	 * @param end the upper bound of the range of saml sp auth requests (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of saml sp auth requests
-	 */
-	public java.util.List<SamlSpAuthRequest> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SamlSpAuthRequest>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the saml sp auth requests.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.saml.persistence.model.impl.SamlSpAuthRequestModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml sp auth requests
-	 * @param end the upper bound of the range of saml sp auth requests (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of saml sp auth requests
-	 */
-	public java.util.List<SamlSpAuthRequest> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SamlSpAuthRequest>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the saml sp auth requests from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of saml sp auth requests.
-	 *
-	 * @return the number of saml sp auth requests
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:924933706
+// LIFERAY-SERVICE-BUILDER-HASH:407700445

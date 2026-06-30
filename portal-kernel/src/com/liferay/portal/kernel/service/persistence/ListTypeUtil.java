@@ -36,6 +36,20 @@ public class ListTypeUtil {
 	 */
 
 	/**
+	 * @see BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<ListType> listTypes) {
+		getPersistence().cacheResult(listTypes);
+	}
+
+	/**
+	 * @see BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(ListType listType) {
+		getPersistence().cacheResult(listType);
+	}
+
+	/**
 	 * @see BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -678,24 +692,6 @@ public class ListTypeUtil {
 	}
 
 	/**
-	 * Caches the list type in the entity cache if it is enabled.
-	 *
-	 * @param listType the list type
-	 */
-	public static void cacheResult(ListType listType) {
-		getPersistence().cacheResult(listType);
-	}
-
-	/**
-	 * Caches the list types in the entity cache if it is enabled.
-	 *
-	 * @param listTypes the list types
-	 */
-	public static void cacheResult(List<ListType> listTypes) {
-		getPersistence().cacheResult(listTypes);
-	}
-
-	/**
 	 * Creates a new list type with the primary key. Does not add the list type to the database.
 	 *
 	 * @param listTypeId the primary key for the new list type
@@ -745,85 +741,6 @@ public class ListTypeUtil {
 		return getPersistence().fetchByPrimaryKey(listTypeId);
 	}
 
-	/**
-	 * Returns all the list types.
-	 *
-	 * @return the list types
-	 */
-	public static List<ListType> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the list types.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.ListTypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of list types
-	 * @param end the upper bound of the range of list types (not inclusive)
-	 * @return the range of list types
-	 */
-	public static List<ListType> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the list types.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.ListTypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of list types
-	 * @param end the upper bound of the range of list types (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of list types
-	 */
-	public static List<ListType> findAll(
-		int start, int end, OrderByComparator<ListType> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the list types.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.model.impl.ListTypeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of list types
-	 * @param end the upper bound of the range of list types (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of list types
-	 */
-	public static List<ListType> findAll(
-		int start, int end, OrderByComparator<ListType> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the list types from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of list types.
-	 *
-	 * @return the number of list types
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static ListTypePersistence getPersistence() {
 		return _persistence;
 	}
@@ -835,4 +752,4 @@ public class ListTypeUtil {
 	private static volatile ListTypePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:623347864
+// LIFERAY-SERVICE-BUILDER-HASH:-2119434278

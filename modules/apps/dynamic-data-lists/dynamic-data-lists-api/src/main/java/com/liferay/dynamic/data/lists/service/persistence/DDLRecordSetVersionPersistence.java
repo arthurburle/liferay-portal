@@ -299,21 +299,6 @@ public interface DDLRecordSetVersionPersistence
 	public int countByRS_S(long recordSetId, int status);
 
 	/**
-	 * Caches the ddl record set version in the entity cache if it is enabled.
-	 *
-	 * @param ddlRecordSetVersion the ddl record set version
-	 */
-	public void cacheResult(DDLRecordSetVersion ddlRecordSetVersion);
-
-	/**
-	 * Caches the ddl record set versions in the entity cache if it is enabled.
-	 *
-	 * @param ddlRecordSetVersions the ddl record set versions
-	 */
-	public void cacheResult(
-		java.util.List<DDLRecordSetVersion> ddlRecordSetVersions);
-
-	/**
 	 * Creates a new ddl record set version with the primary key. Does not add the ddl record set version to the database.
 	 *
 	 * @param recordSetVersionId the primary key for the new ddl record set version
@@ -352,73 +337,5 @@ public interface DDLRecordSetVersionPersistence
 	 */
 	public DDLRecordSetVersion fetchByPrimaryKey(long recordSetVersionId);
 
-	/**
-	 * Returns all the ddl record set versions.
-	 *
-	 * @return the ddl record set versions
-	 */
-	public java.util.List<DDLRecordSetVersion> findAll();
-
-	/**
-	 * Returns a range of all the ddl record set versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.lists.model.impl.DDLRecordSetVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddl record set versions
-	 * @param end the upper bound of the range of ddl record set versions (not inclusive)
-	 * @return the range of ddl record set versions
-	 */
-	public java.util.List<DDLRecordSetVersion> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the ddl record set versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.lists.model.impl.DDLRecordSetVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddl record set versions
-	 * @param end the upper bound of the range of ddl record set versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddl record set versions
-	 */
-	public java.util.List<DDLRecordSetVersion> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DDLRecordSetVersion>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the ddl record set versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.lists.model.impl.DDLRecordSetVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddl record set versions
-	 * @param end the upper bound of the range of ddl record set versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddl record set versions
-	 */
-	public java.util.List<DDLRecordSetVersion> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<DDLRecordSetVersion>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the ddl record set versions from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of ddl record set versions.
-	 *
-	 * @return the number of ddl record set versions
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:273399072
+// LIFERAY-SERVICE-BUILDER-HASH:133962683

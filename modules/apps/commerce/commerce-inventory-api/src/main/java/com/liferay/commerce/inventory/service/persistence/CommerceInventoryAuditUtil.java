@@ -37,6 +37,24 @@ public class CommerceInventoryAuditUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CommerceInventoryAudit> commerceInventoryAudits) {
+
+		getPersistence().cacheResult(commerceInventoryAudits);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		CommerceInventoryAudit commerceInventoryAudit) {
+
+		getPersistence().cacheResult(commerceInventoryAudit);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -392,28 +410,6 @@ public class CommerceInventoryAuditUtil {
 	}
 
 	/**
-	 * Caches the commerce inventory audit in the entity cache if it is enabled.
-	 *
-	 * @param commerceInventoryAudit the commerce inventory audit
-	 */
-	public static void cacheResult(
-		CommerceInventoryAudit commerceInventoryAudit) {
-
-		getPersistence().cacheResult(commerceInventoryAudit);
-	}
-
-	/**
-	 * Caches the commerce inventory audits in the entity cache if it is enabled.
-	 *
-	 * @param commerceInventoryAudits the commerce inventory audits
-	 */
-	public static void cacheResult(
-		List<CommerceInventoryAudit> commerceInventoryAudits) {
-
-		getPersistence().cacheResult(commerceInventoryAudits);
-	}
-
-	/**
 	 * Creates a new commerce inventory audit with the primary key. Does not add the commerce inventory audit to the database.
 	 *
 	 * @param commerceInventoryAuditId the primary key for the new commerce inventory audit
@@ -470,87 +466,6 @@ public class CommerceInventoryAuditUtil {
 		return getPersistence().fetchByPrimaryKey(commerceInventoryAuditId);
 	}
 
-	/**
-	 * Returns all the commerce inventory audits.
-	 *
-	 * @return the commerce inventory audits
-	 */
-	public static List<CommerceInventoryAudit> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce inventory audits.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.inventory.model.impl.CommerceInventoryAuditModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory audits
-	 * @param end the upper bound of the range of commerce inventory audits (not inclusive)
-	 * @return the range of commerce inventory audits
-	 */
-	public static List<CommerceInventoryAudit> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce inventory audits.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.inventory.model.impl.CommerceInventoryAuditModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory audits
-	 * @param end the upper bound of the range of commerce inventory audits (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce inventory audits
-	 */
-	public static List<CommerceInventoryAudit> findAll(
-		int start, int end,
-		OrderByComparator<CommerceInventoryAudit> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce inventory audits.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.inventory.model.impl.CommerceInventoryAuditModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory audits
-	 * @param end the upper bound of the range of commerce inventory audits (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce inventory audits
-	 */
-	public static List<CommerceInventoryAudit> findAll(
-		int start, int end,
-		OrderByComparator<CommerceInventoryAudit> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce inventory audits from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce inventory audits.
-	 *
-	 * @return the number of commerce inventory audits
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceInventoryAuditPersistence getPersistence() {
 		return _persistence;
 	}
@@ -564,4 +479,4 @@ public class CommerceInventoryAuditUtil {
 	private static volatile CommerceInventoryAuditPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1433202028
+// LIFERAY-SERVICE-BUILDER-HASH:1134444539

@@ -36,6 +36,24 @@ public class CommerceInventoryWarehouseItemUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<CommerceInventoryWarehouseItem> commerceInventoryWarehouseItems) {
+
+		getPersistence().cacheResult(commerceInventoryWarehouseItems);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		CommerceInventoryWarehouseItem commerceInventoryWarehouseItem) {
+
+		getPersistence().cacheResult(commerceInventoryWarehouseItem);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -949,28 +967,6 @@ public class CommerceInventoryWarehouseItemUtil {
 	}
 
 	/**
-	 * Caches the commerce inventory warehouse item in the entity cache if it is enabled.
-	 *
-	 * @param commerceInventoryWarehouseItem the commerce inventory warehouse item
-	 */
-	public static void cacheResult(
-		CommerceInventoryWarehouseItem commerceInventoryWarehouseItem) {
-
-		getPersistence().cacheResult(commerceInventoryWarehouseItem);
-	}
-
-	/**
-	 * Caches the commerce inventory warehouse items in the entity cache if it is enabled.
-	 *
-	 * @param commerceInventoryWarehouseItems the commerce inventory warehouse items
-	 */
-	public static void cacheResult(
-		List<CommerceInventoryWarehouseItem> commerceInventoryWarehouseItems) {
-
-		getPersistence().cacheResult(commerceInventoryWarehouseItems);
-	}
-
-	/**
 	 * Creates a new commerce inventory warehouse item with the primary key. Does not add the commerce inventory warehouse item to the database.
 	 *
 	 * @param commerceInventoryWarehouseItemId the primary key for the new commerce inventory warehouse item
@@ -1032,89 +1028,6 @@ public class CommerceInventoryWarehouseItemUtil {
 			commerceInventoryWarehouseItemId);
 	}
 
-	/**
-	 * Returns all the commerce inventory warehouse items.
-	 *
-	 * @return the commerce inventory warehouse items
-	 */
-	public static List<CommerceInventoryWarehouseItem> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the commerce inventory warehouse items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.inventory.model.impl.CommerceInventoryWarehouseItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory warehouse items
-	 * @param end the upper bound of the range of commerce inventory warehouse items (not inclusive)
-	 * @return the range of commerce inventory warehouse items
-	 */
-	public static List<CommerceInventoryWarehouseItem> findAll(
-		int start, int end) {
-
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce inventory warehouse items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.inventory.model.impl.CommerceInventoryWarehouseItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory warehouse items
-	 * @param end the upper bound of the range of commerce inventory warehouse items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of commerce inventory warehouse items
-	 */
-	public static List<CommerceInventoryWarehouseItem> findAll(
-		int start, int end,
-		OrderByComparator<CommerceInventoryWarehouseItem> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the commerce inventory warehouse items.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.commerce.inventory.model.impl.CommerceInventoryWarehouseItemModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of commerce inventory warehouse items
-	 * @param end the upper bound of the range of commerce inventory warehouse items (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of commerce inventory warehouse items
-	 */
-	public static List<CommerceInventoryWarehouseItem> findAll(
-		int start, int end,
-		OrderByComparator<CommerceInventoryWarehouseItem> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the commerce inventory warehouse items from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of commerce inventory warehouse items.
-	 *
-	 * @return the number of commerce inventory warehouse items
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static CommerceInventoryWarehouseItemPersistence getPersistence() {
 		return _persistence;
 	}
@@ -1129,4 +1042,4 @@ public class CommerceInventoryWarehouseItemUtil {
 		_persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2026085391
+// LIFERAY-SERVICE-BUILDER-HASH:-1117114510

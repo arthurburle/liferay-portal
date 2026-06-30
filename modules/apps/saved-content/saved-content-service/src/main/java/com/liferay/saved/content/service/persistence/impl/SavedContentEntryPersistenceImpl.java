@@ -5,39 +5,30 @@
 
 package com.liferay.saved.content.service.persistence.impl;
 
-import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.change.tracking.CTColumnResolutionType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
-import com.liferay.portal.kernel.dao.orm.Query;
-import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.dao.orm.SQLQuery;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.SessionFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
-import com.liferay.portal.kernel.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.change.tracking.helper.CTPersistenceHelper;
+import com.liferay.portal.kernel.service.persistence.impl.ArrayableFinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.service.persistence.impl.CollectionPersistenceFinder;
+import com.liferay.portal.kernel.service.persistence.impl.FilterCollectionPersistenceFinder;
 import com.liferay.portal.kernel.service.persistence.impl.FinderColumn;
 import com.liferay.portal.kernel.service.persistence.impl.UniquePersistenceFinder;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.saved.content.exception.NoSuchSavedContentEntryException;
@@ -59,7 +50,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,7 +73,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = SavedContentEntryPersistence.class)
 public class SavedContentEntryPersistenceImpl
-	extends BasePersistenceImpl<SavedContentEntry>
+	extends BasePersistenceImpl
+		<SavedContentEntry, NoSuchSavedContentEntryException>
 	implements SavedContentEntryPersistence {
 
 	/*
@@ -100,9 +91,6 @@ public class SavedContentEntryPersistenceImpl
 	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
 		FINDER_CLASS_NAME_ENTITY + ".List2";
 
-	private FinderPath _finderPathWithPaginationFindAll;
-	private FinderPath _finderPathWithoutPaginationFindAll;
-	private FinderPath _finderPathCountAll;
 	private FinderPath _finderPathWithPaginationFindByUuid;
 	private FinderPath _finderPathWithoutPaginationFindByUuid;
 	private FinderPath _finderPathCountByUuid;
@@ -178,14 +166,9 @@ public class SavedContentEntryPersistenceImpl
 		OrderByComparator<SavedContentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid.find(
-				finderCache, new Object[] {uuid}, start, end, orderByComparator,
-				useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid.find(
+			finderCache, new Object[] {uuid}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -247,13 +230,8 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid(String uuid) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid.count(
-				finderCache, new Object[] {uuid});
-		}
+		return _collectionPersistenceFinderByUuid.count(
+			finderCache, new Object[] {uuid});
 	}
 
 	private FinderPath _finderPathFetchByUUID_G;
@@ -313,13 +291,8 @@ public class SavedContentEntryPersistenceImpl
 	public SavedContentEntry fetchByUUID_G(
 		String uuid, long groupId, boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _uniquePersistenceFinderByUUID_G.fetch(
-				finderCache, new Object[] {uuid, groupId}, useFinderCache);
-		}
+		return _uniquePersistenceFinderByUUID_G.fetch(
+			finderCache, new Object[] {uuid, groupId}, useFinderCache);
 	}
 
 	/**
@@ -434,14 +407,9 @@ public class SavedContentEntryPersistenceImpl
 		OrderByComparator<SavedContentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.find(
-				finderCache, new Object[] {uuid, companyId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUuid_C.find(
+			finderCache, new Object[] {uuid, companyId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -509,19 +477,14 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByUuid_C.count(
-				finderCache, new Object[] {uuid, companyId});
-		}
+		return _collectionPersistenceFinderByUuid_C.count(
+			finderCache, new Object[] {uuid, companyId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByGroupId;
 	private FinderPath _finderPathWithoutPaginationFindByGroupId;
 	private FinderPath _finderPathCountByGroupId;
-	private CollectionPersistenceFinder<SavedContentEntry>
+	private FilterCollectionPersistenceFinder<SavedContentEntry>
 		_collectionPersistenceFinderByGroupId;
 
 	/**
@@ -596,14 +559,9 @@ public class SavedContentEntryPersistenceImpl
 		OrderByComparator<SavedContentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByGroupId.find(
-				finderCache, new Object[] {groupId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByGroupId.find(
+			finderCache, new Object[] {groupId}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -696,98 +654,9 @@ public class SavedContentEntryPersistenceImpl
 		long groupId, int start, int end,
 		OrderByComparator<SavedContentEntry> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByGroupId(groupId, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByGroupId(
-					groupId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				3 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(4);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					SavedContentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(SavedContentEntryModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), SavedContentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, SavedContentEntryImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, SavedContentEntryImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			return (List<SavedContentEntry>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByGroupId.filterFind(
+			finderCache, new Object[] {groupId}, start, end, orderByComparator,
+			groupId);
 	}
 
 	/**
@@ -809,13 +678,8 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByGroupId(long groupId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByGroupId.count(
-				finderCache, new Object[] {groupId});
-		}
+		return _collectionPersistenceFinderByGroupId.count(
+			finderCache, new Object[] {groupId});
 	}
 
 	/**
@@ -826,58 +690,9 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int filterCountByGroupId(long groupId) {
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByGroupId(groupId);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<SavedContentEntry> savedContentEntries = findByGroupId(
-				groupId);
-
-			savedContentEntries = InlineSQLHelperUtil.filter(
-				savedContentEntries, groupId);
-
-			return savedContentEntries.size();
-		}
-
-		StringBundler sb = new StringBundler(2);
-
-		sb.append(_FILTER_SQL_COUNT_SAVEDCONTENTENTRY_WHERE);
-
-		sb.append(_FINDER_COLUMN_GROUPID_GROUPID_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), SavedContentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByGroupId.filterCount(
+			finderCache, new Object[] {groupId}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_GROUPID_GROUPID_2 =
-		"savedContentEntry.groupId = ?";
 
 	private FinderPath _finderPathWithPaginationFindByUserId;
 	private FinderPath _finderPathWithoutPaginationFindByUserId;
@@ -956,14 +771,9 @@ public class SavedContentEntryPersistenceImpl
 		OrderByComparator<SavedContentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByUserId.find(
-				finderCache, new Object[] {userId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByUserId.find(
+			finderCache, new Object[] {userId}, start, end, orderByComparator,
+			useFinderCache);
 	}
 
 	/**
@@ -1025,19 +835,14 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByUserId(long userId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByUserId.count(
-				finderCache, new Object[] {userId});
-		}
+		return _collectionPersistenceFinderByUserId.count(
+			finderCache, new Object[] {userId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_U;
 	private FinderPath _finderPathWithoutPaginationFindByG_U;
 	private FinderPath _finderPathCountByG_U;
-	private CollectionPersistenceFinder<SavedContentEntry>
+	private FilterCollectionPersistenceFinder<SavedContentEntry>
 		_collectionPersistenceFinderByG_U;
 
 	/**
@@ -1116,14 +921,9 @@ public class SavedContentEntryPersistenceImpl
 		OrderByComparator<SavedContentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_U.find(
-				finderCache, new Object[] {groupId, userId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_U.find(
+			finderCache, new Object[] {groupId, userId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1222,102 +1022,9 @@ public class SavedContentEntryPersistenceImpl
 		long groupId, long userId, int start, int end,
 		OrderByComparator<SavedContentEntry> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_U(groupId, userId, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_U(
-					groupId, userId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				4 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(5);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_U_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_U_USERID_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					SavedContentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(SavedContentEntryModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), SavedContentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, SavedContentEntryImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, SavedContentEntryImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(userId);
-
-			return (List<SavedContentEntry>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_U.filterFind(
+			finderCache, new Object[] {groupId, userId}, start, end,
+			orderByComparator, groupId);
 	}
 
 	/**
@@ -1341,13 +1048,8 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByG_U(long groupId, long userId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_U.count(
-				finderCache, new Object[] {groupId, userId});
-		}
+		return _collectionPersistenceFinderByG_U.count(
+			finderCache, new Object[] {groupId, userId});
 	}
 
 	/**
@@ -1359,70 +1061,14 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int filterCountByG_U(long groupId, long userId) {
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_U(groupId, userId);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<SavedContentEntry> savedContentEntries = findByG_U(
-				groupId, userId);
-
-			savedContentEntries = InlineSQLHelperUtil.filter(
-				savedContentEntries, groupId);
-
-			return savedContentEntries.size();
-		}
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(_FILTER_SQL_COUNT_SAVEDCONTENTENTRY_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_U_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_U_USERID_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), SavedContentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(userId);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_U.filterCount(
+			finderCache, new Object[] {groupId, userId}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_U_GROUPID_2 =
-		"savedContentEntry.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_U_USERID_2 =
-		"savedContentEntry.userId = ?";
 
 	private FinderPath _finderPathWithPaginationFindByG_CN;
 	private FinderPath _finderPathWithoutPaginationFindByG_CN;
 	private FinderPath _finderPathCountByG_CN;
-	private CollectionPersistenceFinder<SavedContentEntry>
+	private FilterCollectionPersistenceFinder<SavedContentEntry>
 		_collectionPersistenceFinderByG_CN;
 
 	/**
@@ -1502,14 +1148,9 @@ public class SavedContentEntryPersistenceImpl
 		OrderByComparator<SavedContentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_CN.find(
-				finderCache, new Object[] {groupId, classNameId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_CN.find(
+			finderCache, new Object[] {groupId, classNameId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1611,103 +1252,9 @@ public class SavedContentEntryPersistenceImpl
 		long groupId, long classNameId, int start, int end,
 		OrderByComparator<SavedContentEntry> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_CN(
-				groupId, classNameId, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_CN(
-					groupId, classNameId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-					orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				4 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(5);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_CN_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_CN_CLASSNAMEID_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					SavedContentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(SavedContentEntryModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), SavedContentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, SavedContentEntryImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, SavedContentEntryImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(classNameId);
-
-			return (List<SavedContentEntry>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_CN.filterFind(
+			finderCache, new Object[] {groupId, classNameId}, start, end,
+			orderByComparator, groupId);
 	}
 
 	/**
@@ -1731,13 +1278,8 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByG_CN(long groupId, long classNameId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_CN.count(
-				finderCache, new Object[] {groupId, classNameId});
-		}
+		return _collectionPersistenceFinderByG_CN.count(
+			finderCache, new Object[] {groupId, classNameId});
 	}
 
 	/**
@@ -1749,65 +1291,9 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int filterCountByG_CN(long groupId, long classNameId) {
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_CN(groupId, classNameId);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<SavedContentEntry> savedContentEntries = findByG_CN(
-				groupId, classNameId);
-
-			savedContentEntries = InlineSQLHelperUtil.filter(
-				savedContentEntries, groupId);
-
-			return savedContentEntries.size();
-		}
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(_FILTER_SQL_COUNT_SAVEDCONTENTENTRY_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_CN_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_CN_CLASSNAMEID_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), SavedContentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(classNameId);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_CN.filterCount(
+			finderCache, new Object[] {groupId, classNameId}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_CN_GROUPID_2 =
-		"savedContentEntry.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_CN_CLASSNAMEID_2 =
-		"savedContentEntry.classNameId = ?";
 
 	private FinderPath _finderPathWithPaginationFindByU_C;
 	private FinderPath _finderPathWithoutPaginationFindByU_C;
@@ -1892,14 +1378,9 @@ public class SavedContentEntryPersistenceImpl
 		OrderByComparator<SavedContentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByU_C.find(
-				finderCache, new Object[] {userId, classNameId}, start, end,
-				orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByU_C.find(
+			finderCache, new Object[] {userId, classNameId}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -1967,19 +1448,14 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByU_C(long userId, long classNameId) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByU_C.count(
-				finderCache, new Object[] {userId, classNameId});
-		}
+		return _collectionPersistenceFinderByU_C.count(
+			finderCache, new Object[] {userId, classNameId});
 	}
 
 	private FinderPath _finderPathWithPaginationFindByG_C_C;
 	private FinderPath _finderPathWithoutPaginationFindByG_C_C;
 	private FinderPath _finderPathCountByG_C_C;
-	private CollectionPersistenceFinder<SavedContentEntry>
+	private FilterCollectionPersistenceFinder<SavedContentEntry>
 		_collectionPersistenceFinderByG_C_C;
 
 	/**
@@ -2066,14 +1542,9 @@ public class SavedContentEntryPersistenceImpl
 		OrderByComparator<SavedContentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_C_C.find(
-				finderCache, new Object[] {groupId, classNameId, classPK},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByG_C_C.find(
+			finderCache, new Object[] {groupId, classNameId, classPK}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2183,107 +1654,9 @@ public class SavedContentEntryPersistenceImpl
 		long groupId, long classNameId, long classPK, int start, int end,
 		OrderByComparator<SavedContentEntry> orderByComparator) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return findByG_C_C(
-				groupId, classNameId, classPK, start, end, orderByComparator);
-		}
-
-		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-			isPermissionsInMemoryFilterEnabled()) {
-
-			return InlineSQLHelperUtil.filter(
-				findByG_C_C(
-					groupId, classNameId, classPK, QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, orderByComparator),
-				groupId);
-		}
-
-		StringBundler sb = null;
-
-		if (orderByComparator != null) {
-			sb = new StringBundler(
-				5 + (orderByComparator.getOrderByFields().length * 2));
-		}
-		else {
-			sb = new StringBundler(6);
-		}
-
-		if (getDB().isSupportsInlineDistinct()) {
-			sb.append(_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_WHERE);
-		}
-		else {
-			sb.append(
-				_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_1);
-		}
-
-		sb.append(_FINDER_COLUMN_G_C_C_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_C_C_CLASSNAMEID_2);
-
-		sb.append(_FINDER_COLUMN_G_C_C_CLASSPK_2);
-
-		if (!getDB().isSupportsInlineDistinct()) {
-			sb.append(
-				_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_2);
-		}
-
-		if (orderByComparator != null) {
-			if (getDB().isSupportsInlineDistinct()) {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator, true);
-			}
-			else {
-				appendOrderByComparator(
-					sb, _ORDER_BY_ENTITY_TABLE, orderByComparator, true);
-			}
-		}
-		else {
-			if (getDB().isSupportsInlineDistinct()) {
-				sb.append(
-					SavedContentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT);
-			}
-			else {
-				sb.append(SavedContentEntryModelImpl.ORDER_BY_SQL);
-			}
-		}
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), SavedContentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			if (getDB().isSupportsInlineDistinct()) {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_ALIAS, SavedContentEntryImpl.class);
-			}
-			else {
-				sqlQuery.addEntity(
-					_FILTER_ENTITY_TABLE, SavedContentEntryImpl.class);
-			}
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(classNameId);
-
-			queryPos.add(classPK);
-
-			return (List<SavedContentEntry>)QueryUtil.list(
-				sqlQuery, getDialect(), start, end);
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_C_C.filterFind(
+			finderCache, new Object[] {groupId, classNameId, classPK}, start,
+			end, orderByComparator, groupId);
 	}
 
 	/**
@@ -2309,13 +1682,8 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByG_C_C(long groupId, long classNameId, long classPK) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByG_C_C.count(
-				finderCache, new Object[] {groupId, classNameId, classPK});
-		}
+		return _collectionPersistenceFinderByG_C_C.count(
+			finderCache, new Object[] {groupId, classNameId, classPK});
 	}
 
 	/**
@@ -2330,72 +1698,9 @@ public class SavedContentEntryPersistenceImpl
 	public int filterCountByG_C_C(
 		long groupId, long classNameId, long classPK) {
 
-		if (!InlineSQLHelperUtil.isEnabled(groupId)) {
-			return countByG_C_C(groupId, classNameId, classPK);
-		}
-
-		if (isPermissionsInMemoryFilterEnabled()) {
-			List<SavedContentEntry> savedContentEntries = findByG_C_C(
-				groupId, classNameId, classPK);
-
-			savedContentEntries = InlineSQLHelperUtil.filter(
-				savedContentEntries, groupId);
-
-			return savedContentEntries.size();
-		}
-
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(_FILTER_SQL_COUNT_SAVEDCONTENTENTRY_WHERE);
-
-		sb.append(_FINDER_COLUMN_G_C_C_GROUPID_2);
-
-		sb.append(_FINDER_COLUMN_G_C_C_CLASSNAMEID_2);
-
-		sb.append(_FINDER_COLUMN_G_C_C_CLASSPK_2);
-
-		String sql = InlineSQLHelperUtil.replacePermissionCheck(
-			sb.toString(), SavedContentEntry.class.getName(),
-			_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
-
-			sqlQuery.addScalar(
-				COUNT_COLUMN_NAME, com.liferay.portal.kernel.dao.orm.Type.LONG);
-
-			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
-
-			queryPos.add(groupId);
-
-			queryPos.add(classNameId);
-
-			queryPos.add(classPK);
-
-			Long count = (Long)sqlQuery.uniqueResult();
-
-			return count.intValue();
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
+		return _collectionPersistenceFinderByG_C_C.filterCount(
+			finderCache, new Object[] {groupId, classNameId, classPK}, groupId);
 	}
-
-	private static final String _FINDER_COLUMN_G_C_C_GROUPID_2 =
-		"savedContentEntry.groupId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_C_C_CLASSNAMEID_2 =
-		"savedContentEntry.classNameId = ? AND ";
-
-	private static final String _FINDER_COLUMN_G_C_C_CLASSPK_2 =
-		"savedContentEntry.classPK = ?";
 
 	private FinderPath _finderPathWithPaginationFindByC_C_C;
 	private FinderPath _finderPathWithoutPaginationFindByC_C_C;
@@ -2488,14 +1793,9 @@ public class SavedContentEntryPersistenceImpl
 		OrderByComparator<SavedContentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByC_C_C.find(
-				finderCache, new Object[] {companyId, classNameId, classPK},
-				start, end, orderByComparator, useFinderCache);
-		}
+		return _collectionPersistenceFinderByC_C_C.find(
+			finderCache, new Object[] {companyId, classNameId, classPK}, start,
+			end, orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2569,13 +1869,8 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Override
 	public int countByC_C_C(long companyId, long classNameId, long classPK) {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _collectionPersistenceFinderByC_C_C.count(
-				finderCache, new Object[] {companyId, classNameId, classPK});
-		}
+		return _collectionPersistenceFinderByC_C_C.count(
+			finderCache, new Object[] {companyId, classNameId, classPK});
 	}
 
 	private FinderPath _finderPathFetchByG_U_C_C;
@@ -2647,15 +1942,9 @@ public class SavedContentEntryPersistenceImpl
 		long groupId, long userId, long classNameId, long classPK,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			return _uniquePersistenceFinderByG_U_C_C.fetch(
-				finderCache,
-				new Object[] {groupId, userId, classNameId, classPK},
-				useFinderCache);
-		}
+		return _uniquePersistenceFinderByG_U_C_C.fetch(
+			finderCache, new Object[] {groupId, userId, classNameId, classPK},
+			useFinderCache);
 	}
 
 	/**
@@ -2699,7 +1988,10 @@ public class SavedContentEntryPersistenceImpl
 	private FinderPath _finderPathWithoutPaginationFindByC_U_C_C;
 	private FinderPath _finderPathFetchByC_U_C_C;
 	private FinderPath _finderPathCountByC_U_C_C;
-	private FinderPath _finderPathWithPaginationCountByC_U_C_C;
+	private CollectionPersistenceFinder<SavedContentEntry>
+		_collectionPersistenceFinderByC_U_C_C;
+	private UniquePersistenceFinder<SavedContentEntry>
+		_uniquePersistenceFinderByC_U_C_C;
 
 	/**
 	 * Returns all the saved content entries where companyId = &#63; and userId = &#63; and classNameId = &#63; and classPK = any &#63;.
@@ -2798,16 +2090,11 @@ public class SavedContentEntryPersistenceImpl
 		OrderByComparator<SavedContentEntry> orderByComparator,
 		boolean useFinderCache) {
 
-		if (classPKs == null) {
-			classPKs = new long[0];
-		}
-		else if (classPKs.length > 1) {
-			classPKs = ArrayUtil.sortedUnique(classPKs);
-		}
+		classPKs = ArrayUtil.sortedUnique(classPKs);
 
 		if (classPKs.length == 1) {
 			SavedContentEntry savedContentEntry = fetchByC_U_C_C(
-				companyId, userId, classNameId, classPKs[0]);
+				companyId, userId, classNameId, classPKs[0], useFinderCache);
 
 			if (savedContentEntry == null) {
 				return Collections.emptyList();
@@ -2822,125 +2109,10 @@ public class SavedContentEntryPersistenceImpl
 			}
 		}
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderArgs = new Object[] {
-						companyId, userId, classNameId,
-						StringUtil.merge(classPKs)
-					};
-				}
-			}
-			else if (useFinderCache) {
-				finderArgs = new Object[] {
-					companyId, userId, classNameId, StringUtil.merge(classPKs),
-					start, end, orderByComparator
-				};
-			}
-
-			List<SavedContentEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<SavedContentEntry>)finderCache.getResult(
-					_finderPathWithPaginationFindByC_U_C_C, finderArgs, this);
-
-				if ((list != null) && !list.isEmpty()) {
-					for (SavedContentEntry savedContentEntry : list) {
-						if ((companyId != savedContentEntry.getCompanyId()) ||
-							(userId != savedContentEntry.getUserId()) ||
-							(classNameId !=
-								savedContentEntry.getClassNameId()) ||
-							!ArrayUtil.contains(
-								classPKs, savedContentEntry.getClassPK())) {
-
-							list = null;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (list == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_SELECT_SAVEDCONTENTENTRY_WHERE);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_COMPANYID_2);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_USERID_2);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_CLASSNAMEID_2);
-
-				if (classPKs.length > 0) {
-					sb.append("(");
-
-					sb.append(_FINDER_COLUMN_C_U_C_C_CLASSPK_7);
-
-					sb.append(StringUtil.merge(classPKs));
-
-					sb.append(")");
-
-					sb.append(")");
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				if (orderByComparator != null) {
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-				}
-				else {
-					sb.append(SavedContentEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(companyId);
-
-					queryPos.add(userId);
-
-					queryPos.add(classNameId);
-
-					list = (List<SavedContentEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(
-							_finderPathWithPaginationFindByC_U_C_C, finderArgs,
-							list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
+		return _collectionPersistenceFinderByC_U_C_C.find(
+			finderCache,
+			new Object[] {companyId, userId, classNameId, classPKs}, start, end,
+			orderByComparator, useFinderCache);
 	}
 
 	/**
@@ -2962,29 +2134,16 @@ public class SavedContentEntryPersistenceImpl
 			companyId, userId, classNameId, classPK);
 
 		if (savedContentEntry == null) {
-			StringBundler sb = new StringBundler(10);
-
-			sb.append(_NO_SUCH_ENTITY_WITH_KEY);
-
-			sb.append("companyId=");
-			sb.append(companyId);
-
-			sb.append(", userId=");
-			sb.append(userId);
-
-			sb.append(", classNameId=");
-			sb.append(classNameId);
-
-			sb.append(", classPK=");
-			sb.append(classPK);
-
-			sb.append("}");
+			String message =
+				_uniquePersistenceFinderByC_U_C_C.buildNoSuchKeyMessage(
+					_NO_SUCH_ENTITY_WITH_KEY,
+					new Object[] {companyId, userId, classNameId, classPK});
 
 			if (_log.isDebugEnabled()) {
-				_log.debug(sb.toString());
+				_log.debug(message);
 			}
 
-			throw new NoSuchSavedContentEntryException(sb.toString());
+			throw new NoSuchSavedContentEntryException(message);
 		}
 
 		return savedContentEntry;
@@ -3021,100 +2180,9 @@ public class SavedContentEntryPersistenceImpl
 		long companyId, long userId, long classNameId, long classPK,
 		boolean useFinderCache) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			Object[] finderArgs = null;
-
-			if (useFinderCache) {
-				finderArgs = new Object[] {
-					companyId, userId, classNameId, classPK
-				};
-			}
-
-			Object result = null;
-
-			if (useFinderCache) {
-				result = finderCache.getResult(
-					_finderPathFetchByC_U_C_C, finderArgs, this);
-			}
-
-			if (result instanceof SavedContentEntry) {
-				SavedContentEntry savedContentEntry = (SavedContentEntry)result;
-
-				if ((companyId != savedContentEntry.getCompanyId()) ||
-					(userId != savedContentEntry.getUserId()) ||
-					(classNameId != savedContentEntry.getClassNameId()) ||
-					(classPK != savedContentEntry.getClassPK())) {
-
-					result = null;
-				}
-			}
-
-			if (result == null) {
-				StringBundler sb = new StringBundler(6);
-
-				sb.append(_SQL_SELECT_SAVEDCONTENTENTRY_WHERE);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_COMPANYID_2);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_USERID_2);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_CLASSNAMEID_2);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_CLASSPK_2);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(companyId);
-
-					queryPos.add(userId);
-
-					queryPos.add(classNameId);
-
-					queryPos.add(classPK);
-
-					List<SavedContentEntry> list = query.list();
-
-					if (list.isEmpty()) {
-						if (useFinderCache) {
-							finderCache.putResult(
-								_finderPathFetchByC_U_C_C, finderArgs, list);
-						}
-					}
-					else {
-						SavedContentEntry savedContentEntry = list.get(0);
-
-						result = savedContentEntry;
-
-						cacheResult(savedContentEntry);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			if (result instanceof List<?>) {
-				return null;
-			}
-			else {
-				return (SavedContentEntry)result;
-			}
-		}
+		return _uniquePersistenceFinderByC_U_C_C.fetch(
+			finderCache, new Object[] {companyId, userId, classNameId, classPK},
+			useFinderCache);
 	}
 
 	/**
@@ -3150,65 +2218,11 @@ public class SavedContentEntryPersistenceImpl
 	public int countByC_U_C_C(
 		long companyId, long userId, long classNameId, long classPK) {
 
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			FinderPath finderPath = _finderPathCountByC_U_C_C;
-
-			Object[] finderArgs = new Object[] {
-				companyId, userId, classNameId, classPK
-			};
-
-			Long count = (Long)finderCache.getResult(
-				finderPath, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler(5);
-
-				sb.append(_SQL_COUNT_SAVEDCONTENTENTRY_WHERE);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_COMPANYID_2);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_USERID_2);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_CLASSNAMEID_2);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_CLASSPK_2);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(companyId);
-
-					queryPos.add(userId);
-
-					queryPos.add(classNameId);
-
-					queryPos.add(classPK);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(finderPath, finderArgs, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByC_U_C_C.count(
+			finderCache,
+			new Object[] {
+				companyId, userId, classNameId, new long[] {classPK}
+			});
 	}
 
 	/**
@@ -3224,100 +2238,12 @@ public class SavedContentEntryPersistenceImpl
 	public int countByC_U_C_C(
 		long companyId, long userId, long classNameId, long[] classPKs) {
 
-		if (classPKs == null) {
-			classPKs = new long[0];
-		}
-		else if (classPKs.length > 1) {
-			classPKs = ArrayUtil.sortedUnique(classPKs);
-		}
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			Object[] finderArgs = new Object[] {
-				companyId, userId, classNameId, StringUtil.merge(classPKs)
-			};
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathWithPaginationCountByC_U_C_C, finderArgs, this);
-
-			if (count == null) {
-				StringBundler sb = new StringBundler();
-
-				sb.append(_SQL_COUNT_SAVEDCONTENTENTRY_WHERE);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_COMPANYID_2);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_USERID_2);
-
-				sb.append(_FINDER_COLUMN_C_U_C_C_CLASSNAMEID_2);
-
-				if (classPKs.length > 0) {
-					sb.append("(");
-
-					sb.append(_FINDER_COLUMN_C_U_C_C_CLASSPK_7);
-
-					sb.append(StringUtil.merge(classPKs));
-
-					sb.append(")");
-
-					sb.append(")");
-				}
-
-				sb.setStringAt(
-					removeConjunction(sb.stringAt(sb.index() - 1)),
-					sb.index() - 1);
-
-				String sql = sb.toString();
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					QueryPos queryPos = QueryPos.getInstance(query);
-
-					queryPos.add(companyId);
-
-					queryPos.add(userId);
-
-					queryPos.add(classNameId);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathWithPaginationCountByC_U_C_C, finderArgs,
-						count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
+		return _collectionPersistenceFinderByC_U_C_C.count(
+			finderCache,
+			new Object[] {
+				companyId, userId, classNameId, ArrayUtil.sortedUnique(classPKs)
+			});
 	}
-
-	private static final String _FINDER_COLUMN_C_U_C_C_COMPANYID_2 =
-		"savedContentEntry.companyId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_U_C_C_USERID_2 =
-		"savedContentEntry.userId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_U_C_C_CLASSNAMEID_2 =
-		"savedContentEntry.classNameId = ? AND ";
-
-	private static final String _FINDER_COLUMN_C_U_C_C_CLASSPK_2 =
-		"savedContentEntry.classPK = ?";
-
-	private static final String _FINDER_COLUMN_C_U_C_C_CLASSPK_7 =
-		"savedContentEntry.classPK IN (";
 
 	public SavedContentEntryPersistenceImpl() {
 		Map<String, String> dbColumnNames = new HashMap<String, String>();
@@ -3332,163 +2258,6 @@ public class SavedContentEntryPersistenceImpl
 		setModelPKClass(long.class);
 
 		setTable(SavedContentEntryTable.INSTANCE);
-	}
-
-	/**
-	 * Caches the saved content entry in the entity cache if it is enabled.
-	 *
-	 * @param savedContentEntry the saved content entry
-	 */
-	@Override
-	public void cacheResult(SavedContentEntry savedContentEntry) {
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					savedContentEntry.getCtCollectionId())) {
-
-			entityCache.putResult(
-				SavedContentEntryImpl.class, savedContentEntry.getPrimaryKey(),
-				savedContentEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G,
-				new Object[] {
-					savedContentEntry.getUuid(), savedContentEntry.getGroupId()
-				},
-				savedContentEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByG_U_C_C,
-				new Object[] {
-					savedContentEntry.getGroupId(),
-					savedContentEntry.getUserId(),
-					savedContentEntry.getClassNameId(),
-					savedContentEntry.getClassPK()
-				},
-				savedContentEntry);
-
-			finderCache.putResult(
-				_finderPathFetchByC_U_C_C,
-				new Object[] {
-					savedContentEntry.getCompanyId(),
-					savedContentEntry.getUserId(),
-					savedContentEntry.getClassNameId(),
-					savedContentEntry.getClassPK()
-				},
-				savedContentEntry);
-		}
-	}
-
-	private int _valueObjectFinderCacheListThreshold;
-
-	/**
-	 * Caches the saved content entries in the entity cache if it is enabled.
-	 *
-	 * @param savedContentEntries the saved content entries
-	 */
-	@Override
-	public void cacheResult(List<SavedContentEntry> savedContentEntries) {
-		if ((_valueObjectFinderCacheListThreshold == 0) ||
-			((_valueObjectFinderCacheListThreshold > 0) &&
-			 (savedContentEntries.size() >
-				 _valueObjectFinderCacheListThreshold))) {
-
-			return;
-		}
-
-		for (SavedContentEntry savedContentEntry : savedContentEntries) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-						savedContentEntry.getCtCollectionId())) {
-
-				if (entityCache.getResult(
-						SavedContentEntryImpl.class,
-						savedContentEntry.getPrimaryKey()) == null) {
-
-					cacheResult(savedContentEntry);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Clears the cache for all saved content entries.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache() {
-		entityCache.clearCache(SavedContentEntryImpl.class);
-
-		finderCache.clearCache(SavedContentEntryImpl.class);
-	}
-
-	/**
-	 * Clears the cache for the saved content entry.
-	 *
-	 * <p>
-	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
-	 * </p>
-	 */
-	@Override
-	public void clearCache(SavedContentEntry savedContentEntry) {
-		entityCache.removeResult(
-			SavedContentEntryImpl.class, savedContentEntry);
-	}
-
-	@Override
-	public void clearCache(List<SavedContentEntry> savedContentEntries) {
-		for (SavedContentEntry savedContentEntry : savedContentEntries) {
-			entityCache.removeResult(
-				SavedContentEntryImpl.class, savedContentEntry);
-		}
-	}
-
-	@Override
-	public void clearCache(Set<Serializable> primaryKeys) {
-		finderCache.clearCache(SavedContentEntryImpl.class);
-
-		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(SavedContentEntryImpl.class, primaryKey);
-		}
-	}
-
-	protected void cacheUniqueFindersCache(
-		SavedContentEntryModelImpl savedContentEntryModelImpl) {
-
-		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					savedContentEntryModelImpl.getCtCollectionId())) {
-
-			Object[] args = new Object[] {
-				savedContentEntryModelImpl.getUuid(),
-				savedContentEntryModelImpl.getGroupId()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByUUID_G, args, savedContentEntryModelImpl);
-
-			args = new Object[] {
-				savedContentEntryModelImpl.getGroupId(),
-				savedContentEntryModelImpl.getUserId(),
-				savedContentEntryModelImpl.getClassNameId(),
-				savedContentEntryModelImpl.getClassPK()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByG_U_C_C, args, savedContentEntryModelImpl);
-
-			args = new Object[] {
-				savedContentEntryModelImpl.getCompanyId(),
-				savedContentEntryModelImpl.getUserId(),
-				savedContentEntryModelImpl.getClassNameId(),
-				savedContentEntryModelImpl.getClassPK()
-			};
-
-			finderCache.putResult(
-				_finderPathFetchByC_U_C_C, args, savedContentEntryModelImpl);
-		}
 	}
 
 	/**
@@ -3525,48 +2294,6 @@ public class SavedContentEntryPersistenceImpl
 		throws NoSuchSavedContentEntryException {
 
 		return remove((Serializable)savedContentEntryId);
-	}
-
-	/**
-	 * Removes the saved content entry with the primary key from the database. Also notifies the appropriate model listeners.
-	 *
-	 * @param primaryKey the primary key of the saved content entry
-	 * @return the saved content entry that was removed
-	 * @throws NoSuchSavedContentEntryException if a saved content entry with the primary key could not be found
-	 */
-	@Override
-	public SavedContentEntry remove(Serializable primaryKey)
-		throws NoSuchSavedContentEntryException {
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			SavedContentEntry savedContentEntry =
-				(SavedContentEntry)session.get(
-					SavedContentEntryImpl.class, primaryKey);
-
-			if (savedContentEntry == null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-				}
-
-				throw new NoSuchSavedContentEntryException(
-					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			return remove(savedContentEntry);
-		}
-		catch (NoSuchSavedContentEntryException noSuchEntityException) {
-			throw noSuchEntityException;
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
 	}
 
 	@Override
@@ -3685,42 +2412,13 @@ public class SavedContentEntryPersistenceImpl
 			closeSession(session);
 		}
 
-		entityCache.putResult(
-			SavedContentEntryImpl.class, savedContentEntryModelImpl, false,
-			true);
-
-		cacheUniqueFindersCache(savedContentEntryModelImpl);
+		cacheUniqueFindersResult(savedContentEntry, false);
 
 		if (isNew) {
 			savedContentEntry.setNew(false);
 		}
 
 		savedContentEntry.resetOriginalValues();
-
-		return savedContentEntry;
-	}
-
-	/**
-	 * Returns the saved content entry with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the saved content entry
-	 * @return the saved content entry
-	 * @throws NoSuchSavedContentEntryException if a saved content entry with the primary key could not be found
-	 */
-	@Override
-	public SavedContentEntry findByPrimaryKey(Serializable primaryKey)
-		throws NoSuchSavedContentEntryException {
-
-		SavedContentEntry savedContentEntry = fetchByPrimaryKey(primaryKey);
-
-		if (savedContentEntry == null) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-			}
-
-			throw new NoSuchSavedContentEntryException(
-				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
-		}
 
 		return savedContentEntry;
 	}
@@ -3739,53 +2437,9 @@ public class SavedContentEntryPersistenceImpl
 		return findByPrimaryKey((Serializable)savedContentEntryId);
 	}
 
-	/**
-	 * Returns the saved content entry with the primary key or returns <code>null</code> if it could not be found.
-	 *
-	 * @param primaryKey the primary key of the saved content entry
-	 * @return the saved content entry, or <code>null</code> if a saved content entry with the primary key could not be found
-	 */
 	@Override
-	public SavedContentEntry fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(
-				SavedContentEntry.class, primaryKey)) {
-
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKey(primaryKey);
-			}
-		}
-
-		SavedContentEntry savedContentEntry =
-			(SavedContentEntry)entityCache.getResult(
-				SavedContentEntryImpl.class, primaryKey);
-
-		if (savedContentEntry != null) {
-			return savedContentEntry;
-		}
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			savedContentEntry = (SavedContentEntry)session.get(
-				SavedContentEntryImpl.class, primaryKey);
-
-			if (savedContentEntry != null) {
-				cacheResult(savedContentEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return savedContentEntry;
+	protected CTPersistenceHelper getCTPersistenceHelper() {
+		return ctPersistenceHelper;
 	}
 
 	/**
@@ -3797,325 +2451,6 @@ public class SavedContentEntryPersistenceImpl
 	@Override
 	public SavedContentEntry fetchByPrimaryKey(long savedContentEntryId) {
 		return fetchByPrimaryKey((Serializable)savedContentEntryId);
-	}
-
-	@Override
-	public Map<Serializable, SavedContentEntry> fetchByPrimaryKeys(
-		Set<Serializable> primaryKeys) {
-
-		if (ctPersistenceHelper.isProductionMode(SavedContentEntry.class)) {
-			try (SafeCloseable safeCloseable =
-					CTCollectionThreadLocal.
-						setProductionModeWithSafeCloseable()) {
-
-				return super.fetchByPrimaryKeys(primaryKeys);
-			}
-		}
-
-		if (primaryKeys.isEmpty()) {
-			return Collections.emptyMap();
-		}
-
-		Map<Serializable, SavedContentEntry> map =
-			new HashMap<Serializable, SavedContentEntry>();
-
-		if (primaryKeys.size() == 1) {
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			Serializable primaryKey = iterator.next();
-
-			SavedContentEntry savedContentEntry = fetchByPrimaryKey(primaryKey);
-
-			if (savedContentEntry != null) {
-				map.put(primaryKey, savedContentEntry);
-			}
-
-			return map;
-		}
-
-		Set<Serializable> uncachedPrimaryKeys = null;
-
-		for (Serializable primaryKey : primaryKeys) {
-			try (SafeCloseable safeCloseable =
-					ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-						SavedContentEntry.class, primaryKey)) {
-
-				SavedContentEntry savedContentEntry =
-					(SavedContentEntry)entityCache.getResult(
-						SavedContentEntryImpl.class, primaryKey);
-
-				if (savedContentEntry == null) {
-					if (uncachedPrimaryKeys == null) {
-						uncachedPrimaryKeys = new HashSet<>();
-					}
-
-					uncachedPrimaryKeys.add(primaryKey);
-				}
-				else {
-					map.put(primaryKey, savedContentEntry);
-				}
-			}
-		}
-
-		if (uncachedPrimaryKeys == null) {
-			return map;
-		}
-
-		if ((databaseInMaxParameters > 0) &&
-			(primaryKeys.size() > databaseInMaxParameters)) {
-
-			Iterator<Serializable> iterator = primaryKeys.iterator();
-
-			while (iterator.hasNext()) {
-				Set<Serializable> page = new HashSet<>();
-
-				for (int i = 0;
-					 (i < databaseInMaxParameters) && iterator.hasNext(); i++) {
-
-					page.add(iterator.next());
-				}
-
-				map.putAll(fetchByPrimaryKeys(page));
-			}
-
-			return map;
-		}
-
-		StringBundler sb = new StringBundler((primaryKeys.size() * 2) + 1);
-
-		sb.append(getSelectSQL());
-		sb.append(" WHERE ");
-		sb.append(getPKDBName());
-		sb.append(" IN (");
-
-		for (Serializable primaryKey : primaryKeys) {
-			sb.append((long)primaryKey);
-
-			sb.append(",");
-		}
-
-		sb.setIndex(sb.index() - 1);
-
-		sb.append(")");
-
-		String sql = sb.toString();
-
-		Session session = null;
-
-		try {
-			session = openSession();
-
-			Query query = session.createQuery(sql);
-
-			for (SavedContentEntry savedContentEntry :
-					(List<SavedContentEntry>)query.list()) {
-
-				map.put(
-					savedContentEntry.getPrimaryKeyObj(), savedContentEntry);
-
-				cacheResult(savedContentEntry);
-			}
-		}
-		catch (Exception exception) {
-			throw processException(exception);
-		}
-		finally {
-			closeSession(session);
-		}
-
-		return map;
-	}
-
-	/**
-	 * Returns all the saved content entries.
-	 *
-	 * @return the saved content entries
-	 */
-	@Override
-	public List<SavedContentEntry> findAll() {
-		return findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-	}
-
-	/**
-	 * Returns a range of all the saved content entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SavedContentEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saved content entries
-	 * @param end the upper bound of the range of saved content entries (not inclusive)
-	 * @return the range of saved content entries
-	 */
-	@Override
-	public List<SavedContentEntry> findAll(int start, int end) {
-		return findAll(start, end, null);
-	}
-
-	/**
-	 * Returns an ordered range of all the saved content entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SavedContentEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saved content entries
-	 * @param end the upper bound of the range of saved content entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of saved content entries
-	 */
-	@Override
-	public List<SavedContentEntry> findAll(
-		int start, int end,
-		OrderByComparator<SavedContentEntry> orderByComparator) {
-
-		return findAll(start, end, orderByComparator, true);
-	}
-
-	/**
-	 * Returns an ordered range of all the saved content entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>SavedContentEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saved content entries
-	 * @param end the upper bound of the range of saved content entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of saved content entries
-	 */
-	@Override
-	public List<SavedContentEntry> findAll(
-		int start, int end,
-		OrderByComparator<SavedContentEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			FinderPath finderPath = null;
-			Object[] finderArgs = null;
-
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
-
-				if (useFinderCache) {
-					finderPath = _finderPathWithoutPaginationFindAll;
-					finderArgs = FINDER_ARGS_EMPTY;
-				}
-			}
-			else if (useFinderCache) {
-				finderPath = _finderPathWithPaginationFindAll;
-				finderArgs = new Object[] {start, end, orderByComparator};
-			}
-
-			List<SavedContentEntry> list = null;
-
-			if (useFinderCache) {
-				list = (List<SavedContentEntry>)finderCache.getResult(
-					finderPath, finderArgs, this);
-			}
-
-			if (list == null) {
-				StringBundler sb = null;
-				String sql = null;
-
-				if (orderByComparator != null) {
-					sb = new StringBundler(
-						2 + (orderByComparator.getOrderByFields().length * 2));
-
-					sb.append(_SQL_SELECT_SAVEDCONTENTENTRY);
-
-					appendOrderByComparator(
-						sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
-
-					sql = sb.toString();
-				}
-				else {
-					sql = _SQL_SELECT_SAVEDCONTENTENTRY;
-
-					sql = sql.concat(SavedContentEntryModelImpl.ORDER_BY_JPQL);
-				}
-
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(sql);
-
-					list = (List<SavedContentEntry>)QueryUtil.list(
-						query, getDialect(), start, end);
-
-					cacheResult(list);
-
-					if (useFinderCache) {
-						finderCache.putResult(finderPath, finderArgs, list);
-					}
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return list;
-		}
-	}
-
-	/**
-	 * Removes all the saved content entries from the database.
-	 *
-	 */
-	@Override
-	public void removeAll() {
-		for (SavedContentEntry savedContentEntry : findAll()) {
-			remove(savedContentEntry);
-		}
-	}
-
-	/**
-	 * Returns the number of saved content entries.
-	 *
-	 * @return the number of saved content entries
-	 */
-	@Override
-	public int countAll() {
-		try (SafeCloseable safeCloseable =
-				ctPersistenceHelper.setCTCollectionIdWithSafeCloseable(
-					SavedContentEntry.class)) {
-
-			Long count = (Long)finderCache.getResult(
-				_finderPathCountAll, FINDER_ARGS_EMPTY, this);
-
-			if (count == null) {
-				Session session = null;
-
-				try {
-					session = openSession();
-
-					Query query = session.createQuery(
-						_SQL_COUNT_SAVEDCONTENTENTRY);
-
-					count = (Long)query.uniqueResult();
-
-					finderCache.putResult(
-						_finderPathCountAll, FINDER_ARGS_EMPTY, count);
-				}
-				catch (Exception exception) {
-					throw processException(exception);
-				}
-				finally {
-					closeSession(session);
-				}
-			}
-
-			return count.intValue();
-		}
 	}
 
 	@Override
@@ -4215,21 +2550,6 @@ public class SavedContentEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		_valueObjectFinderCacheListThreshold = GetterUtil.getInteger(
-			PropsUtil.get(PropsKeys.VALUE_OBJECT_FINDER_CACHE_LIST_THRESHOLD));
-
-		_finderPathWithPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathWithoutPaginationFindAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0],
-			new String[0], true);
-
-		_finderPathCountAll = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-			new String[0], new String[0], false);
-
 		_finderPathWithPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
 			new String[] {
@@ -4240,34 +2560,37 @@ public class SavedContentEntryPersistenceImpl
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			true);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			true, null);
 
 		_finderPathCountByUuid = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()}, new String[] {"uuid_"},
-			false);
+			new String[] {String.class.getName()}, new String[] {"uuid_"}, 0, 1,
+			false, null);
 
 		_collectionPersistenceFinderByUuid = new CollectionPersistenceFinder<>(
 			this, _finderPathWithPaginationFindByUuid,
 			_finderPathWithoutPaginationFindByUuid, _finderPathCountByUuid,
 			_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
 			_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
-			SavedContentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			SavedContentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"savedContentEntry.", "uuid", FinderColumn.Type.STRING, "=",
 				true, true, SavedContentEntry::getUuid));
 
-		_finderPathFetchByUUID_G = new FinderPath(
+		_finderPathFetchByUUID_G = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "groupId"}, true);
+			new String[] {"uuid_", "groupId"}, 0, 1, false,
+			convertNullFunction(SavedContentEntry::getUuid),
+			SavedContentEntry::getGroupId);
 
 		_uniquePersistenceFinderByUUID_G = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByUUID_G, _SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
+			"",
 			new FinderColumn<>(
 				"savedContentEntry.", "uuid", FinderColumn.Type.STRING, "=",
-				true, false, SavedContentEntry::getUuid),
+				true, true, SavedContentEntry::getUuid),
 			new FinderColumn<>(
 				"savedContentEntry.", "groupId", FinderColumn.Type.LONG, "=",
 				true, true, SavedContentEntry::getGroupId));
@@ -4284,12 +2607,12 @@ public class SavedContentEntryPersistenceImpl
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, true);
+			new String[] {"uuid_", "companyId"}, 0, 1, true, null);
 
 		_finderPathCountByUuid_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
-			new String[] {"uuid_", "companyId"}, false);
+			new String[] {"uuid_", "companyId"}, 0, 1, false, null);
 
 		_collectionPersistenceFinderByUuid_C =
 			new CollectionPersistenceFinder<>(
@@ -4297,11 +2620,11 @@ public class SavedContentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUuid_C,
 				_finderPathCountByUuid_C, _SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
 				_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
-				SavedContentEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				SavedContentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"savedContentEntry.", "uuid", FinderColumn.Type.STRING, "=",
-					true, false, SavedContentEntry::getUuid),
+					true, true, SavedContentEntry::getUuid),
 				new FinderColumn<>(
 					"savedContentEntry.", "companyId", FinderColumn.Type.LONG,
 					"=", true, true, SavedContentEntry::getCompanyId));
@@ -4325,13 +2648,23 @@ public class SavedContentEntryPersistenceImpl
 			false);
 
 		_collectionPersistenceFinderByGroupId =
-			new CollectionPersistenceFinder<>(
+			new FilterCollectionPersistenceFinder<>(
 				this, _finderPathWithPaginationFindByGroupId,
 				_finderPathWithoutPaginationFindByGroupId,
 				_finderPathCountByGroupId, _SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
 				_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
-				SavedContentEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				SavedContentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					SavedContentEntryImpl.class, SavedContentEntry.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
+					SavedContentEntryModelImpl.ORDER_BY_SQL,
+					SavedContentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
 				new FinderColumn<>(
 					"savedContentEntry.", "groupId", FinderColumn.Type.LONG,
 					"=", true, true, SavedContentEntry::getGroupId));
@@ -4359,8 +2692,8 @@ public class SavedContentEntryPersistenceImpl
 				_finderPathWithoutPaginationFindByUserId,
 				_finderPathCountByUserId, _SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
 				_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
-				SavedContentEntryModelImpl.ORDER_BY_JPQL,
-				_ORDER_BY_ENTITY_ALIAS,
+				SavedContentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
 				new FinderColumn<>(
 					"savedContentEntry.", "userId", FinderColumn.Type.LONG, "=",
 					true, true, SavedContentEntry::getUserId));
@@ -4384,18 +2717,30 @@ public class SavedContentEntryPersistenceImpl
 			new String[] {Long.class.getName(), Long.class.getName()},
 			new String[] {"groupId", "userId"}, false);
 
-		_collectionPersistenceFinderByG_U = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByG_U,
-			_finderPathWithoutPaginationFindByG_U, _finderPathCountByG_U,
-			_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
-			_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
-			SavedContentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"savedContentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, SavedContentEntry::getGroupId),
-			new FinderColumn<>(
-				"savedContentEntry.", "userId", FinderColumn.Type.LONG, "=",
-				true, true, SavedContentEntry::getUserId));
+		_collectionPersistenceFinderByG_U =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_U,
+				_finderPathWithoutPaginationFindByG_U, _finderPathCountByG_U,
+				_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
+				_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
+				SavedContentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					SavedContentEntryImpl.class, SavedContentEntry.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
+					SavedContentEntryModelImpl.ORDER_BY_SQL,
+					SavedContentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"savedContentEntry.", "groupId", FinderColumn.Type.LONG,
+					"=", true, true, SavedContentEntry::getGroupId),
+				new FinderColumn<>(
+					"savedContentEntry.", "userId", FinderColumn.Type.LONG, "=",
+					true, true, SavedContentEntry::getUserId));
 
 		_finderPathWithPaginationFindByG_CN = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_CN",
@@ -4416,18 +2761,30 @@ public class SavedContentEntryPersistenceImpl
 			new String[] {Long.class.getName(), Long.class.getName()},
 			new String[] {"groupId", "classNameId"}, false);
 
-		_collectionPersistenceFinderByG_CN = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByG_CN,
-			_finderPathWithoutPaginationFindByG_CN, _finderPathCountByG_CN,
-			_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
-			_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
-			SavedContentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"savedContentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, SavedContentEntry::getGroupId),
-			new FinderColumn<>(
-				"savedContentEntry.", "classNameId", FinderColumn.Type.LONG,
-				"=", true, true, SavedContentEntry::getClassNameId));
+		_collectionPersistenceFinderByG_CN =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_CN,
+				_finderPathWithoutPaginationFindByG_CN, _finderPathCountByG_CN,
+				_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
+				_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
+				SavedContentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					SavedContentEntryImpl.class, SavedContentEntry.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
+					SavedContentEntryModelImpl.ORDER_BY_SQL,
+					SavedContentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"savedContentEntry.", "groupId", FinderColumn.Type.LONG,
+					"=", true, true, SavedContentEntry::getGroupId),
+				new FinderColumn<>(
+					"savedContentEntry.", "classNameId", FinderColumn.Type.LONG,
+					"=", true, true, SavedContentEntry::getClassNameId));
 
 		_finderPathWithPaginationFindByU_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByU_C",
@@ -4453,10 +2810,10 @@ public class SavedContentEntryPersistenceImpl
 			_finderPathWithoutPaginationFindByU_C, _finderPathCountByU_C,
 			_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
 			_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
-			SavedContentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			SavedContentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"savedContentEntry.", "userId", FinderColumn.Type.LONG, "=",
-				true, false, SavedContentEntry::getUserId),
+				true, true, SavedContentEntry::getUserId),
 			new FinderColumn<>(
 				"savedContentEntry.", "classNameId", FinderColumn.Type.LONG,
 				"=", true, true, SavedContentEntry::getClassNameId));
@@ -4484,21 +2841,33 @@ public class SavedContentEntryPersistenceImpl
 			},
 			new String[] {"groupId", "classNameId", "classPK"}, false);
 
-		_collectionPersistenceFinderByG_C_C = new CollectionPersistenceFinder<>(
-			this, _finderPathWithPaginationFindByG_C_C,
-			_finderPathWithoutPaginationFindByG_C_C, _finderPathCountByG_C_C,
-			_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
-			_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
-			SavedContentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
-			new FinderColumn<>(
-				"savedContentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, SavedContentEntry::getGroupId),
-			new FinderColumn<>(
-				"savedContentEntry.", "classNameId", FinderColumn.Type.LONG,
-				"=", true, false, SavedContentEntry::getClassNameId),
-			new FinderColumn<>(
-				"savedContentEntry.", "classPK", FinderColumn.Type.LONG, "=",
-				true, true, SavedContentEntry::getClassPK));
+		_collectionPersistenceFinderByG_C_C =
+			new FilterCollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByG_C_C,
+				_finderPathWithoutPaginationFindByG_C_C,
+				_finderPathCountByG_C_C, _SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
+				_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
+				SavedContentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FilterCollectionPersistenceFinder.FilterMetadata<>(
+					SavedContentEntryImpl.class, SavedContentEntry.class,
+					_FILTER_ENTITY_ALIAS, _FILTER_ENTITY_TABLE,
+					_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_1,
+					_FILTER_SQL_SELECT_SAVEDCONTENTENTRY_NO_INLINE_DISTINCT_WHERE_2,
+					_FILTER_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
+					SavedContentEntryModelImpl.ORDER_BY_SQL,
+					SavedContentEntryModelImpl.ORDER_BY_SQL_INLINE_DISTINCT),
+				new FinderColumn<>(
+					"savedContentEntry.", "groupId", FinderColumn.Type.LONG,
+					"=", true, true, SavedContentEntry::getGroupId),
+				new FinderColumn<>(
+					"savedContentEntry.", "classNameId", FinderColumn.Type.LONG,
+					"=", true, true, SavedContentEntry::getClassNameId),
+				new FinderColumn<>(
+					"savedContentEntry.", "classPK", FinderColumn.Type.LONG,
+					"=", true, true, SavedContentEntry::getClassPK));
 
 		_finderPathWithPaginationFindByC_C_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByC_C_C",
@@ -4528,37 +2897,39 @@ public class SavedContentEntryPersistenceImpl
 			_finderPathWithoutPaginationFindByC_C_C, _finderPathCountByC_C_C,
 			_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
 			_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
-			SavedContentEntryModelImpl.ORDER_BY_JPQL, _ORDER_BY_ENTITY_ALIAS,
+			SavedContentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX, "",
 			new FinderColumn<>(
 				"savedContentEntry.", "companyId", FinderColumn.Type.LONG, "=",
-				true, false, SavedContentEntry::getCompanyId),
+				true, true, SavedContentEntry::getCompanyId),
 			new FinderColumn<>(
 				"savedContentEntry.", "classNameId", FinderColumn.Type.LONG,
-				"=", true, false, SavedContentEntry::getClassNameId),
+				"=", true, true, SavedContentEntry::getClassNameId),
 			new FinderColumn<>(
 				"savedContentEntry.", "classPK", FinderColumn.Type.LONG, "=",
 				true, true, SavedContentEntry::getClassPK));
 
-		_finderPathFetchByG_U_C_C = new FinderPath(
+		_finderPathFetchByG_U_C_C = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByG_U_C_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
 				Long.class.getName(), Long.class.getName()
 			},
-			new String[] {"groupId", "userId", "classNameId", "classPK"}, true);
+			new String[] {"groupId", "userId", "classNameId", "classPK"}, 0, 0,
+			false, SavedContentEntry::getGroupId, SavedContentEntry::getUserId,
+			SavedContentEntry::getClassNameId, SavedContentEntry::getClassPK);
 
 		_uniquePersistenceFinderByG_U_C_C = new UniquePersistenceFinder<>(
 			this, _finderPathFetchByG_U_C_C,
-			_SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
+			_SQL_SELECT_SAVEDCONTENTENTRY_WHERE, "",
 			new FinderColumn<>(
 				"savedContentEntry.", "groupId", FinderColumn.Type.LONG, "=",
-				true, false, SavedContentEntry::getGroupId),
+				true, true, SavedContentEntry::getGroupId),
 			new FinderColumn<>(
 				"savedContentEntry.", "userId", FinderColumn.Type.LONG, "=",
-				true, false, SavedContentEntry::getUserId),
+				true, true, SavedContentEntry::getUserId),
 			new FinderColumn<>(
 				"savedContentEntry.", "classNameId", FinderColumn.Type.LONG,
-				"=", true, false, SavedContentEntry::getClassNameId),
+				"=", true, true, SavedContentEntry::getClassNameId),
 			new FinderColumn<>(
 				"savedContentEntry.", "classPK", FinderColumn.Type.LONG, "=",
 				true, true, SavedContentEntry::getClassPK));
@@ -4583,25 +2954,18 @@ public class SavedContentEntryPersistenceImpl
 			new String[] {"companyId", "userId", "classNameId", "classPK"},
 			true);
 
-		_finderPathFetchByC_U_C_C = new FinderPath(
+		_finderPathFetchByC_U_C_C = createUniqueFinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchByC_U_C_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
 				Long.class.getName(), Long.class.getName()
 			},
-			new String[] {"companyId", "userId", "classNameId", "classPK"},
-			true);
+			new String[] {"companyId", "userId", "classNameId", "classPK"}, 0,
+			0, false, SavedContentEntry::getCompanyId,
+			SavedContentEntry::getUserId, SavedContentEntry::getClassNameId,
+			SavedContentEntry::getClassPK);
 
 		_finderPathCountByC_U_C_C = new FinderPath(
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_U_C_C",
-			new String[] {
-				Long.class.getName(), Long.class.getName(),
-				Long.class.getName(), Long.class.getName()
-			},
-			new String[] {"companyId", "userId", "classNameId", "classPK"},
-			false);
-
-		_finderPathWithPaginationCountByC_U_C_C = new FinderPath(
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByC_U_C_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
@@ -4609,6 +2973,43 @@ public class SavedContentEntryPersistenceImpl
 			},
 			new String[] {"companyId", "userId", "classNameId", "classPK"},
 			false);
+
+		_collectionPersistenceFinderByC_U_C_C =
+			new CollectionPersistenceFinder<>(
+				this, _finderPathWithPaginationFindByC_U_C_C,
+				_finderPathWithoutPaginationFindByC_U_C_C,
+				_finderPathCountByC_U_C_C, _SQL_SELECT_SAVEDCONTENTENTRY_WHERE,
+				_SQL_COUNT_SAVEDCONTENTENTRY_WHERE,
+				SavedContentEntryModelImpl.ORDER_BY_JPQL, _ENTITY_ALIAS_PREFIX,
+				"",
+				new FinderColumn<>(
+					"savedContentEntry.", "companyId", FinderColumn.Type.LONG,
+					"=", true, true, SavedContentEntry::getCompanyId),
+				new FinderColumn<>(
+					"savedContentEntry.", "userId", FinderColumn.Type.LONG, "=",
+					true, true, SavedContentEntry::getUserId),
+				new FinderColumn<>(
+					"savedContentEntry.", "classNameId", FinderColumn.Type.LONG,
+					"=", true, true, SavedContentEntry::getClassNameId),
+				new ArrayableFinderColumn<>(
+					"savedContentEntry.", "classPK", FinderColumn.Type.LONG,
+					"=", false, true, true, SavedContentEntry::getClassPK));
+
+		_uniquePersistenceFinderByC_U_C_C = new UniquePersistenceFinder<>(
+			this, _finderPathFetchByC_U_C_C,
+			_SQL_SELECT_SAVEDCONTENTENTRY_WHERE, "",
+			new FinderColumn<>(
+				"savedContentEntry.", "companyId", FinderColumn.Type.LONG, "=",
+				true, true, SavedContentEntry::getCompanyId),
+			new FinderColumn<>(
+				"savedContentEntry.", "userId", FinderColumn.Type.LONG, "=",
+				true, true, SavedContentEntry::getUserId),
+			new FinderColumn<>(
+				"savedContentEntry.", "classNameId", FinderColumn.Type.LONG,
+				"=", true, true, SavedContentEntry::getClassNameId),
+			new FinderColumn<>(
+				"savedContentEntry.", "classPK", FinderColumn.Type.LONG, "=",
+				true, true, SavedContentEntry::getClassPK));
 
 		SavedContentEntryUtil.setPersistence(this);
 	}
@@ -4655,14 +3056,14 @@ public class SavedContentEntryPersistenceImpl
 	@Reference
 	protected FinderCache finderCache;
 
+	private static final String _ENTITY_ALIAS_PREFIX =
+		SavedContentEntryModelImpl.ENTITY_ALIAS + ".";
+
 	private static final String _SQL_SELECT_SAVEDCONTENTENTRY =
 		"SELECT savedContentEntry FROM SavedContentEntry savedContentEntry";
 
 	private static final String _SQL_SELECT_SAVEDCONTENTENTRY_WHERE =
 		"SELECT savedContentEntry FROM SavedContentEntry savedContentEntry WHERE ";
-
-	private static final String _SQL_COUNT_SAVEDCONTENTENTRY =
-		"SELECT COUNT(savedContentEntry) FROM SavedContentEntry savedContentEntry";
 
 	private static final String _SQL_COUNT_SAVEDCONTENTENTRY_WHERE =
 		"SELECT COUNT(savedContentEntry) FROM SavedContentEntry savedContentEntry WHERE ";
@@ -4688,13 +3089,6 @@ public class SavedContentEntryPersistenceImpl
 
 	private static final String _FILTER_ENTITY_TABLE = "SavedContentEntry";
 
-	private static final String _ORDER_BY_ENTITY_ALIAS = "savedContentEntry.";
-
-	private static final String _ORDER_BY_ENTITY_TABLE = "SavedContentEntry.";
-
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
-		"No SavedContentEntry exists with the primary key ";
-
 	private static final String _NO_SUCH_ENTITY_WITH_KEY =
 		"No SavedContentEntry exists with the key {";
 
@@ -4710,4 +3104,4 @@ public class SavedContentEntryPersistenceImpl
 	}
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:765849643
+// LIFERAY-SERVICE-BUILDER-HASH:648426750

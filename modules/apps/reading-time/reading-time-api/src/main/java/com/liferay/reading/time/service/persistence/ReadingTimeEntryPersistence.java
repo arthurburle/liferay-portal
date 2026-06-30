@@ -355,21 +355,6 @@ public interface ReadingTimeEntryPersistence
 	public int countByG_C_C(long groupId, long classNameId, long classPK);
 
 	/**
-	 * Caches the reading time entry in the entity cache if it is enabled.
-	 *
-	 * @param readingTimeEntry the reading time entry
-	 */
-	public void cacheResult(ReadingTimeEntry readingTimeEntry);
-
-	/**
-	 * Caches the reading time entries in the entity cache if it is enabled.
-	 *
-	 * @param readingTimeEntries the reading time entries
-	 */
-	public void cacheResult(
-		java.util.List<ReadingTimeEntry> readingTimeEntries);
-
-	/**
 	 * Creates a new reading time entry with the primary key. Does not add the reading time entry to the database.
 	 *
 	 * @param readingTimeEntryId the primary key for the new reading time entry
@@ -407,73 +392,5 @@ public interface ReadingTimeEntryPersistence
 	 */
 	public ReadingTimeEntry fetchByPrimaryKey(long readingTimeEntryId);
 
-	/**
-	 * Returns all the reading time entries.
-	 *
-	 * @return the reading time entries
-	 */
-	public java.util.List<ReadingTimeEntry> findAll();
-
-	/**
-	 * Returns a range of all the reading time entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.reading.time.model.impl.ReadingTimeEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of reading time entries
-	 * @param end the upper bound of the range of reading time entries (not inclusive)
-	 * @return the range of reading time entries
-	 */
-	public java.util.List<ReadingTimeEntry> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the reading time entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.reading.time.model.impl.ReadingTimeEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of reading time entries
-	 * @param end the upper bound of the range of reading time entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of reading time entries
-	 */
-	public java.util.List<ReadingTimeEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ReadingTimeEntry>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the reading time entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.reading.time.model.impl.ReadingTimeEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of reading time entries
-	 * @param end the upper bound of the range of reading time entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of reading time entries
-	 */
-	public java.util.List<ReadingTimeEntry> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<ReadingTimeEntry>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the reading time entries from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of reading time entries.
-	 *
-	 * @return the number of reading time entries
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-816517274
+// LIFERAY-SERVICE-BUILDER-HASH:2039343727

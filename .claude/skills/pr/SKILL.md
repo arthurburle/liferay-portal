@@ -1,174 +1,156 @@
 ---
 
-allowed-tools: [Bash, Glob, Grep, Read]
-argument-hint: "[optional target-org/repo or message hint]"
-description: Create a GitHub pull request for the current branch, transition the corresponding Jira ticket to review, and record the PR link on the ticket. Use when the user asks to create a PR, send a PR, or invokes /pr.
+allowed-tools: [Bash, Glob, Grep, Read, Skill]
+argument-hint: "[optional target-org/repo, message hint, or --skip-pr-check]"
+description: Create a GitHub PR for the current branch. Use when the user asks to create a PR, send a PR, or invokes /pr.
 name: pr
 
 ---
 
-# Create Pull Request
+# Create a Pull Request
 
-Create a GitHub pull request for the current branch and update the linked Jira ticket.
+Create a GitHub PR for the current branch, transition the linked Jira ticket to review, and record the PR URL on that ticket.
 
-## 1. Gather Context
+## Preconditions
 
-When uncommitted changes exist, warn the user and stop. They should commit first (suggest `/commit`).
+- At least one commit adds tests. When none do, ask the user for a rationale and refuse to proceed without one. The only exceptions are PRs with no code changes (e.g., language key updates or markdown changes).
 
-## 2. Extract the Jira Ticket
+- The current branch is a development branch, not `master` or any other protected branch.
 
-The ticket ID follows the pattern `LPD-12345`, `LCD-12345`, `LRCI-1234`, and similar forms (uppercase letters, hyphen, digits). Resolve the ticket in this order:
+- The `pr-check` skill must pass. Skip only when `${ARGUMENTS}` contains `--skip-pr-check`.
+
+## Input
+
+### Branch
+
+The current Git branch must contain the commits ready to ship.
+
+### Jira Ticket
+
+Resolve a ticket key in priority order:
+
+1. **User Argument** — when `${ARGUMENTS}` supplies a ticket key, prefer that value.
 
 1. **Branch Name** — extract the ticket from the current branch (e.g., branch `LPD-83847` yields ticket `LPD-83847`).
 
-1. **Recent Commits** — when the branch name lacks a ticket, scan recent commit messages for a ticket prefix.
+1. **Recent Commits** — when neither produces a ticket, scan recent commit messages for a ticket prefix.
 
-1. **User Argument** — when `${ARGUMENTS}` supplies a ticket ID, prefer that value.
+1. **Fallback** — when nothing surfaces, prompt the user.
 
-1. **Fallback** — when no ticket surfaces, prompt the user for one.
+The ticket key follows the pattern `LPD-12345`, `LCD-12345`, `LRCI-1234`, and similar forms (uppercase letters, hyphen, digits).
 
-## 3. Determine the Target
+### Target Repository
 
-- **Base Branch**: `master`.
-- **Fork Owner**: When `${ARGUMENTS}` names a GitHub organization or user, use that. Otherwise, ask the user to choose from `liferay-bpm`, `liferay-content-management`, or `liferay-page-management`.
-- **Fork Remote**: Use the user's remote (default: `origin`). Identify the GitHub username from the remote URL (e.g., `git@github.com:brianchandotcom/liferay-portal.git` yields `brianchandotcom`).
-- **Head**: `<github-username>:<branch-name>`.
-- **Target Repository**: `<fork-owner>/liferay-portal` by default. When `${ARGUMENTS}` names a different `org/repo`, use that.
+The target repository defaults to `<fork-owner>/liferay-portal`. When `${ARGUMENTS}` names a different `org/repo`, use that; when it matches an alias below, expand the alias; otherwise, ask the user to choose `<fork-owner>` from one of the team forks:
 
-## 4. Push the Branch
+- `liferay-ac`
+- `liferay-appsec`
+- `liferay-bpm`
+- `liferay-commerce`
+- `liferay-content-management`
+- `liferay-core-infra`
+- `liferay-database-infra`
+- `liferay-devtools`
+- `liferay-frontend`
+- `liferay-headless`
+- `liferay-page-management`
+- `liferay-platform-experience`
+- `liferay-search`
+- `liferay-site-management`
 
-Push the branch to the user's remote when it has not been pushed or when new local commits exist:
+The following short aliases resolve to a target repository:
 
-```bash
-git push --set-upstream origin <branch-name>
-```
+- `brian` → `brianchandotcom/liferay-portal`
 
-## 5. Analyze Changes and Create the Pull Request
+The PR head is `<github-username>:<branch-name>` (the GitHub username is read from the user's `origin` remote URL — e.g., `git@github.com:brianchandotcom/liferay-portal.git` yields `brianchandotcom`), and the base is `master`.
 
-Read the full diff (`git diff master...HEAD`) and every commit message on the branch to understand the complete scope of changes.
+## Expected Output
 
-### Pull Request Title
+### Pushed Branch
 
-Keep it concise (under 72 characters) and prefix with the Jira ticket:
+Push the current branch to the user's remote when it has not been pushed yet or when new local commits exist.
+
+### Pull Request
+
+The title is concise (under 72 characters) and prefixed with the Jira ticket:
 
 ```
 LPD-83847 Fix OutOfMemoryError during batch engine import
 ```
 
-### Pull Request Body
-
-Use the following format:
+The body follows this format:
 
 ```markdown
 https://liferay.atlassian.net/browse/TICKET-ID
 
-**What is being fixed:** Explain the problem or bug that motivated the
-change — what was going wrong or what was missing.
+## What is being fixed
 
-**How it is being fixed:** Explain the approach taken across all commits.
-Describe the key changes and the reasoning behind the approach. Write in
-plain prose rather than bullet points.
+Explain the problem or bug that motivated the change — what was going
+wrong or what was missing.
+
+## How it is being fixed
+
+Explain the approach taken across all commits. Describe the key changes
+and the reasoning behind the approach. Write in plain prose rather than
+bullet points.
+
+## Why are there no tests?
+
+This optional section is only included when the commits do not add any
+tests. It should contain the rationale provided by the user.
 ```
 
-### Create the Pull Request
+Use a direct, to-the-point style. Avoid being verbose. Present the proposed title and body to the user before submitting, and proceed once they approve.
 
-```bash
-PR_BODY=$(cat <<'EOF'
-<body>
-EOF
-)
+When pr-check passes, invoke the `pr-check-publish` skill with the newly created PR URL.
 
-gh pr create \
-	--base master \
-	--body "${PR_BODY}" \
-	--head <username>:<branch> \
-	--repo <target-org/repo> \
-	--title "<title>"
-```
+### Transitioned Jira Ticket
 
-Present the proposed title and body to the user before submitting. Proceed once they approve.
+Fetch the input ticket (issue type, status, subtasks) and resolve the **target ticket** — the one whose status reflects active work and on which the PR URL is recorded:
 
-## 6. Update the Jira Ticket
+| Ticket Type | Target |
+| --- | --- |
+| Bug (`10004`) | The bug itself |
+| Task (`10002`) | Its Technical Task (`10153`) subtask |
+| Technical Task (`10153`) | Itself |
 
-Once the pull request is created successfully, transition the Jira ticket into review and record the pull request URL in the **Git Pull Request** field via the Jira REST API.
+When the target is not already in an in-progress status, transition it first:
 
-### Determine the Ticket Type and Resolve the Target Ticket
+| Target Type | Destination | Transition ID |
+| --- | --- | --- |
+| Bug | In Progress | `61` |
+| Technical Task | In Progress | `41` |
 
-LPD applies different workflows depending on the issue type. Check the issue type first:
+Then transition it to review:
 
-```bash
-curl \
-	--silent \
-	--url "https://liferay.atlassian.net/rest/api/3/issue/<TICKET>?fields=issuetype,subtasks" \
-	--user "${JIRA_API_USER}:${JIRA_API_TOKEN}"
-```
+| Target Type | Destination | Transition ID |
+| --- | --- | --- |
+| Bug | In Review | `71` |
+| Technical Task | In Peer Review | `31` |
 
-- **Bug** (type ID `10004`): Use the bug ticket directly. The transition to **In Review** uses ID `71`.
-- **Task** (parent, type ID `10002`): Locate its Technical Task subtask and use that subtask's key. Every subsequent operation (transition, PR field, PR title, summary) must reference the **subtask's key**. The transition to **In Peer Review** uses ID `31`.
-- **Technical Task** (subtask, type ID `10153`): Use it directly. The transition to **In Peer Review** uses ID `31`.
+When the review transition fails (for example, because the ticket is already in a later status), still proceed to record the PR URL.
 
-### Ensure the Ticket Is In Progress First
+Set the **Git Pull Request** field (`customfield_10201`) on the target ticket to the new PR URL.
 
-Before transitioning to review, check the ticket's current status. When it is not already "In Progress", transition it to In Progress first. The transition ID depends on the issue type:
+### Existing Pull Request
 
-- **Bug**: In Progress transition ID is `61`.
-- **Technical Task**: In Progress transition ID is `41`.
+When the **Git Pull Request** field already holds one or more PR URLs, ask the user whether the new PR **supersedes** the existing one or is **added** alongside it.
 
-```bash
-curl \
-	--data '{"transition": {"id": "<61-for-bug|41-for-task>"}}' \
-	--header "Content-Type: application/json" \
-	--request POST \
-	--silent \
-	--url "https://liferay.atlassian.net/rest/api/3/issue/<TARGET-TICKET>/transitions" \
-	--user "${JIRA_API_USER}:${JIRA_API_TOKEN}"
-```
+When the user chooses **supersede**:
 
-### Transition to Review
+1. Overwrite **Git Pull Request** with the new PR URL, dropping the previous value.
 
-For **Bug** tickets (In Review, ID `71`):
+1. Add a comment on the previous PR, linking to the new one (for example, `Superseded by <new-pr-url>.`).
 
-```bash
-curl \
-	--data '{"transition": {"id": "71"}}' \
-	--header "Content-Type: application/json" \
-	--request POST \
-	--silent \
-	--url "https://liferay.atlassian.net/rest/api/3/issue/<BUG>/transitions" \
-	--user "${JIRA_API_USER}:${JIRA_API_TOKEN}"
-```
+1. Close the previous PR when possible. When the user lacks permission to close it directly, add a `ci:close` comment instead, so the CI bot closes it.
 
-For **Technical Task** tickets or a subtask resolved from a Task (In Peer Review, ID `31`):
+When the user chooses **add**:
 
-```bash
-curl \
-	--data '{"transition": {"id": "31"}}' \
-	--header "Content-Type: application/json" \
-	--request POST \
-	--silent \
-	--url "https://liferay.atlassian.net/rest/api/3/issue/<TECHNICAL-TASK>/transitions" \
-	--user "${JIRA_API_USER}:${JIRA_API_TOKEN}"
-```
+1. Append the new PR URL to the existing value, separating each URL with a comma and a space.
 
-Then set the **Git Pull Request** field on the target ticket:
+### Summary
 
-```bash
-curl \
-	--data '{"fields": {"customfield_10201": "<PR-URL>"}}' \
-	--header "Content-Type: application/json" \
-	--request PUT \
-	--silent \
-	--url "https://liferay.atlassian.net/rest/api/3/issue/<TARGET-TICKET>" \
-	--user "${JIRA_API_USER}:${JIRA_API_TOKEN}"
-```
+Report back to the user with:
 
-- `customfield_10201` is the "Git Pull Request" text field.
-
-When the transition fails (for example, when the ticket is already in a later status), still attempt to set the PR field separately. Confirm the update by fetching the ticket status and PR field afterward.
-
-## 7. Summary
-
-Report back with:
-
-- The pull request URL.
 - The Jira ticket status and link.
+- The PR URL.

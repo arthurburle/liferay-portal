@@ -36,6 +36,20 @@ public class MFAEmailOTPEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<MFAEmailOTPEntry> mfaEmailOTPEntries) {
+		getPersistence().cacheResult(mfaEmailOTPEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(MFAEmailOTPEntry mfaEmailOTPEntry) {
+		getPersistence().cacheResult(mfaEmailOTPEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -171,24 +185,6 @@ public class MFAEmailOTPEntryUtil {
 	}
 
 	/**
-	 * Caches the mfa email otp entry in the entity cache if it is enabled.
-	 *
-	 * @param mfaEmailOTPEntry the mfa email otp entry
-	 */
-	public static void cacheResult(MFAEmailOTPEntry mfaEmailOTPEntry) {
-		getPersistence().cacheResult(mfaEmailOTPEntry);
-	}
-
-	/**
-	 * Caches the mfa email otp entries in the entity cache if it is enabled.
-	 *
-	 * @param mfaEmailOTPEntries the mfa email otp entries
-	 */
-	public static void cacheResult(List<MFAEmailOTPEntry> mfaEmailOTPEntries) {
-		getPersistence().cacheResult(mfaEmailOTPEntries);
-	}
-
-	/**
 	 * Creates a new mfa email otp entry with the primary key. Does not add the mfa email otp entry to the database.
 	 *
 	 * @param mfaEmailOTPEntryId the primary key for the new mfa email otp entry
@@ -242,87 +238,6 @@ public class MFAEmailOTPEntryUtil {
 		return getPersistence().fetchByPrimaryKey(mfaEmailOTPEntryId);
 	}
 
-	/**
-	 * Returns all the mfa email otp entries.
-	 *
-	 * @return the mfa email otp entries
-	 */
-	public static List<MFAEmailOTPEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the mfa email otp entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.multi.factor.authentication.email.otp.model.impl.MFAEmailOTPEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of mfa email otp entries
-	 * @param end the upper bound of the range of mfa email otp entries (not inclusive)
-	 * @return the range of mfa email otp entries
-	 */
-	public static List<MFAEmailOTPEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the mfa email otp entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.multi.factor.authentication.email.otp.model.impl.MFAEmailOTPEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of mfa email otp entries
-	 * @param end the upper bound of the range of mfa email otp entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of mfa email otp entries
-	 */
-	public static List<MFAEmailOTPEntry> findAll(
-		int start, int end,
-		OrderByComparator<MFAEmailOTPEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the mfa email otp entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.multi.factor.authentication.email.otp.model.impl.MFAEmailOTPEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of mfa email otp entries
-	 * @param end the upper bound of the range of mfa email otp entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of mfa email otp entries
-	 */
-	public static List<MFAEmailOTPEntry> findAll(
-		int start, int end,
-		OrderByComparator<MFAEmailOTPEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the mfa email otp entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of mfa email otp entries.
-	 *
-	 * @return the number of mfa email otp entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static MFAEmailOTPEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -334,4 +249,4 @@ public class MFAEmailOTPEntryUtil {
 	private static volatile MFAEmailOTPEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1117176645
+// LIFERAY-SERVICE-BUILDER-HASH:-1567912034

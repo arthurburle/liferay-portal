@@ -1151,20 +1151,6 @@ public interface SocialRelationPersistence
 	public int countByU1_U2_T(long userId1, long userId2, int type);
 
 	/**
-	 * Caches the social relation in the entity cache if it is enabled.
-	 *
-	 * @param socialRelation the social relation
-	 */
-	public void cacheResult(SocialRelation socialRelation);
-
-	/**
-	 * Caches the social relations in the entity cache if it is enabled.
-	 *
-	 * @param socialRelations the social relations
-	 */
-	public void cacheResult(java.util.List<SocialRelation> socialRelations);
-
-	/**
 	 * Creates a new social relation with the primary key. Does not add the social relation to the database.
 	 *
 	 * @param relationId the primary key for the new social relation
@@ -1202,73 +1188,5 @@ public interface SocialRelationPersistence
 	 */
 	public SocialRelation fetchByPrimaryKey(long relationId);
 
-	/**
-	 * Returns all the social relations.
-	 *
-	 * @return the social relations
-	 */
-	public java.util.List<SocialRelation> findAll();
-
-	/**
-	 * Returns a range of all the social relations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialRelationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social relations
-	 * @param end the upper bound of the range of social relations (not inclusive)
-	 * @return the range of social relations
-	 */
-	public java.util.List<SocialRelation> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the social relations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialRelationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social relations
-	 * @param end the upper bound of the range of social relations (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of social relations
-	 */
-	public java.util.List<SocialRelation> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SocialRelation>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the social relations.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portlet.social.model.impl.SocialRelationModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of social relations
-	 * @param end the upper bound of the range of social relations (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of social relations
-	 */
-	public java.util.List<SocialRelation> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<SocialRelation>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the social relations from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of social relations.
-	 *
-	 * @return the number of social relations
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1176340387
+// LIFERAY-SERVICE-BUILDER-HASH:447254265

@@ -36,6 +36,20 @@ public class DDMFieldAttributeUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<DDMFieldAttribute> ddmFieldAttributes) {
+		getPersistence().cacheResult(ddmFieldAttributes);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(DDMFieldAttribute ddmFieldAttribute) {
+		getPersistence().cacheResult(ddmFieldAttribute);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -826,24 +840,6 @@ public class DDMFieldAttributeUtil {
 	}
 
 	/**
-	 * Caches the ddm field attribute in the entity cache if it is enabled.
-	 *
-	 * @param ddmFieldAttribute the ddm field attribute
-	 */
-	public static void cacheResult(DDMFieldAttribute ddmFieldAttribute) {
-		getPersistence().cacheResult(ddmFieldAttribute);
-	}
-
-	/**
-	 * Caches the ddm field attributes in the entity cache if it is enabled.
-	 *
-	 * @param ddmFieldAttributes the ddm field attributes
-	 */
-	public static void cacheResult(List<DDMFieldAttribute> ddmFieldAttributes) {
-		getPersistence().cacheResult(ddmFieldAttributes);
-	}
-
-	/**
 	 * Creates a new ddm field attribute with the primary key. Does not add the ddm field attribute to the database.
 	 *
 	 * @param fieldAttributeId the primary key for the new ddm field attribute
@@ -897,87 +893,6 @@ public class DDMFieldAttributeUtil {
 		return getPersistence().fetchByPrimaryKey(fieldAttributeId);
 	}
 
-	/**
-	 * Returns all the ddm field attributes.
-	 *
-	 * @return the ddm field attributes
-	 */
-	public static List<DDMFieldAttribute> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the ddm field attributes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMFieldAttributeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm field attributes
-	 * @param end the upper bound of the range of ddm field attributes (not inclusive)
-	 * @return the range of ddm field attributes
-	 */
-	public static List<DDMFieldAttribute> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm field attributes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMFieldAttributeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm field attributes
-	 * @param end the upper bound of the range of ddm field attributes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ddm field attributes
-	 */
-	public static List<DDMFieldAttribute> findAll(
-		int start, int end,
-		OrderByComparator<DDMFieldAttribute> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the ddm field attributes.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.dynamic.data.mapping.model.impl.DDMFieldAttributeModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of ddm field attributes
-	 * @param end the upper bound of the range of ddm field attributes (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of ddm field attributes
-	 */
-	public static List<DDMFieldAttribute> findAll(
-		int start, int end,
-		OrderByComparator<DDMFieldAttribute> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the ddm field attributes from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of ddm field attributes.
-	 *
-	 * @return the number of ddm field attributes
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static DDMFieldAttributePersistence getPersistence() {
 		return _persistence;
 	}
@@ -991,4 +906,4 @@ public class DDMFieldAttributeUtil {
 	private static volatile DDMFieldAttributePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1029034206
+// LIFERAY-SERVICE-BUILDER-HASH:2106594971

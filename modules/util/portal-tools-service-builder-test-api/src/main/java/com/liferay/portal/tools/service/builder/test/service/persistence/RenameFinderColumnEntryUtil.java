@@ -36,6 +36,24 @@ public class RenameFinderColumnEntryUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(
+		List<RenameFinderColumnEntry> renameFinderColumnEntries) {
+
+		getPersistence().cacheResult(renameFinderColumnEntries);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(
+		RenameFinderColumnEntry renameFinderColumnEntry) {
+
+		getPersistence().cacheResult(renameFinderColumnEntry);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -181,28 +199,6 @@ public class RenameFinderColumnEntryUtil {
 	}
 
 	/**
-	 * Caches the rename finder column entry in the entity cache if it is enabled.
-	 *
-	 * @param renameFinderColumnEntry the rename finder column entry
-	 */
-	public static void cacheResult(
-		RenameFinderColumnEntry renameFinderColumnEntry) {
-
-		getPersistence().cacheResult(renameFinderColumnEntry);
-	}
-
-	/**
-	 * Caches the rename finder column entries in the entity cache if it is enabled.
-	 *
-	 * @param renameFinderColumnEntries the rename finder column entries
-	 */
-	public static void cacheResult(
-		List<RenameFinderColumnEntry> renameFinderColumnEntries) {
-
-		getPersistence().cacheResult(renameFinderColumnEntries);
-	}
-
-	/**
 	 * Creates a new rename finder column entry with the primary key. Does not add the rename finder column entry to the database.
 	 *
 	 * @param renameFinderColumnEntryId the primary key for the new rename finder column entry
@@ -261,87 +257,6 @@ public class RenameFinderColumnEntryUtil {
 		return getPersistence().fetchByPrimaryKey(renameFinderColumnEntryId);
 	}
 
-	/**
-	 * Returns all the rename finder column entries.
-	 *
-	 * @return the rename finder column entries
-	 */
-	public static List<RenameFinderColumnEntry> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the rename finder column entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.RenameFinderColumnEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of rename finder column entries
-	 * @param end the upper bound of the range of rename finder column entries (not inclusive)
-	 * @return the range of rename finder column entries
-	 */
-	public static List<RenameFinderColumnEntry> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the rename finder column entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.RenameFinderColumnEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of rename finder column entries
-	 * @param end the upper bound of the range of rename finder column entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of rename finder column entries
-	 */
-	public static List<RenameFinderColumnEntry> findAll(
-		int start, int end,
-		OrderByComparator<RenameFinderColumnEntry> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the rename finder column entries.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.model.impl.RenameFinderColumnEntryModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of rename finder column entries
-	 * @param end the upper bound of the range of rename finder column entries (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of rename finder column entries
-	 */
-	public static List<RenameFinderColumnEntry> findAll(
-		int start, int end,
-		OrderByComparator<RenameFinderColumnEntry> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the rename finder column entries from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of rename finder column entries.
-	 *
-	 * @return the number of rename finder column entries
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static RenameFinderColumnEntryPersistence getPersistence() {
 		return _persistence;
 	}
@@ -355,4 +270,4 @@ public class RenameFinderColumnEntryUtil {
 	private static volatile RenameFinderColumnEntryPersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1618122905
+// LIFERAY-SERVICE-BUILDER-HASH:462770234

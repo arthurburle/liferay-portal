@@ -37,6 +37,20 @@ public class SamlSpMessageUtil {
 	 */
 
 	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(List)
+	 */
+	public static void cacheResult(List<SamlSpMessage> samlSpMessages) {
+		getPersistence().cacheResult(samlSpMessages);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#cacheResult(com.liferay.portal.kernel.model.BaseModel)
+	 */
+	public static void cacheResult(SamlSpMessage samlSpMessage) {
+		getPersistence().cacheResult(samlSpMessage);
+	}
+
+	/**
 	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#clearCache()
 	 */
 	public static void clearCache() {
@@ -313,24 +327,6 @@ public class SamlSpMessageUtil {
 	}
 
 	/**
-	 * Caches the saml sp message in the entity cache if it is enabled.
-	 *
-	 * @param samlSpMessage the saml sp message
-	 */
-	public static void cacheResult(SamlSpMessage samlSpMessage) {
-		getPersistence().cacheResult(samlSpMessage);
-	}
-
-	/**
-	 * Caches the saml sp messages in the entity cache if it is enabled.
-	 *
-	 * @param samlSpMessages the saml sp messages
-	 */
-	public static void cacheResult(List<SamlSpMessage> samlSpMessages) {
-		getPersistence().cacheResult(samlSpMessages);
-	}
-
-	/**
 	 * Creates a new saml sp message with the primary key. Does not add the saml sp message to the database.
 	 *
 	 * @param samlSpMessageId the primary key for the new saml sp message
@@ -380,86 +376,6 @@ public class SamlSpMessageUtil {
 		return getPersistence().fetchByPrimaryKey(samlSpMessageId);
 	}
 
-	/**
-	 * Returns all the saml sp messages.
-	 *
-	 * @return the saml sp messages
-	 */
-	public static List<SamlSpMessage> findAll() {
-		return getPersistence().findAll();
-	}
-
-	/**
-	 * Returns a range of all the saml sp messages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.saml.persistence.model.impl.SamlSpMessageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml sp messages
-	 * @param end the upper bound of the range of saml sp messages (not inclusive)
-	 * @return the range of saml sp messages
-	 */
-	public static List<SamlSpMessage> findAll(int start, int end) {
-		return getPersistence().findAll(start, end);
-	}
-
-	/**
-	 * Returns an ordered range of all the saml sp messages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.saml.persistence.model.impl.SamlSpMessageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml sp messages
-	 * @param end the upper bound of the range of saml sp messages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of saml sp messages
-	 */
-	public static List<SamlSpMessage> findAll(
-		int start, int end,
-		OrderByComparator<SamlSpMessage> orderByComparator) {
-
-		return getPersistence().findAll(start, end, orderByComparator);
-	}
-
-	/**
-	 * Returns an ordered range of all the saml sp messages.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.saml.persistence.model.impl.SamlSpMessageModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of saml sp messages
-	 * @param end the upper bound of the range of saml sp messages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of saml sp messages
-	 */
-	public static List<SamlSpMessage> findAll(
-		int start, int end, OrderByComparator<SamlSpMessage> orderByComparator,
-		boolean useFinderCache) {
-
-		return getPersistence().findAll(
-			start, end, orderByComparator, useFinderCache);
-	}
-
-	/**
-	 * Removes all the saml sp messages from the database.
-	 */
-	public static void removeAll() {
-		getPersistence().removeAll();
-	}
-
-	/**
-	 * Returns the number of saml sp messages.
-	 *
-	 * @return the number of saml sp messages
-	 */
-	public static int countAll() {
-		return getPersistence().countAll();
-	}
-
 	public static SamlSpMessagePersistence getPersistence() {
 		return _persistence;
 	}
@@ -471,4 +387,4 @@ public class SamlSpMessageUtil {
 	private static volatile SamlSpMessagePersistence _persistence;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1368318401
+// LIFERAY-SERVICE-BUILDER-HASH:-1219031791

@@ -403,21 +403,6 @@ public interface VersionedEntryVersionPersistence
 	public int countByGroupId_Version(long groupId, int version);
 
 	/**
-	 * Caches the versioned entry version in the entity cache if it is enabled.
-	 *
-	 * @param versionedEntryVersion the versioned entry version
-	 */
-	public void cacheResult(VersionedEntryVersion versionedEntryVersion);
-
-	/**
-	 * Caches the versioned entry versions in the entity cache if it is enabled.
-	 *
-	 * @param versionedEntryVersions the versioned entry versions
-	 */
-	public void cacheResult(
-		java.util.List<VersionedEntryVersion> versionedEntryVersions);
-
-	/**
 	 * Creates a new versioned entry version with the primary key. Does not add the versioned entry version to the database.
 	 *
 	 * @param versionedEntryVersionId the primary key for the new versioned entry version
@@ -457,73 +442,5 @@ public interface VersionedEntryVersionPersistence
 	public VersionedEntryVersion fetchByPrimaryKey(
 		long versionedEntryVersionId);
 
-	/**
-	 * Returns all the versioned entry versions.
-	 *
-	 * @return the versioned entry versions
-	 */
-	public java.util.List<VersionedEntryVersion> findAll();
-
-	/**
-	 * Returns a range of all the versioned entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.VersionedEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of versioned entry versions
-	 * @param end the upper bound of the range of versioned entry versions (not inclusive)
-	 * @return the range of versioned entry versions
-	 */
-	public java.util.List<VersionedEntryVersion> findAll(int start, int end);
-
-	/**
-	 * Returns an ordered range of all the versioned entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.VersionedEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of versioned entry versions
-	 * @param end the upper bound of the range of versioned entry versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of versioned entry versions
-	 */
-	public java.util.List<VersionedEntryVersion> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<VersionedEntryVersion>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the versioned entry versions.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>com.liferay.portal.tools.service.builder.test.compat740.model.impl.VersionedEntryVersionModelImpl</code>.
-	 * </p>
-	 *
-	 * @param start the lower bound of the range of versioned entry versions
-	 * @param end the upper bound of the range of versioned entry versions (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param useFinderCache whether to use the finder cache
-	 * @return the ordered range of versioned entry versions
-	 */
-	public java.util.List<VersionedEntryVersion> findAll(
-		int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<VersionedEntryVersion>
-			orderByComparator,
-		boolean useFinderCache);
-
-	/**
-	 * Removes all the versioned entry versions from the database.
-	 */
-	public void removeAll();
-
-	/**
-	 * Returns the number of versioned entry versions.
-	 *
-	 * @return the number of versioned entry versions
-	 */
-	public int countAll();
-
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-995425984
+// LIFERAY-SERVICE-BUILDER-HASH:-1184630619
