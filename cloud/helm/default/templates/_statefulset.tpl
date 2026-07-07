@@ -298,6 +298,14 @@ spec:
         -   backendRefs:
                 -   name: {{ include "liferay.name" $ctx.root }}{{ $suffix }}
                     port: {{ $backendPort }}
+            {{- if $ctx.statefulset.network.hsts.enabled }}
+            filters:
+                -   type: ResponseHeaderModifier
+                    responseHeaderModifier:
+                        set:
+                            -   name: Strict-Transport-Security
+                                value: {{ $ctx.statefulset.network.hsts.value | quote }}
+            {{- end }}
             matches:
                 -   path:
                         type: PathPrefix
@@ -306,10 +314,12 @@ spec:
             sessionPersistence:
                 {{- toYaml . | nindent 16 }}
             {{- end }}
+            {{- if not $ctx.statefulset.network.gke.enabled }}
             {{- with $ctx.statefulset.network.timeouts }}
             timeouts:
                 backendRequest: {{ .backendRequest }}
                 request: {{ .request }}
+            {{- end }}
             {{- end }}
 {{- end }}
 {{- else }}
@@ -343,6 +353,14 @@ spec:
         -   backendRefs:
                 -   name: {{ include "liferay.name" .root }}{{ $suffix }}
                     port: {{ $backendPort }}
+            {{- if .statefulset.network.hsts.enabled }}
+            filters:
+                -   type: ResponseHeaderModifier
+                    responseHeaderModifier:
+                        set:
+                            -   name: Strict-Transport-Security
+                                value: {{ .statefulset.network.hsts.value | quote }}
+            {{- end }}
             matches:
                 -   path:
                         type: PathPrefix
@@ -351,10 +369,12 @@ spec:
             sessionPersistence:
                 {{- toYaml . | nindent 16 }}
             {{- end }}
+            {{- if not .statefulset.network.gke.enabled }}
             {{- with .statefulset.network.timeouts }}
             timeouts:
                 backendRequest: {{ .backendRequest }}
                 request: {{ .request }}
+            {{- end }}
             {{- end }}
         {{- with .statefulset.network.extraRules }}
         {{- toYaml . | nindent 8 }}
