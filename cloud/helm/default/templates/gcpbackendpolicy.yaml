@@ -9,7 +9,13 @@ metadata:
     namespace: {{ include "liferay.namespace" . }}
 spec:
     default:
-        timeoutSec: {{ .Values.network.gke.backendConfig.timeoutSec }}
+        timeoutSec: {{ dig "backendConfig" "timeoutSec" 300 .Values.network.gke }}
+        {{- with dig "cloudArmor" "policy" "" .Values.network.gke }}
+        securityPolicy: {{ . | quote }}
+        {{- end }}
+        logging:
+            enabled: {{ dig "logging" "enabled" true .Values.network.gke }}
+            sampleRate: {{ dig "logging" "sampleRate" 100000 .Values.network.gke }}
     targetRef:
         group: ""
         kind: Service
