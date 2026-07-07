@@ -1,0 +1,32 @@
+{{- /*
+LCI-ROLLOUT: SCOPE=ENV_SCOPED_MEDIUM
+Introduced by LCI-5246. HealthCheckPolicy supplies the GKE L7 LB with the
+correct HTTP healthcheck path (/c/portal/robots by default). Liferay returns
+200 only after the portal is up — using the default LB TCP check would mark
+backends ready before the portal is actually serving.
+Rollout: enable in dev first, confirm LB marks backends Healthy only after
+portal boot. If a prd env flips gke.enabled=true without this template
+being present, LB will fall back to TCP checks and send 503s to users
+during roll restarts. uat/prd after dev soak.
+*/ -}}
+{{- if .Values.network.gke.enabled }}
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+    labels:
+        app: {{ include "liferay.name" . }}
+        {{- include "liferay.labels" . | nindent 8 }}
+    name: {{ include "liferay.name" . }}
+    namespace: {{ include "liferay.namespace" . }}
+spec:
+    default:
+        config:
+            type: HTTP
+            httpHealthCheck:
+                port: {{ .Values.network.gke.healthCheck.port }}
+                requestPath: {{ .Values.network.gke.healthCheck.path }}
+    targetRef:
+        group: ""
+        kind: Service
+        name: {{ include "liferay.name" . }}
+{{- end }}

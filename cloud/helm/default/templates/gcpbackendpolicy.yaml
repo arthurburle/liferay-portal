@@ -1,0 +1,29 @@
+{{- /*
+LCI-ROLLOUT: SCOPE=ENV_SCOPED_MEDIUM
+Introduced by LCI-5246. GCPBackendPolicy attaches to the Liferay Service
+and drives session affinity + connection drain + timeoutSec for the GKE
+L7 LB. It co-exists with the envoy-based Gateway/HTTPRoute (upstream
+default) because gke.enabled gates both sides. On the GKE L7 path the
+HTTPRoute timeouts/sessionPersistence blocks are suppressed to avoid
+double-definition (see _statefulset.tpl gate).
+Rollout: enable in dev first, verify the policy attaches to the Service
+in the GKE console (Networking → Gateway → Backend). uat/prd follow
+only after an envoy->gke cutover on the Gateway class per env.
+*/ -}}
+{{- if .Values.network.gke.enabled }}
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+    labels:
+        app: {{ include "liferay.name" . }}
+        {{- include "liferay.labels" . | nindent 8 }}
+    name: {{ include "liferay.name" . }}
+    namespace: {{ include "liferay.namespace" . }}
+spec:
+    default:
+        timeoutSec: {{ .Values.network.gke.backendConfig.timeoutSec }}
+    targetRef:
+        group: ""
+        kind: Service
+        name: {{ include "liferay.name" . }}
+{{- end }}

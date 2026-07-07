@@ -321,11 +321,11 @@ spec:
                     weight: 1
             {{- if $ctx.statefulset.network.hsts.enabled }}
             filters:
-                -   responseHeaderModifier:
+                -   type: ResponseHeaderModifier
+                    responseHeaderModifier:
                         set:
                             -   name: Strict-Transport-Security
                                 value: {{ $ctx.statefulset.network.hsts.value | quote }}
-                    type: ResponseHeaderModifier
             {{- end }}
             matches:
                 -   path:
@@ -337,10 +337,19 @@ spec:
                 {{- omit . "enabled" | toYaml | nindent 16 }}
             {{- end }}
             {{- end }}
+            # LCI-ROLLOUT: SCOPE=ENV_SCOPED_MEDIUM
+            # Timeouts via HTTPRoute belong to the Gateway-API/envoy path only.
+            # On GKE L7, request/backendRequest timeouts come from GCPBackendPolicy
+            # (backendConfig.timeoutSec). This gate avoids emitting both.
+            # Rollout: a dev env with gke.enabled=true should have timeouts
+            # driven by `network.gke.backendConfig.timeoutSec`. Smoke-test by
+            # rendering the HTTPRoute and confirming no `timeouts:` block.
+            {{- if not $ctx.statefulset.network.gke.enabled }}
             {{- with $ctx.statefulset.network.timeouts }}
             timeouts:
                 backendRequest: {{ .backendRequest }}
                 request: {{ .request }}
+            {{- end }}
             {{- end }}
 {{- end }}
 {{- else }}
@@ -379,11 +388,11 @@ spec:
                     weight: 1
             {{- if .statefulset.network.hsts.enabled }}
             filters:
-                -   responseHeaderModifier:
+                -   type: ResponseHeaderModifier
+                    responseHeaderModifier:
                         set:
                             -   name: Strict-Transport-Security
                                 value: {{ .statefulset.network.hsts.value | quote }}
-                    type: ResponseHeaderModifier
             {{- end }}
             matches:
                 -   path:
@@ -395,10 +404,16 @@ spec:
                 {{- omit . "enabled" | toYaml | nindent 16 }}
             {{- end }}
             {{- end }}
+            # LCI-ROLLOUT: SCOPE=ENV_SCOPED_MEDIUM
+            # See the twin block above (gke.enabled gate on timeouts) for
+            # rollout notes — the same rationale applies to this second
+            # HTTPRoute branch (used when perHostnameRoutes is disabled).
+            {{- if not .statefulset.network.gke.enabled }}
             {{- with .statefulset.network.timeouts }}
             timeouts:
                 backendRequest: {{ .backendRequest }}
                 request: {{ .request }}
+            {{- end }}
             {{- end }}
         {{- with .statefulset.network.extraRules }}
         {{- toYaml . | nindent 8 }}
