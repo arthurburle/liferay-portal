@@ -1,0 +1,18 @@
+{{- $sslPolicy := dig "sslPolicy" "" .Values.network.gke -}}
+{{- if and .Values.network.gke.enabled .Values.network.gatewayName $sslPolicy }}
+apiVersion: networking.gke.io/v1
+kind: GCPGatewayPolicy
+metadata:
+    labels:
+        app: {{ include "liferay.name" . }}
+        {{- include "liferay.labels" . | nindent 8 }}
+    name: {{ include "liferay.name" . }}
+    namespace: {{ include "liferay.namespace" . }}
+spec:
+    default:
+        sslPolicy: {{ $sslPolicy | quote }}
+    targetRef:
+        group: gateway.networking.k8s.io
+        kind: Gateway
+        name: {{ .Values.network.gatewayName }}
+{{- end }}
