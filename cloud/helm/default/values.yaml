@@ -461,12 +461,7 @@ network:
     forceHttpsRedirect: false
     gatewayName: ""
     gke:
-        backendConfig:
-            timeoutSec: 300
         enabled: false
-        healthCheck:
-            path: /c/portal/robots
-            port: 8080
     hostnames: []
     hsts:
         enabled: false
