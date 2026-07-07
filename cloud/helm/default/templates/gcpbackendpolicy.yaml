@@ -1,0 +1,23 @@
+{{- if .Values.network.gke.enabled }}
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+    labels:
+        app: {{ include "liferay.name" . }}
+        {{- include "liferay.labels" . | nindent 8 }}
+    name: {{ include "liferay.name" . }}
+    namespace: {{ include "liferay.namespace" . }}
+spec:
+    default:
+        timeoutSec: {{ dig "backendConfig" "timeoutSec" 300 .Values.network.gke }}
+        {{- with dig "cloudArmor" "policy" "" .Values.network.gke }}
+        securityPolicy: {{ . | quote }}
+        {{- end }}
+        logging:
+            enabled: {{ dig "logging" "enabled" true .Values.network.gke }}
+            sampleRate: {{ dig "logging" "sampleRate" 100000 .Values.network.gke }}
+    targetRef:
+        group: ""
+        kind: Service
+        name: {{ include "liferay.name" . }}
+{{- end }}

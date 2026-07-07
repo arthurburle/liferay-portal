@@ -1,0 +1,27 @@
+{{- if .Values.network.gke.enabled }}
+{{- $probePort := .Values.readinessProbe.httpGet.port -}}
+{{- range .Values.ports -}}
+    {{- if eq .name $probePort -}}{{- $probePort = .containerPort -}}{{- end -}}
+{{- end -}}
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+    labels:
+        app: {{ include "liferay.name" . }}
+        {{- include "liferay.labels" . | nindent 8 }}
+    name: {{ include "liferay.name" . }}
+    namespace: {{ include "liferay.namespace" . }}
+spec:
+    default:
+        checkIntervalSec: {{ dig "healthCheck" "checkIntervalSec" 15 .Values.network.gke }}
+        timeoutSec: {{ dig "healthCheck" "timeoutSec" 5 .Values.network.gke }}
+        config:
+            type: HTTP
+            httpHealthCheck:
+                port: {{ $probePort }}
+                requestPath: {{ .Values.readinessProbe.httpGet.path }}
+    targetRef:
+        group: ""
+        kind: Service
+        name: {{ include "liferay.name" . }}
+{{- end }}

@@ -298,7 +298,11 @@ network:
     extraRules: []
     forceHttpsRedirect: false
     gatewayName: ""
+    gke:
+        enabled: false
     hostnames: []
+    hsts:
+        enabled: true
     perHostnameRoutes: false
     securityPolicyAuthorizationSpec: {}
     timeouts: {}
