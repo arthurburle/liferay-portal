@@ -202,6 +202,7 @@ spec:
     {{- end }}
 {{- if and .statefulset.network .statefulset.network.enabled }}
 {{- $perHost := and .statefulset.network.perHostnameRoutes (gt (len .statefulset.network.hostnames) 0) }}
+{{- if not .statefulset.network.gke.enabled }}
 ---
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
@@ -258,6 +259,7 @@ spec:
             kind: HTTPRoute
             name: {{ include "liferay.name" $.root }}-httproute
         {{- end }}
+{{- end }}
 {{- end }}
 {{- if .statefulset.network.gatewayName }}
 {{- if $perHost }}
