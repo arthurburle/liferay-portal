@@ -21,7 +21,7 @@ spec:
             metricRelabeling:
             {{- range . }}
                 -   action: {{ .action }}
-                    regex: {{ .regex | quote }}
+                    regex: {{ .regex | replace "\n" "" | replace " " "" | quote }}
                     sourceLabels:
                     {{- range .sourceLabels }}
                         -   {{ . }}

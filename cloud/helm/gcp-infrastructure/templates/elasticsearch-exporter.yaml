@@ -28,21 +28,21 @@ spec:
             automountServiceAccountToken: false
             containers:
                 -   args:
-                        -   "--es.uri=http://{{ $esName }}-es-http:9200"
-                        -   "--es.all"
-                        -   "--es.indices"
-                        -   "--es.indices_settings"
-                        -   "--es.shards"
-                        -   "--collector.clustersettings"
-                        -   "--collector.snapshots"
-                        -   "--collector.slm"
-                        -   "--es.timeout=20s"
-                        -   "--web.listen-address=:9114"
-                        -   "--web.telemetry-path=/metrics"
-                        -   "--log.format=json"
+                        -   --es.uri=http://{{ $esName }}-es-http:9200
+                        -   --es.all
+                        -   --es.indices
+                        -   --es.indices_settings
+                        -   --es.shards
+                        -   --collector.clustersettings
+                        -   --collector.snapshots
+                        -   --collector.slm
+                        -   --es.timeout=20s
+                        -   --web.listen-address=:9114
+                        -   --web.telemetry-path=/metrics
+                        -   --log.format=json
                     env:
                         -   name: ES_USERNAME
-                            value: "elastic"
+                            value: elastic
                         -   name: ES_PASSWORD
                             valueFrom:
                                 secretKeyRef:
