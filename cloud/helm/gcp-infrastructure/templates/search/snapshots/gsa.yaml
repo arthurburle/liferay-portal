@@ -1,0 +1,27 @@
+{{- $search := .Values.search.elasticsearch -}}
+{{- if and .Values.enabled $search.enabled $search.snapshots.enabled -}}
+{{- $gsaName := include "search.snapshotGsaName" . -}}
+apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+kind: ServiceAccount
+metadata:
+    labels:
+        {{- include "search.labels" . | nindent 8 }}
+    name: {{ $gsaName }}
+spec:
+    forProvider:
+        description: "Workload-identity GSA for the search stack."
+        displayName: "Search stack ({{ .Values.environmentId }})"
+---
+apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
+kind: ServiceAccountIAMMember
+metadata:
+    labels:
+        {{- include "search.labels" . | nindent 8 }}
+    name: {{ printf "%s-workload-identity" $gsaName }}
+spec:
+    forProvider:
+        member: {{ printf "serviceAccount:%s.svc.id.goog[%s/%s]" .Values.cloudProjectId (include "search.namespace" .) (include "search.serviceAccountName" .) | quote }}
+        role: roles/iam.workloadIdentityUser
+        serviceAccountIdRef:
+            name: {{ $gsaName }}
+{{- end -}}

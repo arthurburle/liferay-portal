@@ -1,0 +1,33 @@
+{{- $search := .Values.search.elasticsearch -}}
+{{- if and .Values.enabled $search.enabled $search.snapshots.enabled -}}
+{{- $retentionDays := int $search.snapshots.retentionDays -}}
+apiVersion: stackconfigpolicy.k8s.elastic.co/v1alpha1
+kind: StackConfigPolicy
+metadata:
+    labels:
+        {{- include "search.labels" . | nindent 8 }}
+    name: search-snapshots
+    namespace: {{ include "search.namespace" . }}
+spec:
+    elasticsearch:
+        snapshotLifecyclePolicies:
+            daily-snapshots:
+                config:
+                    include_global_state: true
+                    indices: "liferay-*"
+                name: "<daily-snap-{now/d}>"
+                repository: snapshots
+                retention:
+                    expire_after: {{ printf "%dd" $retentionDays | quote }}
+                    max_count: {{ int $search.snapshots.maxSnapshots }}
+                    min_count: {{ int $search.snapshots.minSnapshots }}
+                schedule: "0 30 1 * * ?"
+        snapshotRepositories:
+            snapshots:
+                settings:
+                    bucket: {{ include "search.snapshotBucketName" . }}
+                type: gcs
+    resourceSelector:
+        matchLabels:
+            {{- include "search.labels" . | nindent 12 }}
+{{- end -}}

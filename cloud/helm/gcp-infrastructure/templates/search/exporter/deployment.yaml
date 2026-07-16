@@ -1,9 +1,7 @@
 {{- $search := .Values.search.elasticsearch -}}
 {{- if and .Values.enabled $search.enabled $search.exporter.enabled -}}
 {{- $exp := $search.exporter -}}
-{{- $elasticsearchNamespace := printf "%s-elasticsearch" .Release.Namespace -}}
-{{- $esName := include "elasticsearch.name" . -}}
-{{- $name := printf "%s-exporter" $esName -}}
+{{- $esName := include "search.name" . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -11,8 +9,8 @@ metadata:
         app.kubernetes.io/component: metrics
         app.kubernetes.io/name: elasticsearch-exporter
         projectId: {{ .Values.projectId }}
-    name: {{ $name }}
-    namespace: {{ $elasticsearchNamespace }}
+    name: {{ printf "%s-exporter" $esName }}
+    namespace: {{ include "search.namespace" . }}
 spec:
     replicas: {{ $exp.replicaCount }}
     selector:
@@ -72,32 +70,4 @@ spec:
                 runAsUser: 65534
                 seccompProfile:
                     type: RuntimeDefault
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-    labels:
-        app.kubernetes.io/component: metrics
-        app.kubernetes.io/name: elasticsearch-exporter
-        projectId: {{ .Values.projectId }}
-    name: {{ $name }}
-    namespace: {{ $elasticsearchNamespace }}
-spec:
-    ingress:
-        -   from:
-                -   namespaceSelector:
-                        matchLabels:
-                            kubernetes.io/metadata.name: gmp-system
-                    podSelector:
-                        matchLabels:
-                            app: managed-prometheus-collector
-                            app.kubernetes.io/name: collector
-            ports:
-                -   port: metrics
-                    protocol: TCP
-    podSelector:
-        matchLabels:
-            app.kubernetes.io/name: elasticsearch-exporter
-    policyTypes:
-        -   Ingress
 {{- end -}}

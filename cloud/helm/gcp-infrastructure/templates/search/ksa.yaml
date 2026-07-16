@@ -1,0 +1,17 @@
+{{- $search := .Values.search.elasticsearch -}}
+{{- if and .Values.enabled $search.enabled }}
+{{- if and $search.snapshots.enabled (not .Values.cloudProjectId) -}}
+{{- fail "cloudProjectId must be set when search.elasticsearch.snapshots.enabled is true — the GCP project that owns the GKE cluster is required for the workload-identity annotation" -}}
+{{- end -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    {{- if $search.snapshots.enabled }}
+    annotations:
+        iam.gke.io/gcp-service-account: {{ include "search.snapshotGsaEmail" . | quote }}
+    {{- end }}
+    labels:
+        {{- include "search.labels" . | nindent 8 }}
+    name: {{ include "search.serviceAccountName" . }}
+    namespace: {{ include "search.namespace" . }}
+{{- end -}}
