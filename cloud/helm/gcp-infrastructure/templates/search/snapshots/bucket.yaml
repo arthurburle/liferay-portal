@@ -1,0 +1,46 @@
+{{- $search := .Values.search.elasticsearch -}}
+{{- if and .Values.enabled $search.enabled $search.snapshots.enabled -}}
+{{- $retentionDays := int $search.snapshots.retentionDays -}}
+{{- $minSnapshots := int $search.snapshots.minSnapshots -}}
+{{- $maxSnapshots := int $search.snapshots.maxSnapshots -}}
+{{- if gt $minSnapshots $maxSnapshots -}}
+{{- fail (printf "search.elasticsearch.snapshots.minSnapshots (%d) must be <= maxSnapshots (%d)" $minSnapshots $maxSnapshots) -}}
+{{- end -}}
+{{- $bucketName := include "search.snapshotBucketName" . -}}
+apiVersion: storage.gcp.m.upbound.io/v1beta1
+kind: Bucket
+metadata:
+    labels:
+        {{- include "search.labels" . | nindent 8 }}
+    name: {{ $bucketName }}
+spec:
+    forProvider:
+        forceDestroy: false
+        labels:
+            component: search
+            customer_billing: storage
+            environment_id: {{ .Values.environmentId }}
+            project_id: {{ .Values.projectId }}
+            resource_type: search-snapshot
+        lifecycleRule:
+            -   action:
+                    type: Delete
+                condition:
+                    age: {{ add $retentionDays 7 }}
+        location: {{ .Values.region }}
+        storageClass: STANDARD
+        uniformBucketLevelAccess: true
+---
+apiVersion: storage.gcp.m.upbound.io/v1beta1
+kind: BucketIAMMember
+metadata:
+    labels:
+        {{- include "search.labels" . | nindent 8 }}
+    name: {{ printf "%s-bucket-access" (include "search.snapshotGsaName" .) }}
+spec:
+    forProvider:
+        bucketRef:
+            name: {{ $bucketName }}
+        member: {{ printf "serviceAccount:%s" (include "search.snapshotGsaEmail" .) | quote }}
+        role: roles/storage.objectUser
+{{- end -}}

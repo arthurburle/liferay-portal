@@ -8,6 +8,7 @@ backup:
     schedule: 0 5 * * *
     storageClass: NEARLINE
     vaultTags: {}
+cloudProjectId: ""
 cmk:
     enabled: false
 database:
@@ -182,6 +183,11 @@ search:
                     -   ALL
             privileged: false
             readOnlyRootFilesystem: false
+        snapshots:
+            enabled: false
+            maxSnapshots: 30
+            minSnapshots: 5
+            retentionDays: 7
         version: 8.19.11
         volumeSize: 10Gi
 secretNames: []
