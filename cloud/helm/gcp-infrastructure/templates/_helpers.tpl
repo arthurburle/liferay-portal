@@ -1,5 +1,7 @@
-{{- define "elasticsearch.name" -}}
-{{- .Values.search.elasticsearch.name | default (printf "%s-es" .Release.Name) | trunc 63 | trimSuffix "-" -}}
+{{- /* Labels applied to every resource created by this chart. */ -}}
+{{- define "commonLabels" -}}
+environmentId: {{ .Values.environmentId }}
+projectId: {{ .Values.projectId }}
 {{- end -}}
 
 {{- define "liferay.hostnameSlug" -}}
