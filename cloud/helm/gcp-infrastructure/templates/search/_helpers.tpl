@@ -1,3 +1,9 @@
+{{- /* Labels for the search stack. */ -}}
+{{- define "search.labels" -}}
+component: search
+{{ include "commonLabels" . }}
+{{- end -}}
+
 {{- define "search.name" -}}
 {{- .Values.search.elasticsearch.name | default (printf "%s-es" .Release.Name) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -18,16 +24,10 @@ search
 {{- printf "search-snapshots-%s-%s-%s" $envtag $projectId $bucketHash | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "search.snapshotGsaName" -}}
-{{- printf "search-%s" .Values.environmentId -}}
-{{- end -}}
-
 {{- define "search.snapshotGsaEmail" -}}
 {{- printf "%s@%s.iam.gserviceaccount.com" (include "search.snapshotGsaName" .) .Values.cloudProjectId -}}
 {{- end -}}
 
-{{- /* Labels for the search stack. */ -}}
-{{- define "search.labels" -}}
-component: search
-{{ include "commonLabels" . }}
+{{- define "search.snapshotGsaName" -}}
+{{- printf "search-%s" .Values.environmentId -}}
 {{- end -}}
