@@ -1,0 +1,37 @@
+{{- $search := .Values.search.elasticsearch -}}
+{{- if and .Values.enabled $search.enabled $search.allowedIngress -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+    labels:
+        {{- include "search.labels" . | nindent 8 }}
+    name: {{ include "search.name" . }}-allowed-ingress
+    namespace: {{ include "search.namespace" . }}
+spec:
+    ingress:
+        {{- range $entry := $search.allowedIngress }}
+        -   from:
+                {{- if $entry.podLabels }}
+                {{- range $labels := $entry.podLabels }}
+                -   namespaceSelector:
+                        matchLabels:
+                            kubernetes.io/metadata.name: {{ $entry.namespace }}
+                    podSelector:
+                        matchLabels:
+                            {{- toYaml $labels | nindent 28 }}
+                {{- end }}
+                {{- else }}
+                -   namespaceSelector:
+                        matchLabels:
+                            kubernetes.io/metadata.name: {{ $entry.namespace }}
+                {{- end }}
+            ports:
+                -   port: {{ $entry.port }}
+                    protocol: TCP
+        {{- end }}
+    podSelector:
+        matchLabels:
+            elasticsearch.k8s.elastic.co/cluster-name: {{ include "search.name" . }}
+    policyTypes:
+        -   Ingress
+{{- end -}}

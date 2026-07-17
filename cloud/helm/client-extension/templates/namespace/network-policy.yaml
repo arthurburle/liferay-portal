@@ -1,0 +1,56 @@
+{{- if .Values.enabled -}}
+{{- range $ext := .Values.extensions }}
+{{- $kind := dig "kind" "Deployment" $ext }}
+{{- $npEnabled := dig "networkPolicy" "enabled" true $ext }}
+{{- if and (eq $kind "Deployment") $npEnabled }}
+{{- if not $.Values.main.namespace -}}
+{{- fail "main.namespace must be set when any extension has networkPolicy.enabled — needed to allow ingress from the main Liferay namespace" -}}
+{{- end }}
+{{- $extPort := required "extensions[].port is required when networkPolicy.enabled is true" $ext.port }}
+{{- $allowedIngress := dig "networkPolicy" "allowedIngress" list $ext }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+    labels:
+        {{- include "extLabels" (dict "root" $ "ext" $ext) | nindent 8 }}
+    name: {{ printf "%s-ingress" $ext.name }}
+    namespace: {{ $.Release.Namespace }}
+spec:
+    ingress:
+        -   from:
+                -   namespaceSelector:
+                        matchLabels:
+                            kubernetes.io/metadata.name: {{ $.Values.main.namespace }}
+                -   podSelector: {}
+            ports:
+                -   port: {{ $extPort }}
+                    protocol: TCP
+        {{- range $entry := $allowedIngress }}
+        -   from:
+                {{- if $entry.podLabels }}
+                {{- range $labels := $entry.podLabels }}
+                -   namespaceSelector:
+                        matchLabels:
+                            kubernetes.io/metadata.name: {{ $entry.namespace }}
+                    podSelector:
+                        matchLabels:
+                            {{- toYaml $labels | nindent 28 }}
+                {{- end }}
+                {{- else }}
+                -   namespaceSelector:
+                        matchLabels:
+                            kubernetes.io/metadata.name: {{ $entry.namespace }}
+                {{- end }}
+            ports:
+                -   port: {{ $entry.port | default $extPort }}
+                    protocol: TCP
+        {{- end }}
+    podSelector:
+        matchLabels:
+            {{- include "extSelectorLabels" (dict "root" $ "ext" $ext) | nindent 12 }}
+    policyTypes:
+        -   Ingress
+{{- end }}
+{{- end }}
+{{- end -}}

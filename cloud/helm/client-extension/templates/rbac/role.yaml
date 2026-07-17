@@ -1,0 +1,11 @@
+{{- if and .Values.enabled .Values.rbac.enabled .Values.rbac.rules -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+    labels:
+        {{- include "sharedLabels" . | nindent 8 }}
+    name: {{ .Release.Name }}
+    namespace: {{ .Release.Namespace }}
+rules:
+    {{- toYaml .Values.rbac.rules | nindent 4 }}
+{{- end -}}
