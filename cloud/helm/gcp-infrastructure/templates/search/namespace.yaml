@@ -6,6 +6,7 @@ metadata:
     annotations:
         argocd.argoproj.io/sync-wave: "-25"
     labels:
+        {{- include "search.labels" . | nindent 8 }}
         name: {{ include "search.namespace" . }}
         pod-security.kubernetes.io/enforce: restricted
     name: {{ include "search.namespace" . }}
