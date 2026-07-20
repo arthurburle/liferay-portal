@@ -1,0 +1,26 @@
+{{- if .Values.enabled -}}
+{{- range $ext := .Values.extensions }}
+{{- if eq (dig "kind" "Deployment" $ext) "CronJob" }}
+{{- $schedule := dig "cronjob" "schedule" "" $ext }}
+{{- if not $schedule -}}
+{{- fail (printf "extensions[%s].cronjob.schedule must be set when kind is CronJob" $ext.name) -}}
+{{- end }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+    labels:
+        {{- include "extLabels" (dict "root" $ "ext" $ext) | nindent 8 }}
+    name: {{ $ext.name }}
+    namespace: {{ $.Release.Namespace }}
+spec:
+    concurrencyPolicy: {{ dig "cronjob" "concurrencyPolicy" "Forbid" $ext }}
+    jobTemplate:
+        spec:
+            backoffLimit: {{ dig "job" "backoffLimit" 6 $ext }}
+            template:
+                {{- include "podTemplate" (dict "root" $ "ext" $ext) | nindent 16 }}
+    schedule: {{ $schedule | quote }}
+{{- end }}
+{{- end }}
+{{- end -}}

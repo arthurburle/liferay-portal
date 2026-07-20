@@ -1,0 +1,38 @@
+{{- if .Values.enabled -}}
+{{- range $ext := .Values.extensions }}
+{{- if and (eq (dig "kind" "Deployment" $ext) "Deployment") (dig "autoscaling" "enabled" false $ext) }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+    labels:
+        {{- include "extLabels" (dict "root" $ "ext" $ext) | nindent 8 }}
+    name: {{ $ext.name }}
+    namespace: {{ $.Release.Namespace }}
+spec:
+    maxReplicas: {{ dig "autoscaling" "maxReplicas" 10 $ext }}
+    metrics:
+        {{- with (dig "autoscaling" "targetCPUUtilizationPercentage" 0 $ext) }}
+        -   resource:
+                name: cpu
+                target:
+                    averageUtilization: {{ . }}
+                    type: Utilization
+            type: Resource
+        {{- end }}
+        {{- with (dig "autoscaling" "targetMemoryUtilizationPercentage" 0 $ext) }}
+        -   resource:
+                name: memory
+                target:
+                    averageUtilization: {{ . }}
+                    type: Utilization
+            type: Resource
+        {{- end }}
+    minReplicas: {{ dig "autoscaling" "minReplicas" 1 $ext }}
+    scaleTargetRef:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: {{ $ext.name }}
+{{- end }}
+{{- end }}
+{{- end -}}

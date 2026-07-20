@@ -1,0 +1,30 @@
+cloudProjectId: ""
+dxp:
+    domains: []
+    mainDomain: ""
+    protocol: https
+enabled: true
+environmentId: ""
+extensions: []
+loadBalancerSourceRanges:
+    - 130.211.0.0/22
+    - 35.191.0.0/16
+main:
+    namespace: ""
+projectId: ""
+rbac:
+    enabled: false
+    rules: []
+resourceQuota:
+    enabled: false
+    limits:
+        cpu: "20"
+        memory: 40Gi
+    requests:
+        cpu: "10"
+        memory: 20Gi
+serviceAccount:
+    annotations: {}
+    create: true
+    gcpServiceAccount: ""
+    name: ""
