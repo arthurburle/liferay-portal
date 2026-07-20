@@ -33,10 +33,10 @@ metadata:
 spec:
     ingress:
         -   from:
+                {{- range $cidr := $.Values.loadBalancerSourceRanges }}
                 -   ipBlock:
-                        cidr: 130.211.0.0/22
-                -   ipBlock:
-                        cidr: 35.191.0.0/16
+                        cidr: {{ $cidr | quote }}
+                {{- end }}
             ports:
                 -   port: {{ $extPort }}
                     protocol: TCP
