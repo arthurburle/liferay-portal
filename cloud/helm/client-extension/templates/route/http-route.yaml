@@ -1,0 +1,50 @@
+{{- if .Values.enabled -}}
+{{- range $ext := .Values.extensions }}
+{{- if and (eq (dig "kind" "Deployment" $ext) "Deployment") (dig "route" "enabled" true $ext) }}
+{{- $extPort := required "extensions[].port is required when route.enabled is true" $ext.port }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+    labels:
+        {{- include "extLabels" (dict "root" $ "ext" $ext) | nindent 8 }}
+    name: {{ $ext.name }}
+    namespace: {{ $.Release.Namespace }}
+spec:
+    hostnames:
+        {{- range (dig "route" "hostnames" list $ext) }}
+        -   {{ . | quote }}
+        {{- end }}
+    parentRefs:
+        -   name: {{ required (printf "extensions[%s].route.parent.name is required when route.enabled is true" $ext.name) (dig "route" "parent" "name" "" $ext) }}
+            namespace: {{ default $.Values.main.namespace (dig "route" "parent" "namespace" "" $ext) }}
+    rules:
+        -   backendRefs:
+                -   name: {{ $ext.name }}
+                    port: {{ $extPort }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+    labels:
+        {{- include "extLabels" (dict "root" $ "ext" $ext) | nindent 8 }}
+    name: {{ printf "%s-lb-ingress" $ext.name }}
+    namespace: {{ $.Release.Namespace }}
+spec:
+    ingress:
+        -   from:
+                {{- range $cidr := $.Values.loadBalancerSourceRanges }}
+                -   ipBlock:
+                        cidr: {{ $cidr | quote }}
+                {{- end }}
+            ports:
+                -   port: {{ $extPort }}
+                    protocol: TCP
+    podSelector:
+        matchLabels:
+            {{- include "extSelectorLabels" (dict "root" $ "ext" $ext) | nindent 12 }}
+    policyTypes:
+        -   Ingress
+{{- end }}
+{{- end }}
+{{- end -}}

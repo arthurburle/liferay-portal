@@ -16,12 +16,18 @@ spec:
             selfSignedCertificate:
                 disabled: true
     nodeSets:
-        -   count: {{ $search.nodeCount }}
+        -   {{- with $search.config }}
+            config:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
+            count: {{ $search.nodeCount }}
             name: default
             podTemplate:
                 metadata:
                     annotations:
                         {{- $search.annotations | toYaml | nindent 24 }}
+                    labels:
+                        {{- include "search.labels" . | nindent 24 }}
                 spec:
                     containers:
                         -   env:

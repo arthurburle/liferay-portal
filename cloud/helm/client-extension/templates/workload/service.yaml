@@ -1,0 +1,23 @@
+{{- if .Values.enabled -}}
+{{- range $ext := .Values.extensions }}
+{{- if and (eq (dig "kind" "Deployment" $ext) "Deployment") (dig "service" "enabled" true $ext) }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+    labels:
+        {{- include "extLabels" (dict "root" $ "ext" $ext) | nindent 8 }}
+    name: {{ $ext.name }}
+    namespace: {{ $.Release.Namespace }}
+spec:
+    ports:
+        -   name: http
+            port: {{ required "extensions[].port is required when service.enabled is true" $ext.port }}
+            protocol: TCP
+            targetPort: http
+    selector:
+        {{- include "extSelectorLabels" (dict "root" $ "ext" $ext) | nindent 8 }}
+    type: ClusterIP
+{{- end }}
+{{- end }}
+{{- end -}}
