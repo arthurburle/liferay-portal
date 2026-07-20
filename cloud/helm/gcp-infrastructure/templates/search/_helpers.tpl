@@ -2,6 +2,7 @@
 {{- define "search.labels" -}}
 component: search
 {{ include "commonLabels" . }}
+workload_class: standard
 {{- end -}}
 
 {{- define "search.name" -}}

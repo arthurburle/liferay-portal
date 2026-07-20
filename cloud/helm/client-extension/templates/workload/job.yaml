@@ -1,0 +1,18 @@
+{{- if .Values.enabled -}}
+{{- range $ext := .Values.extensions }}
+{{- if eq (dig "kind" "Deployment" $ext) "Job" }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+    labels:
+        {{- include "extLabels" (dict "root" $ "ext" $ext) | nindent 8 }}
+    name: {{ $ext.name }}
+    namespace: {{ $.Release.Namespace }}
+spec:
+    backoffLimit: {{ dig "job" "backoffLimit" 6 $ext }}
+    template:
+        {{- include "podTemplate" (dict "root" $ "ext" $ext) | nindent 8 }}
+{{- end }}
+{{- end }}
+{{- end -}}

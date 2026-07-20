@@ -24,7 +24,7 @@ spec:
     environmentId: {{ .Values.environmentId }}
     forceDestroy: {{ .Values.forceDestroy }}
     orphanOnDelete: {{ .Values.orphanOnDelete }}
-    overlay:
+    overlayAccess:
         enabled: {{ .Values.overlay.enabled }}
     projectId: {{ .Values.projectId }}
     region: {{ .Values.region }}
