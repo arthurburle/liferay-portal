@@ -1,6 +1,6 @@
 {{- $search := .Values.search.elasticsearch -}}
-{{- if and .Values.enabled $search.enabled $search.snapshots.enabled -}}
-{{- $gsaName := include "search.snapshotGsaName" . -}}
+{{- if and .Values.enabled $search.enabled (($search.gsa | default dict).enabled | default false) -}}
+{{- $gsaName := include "search.gsaName" . -}}
 apiVersion: cloudplatform.gcp.m.upbound.io/v1beta1
 kind: ServiceAccount
 metadata:
