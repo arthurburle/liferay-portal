@@ -25,10 +25,10 @@ search
 {{- printf "search-snapshots-%s-%s-%s" $envtag $projectId $bucketHash | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "search.snapshotGsaEmail" -}}
-{{- printf "%s@%s.iam.gserviceaccount.com" (include "search.snapshotGsaName" .) .Values.cloudProjectId -}}
+{{- define "search.gsaEmail" -}}
+{{- printf "%s@%s.iam.gserviceaccount.com" (include "search.gsaName" .) .Values.cloudProjectId -}}
 {{- end -}}
 
-{{- define "search.snapshotGsaName" -}}
+{{- define "search.gsaName" -}}
 {{- printf "search-%s" .Values.environmentId -}}
 {{- end -}}
