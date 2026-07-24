@@ -83,7 +83,7 @@ podMonitoring:
             path: /metrics
             port: metrics
         envoy:
-            enabled: true
+            enabled: '{{ include "liferay.gateway.isEnvoy" . }}'
             matchLabels:
                 app.kubernetes.io/name: envoy
             metricRelabeling:
@@ -136,6 +136,8 @@ search:
             sidecar.opentelemetry.io/inject: "false"
         config: {}
         enabled: true
+        gsa:
+            enabled: false
         exporter:
             enabled: false
             image:

@@ -18,7 +18,7 @@ spec:
         forceDestroy: false
         labels:
             component: search
-            customer_billing: storage
+            spend_area: storage
             environment_id: {{ .Values.environmentId }}
             project_id: {{ .Values.projectId }}
             resource_type: search-snapshot
@@ -36,11 +36,11 @@ kind: BucketIAMMember
 metadata:
     labels:
         {{- include "search.labels" . | nindent 8 }}
-    name: {{ printf "%s-bucket-access" (include "search.snapshotGsaName" .) }}
+    name: {{ printf "%s-bucket-access" (include "search.gsaName" .) }}
 spec:
     forProvider:
         bucketRef:
             name: {{ $bucketName }}
-        member: {{ printf "serviceAccount:%s" (include "search.snapshotGsaEmail" .) | quote }}
+        member: {{ printf "serviceAccount:%s" (include "search.gsaEmail" .) | quote }}
         role: roles/storage.objectUser
 {{- end -}}
