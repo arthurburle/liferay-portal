@@ -493,6 +493,16 @@ spec:
                 -   port: http
                     protocol: TCP
         {{- end }}
+        {{- if and .statefulset.network .statefulset.network.gke.enabled .statefulset.networkPolicy.loadBalancerSourceRanges }}
+        -   from:
+                {{- range $cidr := .statefulset.networkPolicy.loadBalancerSourceRanges }}
+                -   ipBlock:
+                        cidr: {{ $cidr | quote }}
+                {{- end }}
+            ports:
+                -   port: http
+                    protocol: TCP
+        {{- end }}
         -   from:
                 -   podSelector:
                         matchLabels:
