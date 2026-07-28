@@ -493,12 +493,9 @@ spec:
                 -   port: http
                     protocol: TCP
         {{- end }}
-        {{- if and .statefulset.network .statefulset.network.gke.enabled .statefulset.networkPolicy.loadBalancerSourceRanges }}
+        {{- if and .statefulset.network .statefulset.network.gke.enabled }}
         -   from:
-                {{- range $cidr := .statefulset.networkPolicy.loadBalancerSourceRanges }}
-                -   ipBlock:
-                        cidr: {{ $cidr | quote }}
-                {{- end }}
+                {{- include "liferay.gkeLoadBalancerSourceRanges" . | nindent 16 }}
             ports:
                 -   port: http
                     protocol: TCP
