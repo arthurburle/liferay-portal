@@ -6,9 +6,6 @@ dxp:
 enabled: true
 environmentId: ""
 extensions: []
-loadBalancerSourceRanges:
-    - 130.211.0.0/22
-    - 35.191.0.0/16
 main:
     namespace: ""
 projectId: ""
