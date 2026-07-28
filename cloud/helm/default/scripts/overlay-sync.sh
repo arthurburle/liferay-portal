@@ -4,9 +4,9 @@ set -o errexit
 set -o nounset
 
 function main {
-	if [ "${#}" -ne 3 ]
+	if [ "${#}" -lt 3 ] || [ "${#}" -gt 4 ]
 	then
-		_log_json "Usage: ${0} <provider-type> <from-path> <into-path>." "ERROR"
+		_log_json "Usage: ${0} <provider-type> <from-path> <into-path> [mode:dir|file]." "ERROR"
 
 		exit 1
 	fi
@@ -14,6 +14,7 @@ function main {
 	local bucket_name="${LIFERAY_OVERLAY_BUCKET_NAME:-}"
 	local from_path="${2}"
 	local into_path="${3}"
+	local mode="${4:-dir}"
 	local provider_type="${1}"
 
 	if [ -z "${bucket_name}" ]
@@ -35,11 +36,14 @@ function main {
 	local source_uri=":${provider_type},env_auth=true:${bucket_name}/${from_path}"
 	local target_path="/temp/${into_path}"
 
-	_log_json "Copying from \"${source_uri}\" to \"${target_path}\"."
+	_log_json "Copying from \"${source_uri}\" to \"${target_path}\" (mode=${mode})."
 
 	if [ -n "${include_pattern}" ]
 	then
 		rclone copy "${source_uri}" "${target_path}" --include "${include_pattern}" --log-level INFO --use-json-log
+	elif [ "${mode}" = "file" ]
+	then
+		rclone copyto "${source_uri}" "${target_path}" --log-level INFO --use-json-log
 	else
 		rclone copy "${source_uri}" "${target_path}" --log-level INFO --use-json-log
 	fi
