@@ -504,6 +504,13 @@ spec:
                 -   port: http
                     protocol: TCP
         {{- end }}
+        {{- if and .statefulset.network .statefulset.network.gke.enabled }}
+        -   from:
+                {{- include "liferay.gkeLoadBalancerSourceRanges" . | nindent 16 }}
+            ports:
+                -   port: http
+                    protocol: TCP
+        {{- end }}
         -   from:
                 -   podSelector:
                         matchLabels:

@@ -33,10 +33,7 @@ metadata:
 spec:
     ingress:
         -   from:
-                {{- range $cidr := $.Values.loadBalancerSourceRanges }}
-                -   ipBlock:
-                        cidr: {{ $cidr | quote }}
-                {{- end }}
+                {{- include "gkeLoadBalancerSourceRanges" . | nindent 16 }}
             ports:
                 -   port: {{ $extPort }}
                     protocol: TCP
