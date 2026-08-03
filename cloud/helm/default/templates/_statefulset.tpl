@@ -32,11 +32,6 @@ spec:
                 checksum/config: {{ include (print .root.Template.BasePath "/configmap.yaml") .root | sha256sum }}
                 checksum/init-scripts: {{ include (print .root.Template.BasePath "/liferay-init-scripts-cm.yaml") .root | sha256sum }}
                 checksum/network: {{ include (print .root.Template.BasePath "/liferay-network-cm.yaml") .root | sha256sum }}
-                {{- $overlay := .statefulset.overlay | default dict }}
-                {{- $autoRestart := $overlay.autoRestart | default dict }}
-                {{- if and $autoRestart.enabled $overlay.contentHash (eq ($overlay.version | default "master") "master") }}
-                overlay.liferay.com/content-hash: {{ $overlay.contentHash | quote }}
-                {{- end }}
                 {{- with .statefulset.annotations }}
                 {{- toYaml . | nindent 16 }}
                 {{- end }}
@@ -108,9 +103,7 @@ spec:
                     startupProbe:
                         {{- toYaml . | nindent 22 }}
                     {{- end }}
-                    {{- $overlay := .statefulset.overlay | default dict }}
-                    {{- $overlayCopy := ternary ($overlay.copy | default list) list ($overlay.enabled | default false) }}
-                    {{- if or .statefulset.volumeMounts .statefulset.customVolumeMounts $overlayCopy }}
+                    {{- if or .statefulset.volumeMounts .statefulset.customVolumeMounts }}
                     volumeMounts:
                         {{- with .statefulset.volumeMounts }}
                         {{- toYaml . | nindent 22 }}
@@ -119,15 +112,6 @@ spec:
                         {{- if and $v (gt (len $v) 0) }}
                         {{- toYaml $v | nindent 22 }}
                         {{- end }}
-                        {{- end }}
-                        {{- $overlayMounts := list }}
-                        {{- range $overlayCopy }}
-                        {{- $path := .dir | default .file }}
-                        {{- $mountPath := .mountPath | default (printf "/opt/liferay/%s" $path) }}
-                        {{- $overlayMounts = append $overlayMounts (dict "mountPath" $mountPath "name" "liferay-persistent-volume" "subPath" $path) }}
-                        {{- end }}
-                        {{- with $overlayMounts }}
-                        {{- toYaml . | nindent 22 }}
                         {{- end }}
                     {{- end }}
             {{- if or .statefulset.pullSecrets .statefulset.customPullSecrets}}

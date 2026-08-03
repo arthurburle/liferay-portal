@@ -10,10 +10,11 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-    {{- if $gsaEnabled }}
     annotations:
+        argocd.argoproj.io/sync-wave: "-25"
+        {{- if $gsaEnabled }}
         iam.gke.io/gcp-service-account: {{ include "search.gsaEmail" . | quote }}
-    {{- end }}
+        {{- end }}
     labels:
         {{- include "search.labels" . | nindent 8 }}
     name: {{ include "search.serviceAccountName" . }}
