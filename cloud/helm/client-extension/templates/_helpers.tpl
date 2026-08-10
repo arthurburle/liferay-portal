@@ -1,3 +1,12 @@
+{{- /*
+Base mount path for chart-provided init scripts (helpers.sh, overlay-sync.sh,
+wait-for-liferay.sh). Consumed by every init container that mounts a subPath
+from the client-extension-init-scripts ConfigMap.
+*/ -}}
+{{- define "initScriptsPath" -}}
+/liferay-init-scripts
+{{- end }}
+
 {{- /* Labels applied to every resource created by this chart. */ -}}
 {{- define "commonLabels" -}}
 environmentId: {{ .Values.environmentId }}

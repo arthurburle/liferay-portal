@@ -1,5 +1,7 @@
 apiVersion: v1
 data:
+    helpers.sh: |
+{{ .Files.Get "scripts/helpers.sh" | nindent 8 }}
     overlay-sync.sh: |
 {{ .Files.Get "scripts/overlay-sync.sh" | nindent 8 }}
     wait-for-liferay.sh: |

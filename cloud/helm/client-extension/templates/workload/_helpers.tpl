@@ -35,7 +35,7 @@ spec:
                     set -o errexit
                     {{- range $overlay.copy }}
                     {{- $ver := .version | default $extOverlayVersion }}
-                    sh /liferay-init-scripts/overlay-sync.sh "gcs" {{ printf "%s/%s" $ver .from | quote }} {{ .into | quote }}
+                    sh {{ include "initScriptsPath" $root }}/overlay-sync.sh "gcs" {{ printf "%s/%s" $ver .from | quote }} {{ .into | quote }}
                     {{- end }}
             env:
                 -   name: LIFERAY_OVERLAY_BUCKET_NAME
@@ -52,7 +52,10 @@ spec:
                         -   ALL
                 readOnlyRootFilesystem: false
             volumeMounts:
-                -   mountPath: /liferay-init-scripts/overlay-sync.sh
+                -   mountPath: {{ include "initScriptsPath" $root }}/helpers.sh
+                    name: client-extension-init-scripts
+                    subPath: helpers.sh
+                -   mountPath: {{ include "initScriptsPath" $root }}/overlay-sync.sh
                     name: client-extension-init-scripts
                     subPath: overlay-sync.sh
                 -   mountPath: /temp
@@ -61,7 +64,7 @@ spec:
         {{- if $waitEnabled }}
         -   command:
                 -   sh
-                -   /liferay-init-scripts/wait-for-liferay.sh
+                -   {{ include "initScriptsPath" $root }}/wait-for-liferay.sh
             env:
                 -   name: LIFERAY_URL
                     value: {{ printf "%s://%s%s" $liferayProtocol $liferayDomain $waitEndpoint | quote }}
@@ -87,7 +90,10 @@ spec:
                 seccompProfile:
                     type: RuntimeDefault
             volumeMounts:
-                -   mountPath: /liferay-init-scripts/wait-for-liferay.sh
+                -   mountPath: {{ include "initScriptsPath" $root }}/helpers.sh
+                    name: client-extension-init-scripts
+                    subPath: helpers.sh
+                -   mountPath: {{ include "initScriptsPath" $root }}/wait-for-liferay.sh
                     name: client-extension-init-scripts
                     subPath: wait-for-liferay.sh
         {{- end }}

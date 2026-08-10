@@ -13,7 +13,7 @@ main:
         endpoint: /c/portal/robots
         image:
             pullPolicy: IfNotPresent
-            repository: busybox
+            repository: docker.io/busybox
             tag: "1.36"
         pollIntervalSeconds: 5
 overlay:
