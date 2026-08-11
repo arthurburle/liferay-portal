@@ -106,7 +106,7 @@ spec:
                     startupProbe:
                         {{- toYaml . | nindent 22 }}
                     {{- end }}
-                    {{- if or .statefulset.volumeMounts .statefulset.customVolumeMounts}}
+                    {{- if or .statefulset.volumeMounts .statefulset.customVolumeMounts }}
                     volumeMounts:
                         {{- with .statefulset.volumeMounts }}
                         {{- toYaml . | nindent 22 }}
