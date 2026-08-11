@@ -3,7 +3,7 @@
 set -o errexit
 set -o nounset
 
-. /liferay-init-scripts/helpers.sh
+source "${LIFERAY_INIT_SCRIPTS_PATH}/helpers.sh"
 
 function main {
 	if [ "${#}" -ne 3 ]

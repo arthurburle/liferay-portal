@@ -54,15 +54,15 @@ customInitContainers:
     x-liferay-overlay:
         -   containerTemplate: |
                 {{- if and .overlay.enabled .overlay.copy }}
+                {{- $initScriptsPath := include "liferay.initScriptsPath" $ }}
                 -   command:
                         -   sh
                         -   -c
                         -   |
                             {{- $defaultVersion := $.overlay.version | default "master" }}
-                            {{- $initPath := include "liferay.initScriptsPath" $ }}
                             {{- range .overlay.copy }}
                             {{- $ver := .version | default $defaultVersion }}
-                            {{ $initPath }}/overlay-sync.sh {{ $.overlay.type | quote }} {{ printf "%s/%s" $ver .from | quote }} {{ .into | quote }}
+                            {{ $initScriptsPath }}/overlay-sync.sh {{ $.overlay.type | quote }} {{ printf "%s/%s" $ver .from | quote }} {{ .into | quote }}
                             {{- end }}
                     envFrom:
                         -   secretRef:
@@ -74,7 +74,7 @@ customInitContainers:
                         {{- toYaml . | nindent 24 }}
                     {{- end }}
                     volumeMounts:
-                        -   mountPath: {{ include "liferay.initScriptsPath" $ }}/overlay-sync.sh
+                        -   mountPath: {{ $initScriptsPath }}/overlay-sync.sh
                             name: {{ .overlay.initScriptsVolumeName }}
                             subPath: overlay-sync.sh
                         -   mountPath: /temp

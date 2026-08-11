@@ -26,6 +26,7 @@ metadata:
         {{- include "extLabels" . | nindent 8 }}
 spec:
     {{- if or $overlayEnabled $waitEnabled }}
+    {{- $initScriptsPath := include "initScriptsPath" $root }}
     initContainers:
         {{- if $overlayEnabled }}
         -   command:
@@ -35,9 +36,11 @@ spec:
                     set -o errexit
                     {{- range $overlay.copy }}
                     {{- $ver := .version | default $extOverlayVersion }}
-                    sh {{ include "initScriptsPath" $root }}/overlay-sync.sh "gcs" {{ printf "%s/%s" $ver .from | quote }} {{ .into | quote }}
+                    sh {{ $initScriptsPath }}/overlay-sync.sh "gcs" {{ printf "%s/%s" $ver .from | quote }} {{ .into | quote }}
                     {{- end }}
             env:
+                -   name: LIFERAY_INIT_SCRIPTS_PATH
+                    value: {{ $initScriptsPath | quote }}
                 -   name: LIFERAY_OVERLAY_BUCKET_NAME
                     value: {{ $overlayBucket | quote }}
             image: {{ printf "%s:%s" (dig "image" "repository" "rclone/rclone" $overlay) (dig "image" "tag" "1.66" $overlay | toString) }}
@@ -52,20 +55,18 @@ spec:
                         -   ALL
                 readOnlyRootFilesystem: false
             volumeMounts:
-                -   mountPath: {{ include "initScriptsPath" $root }}/helpers.sh
+                -   mountPath: {{ $initScriptsPath }}
                     name: client-extension-init-scripts
-                    subPath: helpers.sh
-                -   mountPath: {{ include "initScriptsPath" $root }}/overlay-sync.sh
-                    name: client-extension-init-scripts
-                    subPath: overlay-sync.sh
                 -   mountPath: /temp
                     name: overlay-staging
         {{- end }}
         {{- if $waitEnabled }}
         -   command:
                 -   sh
-                -   {{ include "initScriptsPath" $root }}/wait-for-liferay.sh
+                -   {{ $initScriptsPath }}/wait-for-liferay.sh
             env:
+                -   name: LIFERAY_INIT_SCRIPTS_PATH
+                    value: {{ $initScriptsPath | quote }}
                 -   name: LIFERAY_URL
                     value: {{ printf "%s://%s%s" $liferayProtocol $liferayDomain $waitEndpoint | quote }}
                 -   name: POLL_INTERVAL_SECONDS
@@ -90,12 +91,8 @@ spec:
                 seccompProfile:
                     type: RuntimeDefault
             volumeMounts:
-                -   mountPath: {{ include "initScriptsPath" $root }}/helpers.sh
+                -   mountPath: {{ $initScriptsPath }}
                     name: client-extension-init-scripts
-                    subPath: helpers.sh
-                -   mountPath: {{ include "initScriptsPath" $root }}/wait-for-liferay.sh
-                    name: client-extension-init-scripts
-                    subPath: wait-for-liferay.sh
         {{- end }}
     {{- end }}
     containers:
