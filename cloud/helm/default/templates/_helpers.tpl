@@ -1,4 +1,13 @@
 {{- /*
+    Base mount path for chart-provided init scripts (overlay-sync,
+    wait-for-elasticsearch, ...). Consumed by every init container that mounts
+    a subPath from the liferay-init-scripts ConfigMap.
+*/ -}}
+{{- define "liferay.initScriptsPath" -}}
+/liferay-init-scripts
+{{- end }}
+
+{{- /*
     Google Cloud L7 LB health-check source ranges. Constants published by
     Google — https://cloud.google.com/load-balancing/docs/health-check-concepts#ip-ranges
 */ -}}
