@@ -8,6 +8,17 @@ environmentId: ""
 extensions: []
 main:
     namespace: ""
+    waitForLiferay:
+        enabled: true
+        endpoint: /c/portal/robots
+        image:
+            pullPolicy: IfNotPresent
+            repository: docker.io/busybox
+            tag: "1.36"
+        pollIntervalSeconds: 5
+overlay:
+    bucket: ""
+    version: master
 projectId: ""
 rbac:
     enabled: false
