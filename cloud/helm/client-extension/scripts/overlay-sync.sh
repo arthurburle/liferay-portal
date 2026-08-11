@@ -3,6 +3,8 @@
 set -o errexit
 set -o nounset
 
+source "${LIFERAY_INIT_SCRIPTS_PATH}/helpers.sh"
+
 function main {
 	if [ "${#}" -ne 3 ]
 	then
@@ -11,7 +13,6 @@ function main {
 		exit 1
 	fi
 
-	local backend_options="${LIFERAY_OVERLAY_BACKEND_OPTIONS:-}"
 	local bucket_name="${LIFERAY_OVERLAY_BUCKET_NAME:-}"
 	local from_path="${2}"
 	local into_path="${3}"
@@ -33,7 +34,7 @@ function main {
 		from_path="${from_path%/*}"
 	fi
 
-	local source_uri=":${provider_type},env_auth=true${backend_options:+,${backend_options}}:${bucket_name}/${from_path}"
+	local source_uri=":${provider_type},env_auth=true:${bucket_name}/${from_path}"
 	local target_path="/temp/${into_path}"
 
 	_log_json "Copying from \"${source_uri}\" to \"${target_path}\"."
@@ -51,24 +52,6 @@ function main {
 	fi
 
 	_log_json "Copy completed successfully."
-}
-
-function _log_json {
-	local escaped_message
-
-	escaped_message=$(echo "${1}" | sed 's/"/\\"/g')
-
-	local script_name
-
-	script_name=$(basename "${0}")
-
-	local severity="${2:-INFO}"
-
-	local timestamp
-
-	timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-	printf '{"message": "%s", "script": "%s", "severity": "%s", "timestamp": "%s"}\n' "${escaped_message}" "${script_name}" "${severity}" "${timestamp}"
 }
 
 main "${@}"
