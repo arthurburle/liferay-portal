@@ -112,16 +112,18 @@ spec:
                 {{- with (dig "env" list $ext) }}
                 {{- toYaml . | nindent 16 }}
                 {{- end }}
+            {{- $secrets := dig "secrets" list $ext -}}
+            {{- $extraEnvFrom := dig "envFrom" list $ext -}}
+            {{- if or $secrets $extraEnvFrom }}
             envFrom:
-                -   configMapRef:
-                        name: {{ printf "%s-runtime-env" $ext.name }}
-                {{- range $s := (dig "secrets" list $ext) }}
+                {{- range $s := $secrets }}
                 -   secretRef:
                         name: {{ $s | quote }}
                 {{- end }}
-                {{- with (dig "envFrom" list $ext) }}
+                {{- with $extraEnvFrom }}
                 {{- toYaml . | nindent 16 }}
                 {{- end }}
+            {{- end }}
             image: {{ printf "%s:%s" (required "extensions[].image.repository is required" $ext.image.repository) (required "extensions[].image.tag is required" ($ext.image.tag | toString)) }}
             imagePullPolicy: {{ dig "image" "pullPolicy" "Always" $ext }}
             name: {{ $ext.name }}
