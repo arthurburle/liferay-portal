@@ -131,6 +131,18 @@ spec:
                     name: http
                     protocol: TCP
             {{- end }}
+            {{- with (dig "livenessProbe" dict $ext) }}
+            livenessProbe:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
+            {{- with (dig "readinessProbe" dict $ext) }}
+            readinessProbe:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
+            {{- with (dig "startupProbe" dict $ext) }}
+            startupProbe:
+                {{- toYaml . | nindent 16 }}
+            {{- end }}
             {{- with (dig "resources" dict $ext) }}
             {{- if . }}
             resources:
