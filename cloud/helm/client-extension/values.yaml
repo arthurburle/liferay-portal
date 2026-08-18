@@ -17,6 +17,8 @@ main:
             tag: "1.36"
         pollIntervalSeconds: 5
 overlay:
+    autoRestart:
+        enabled: false
     bucket: ""
     version: master
 projectId: ""
