@@ -439,6 +439,8 @@ networkPolicy:
     gatewayPodLabel: envoy
 nodeSelector: {}
 overlay:
+    autoRestart:
+        enabled: false
     copy: []
     enabled: false
     image:

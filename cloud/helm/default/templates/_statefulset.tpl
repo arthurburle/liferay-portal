@@ -17,6 +17,12 @@ metadata:
     labels:
         app: {{ include "liferay.name" .root }}{{ $suffix }}
         {{- include "liferay.labels" .root | nindent 8 }}
+        {{- $overlay := .statefulset.overlay | default dict }}
+        {{- $autoRestart := $overlay.autoRestart | default dict }}
+        {{- if $autoRestart.enabled }}
+        overlay.liferay.com/auto-restart: enabled
+        overlay.liferay.com/ref: {{ $overlay.version | default "master" | quote }}
+        {{- end }}
     name: {{ include "liferay.name" .root }}{{ $suffix }}
     namespace: {{ include "liferay.namespace" .root }}
 spec:
