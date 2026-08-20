@@ -24,6 +24,7 @@ overlay:
 projectId: ""
 rbac:
     enabled: false
+    grantLiferayAccess: true
     rules: []
 resourceQuota:
     enabled: false

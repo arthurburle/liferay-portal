@@ -1,4 +1,4 @@
-{{- if and .Values.enabled .Values.rbac.enabled .Values.rbac.rules -}}
+{{- if and .Values.enabled .Values.rbac.enabled (or .Values.rbac.rules .Values.rbac.grantLiferayAccess) -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -14,4 +14,9 @@ subjects:
     -   kind: ServiceAccount
         name: {{ include "serviceAccountName" . }}
         namespace: {{ .Release.Namespace }}
+    {{- if .Values.rbac.grantLiferayAccess }}
+    -   kind: ServiceAccount
+        name: liferay-default
+        namespace: {{ required "main.namespace is required when rbac.grantLiferayAccess is true" .Values.main.namespace }}
+    {{- end }}
 {{- end -}}
