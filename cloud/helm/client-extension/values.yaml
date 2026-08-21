@@ -8,6 +8,7 @@ environmentId: ""
 extensions: []
 main:
     namespace: ""
+    serviceAccountName: liferay-default
     waitForLiferay:
         enabled: true
         endpoint: /c/portal/robots
@@ -24,6 +25,7 @@ overlay:
 projectId: ""
 rbac:
     enabled: false
+    grantLiferayAccess: true
     rules: []
 resourceQuota:
     enabled: false

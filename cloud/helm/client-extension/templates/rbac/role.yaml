@@ -1,4 +1,4 @@
-{{- if and .Values.enabled .Values.rbac.enabled .Values.rbac.rules -}}
+{{- if and .Values.enabled .Values.rbac.enabled (or .Values.rbac.rules .Values.rbac.grantLiferayAccess) -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -7,5 +7,12 @@ metadata:
     name: {{ .Release.Name }}
     namespace: {{ .Release.Namespace }}
 rules:
-    {{- toYaml .Values.rbac.rules | nindent 4 }}
+    {{- if .Values.rbac.grantLiferayAccess }}
+    -   apiGroups: [""]
+        resources: [configmaps]
+        verbs: [create, get, list, patch, update, watch]
+    {{- end }}
+    {{- with .Values.rbac.rules }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 {{- end -}}
