@@ -16,7 +16,7 @@ subjects:
         namespace: {{ .Release.Namespace }}
     {{- if .Values.rbac.grantLiferayAccess }}
     -   kind: ServiceAccount
-        name: liferay-default
+        name: {{ required "main.serviceAccountName is required when rbac.grantLiferayAccess is true" .Values.main.serviceAccountName }}
         namespace: {{ required "main.namespace is required when rbac.grantLiferayAccess is true" .Values.main.namespace }}
     {{- end }}
 {{- end -}}

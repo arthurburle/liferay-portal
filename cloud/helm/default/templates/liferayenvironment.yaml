@@ -17,7 +17,7 @@ spec:
     marketplaceVolume:
         enabled: {{ .Values.marketplace.enabled }}
         size: {{ .Values.marketplace.size }}
-        storageClassName: {{ .Values.marketplace.storageClassName | quote }}
+        storageClassName: {{ .Values.marketplace.storageClassName | default .Values.persistence.defaultStorageClassName | quote }}
     {{- end }}
     workloadRef:
         name: {{ include "liferay.name" . }}
