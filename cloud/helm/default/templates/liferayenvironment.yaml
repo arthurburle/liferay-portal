@@ -13,9 +13,11 @@ spec:
     {{- if not .Values.autoscaling.enabled }}
     desiredReplicas: {{ .Values.replicaCount }}
     {{- end }}
+    {{- if .Values.marketplace.enabled }}
     marketplaceVolume:
         enabled: {{ .Values.marketplace.enabled }}
         size: {{ .Values.marketplace.size }}
         storageClassName: {{ .Values.marketplace.storageClassName | quote }}
+    {{- end }}
     workloadRef:
         name: {{ include "liferay.name" . }}
