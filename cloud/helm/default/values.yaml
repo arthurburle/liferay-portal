@@ -386,6 +386,8 @@ global:
                     verbs:
                         -   get
                         -   list
+                        -   patch
+                        -   update
                         -   watch
 image:
     pullPolicy: IfNotPresent

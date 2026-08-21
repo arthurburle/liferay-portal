@@ -194,7 +194,8 @@ spec:
                 name: {{ printf "%s-dxp-metadata" $root.Release.Name }}
             name: dxp-metadata
         -   configMap:
-                name: {{ printf "%s-ext-init-metadata" $ext.name }}
+                name: {{ printf "%s-%s-lxc-ext-init-metadata" $ext.name (required "dxp.mainDomain is required" .root.Values.dxp.mainDomain) }}
+                optional: true
             name: ext-init-metadata
         {{- if $overlayEnabled }}
         -   emptyDir: {}

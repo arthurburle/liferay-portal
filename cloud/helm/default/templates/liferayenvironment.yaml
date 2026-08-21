@@ -25,6 +25,12 @@ spec:
     {{- with .Values.licensing.offlineActivationBundle }}
     offlineActivationBundle: {{ . | quote }}
     {{- end }}
+    {{- if .Values.marketplace.enabled }}
+    marketplaceVolume:
+        enabled: {{ .Values.marketplace.enabled }}
+        size: {{ .Values.marketplace.size }}
+        storageClassName: {{ .Values.marketplace.storageClassName | default .Values.persistence.defaultStorageClassName | quote }}
+    {{- end }}
     workloadRef:
         name: {{ include "liferay.name" . }}
 {{- end }}
