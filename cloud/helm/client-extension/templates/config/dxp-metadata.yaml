@@ -8,6 +8,8 @@ data:
 kind: ConfigMap
 metadata:
     labels:
+        dxp.lxc.liferay.com/virtualInstanceId: {{ .Values.dxp.mainDomain | quote }}
+        lxc.liferay.com/metadataType: dxp
         {{- include "sharedLabels" . | nindent 8 }}
     name: {{ printf "%s-dxp-metadata" .Release.Name }}
     namespace: {{ .Release.Namespace }}

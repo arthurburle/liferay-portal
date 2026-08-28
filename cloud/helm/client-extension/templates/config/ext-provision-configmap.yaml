@@ -1,0 +1,33 @@
+{{- if .Values.enabled -}}
+{{- range $ext := .Values.extensions }}
+{{- if $ext.configJson }}
+{{- $projectName := $ext.projectName | default $ext.name }}
+{{- $mainDomain := required "dxp.mainDomain is required to emit ext-provision ConfigMap" $.Values.dxp.mainDomain }}
+{{- $extDomain := printf "%s.%s.svc.cluster.local:%v" $ext.name $.Release.Namespace (required "extensions[].port is required" $ext.port) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    annotations:
+        # Server-side apply keeps `kubectl.kubernetes.io/last-applied-configuration`
+        # off the object. Client-side apply would flip that annotation on every
+        # Argo sync, and the Liferay portal K8s agent's mutator turns it into a
+        # Felix Configuration property change, which cascades into a re-fire of
+        # every factory PID in this ConfigMap.
+        argocd.argoproj.io/sync-options: ServerSideApply=true
+        ext.lxc.liferay.com/domains: {{ $extDomain | quote }}
+        ext.lxc.liferay.com/mainDomain: {{ $extDomain | quote }}
+    labels:
+        dxp.lxc.liferay.com/virtualInstanceId: {{ $mainDomain | quote }}
+        ext.lxc.liferay.com/projectName: {{ $projectName | quote }}
+        ext.lxc.liferay.com/serviceId: {{ $ext.name | quote }}
+        lxc.liferay.com/metadataType: ext-provision
+        {{- include "sharedLabels" $ | nindent 8 }}
+    name: {{ printf "%s-%s-lxc-ext-provision-metadata" $ext.name $mainDomain }}
+    namespace: {{ required "main.namespace is required to emit ext-provision ConfigMap in the DXP namespace" $.Values.main.namespace }}
+data:
+    {{ $projectName }}.client-extension-config.json: |-
+{{ $ext.configJson | indent 8 }}
+{{- end }}
+{{- end }}
+{{- end -}}
