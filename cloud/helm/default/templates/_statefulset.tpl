@@ -304,8 +304,11 @@ spec:
             sectionName: {{ printf "%s-%s" $ctx.statefulset.network.endpointRef $slug }}
     rules:
         -   backendRefs:
-                -   name: {{ include "liferay.name" $ctx.root }}{{ $suffix }}
+                -   group: ""
+                    kind: Service
+                    name: {{ include "liferay.name" $ctx.root }}{{ $suffix }}
                     port: {{ $backendPort }}
+                    weight: 1
             {{- if $ctx.statefulset.network.hsts.enabled }}
             filters:
                 -   type: ResponseHeaderModifier
@@ -359,8 +362,11 @@ spec:
         {{- end }}
     rules:
         -   backendRefs:
-                -   name: {{ include "liferay.name" .root }}{{ $suffix }}
+                -   group: ""
+                    kind: Service
+                    name: {{ include "liferay.name" .root }}{{ $suffix }}
                     port: {{ $backendPort }}
+                    weight: 1
             {{- if .statefulset.network.hsts.enabled }}
             filters:
                 -   type: ResponseHeaderModifier
