@@ -191,11 +191,12 @@ spec:
             name: client-extension-init-scripts
         {{- end }}
         -   configMap:
-                name: {{ printf "%s-dxp-metadata" $root.Release.Name }}
-            name: dxp-metadata
-        -   configMap:
-                name: {{ printf "%s-%s-lxc-ext-init-metadata" $ext.name (required "dxp.mainDomain is required" .root.Values.dxp.mainDomain) }}
+                name: {{ printf "%s-lxc-dxp-metadata" (required "dxp.mainDomain is required" $root.Values.dxp.mainDomain) }}
                 optional: true
+            name: dxp-metadata
+        -   secret:
+                optional: true
+                secretName: {{ printf "%s-%s-lxc-ext-init-metadata" $ext.name (required "dxp.mainDomain is required" $root.Values.dxp.mainDomain) }}
             name: ext-init-metadata
         {{- if $overlayEnabled }}
         -   emptyDir: {}
