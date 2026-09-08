@@ -23,21 +23,24 @@ tests:
     -   asserts:
             -   matchRegex:
                     path: spec.template.spec.initContainers[?(@.name=="liferay-overlay")].command[2]
-                    pattern: osgi/configs
+                    pattern: '"osgi/configs/foo\.config"'
             -   matchRegex:
                     path: spec.template.spec.initContainers[?(@.name=="liferay-overlay")].command[2]
-                    pattern: osgi[^/]
+                    pattern: '"osgi/modules"'
+            -   matchRegex:
+                    path: spec.template.spec.initContainers[?(@.name=="liferay-overlay")].command[2]
+                    pattern: overlay-sync\.sh "gcs" "\$manifest"
         documentSelector:
             path: kind
             skipEmptyTemplates: true
             value: StatefulSet
-        it: Generates a sync command for each copy block
+        it: Renders one manifest entry per copy block and invokes overlay-sync once
         set:
             overlay.copy:
-                -   from: overlay-build-1/configs/*.config
-                    into: osgi/configs
-                -   from: overlay-build-1/osgi/*
-                    into: osgi
+                -   from: osgi/configs/foo.config
+                    into: osgi/configs/foo.config
+                -   from: osgi/modules/
+                    into: osgi/modules
             overlay.enabled: true
     -   asserts:
             -   contains:

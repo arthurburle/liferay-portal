@@ -3,19 +3,20 @@
 set -o errexit
 set -o nounset
 
+PREV_MANIFEST=/temp/.overlay-manifest
+
 function main {
-	if [ "${#}" -ne 3 ]
+	if [ "${#}" -ne 2 ]
 	then
-		_log_json "Usage: ${0} <provider-type> <from-path> <into-path>." "ERROR"
+		_log_json "Usage: ${0} <provider-type> <manifest-file>." "ERROR"
 
 		exit 1
 	fi
 
 	local backend_options="${LIFERAY_OVERLAY_BACKEND_OPTIONS:-}"
 	local bucket_name="${LIFERAY_OVERLAY_BUCKET_NAME:-}"
-	local from_path="${2}"
-	local into_path="${3}"
 	local provider_type="${1}"
+	local manifest="${2}"
 
 	if [ -z "${bucket_name}" ]
 	then
@@ -24,33 +25,64 @@ function main {
 		exit 1
 	fi
 
-	local include_pattern=""
+	_prune_orphans "${manifest}"
 
-	if echo "${from_path}" | grep -q "\*"
+	local from_path into_path source_uri target_path
+
+	while IFS="	" read -r from_path into_path
+	do
+		[ -z "${from_path}" ] && continue
+
+		source_uri=":${provider_type},env_auth=true${backend_options:+,${backend_options}}:${bucket_name}/${from_path}"
+		target_path="/temp/${into_path}"
+
+		_log_json "Copying from \"${source_uri}\" to \"${target_path}\"."
+
+		if [ "${from_path%/}" != "${from_path}" ]
+		then
+			rm -rf "${target_path}"
+			mkdir -p "${target_path}"
+			rclone copy "${source_uri}" "${target_path}" --inplace --log-level INFO --use-json-log
+		else
+			rclone copyto "${source_uri}" "${target_path}" --inplace --log-level INFO --use-json-log
+		fi
+	done < "${manifest}"
+
+	awk -F"	" '{print $2}' "${manifest}" > "${PREV_MANIFEST}"
+
+	_log_json "Sync completed successfully."
+}
+
+function _prune_orphans {
+	local manifest="${1}"
+
+	if [ ! -f "${PREV_MANIFEST}" ]
 	then
-		include_pattern="${from_path##*/}"
-
-		from_path="${from_path%/*}"
+		return 0
 	fi
 
-	local source_uri=":${provider_type},env_auth=true${backend_options:+,${backend_options}}:${bucket_name}/${from_path}"
-	local target_path="/temp/${into_path}"
+	local current_sorted prev_sorted orphan target
 
-	_log_json "Copying from \"${source_uri}\" to \"${target_path}\"."
+	current_sorted=$(mktemp)
+	prev_sorted=$(mktemp)
 
-	if [ -n "${include_pattern}" ]
-	then
-		rclone copy "${source_uri}" "${target_path}" --include "${include_pattern}" --inplace --log-level INFO --use-json-log
-	elif [ "${from_path%/}" != "${from_path}" ]
-	then
-		rm -rf "${target_path}"
-		mkdir -p "${target_path}"
-		rclone copy "${source_uri}" "${target_path}" --inplace --log-level INFO --use-json-log
-	else
-		rclone copyto "${source_uri}" "${target_path}" --inplace --log-level INFO --use-json-log
-	fi
+	awk -F"	" '{print $2}' "${manifest}" | sort -u > "${current_sorted}"
+	sort -u "${PREV_MANIFEST}" > "${prev_sorted}"
 
-	_log_json "Copy completed successfully."
+	comm -23 "${prev_sorted}" "${current_sorted}" | while IFS= read -r orphan
+	do
+		[ -z "${orphan}" ] && continue
+
+		target="/temp/${orphan}"
+
+		if [ -e "${target}" ]
+		then
+			rm -rf "${target}"
+			_log_json "Removed orphan \"${target}\"."
+		fi
+	done
+
+	rm -f "${current_sorted}" "${prev_sorted}"
 }
 
 function _log_json {

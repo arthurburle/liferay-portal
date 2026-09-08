@@ -91,15 +91,20 @@ customInitContainers:
         -   containerTemplate: |
                 {{- if and .overlay.enabled .overlay.copy }}
                 {{- $initScriptsPath := include "liferay.initScriptsPath" $ }}
+                {{- $defaultVersion := $.overlay.version | default "master" }}
                 -   command:
                         -   sh
                         -   -c
                         -   |
-                            {{- $defaultVersion := $.overlay.version | default "master" }}
+                            set -o errexit
+
+                            manifest=$(mktemp)
                             {{- range .overlay.copy }}
                             {{- $ver := .version | default $defaultVersion }}
-                            {{ $initScriptsPath }}/overlay-sync.sh {{ $.overlay.type | quote }} {{ printf "%s/%s" $ver .from | quote }} {{ .into | quote }}
+                            printf '%s\t%s\n' {{ printf "%s/%s" $ver .from | quote }} {{ .into | quote }} >> "$manifest"
                             {{- end }}
+
+                            {{ $initScriptsPath }}/overlay-sync.sh {{ $.overlay.type | quote }} "$manifest"
                     envFrom:
                         -   secretRef:
                                 name: overlay-bucket-details
