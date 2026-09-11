@@ -59,6 +59,15 @@ spec:
                                                 -   ZONAL
                                                 -   REGIONAL
                                             type: string
+                                        backupConfiguration:
+                                            properties:
+                                                enabled:
+                                                    default: false
+                                                    type: boolean
+                                                pointInTimeRecoveryEnabled:
+                                                    default: false
+                                                    type: boolean
+                                            type: object
                                         databaseVersion:
                                             type: string
                                         deletionProtection:
