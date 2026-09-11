@@ -207,6 +207,18 @@ customInitContainers:
                             EOF
 
                             sed --in-place '/<Engine/r'<(echo "${SERVER_XML_CLUSTER}") /temp/tomcat/conf/server.xml
+                            {{- if dig "remoteIp" "enabled" false (.network | default dict) }}
+
+                            IFS='' read -r -d '' SERVER_XML_REMOTE_IP_VALVE <<EOF
+                            <Valve className="org.apache.catalina.valves.RemoteIpValve"
+                                internalProxies="{{ dig "remoteIp" "internalProxies" "" (.network | default dict) }}"
+                                protocolHeader="{{ dig "remoteIp" "protocolHeader" "X-Forwarded-Proto" (.network | default dict) }}"
+                                remoteIpHeader="{{ dig "remoteIp" "remoteIpHeader" "X-Forwarded-For" (.network | default dict) }}"
+                            />
+                            EOF
+
+                            sed --in-place '/<Engine/r'<(echo "${SERVER_XML_REMOTE_IP_VALVE}") /temp/tomcat/conf/server.xml
+                            {{- end }}
 
                             if [ -d /opt/liferay/deploy ] && [ -n "$(ls -A /opt/liferay/deploy 2>/dev/null)" ] && [ -z "$(ls --all /temp/liferay/deploy/*license* 2>/dev/null)" ]
                             then
@@ -449,6 +461,11 @@ network:
     hsts:
         enabled: true
     perHostnameRoutes: false
+    remoteIp:
+        enabled: false
+        internalProxies: '10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|169\.254\.\d+\.\d+|127\.\d+\.\d+\.\d+|172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+'
+        protocolHeader: X-Forwarded-Proto
+        remoteIpHeader: X-Forwarded-For
     securityPolicyAuthorizationSpec: {}
     sessionPersistence:
         cookieConfig:
