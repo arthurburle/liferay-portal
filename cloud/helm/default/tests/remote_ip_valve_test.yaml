@@ -1,0 +1,66 @@
+suite: Remote IP Valve
+templates:
+    -   templates/configmap.yaml
+    -   templates/liferay-init-scripts-cm.yaml
+    -   templates/liferay-network-cm.yaml
+    -   templates/workloads.yaml
+tests:
+    -   asserts:
+            -   notMatchRegex:
+                    path: spec.template.spec.initContainers[?(@.name=="liferay-prepopulate-data")].command[2]
+                    pattern: RemoteIpValve
+        documentSelector:
+            path: kind
+            skipEmptyTemplates: true
+            value: StatefulSet
+        it: Does not render the Valve when network.remoteIp.enabled is false
+    -   asserts:
+            -   matchRegex:
+                    path: spec.template.spec.initContainers[?(@.name=="liferay-prepopulate-data")].command[2]
+                    pattern: <Valve className="org\.apache\.catalina\.valves\.RemoteIpValve"
+            -   matchRegex:
+                    path: spec.template.spec.initContainers[?(@.name=="liferay-prepopulate-data")].command[2]
+                    pattern: '192\\.168'
+        documentSelector:
+            path: kind
+            skipEmptyTemplates: true
+            value: StatefulSet
+        it: Renders the Valve with the configured RFC1918 defaults when enabled
+        set:
+            network.remoteIp.enabled: true
+    -   asserts:
+            -   matchRegex:
+                    path: spec.template.spec.initContainers[?(@.name=="liferay-prepopulate-data")].command[2]
+                    pattern: internalProxies="MARKER-INTERNAL-PROXIES"
+        documentSelector:
+            path: kind
+            skipEmptyTemplates: true
+            value: StatefulSet
+        it: Uses the configured internalProxies verbatim when overridden
+        set:
+            network.remoteIp.enabled: true
+            network.remoteIp.internalProxies: MARKER-INTERNAL-PROXIES
+    -   asserts:
+            -   matchRegex:
+                    path: spec.template.spec.initContainers[?(@.name=="liferay-prepopulate-data")].command[2]
+                    pattern: protocolHeader="X-Custom-Proto"
+        documentSelector:
+            path: kind
+            skipEmptyTemplates: true
+            value: StatefulSet
+        it: Interpolates a custom protocolHeader
+        set:
+            network.remoteIp.enabled: true
+            network.remoteIp.protocolHeader: X-Custom-Proto
+    -   asserts:
+            -   matchRegex:
+                    path: spec.template.spec.initContainers[?(@.name=="liferay-prepopulate-data")].command[2]
+                    pattern: remoteIpHeader="X-Custom-For"
+        documentSelector:
+            path: kind
+            skipEmptyTemplates: true
+            value: StatefulSet
+        it: Interpolates a custom remoteIpHeader
+        set:
+            network.remoteIp.enabled: true
+            network.remoteIp.remoteIpHeader: X-Custom-For
