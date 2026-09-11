@@ -24,12 +24,13 @@ spec:
             key: password
             name: {{ $databaseSpec.rootPasswordSecretName }}
         settings:
+            availabilityType: {{ $databaseSpec.availabilityType | default "ZONAL" }}
             databaseFlags:
                 -   name: cloudsql.iam_authentication
                     value: "on"
             diskSize: {{ $databaseSpec.storageGB | default 10 }}
             diskType: PD_SSD
-            edition: ENTERPRISE
+            edition: {{ $databaseSpec.edition | default "ENTERPRISE" }}
             insightsConfig:
                 queryInsightsEnabled: {{ $databaseSpec.queryInsightsEnabled | default true }}
             ipConfiguration:

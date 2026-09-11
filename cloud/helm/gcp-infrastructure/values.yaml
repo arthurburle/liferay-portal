@@ -12,8 +12,10 @@ cloudProjectId: ""
 cmk:
     enabled: false
 database:
+    availabilityType: ZONAL
     databaseVersion: POSTGRES_18
     deletionProtection: true
+    edition: ENTERPRISE
     instanceType: db-custom-1-3840
     queryInsightsEnabled: true
     storageGB: 20

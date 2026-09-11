@@ -53,10 +53,22 @@ spec:
                                     type: object
                                 database:
                                     properties:
+                                        availabilityType:
+                                            default: ZONAL
+                                            enum:
+                                                -   ZONAL
+                                                -   REGIONAL
+                                            type: string
                                         databaseVersion:
                                             type: string
                                         deletionProtection:
                                             type: boolean
+                                        edition:
+                                            default: ENTERPRISE
+                                            enum:
+                                                -   ENTERPRISE
+                                                -   ENTERPRISE_PLUS
+                                            type: string
                                         instanceType:
                                             type: string
                                         queryInsightsEnabled:
