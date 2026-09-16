@@ -1,0 +1,42 @@
+suite: GCPBackendPolicy
+templates:
+    -   templates/gcpbackendpolicy.yaml
+tests:
+    -   asserts:
+            -   hasDocuments:
+                    count: 0
+        it: Omits the GCPBackendPolicy when the GKE gateway is disabled
+        set:
+            network.gke.enabled: false
+    -   asserts:
+            -   hasDocuments:
+                    count: 1
+            -   isKind:
+                    of: GCPBackendPolicy
+            -   notExists:
+                    path: spec.default.sessionAffinity
+        it: Omits sessionAffinity by default
+        set:
+            network.gke.enabled: true
+    -   asserts:
+            -   equal:
+                    path: spec.default.sessionAffinity
+                    value:
+                        type: CLIENT_IP
+        it: Renders sessionAffinity when set to CLIENT_IP
+        set:
+            network.gke.enabled: true
+            network.gke.sessionAffinity:
+                type: CLIENT_IP
+    -   asserts:
+            -   equal:
+                    path: spec.default.sessionAffinity
+                    value:
+                        type: GENERATED_COOKIE
+                        cookieTtlSec: 3600
+        it: Passes arbitrary sessionAffinity subfields through
+        set:
+            network.gke.enabled: true
+            network.gke.sessionAffinity:
+                type: GENERATED_COOKIE
+                cookieTtlSec: 3600

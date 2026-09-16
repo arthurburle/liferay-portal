@@ -16,6 +16,10 @@ spec:
         logging:
             enabled: {{ dig "logging" "enabled" true .Values.network.gke }}
             sampleRate: {{ dig "logging" "sampleRate" 100000 .Values.network.gke }}
+        {{- with dig "sessionAffinity" nil .Values.network.gke }}
+        sessionAffinity:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
     targetRef:
         group: ""
         kind: Service

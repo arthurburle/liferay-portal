@@ -10,6 +10,7 @@ tests:
                     count: 3
         it: Adds a custom instance to the loop alongside the defaults
         set:
+            gateway.className: envoy-gateway
             podMonitoring.instances:
                 custom:
                     matchLabels:
@@ -32,6 +33,8 @@ tests:
             path: metadata.name
             value: envoy
         it: Configures the envoy PodMonitoring endpoint and selector
+        set:
+            gateway.className: envoy-gateway
     -   asserts:
             -   equal:
                     path: spec.endpoints[0].port
@@ -53,6 +56,8 @@ tests:
             -   hasDocuments:
                     count: 2
         it: Renders one PodMonitoring per configured instance
+        set:
+            gateway.className: envoy-gateway
     -   asserts:
             -   equal:
                     path: spec.endpoints[0].interval

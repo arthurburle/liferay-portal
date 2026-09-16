@@ -42,6 +42,7 @@ tests:
                 -   from: osgi/modules/
                     into: osgi/modules
             overlay.enabled: true
+            overlay.type: gcs
     -   asserts:
             -   contains:
                     any: true
