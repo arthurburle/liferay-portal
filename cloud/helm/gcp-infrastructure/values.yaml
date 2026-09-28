@@ -118,7 +118,7 @@ podMonitoring:
                         ^(?:
                             Catalina_(?:
                                 GlobalRequestProcessor_(?:.*_)?(?:errorCount|processingTime|requestCount)
-                                |ThreadPool_(?:.*_)?(?:currentThreadCount|currentThreadsBusy)
+                                |ThreadPool_(?:.*_)?(?:connectionCount|currentThreadCount|currentThreadsBusy|maxConnections)
                             )
                             |hikaricp_(?:ActiveConnections|IdleConnections|ThreadsAwaitingConnection|TotalConnections)
                             |java_lang_Threading_ThreadCount
