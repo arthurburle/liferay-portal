@@ -72,6 +72,15 @@ public class FinderPath {
 
 		_initCacheKeyPrefix(methodName, params);
 
+		int index = methodName.indexOf("By");
+
+		if (index == -1) {
+			_finderName = methodName;
+		}
+		else {
+			_finderName = methodName.substring(index + 2);
+		}
+
 		if (_cacheName.contains(".List") || methodName.equals("dslQuery")) {
 			_singleResult = false;
 		}
@@ -94,6 +103,10 @@ public class FinderPath {
 
 	public String[] getColumnNames() {
 		return _columnNames;
+	}
+
+	public String getFinderName() {
+		return _finderName;
 	}
 
 	public boolean isBaseModelResult() {
@@ -209,6 +222,7 @@ public class FinderPath {
 	private final int _caseInsensitiveBitmask;
 	private final String[] _columnNames;
 	private final int _convertNullBitmask;
+	private final String _finderName;
 	private final boolean _singleResult;
 	private volatile long _timestamp;
 

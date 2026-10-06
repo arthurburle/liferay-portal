@@ -12,9 +12,7 @@ import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectField;
 import com.liferay.object.model.bag.ObjectFieldBag;
 import com.liferay.object.service.ObjectDefinitionLocalServiceUtil;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONArray;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -23,6 +21,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.util.List;
 import java.util.Locale;
@@ -36,13 +35,7 @@ public class AssetListTypePropertiesUtil {
 		long[] classNameIds, long[] classTypeIds, long companyId,
 		Locale locale) {
 
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-74731")) {
-			return jsonArray;
-		}
-
-		jsonArray.put(
+		JSONArray jsonArray = JSONUtil.put(
 			JSONUtil.put(
 				"items", _getCommonFieldsItemsJSONArray(locale)
 			).put(
@@ -87,9 +80,14 @@ public class AssetListTypePropertiesUtil {
 			return null;
 		}
 
+		String className = PortalUtil.fetchClassName(classNameId);
+
+		if (Validator.isNull(className)) {
+			return null;
+		}
+
 		return ObjectDefinitionLocalServiceUtil.
-			fetchObjectDefinitionByClassName(
-				companyId, PortalUtil.getClassName(classNameId));
+			fetchObjectDefinitionByClassName(companyId, className);
 	}
 
 	private static JSONObject _getCommonFieldJSONObject(
@@ -120,7 +118,7 @@ public class AssetListTypePropertiesUtil {
 				"expiration-date", locale, Field.EXPIRATION_DATE, "date"),
 			_getCommonFieldJSONObject(
 				"external-reference-code", locale, "externalReferenceCode",
-				"text"),
+				"keyword"),
 			_getCommonFieldJSONObject(
 				"modified-date", locale, Field.MODIFIED_DATE, "date"),
 			_getCommonFieldJSONObject(
@@ -141,7 +139,7 @@ public class AssetListTypePropertiesUtil {
 		return JSONUtil.toJSONArray(
 			objectFields,
 			objectField -> {
-				String type = _toType(objectField.getBusinessType());
+				String type = _toType(objectField);
 
 				if (type == null) {
 					return null;
@@ -203,7 +201,9 @@ public class AssetListTypePropertiesUtil {
 		return true;
 	}
 
-	private static String _toType(String businessType) {
+	private static String _toType(ObjectField objectField) {
+		String businessType = objectField.getBusinessType();
+
 		if (businessType == null) {
 			return null;
 		}
@@ -239,6 +239,10 @@ public class AssetListTypePropertiesUtil {
 				ObjectFieldConstants.BUSINESS_TYPE_PHONE_NUMBER) ||
 			businessType.equals(ObjectFieldConstants.BUSINESS_TYPE_RICH_TEXT) ||
 			businessType.equals(ObjectFieldConstants.BUSINESS_TYPE_TEXT)) {
+
+			if (objectField.isIndexedAsKeyword()) {
+				return "keyword";
+			}
 
 			return "text";
 		}

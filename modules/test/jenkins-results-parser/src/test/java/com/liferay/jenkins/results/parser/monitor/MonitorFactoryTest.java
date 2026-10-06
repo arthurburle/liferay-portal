@@ -150,7 +150,7 @@ public class MonitorFactoryTest
 		try {
 			MonitorFactory.newMonitor(monitorConfig);
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 		}

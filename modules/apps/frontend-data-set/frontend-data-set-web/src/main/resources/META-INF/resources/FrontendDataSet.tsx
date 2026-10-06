@@ -14,6 +14,7 @@ import {
 	ClientExtensionDefinition,
 	ClientExtensionResolution,
 	deepClone,
+	escapeHTML,
 	fetch,
 	getObjectValueFromPath,
 	loadClientExtensions,
@@ -24,6 +25,7 @@ import React, {
 	useCallback,
 	useContext,
 	useEffect,
+	useLayoutEffect,
 	useMemo,
 	useReducer,
 	useRef,
@@ -46,7 +48,6 @@ import {
 	InlineNotification,
 } from './inline_notification/InlineNotification';
 import ManagementBar from './management_bar/ManagementBar';
-import {FILTER_IMPLEMENTATIONS} from './management_bar/controls/filters/Filter';
 
 // @ts-ignore
 
@@ -57,9 +58,12 @@ import Modal from './modal/Modal';
 import SidePanel from './side_panel/SidePanel';
 import filterCreationActions from './utils/actionItems/filterCreationActions';
 import {readConfigFromURL} from './utils/configInURL';
+import {IConnectedFDSState} from './utils/connection/types';
+import {useOfferedCustomConfigs} from './utils/connection/useOfferedCustomConfigs';
 import EVENTS from './utils/eventsDefinitions';
 import {activateFilter} from './utils/filters/activateFilter';
 import {deactivateFilter} from './utils/filters/deactivateFilter';
+import {getOdataFiltersStrings} from './utils/filters/getOdataFiltersStrings';
 import {getOrCreateFDSAtom} from './utils/getOrCreateFDSAtom';
 import getRandomId from './utils/getRandomId';
 
@@ -94,12 +98,24 @@ import {
 	VisibleFieldNames,
 } from './utils/types';
 import useConfigInURL, {useUpdateConfig} from './utils/useConfigInURL';
-import ViewsContext, {ISnapshot, ISnapshots} from './views/ViewsContext';
+import ViewsContext, {
+	ISnapshot,
+	ISnapshots,
+	IUserConfiguration,
+} from './views/ViewsContext';
 import getViewComponent from './views/getViewComponent';
 import viewsReducer, {EViewsActionTypes} from './views/viewsReducer';
 
 const DEFAULT_PAGINATION_DELTA = 20;
 const DEFAULT_PAGINATION_PAGE_NUMBER = 1;
+
+const getSnapshotByERC = (
+	snapshots: Array<ISnapshots> | undefined,
+	erc: string
+): ISnapshot | undefined =>
+	(snapshots ?? [])
+		.flatMap((group: ISnapshots) => group.items)
+		.find((snapshot: ISnapshot) => snapshot.erc === erc);
 
 const FrontendDataSetContent = ({
 	actionParameterName,
@@ -141,6 +157,7 @@ const FrontendDataSetContent = ({
 	overrideEmptyResultView,
 	pagination,
 	portletId,
+	saveDataSetUserConfigurationURL,
 	searchAsYouType = false,
 	searchSuggestionsEnabled = false,
 	selectedItems: externalSelectedItems,
@@ -159,6 +176,7 @@ const FrontendDataSetContent = ({
 	sorts: sortsProp = [],
 	style = 'default',
 	uniformActionsDisplay,
+	userConfiguration = null,
 	views,
 }: IFrontendDataSetProps) => {
 	const {fileDropSettings} = useContext(DnDContext);
@@ -382,6 +400,31 @@ const FrontendDataSetContent = ({
 	const [globalFDSState, setGlobalFDSState] =
 		useLiferayState<IFDSState>(memoizedAtom);
 
+	const {appliedCustomConfigs, connectionFilters, filteringOwnerAppId} =
+		globalFDSState as IConnectedFDSState;
+
+	const [customConfigsOffered, setCustomConfigsOffered] = useState(false);
+
+	const {getCustomConfigs, settled: customConfigsSettled} =
+		useOfferedCustomConfigs({
+			configInURLBehavior,
+			customConfigsOffered,
+			filteringOwnerAppId,
+			id,
+			offeredCustomConfigs: globalFDSState.offeredCustomConfigs,
+			onGiveUp: () => {
+				const unfrozenGlobalFDSState: IFDSState =
+					deepClone(globalFDSState);
+
+				delete unfrozenGlobalFDSState.offeredCustomConfigs;
+
+				setGlobalFDSState(unfrozenGlobalFDSState);
+			},
+		});
+
+	const filteringDelegated =
+		Boolean(filteringOwnerAppId) || !customConfigsSettled;
+
 	const [globalFDSStateInitialized, setGlobalFDSStateInitialized] =
 		useState(false);
 	const [cellClientExtensionsLoaded, setCellClientExtensionsLoaded] =
@@ -537,6 +580,15 @@ const FrontendDataSetContent = ({
 		];
 	};
 
+	const hasURLState = () =>
+		Boolean(
+			getView() ||
+				getDelta() ||
+				getActiveSorts()?.length ||
+				getFilters()?.length ||
+				getSearchParam()
+		);
+
 	const getInitialViewsState = () => {
 		const defaultSnapshot: any = {
 			modifiedFields: {},
@@ -619,7 +671,7 @@ const FrontendDataSetContent = ({
 			})),
 		}));
 
-		return {
+		const initialViewsState: any = {
 			activeView,
 			defaultSnapshot,
 			groupedFilters,
@@ -629,9 +681,24 @@ const FrontendDataSetContent = ({
 			snapshots: parsedSnapshots,
 			snapshotsEnabled,
 			sorts,
+			userConfiguration: userConfiguration ?? null,
 			views,
 			visibleFieldNames: initialVisibleFieldNames,
 		};
+
+		const initialDataSetSnapshotERC =
+			userConfiguration?.initialDataSetSnapshotERC;
+
+		if (
+			initialDataSetSnapshotERC &&
+			getSnapshotByERC(parsedSnapshots, initialDataSetSnapshotERC) &&
+			hasURLState()
+		) {
+			initialViewsState.activeSnapshotERC = initialDataSetSnapshotERC;
+			initialViewsState.snapshotUpdated = true;
+		}
+
+		return initialViewsState;
 	};
 
 	const [viewsState, viewsDispatch] = useThunk(
@@ -670,17 +737,9 @@ const FrontendDataSetContent = ({
 
 			const unfrozenGlobalFDSState: IFDSState = deepClone(globalFDSState);
 
-			const activeFilters: Array<IBaseFilterState> =
-				unfrozenGlobalFDSState.filters.filter(
-					(filter) => filter.active
-				) || [];
-
-			const activeFiltersOdataStrings = activeFilters.map((filter) => {
-				const filterImplementation =
-					FILTER_IMPLEMENTATIONS[filter.type];
-
-				return filterImplementation.getOdataString(filter);
-			});
+			const activeFiltersOdataStrings = getOdataFiltersStrings(
+				unfrozenGlobalFDSState
+			);
 
 			const activeSorts =
 				sorts.length > 1
@@ -727,22 +786,28 @@ const FrontendDataSetContent = ({
 	const onClearFilters = useCallback(() => {
 		const unfrozenGlobalFDSState: IFDSState = deepClone(globalFDSState);
 
-		const filters = unfrozenGlobalFDSState.filters.map((filter) =>
-			deactivateFilter(filter)
-		);
+		// Delegated filters must survive a clear: the user cannot see them, so
+		// removing them would silently change the results.
+
+		const filters = filteringDelegated
+			? unfrozenGlobalFDSState.filters
+			: unfrozenGlobalFDSState.filters.map((filter) =>
+					deactivateFilter(filter)
+				);
 
 		setGlobalFDSState({
 			...unfrozenGlobalFDSState,
 			filters,
 			search: {query: ''},
 		});
-	}, [globalFDSState, setGlobalFDSState]);
+	}, [filteringDelegated, globalFDSState, setGlobalFDSState]);
 
 	const skipSnapshotsUpdatedChangeRef = useRef(true);
 
 	useEffect(() => {
 		if (
 			globalFDSStateInitialized ||
+			!customConfigsSettled ||
 			!filterClientExtensionsLoaded ||
 			!cellClientExtensionsLoaded
 		) {
@@ -752,6 +817,7 @@ const FrontendDataSetContent = ({
 		setGlobalFDSStateInitialized(true);
 	}, [
 		cellClientExtensionsLoaded,
+		customConfigsSettled,
 		filterClientExtensionsLoaded,
 		globalFDSStateInitialized,
 	]);
@@ -762,9 +828,6 @@ const FrontendDataSetContent = ({
 		}
 
 		const configInURL: Partial<IConfigInURL> | null = readConfigFromURL(id);
-
-		const globalFDSStateSearchQuery = globalFDSState.search.query;
-		const urlSearchQuery = configInURL?.q;
 
 		const hasActiveFilterInURL = Boolean(configInURL?.filters?.length);
 		const hasActiveFilterInState = globalFDSState.filters.some(
@@ -786,10 +849,6 @@ const FrontendDataSetContent = ({
 				return false;
 			});
 
-		const shouldUpdateSearch =
-			(urlSearchQuery ?? '') !== (globalFDSStateSearchQuery ?? '') &&
-			(urlSearchQuery || globalFDSStateSearchQuery);
-
 		const updateConfig: Partial<IConfigInURL> = {};
 
 		if (shouldUpdateFilters) {
@@ -797,13 +856,49 @@ const FrontendDataSetContent = ({
 				globalFDSState.filters as Array<any>;
 		}
 
-		if (shouldUpdateSearch) {
+		const filteredByConnection = Boolean(
+			connectionFilters?.some(({odataFilterString}) => odataFilterString)
+		);
+
+		const shouldUpdateCustomConfigs =
+			filteringOwnerAppId &&
+			(filteredByConnection ||
+				configInURL?.[EConfigInURLKeys.CUSTOM_CONFIGS] !== undefined);
+
+		if (shouldUpdateCustomConfigs) {
+			updateConfig[EConfigInURLKeys.CUSTOM_CONFIGS] = filteredByConnection
+				? appliedCustomConfigs
+				: undefined;
+		}
+
+		const globalFDSStateSearchQuery = globalFDSState.search.query;
+		const urlSearchQuery = configInURL?.q;
+
+		const shouldUpdateSearch =
+			(urlSearchQuery ?? '') !== (globalFDSStateSearchQuery ?? '') &&
+			(urlSearchQuery || globalFDSStateSearchQuery);
+
+		const overrideConfigInURLBehaviorForSearch =
+			searchAsYouType &&
+			configInURLBehavior === EConfigInURLBehavior.PUSH;
+
+		if (shouldUpdateSearch && !overrideConfigInURLBehaviorForSearch) {
 			updateConfig[EConfigInURLKeys.SEARCH_PARAM] =
 				globalFDSState.search.query;
 		}
 
 		if (Object.keys(updateConfig).length) {
 			updateConfigInURL(updateConfig);
+		}
+
+		if (shouldUpdateSearch && overrideConfigInURLBehaviorForSearch) {
+			updateConfigInURL(
+				{
+					[EConfigInURLKeys.SEARCH_PARAM]:
+						globalFDSState.search.query,
+				},
+				EConfigInURLBehavior.REPLACE
+			);
 		}
 
 		if (skipSnapshotsUpdatedChangeRef.current) {
@@ -816,9 +911,14 @@ const FrontendDataSetContent = ({
 			});
 		}
 	}, [
+		appliedCustomConfigs,
+		configInURLBehavior,
+		connectionFilters,
+		filteringOwnerAppId,
 		globalFDSState,
 		globalFDSStateInitialized,
 		id,
+		searchAsYouType,
 		updateConfigInURL,
 		viewsDispatch,
 	]);
@@ -888,6 +988,8 @@ const FrontendDataSetContent = ({
 
 		const searchParam = getSearchParam();
 
+		const offeredCustomConfigs = getCustomConfigs();
+
 		const preloadFilters = (
 			filters: Array<IBaseFilterState> | undefined
 		): Array<IBaseFilterState> => {
@@ -938,9 +1040,14 @@ const FrontendDataSetContent = ({
 		else {
 			setFilterClientExtensionsLoaded(true);
 
+			if (offeredCustomConfigs !== undefined) {
+				setCustomConfigsOffered(true);
+			}
+
 			setGlobalFDSState({
 				...globalFDSState,
 				filters: preloadFilters(initialFilters),
+				offeredCustomConfigs,
 				search: {query: searchParam ?? ''},
 			});
 		}
@@ -1026,9 +1133,14 @@ const FrontendDataSetContent = ({
 							return filter;
 						}) || [];
 
+					if (offeredCustomConfigs !== undefined) {
+						setCustomConfigsOffered(true);
+					}
+
 					setGlobalFDSState({
 						...globalFDSState,
 						filters: preloadFilters(newFilters),
+						offeredCustomConfigs,
 						search: {query: searchParam ?? ''},
 					});
 
@@ -1075,6 +1187,7 @@ const FrontendDataSetContent = ({
 		cellClientExtensionsLoading,
 		filterClientExtensionsLoaded,
 		filterClientExtensionsLoading,
+		getCustomConfigs,
 		getSearchParam,
 		globalFDSState,
 		globalFDSStateInitialized,
@@ -1253,8 +1366,19 @@ const FrontendDataSetContent = ({
 			});
 		}
 
+		const customConfigsInURL = getCustomConfigs();
+
+		const offeredCustomConfigs =
+			filteringOwnerAppId || customConfigsInURL !== undefined
+				? customConfigsInURL ?? null
+				: undefined;
+
 		if (activeFilters || searchParam) {
 			const unfrozenGlobalFDSState: IFDSState = deepClone(globalFDSState);
+
+			if (offeredCustomConfigs !== undefined) {
+				setCustomConfigsOffered(true);
+			}
 
 			setGlobalFDSState({
 				...unfrozenGlobalFDSState,
@@ -1262,6 +1386,7 @@ const FrontendDataSetContent = ({
 					newFilters: activeFilters,
 					oldFilters: unfrozenGlobalFDSState.filters,
 				}),
+				offeredCustomConfigs,
 				search: {
 					query: searchParam ?? '',
 				},
@@ -1319,7 +1444,9 @@ const FrontendDataSetContent = ({
 			});
 		}
 	}, [
+		filteringOwnerAppId,
 		getActiveSorts,
+		getCustomConfigs,
 		getDelta,
 		getFilters,
 		getPageNumber,
@@ -1440,8 +1567,8 @@ const FrontendDataSetContent = ({
 		logError(apiErrorMessage);
 
 		openToast({
-			message: apiErrorMessage,
-			title: `${Liferay.Language.get('error')} ${statusCode}`,
+			message: escapeHTML(apiErrorMessage),
+			title: escapeHTML(`${Liferay.Language.get('error')} ${statusCode}`),
 			type: 'danger',
 		});
 	};
@@ -1615,6 +1742,7 @@ const FrontendDataSetContent = ({
 				selectedItemsKey={selectedItemsKey}
 				selectedItemsValue={selectedItemsValue}
 				selectionType={selectionType}
+				showFilters={!filteringDelegated}
 				showNavBarWhenSelected={showNavBarWhenSelected}
 				showSearch={showSearch}
 				showSelectAll={showSelectAll}
@@ -1883,11 +2011,19 @@ const FrontendDataSetContent = ({
 		}
 	});
 
+	const offerCustomConfigs = (customConfigs: unknown) =>
+		filteringOwnerAppId || customConfigs !== undefined
+			? customConfigs ?? null
+			: undefined;
+
 	const handleSnapshotChange = ({defaultSnapshot, snapshots, value}: any) => {
 		if (value === 'DEFAULT_VIEW') {
+			const offeredCustomConfigs = offerCustomConfigs(undefined);
+
 			updateConfigInURL({
 				[EConfigInURLKeys.ACTIVE_FILTERS]: defaultSnapshot.filters,
 				[EConfigInURLKeys.ACTIVE_SORTS]: defaultSnapshot.sorts,
+				[EConfigInURLKeys.CUSTOM_CONFIGS]: undefined,
 				[EConfigInURLKeys.DELTA]: {...defaultSnapshot.paginationDelta},
 				[EConfigInURLKeys.VIEW_NAME]: {
 					...defaultSnapshot.activeView.name,
@@ -1903,17 +2039,22 @@ const FrontendDataSetContent = ({
 
 			skipSnapshotsUpdatedChangeRef.current = true;
 
+			if (offeredCustomConfigs !== undefined) {
+				setCustomConfigsOffered(true);
+			}
+
 			setGlobalFDSState({
 				...unfrozenGlobalFDSState,
 				filters: defaultSnapshot.filters,
+				offeredCustomConfigs,
 			});
 		}
 		else {
-			const snapshot = deepClone(
-				snapshots
-					.flatMap((group: ISnapshots) => group.items)
-					.find((snapshot: ISnapshot) => snapshot.erc === value)
-			);
+			const snapshot = deepClone(getSnapshotByERC(snapshots, value));
+
+			const {customConfigs} = snapshot.configuration;
+
+			const offeredCustomConfigs = offerCustomConfigs(customConfigs);
 
 			updateConfigInURL({
 				[EConfigInURLKeys.ACTIVE_FILTERS]:
@@ -1922,6 +2063,7 @@ const FrontendDataSetContent = ({
 					newSorts: snapshot.configuration.sorts,
 					oldSorts: sorts,
 				}),
+				[EConfigInURLKeys.CUSTOM_CONFIGS]: customConfigs,
 				[EConfigInURLKeys.DELTA]:
 					snapshot.configuration.paginationDelta,
 				[EConfigInURLKeys.VIEW_NAME]:
@@ -1937,12 +2079,88 @@ const FrontendDataSetContent = ({
 
 			skipSnapshotsUpdatedChangeRef.current = true;
 
+			if (offeredCustomConfigs !== undefined) {
+				setCustomConfigsOffered(true);
+			}
+
 			setGlobalFDSState({
 				...unfrozenGlobalFDSState,
 				filters: snapshot.configuration.filters,
+				offeredCustomConfigs,
 			});
 		}
 	};
+
+	const updateUserConfiguration = (configuration: IUserConfiguration) => {
+		if (!saveDataSetUserConfigurationURL) {
+			return Promise.reject(new Error());
+		}
+
+		return fetch(saveDataSetUserConfigurationURL, {
+			body: new URLSearchParams({
+				configuration: JSON.stringify(configuration),
+				fdsName: id,
+			}),
+			method: 'POST',
+		})
+			.then((response) => {
+				if (!response.ok) {
+					return response
+						.json()
+						.then((jsonResponse) =>
+							Promise.reject(new Error(jsonResponse.title))
+						);
+				}
+
+				return response.json();
+			})
+			.then((nextUserConfiguration) => {
+				viewsDispatch({
+					type: EViewsActionTypes.UPDATE_USER_CONFIGURATION,
+					value: {userConfiguration: nextUserConfiguration},
+				});
+			});
+	};
+
+	const handleSnapshotChangeRef = useRef(handleSnapshotChange);
+	const hasURLStateRef = useRef(hasURLState);
+	const initialDataSetSnapshotERCAppliedRef = useRef(false);
+
+	useLayoutEffect(() => {
+		handleSnapshotChangeRef.current = handleSnapshotChange;
+		hasURLStateRef.current = hasURLState;
+	});
+
+	useEffect(() => {
+		const initialDataSetSnapshotERC =
+			userConfiguration?.initialDataSetSnapshotERC;
+
+		if (
+			initialDataSetSnapshotERCAppliedRef.current ||
+			!globalFDSStateInitialized ||
+			!initialDataSetSnapshotERC
+		) {
+			return;
+		}
+
+		initialDataSetSnapshotERCAppliedRef.current = true;
+
+		if (
+			!getSnapshotByERC(
+				viewsState.snapshots,
+				initialDataSetSnapshotERC
+			) ||
+			hasURLStateRef.current()
+		) {
+			return;
+		}
+
+		handleSnapshotChangeRef.current({
+			defaultSnapshot: viewsState.defaultSnapshot,
+			snapshots: viewsState.snapshots,
+			value: initialDataSetSnapshotERC,
+		});
+	}, [globalFDSStateInitialized, userConfiguration, viewsState]);
 
 	function toggleItemInlineEdit(itemKey: any) {
 		setItemsChanges(({[itemKey]: foundItem, ...itemsChanges}) => {
@@ -2003,7 +2221,7 @@ const FrontendDataSetContent = ({
 			.catch((error) => {
 				logError(error);
 				openToast({
-					message: error.message,
+					message: escapeHTML(String(error.message ?? '')),
 					type: 'danger',
 				});
 
@@ -2058,7 +2276,7 @@ const FrontendDataSetContent = ({
 			.catch((error) => {
 				logError(error);
 				openToast({
-					message: error.message,
+					message: escapeHTML(String(error.message ?? '')),
 					type: 'danger',
 				});
 
@@ -2114,9 +2332,11 @@ const FrontendDataSetContent = ({
 				onActionDropdownItemClick,
 				onBulkActionItemClick,
 				onClearResultsBar: () => {
-					const filters = unfrozenGlobalFDSState.filters.map(
-						(filter) => deactivateFilter(filter)
-					);
+					const filters = filteringDelegated
+						? unfrozenGlobalFDSState.filters
+						: unfrozenGlobalFDSState.filters.map((filter) =>
+								deactivateFilter(filter)
+							);
 
 					setGlobalFDSState({
 						...unfrozenGlobalFDSState,
@@ -2209,6 +2429,7 @@ const FrontendDataSetContent = ({
 				openModal,
 				openSidePanel,
 				portletId,
+				saveDataSetUserConfigurationURL,
 				searchAsYouType,
 				searchParam: unfrozenGlobalFDSState.search.query,
 				searchSuggestionsEnabled,
@@ -2231,6 +2452,7 @@ const FrontendDataSetContent = ({
 				updateDataSetItems,
 				updateFilters,
 				updateItem,
+				updateUserConfiguration,
 				updateView,
 				updateVisibleFields,
 			}}

@@ -9,12 +9,12 @@ import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.test.util.AssetTestUtil;
+import com.liferay.document.library.helper.DLURLHelper;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
 import com.liferay.document.library.test.util.DLTestUtil;
-import com.liferay.document.library.util.DLURLHelper;
 import com.liferay.info.field.InfoFieldValue;
 import com.liferay.info.item.ClassPKInfoItemIdentifier;
 import com.liferay.info.item.InfoItemFieldValues;
@@ -206,7 +206,7 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 			null, TestPropsValues.getUserId(),
 			_parentObjectDefinition.getObjectDefinitionId(),
 			_childObjectDefinition.getObjectDefinitionId(), 0,
-			ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+			ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			"oneToManyRelationshipName", false,
 			ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -262,7 +262,7 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 		ObjectAction objectAction = _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			objectEntry.getObjectDefinitionId(), true, StringPool.BLANK,
-			RandomTestUtil.randomString(),
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(),
@@ -619,7 +619,7 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 				null, TestPropsValues.getUserId(),
 				parentObjectDefinition.getObjectDefinitionId(),
 				childObjectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, true,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, true,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"oneToManyRelationshipName", false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -697,7 +697,7 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 				objectRelationship.getExternalReferenceCode(),
 				objectRelationship.getObjectRelationshipId(),
 				objectRelationship.getParameterObjectFieldId(),
-				objectRelationship.getDeletionType(), false,
+				objectRelationship.getDeletionType(), null, false,
 				objectRelationship.getLabelMap(), null);
 
 		_objectRelationshipLocalService.deleteObjectRelationship(
@@ -714,7 +714,7 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 		throws Exception {
 
 		return _objectDefinitionLocalService.addCustomObjectDefinition(
-			null, TestPropsValues.getUserId(), 0, null, true, false, true,
+			null, TestPropsValues.getUserId(), 0, null, null, true, false, true,
 			false, true, false, false, false, enableObjectEntryVersioning, null,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			ObjectDefinitionTestUtil.getRandomName(), null, null,

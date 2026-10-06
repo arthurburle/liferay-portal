@@ -6,11 +6,83 @@
 import '@testing-library/jest-dom';
 
 import {
+	ADJUSTMENT_KEYS,
+	ANNOTATE_TOOLS,
+	FILTER_PRESETS,
+	FRAME_KINDS,
 	RATIO_PRESETS,
 	resolveConfig,
 } from '../src/main/resources/META-INF/resources/js/editorConfig';
 
 describe('resolveConfig', () => {
+	it('exposes every adjustment slider by default', () => {
+		expect(resolveConfig().adjustments).toEqual(ADJUSTMENT_KEYS);
+	});
+
+	it('switches the adjustment sliders off with false', () => {
+		expect(resolveConfig({adjustments: false}).adjustments).toEqual([]);
+	});
+
+	it('narrows the adjustment sliders to a subset in slider order', () => {
+		expect(
+			resolveConfig({adjustments: {sliders: ['shadows', 'contrast']}})
+				.adjustments
+		).toEqual(['contrast', 'shadows']);
+	});
+
+	it('exposes every annotation tool by default', () => {
+		expect(resolveConfig().annotate).toEqual(ANNOTATE_TOOLS);
+		expect(ANNOTATE_TOOLS).toEqual([
+			'text',
+			'rectangle',
+			'square',
+			'circle',
+			'arrow',
+			'draw',
+			'redaction',
+			'image',
+			'emoji',
+		]);
+	});
+
+	it('switches the annotation tools off with false', () => {
+		expect(resolveConfig({annotate: false}).annotate).toEqual([]);
+	});
+
+	it('narrows the annotation tools to a subset in panel order', () => {
+		expect(
+			resolveConfig({annotate: {tools: ['arrow', 'text']}}).annotate
+		).toEqual(['text', 'arrow']);
+	});
+
+	it('exposes every filter preset by default', () => {
+		expect(resolveConfig().filters).toEqual(FILTER_PRESETS);
+	});
+
+	it('switches the filter gallery off with false', () => {
+		expect(resolveConfig({filters: false}).filters).toEqual([]);
+	});
+
+	it('narrows the filter presets to a subset in gallery order', () => {
+		expect(
+			resolveConfig({filters: {presets: ['sepia', 'none']}}).filters
+		).toEqual(['none', 'sepia']);
+	});
+
+	it('exposes every frame kind by default', () => {
+		expect(resolveConfig().frames).toEqual(FRAME_KINDS);
+	});
+
+	it('switches the frame gallery off with false', () => {
+		expect(resolveConfig({frames: false}).frames).toEqual([]);
+	});
+
+	it('narrows the frame kinds to a subset in gallery order', () => {
+		expect(
+			resolveConfig({frames: {presets: ['line', 'none']}}).frames
+		).toEqual(['none', 'line']);
+	});
+
 	it('exposes everything by default', () => {
 		expect(resolveConfig().crop).toEqual({
 			enabled: true,

@@ -6,15 +6,18 @@
 package com.liferay.site.cms.site.initializer.internal.servlet;
 
 import com.liferay.diff.DiffHtml;
+import com.liferay.document.library.helper.DLURLHelper;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
-import com.liferay.document.library.util.DLURLHelper;
 import com.liferay.list.type.service.ListTypeEntryLocalService;
+import com.liferay.object.constants.ObjectFieldConstants;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.model.ObjectField;
+import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectEntryService;
 import com.liferay.object.service.ObjectEntryVersionService;
 import com.liferay.object.service.ObjectFieldLocalService;
+import com.liferay.object.service.ObjectRelationshipLocalService;
 import com.liferay.petra.io.StreamUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
@@ -29,6 +32,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.site.cms.site.initializer.internal.comparison.ObjectEntryVersionFieldValueResolver;
 
 import jakarta.servlet.Servlet;
@@ -65,7 +69,8 @@ public class CompareObjectEntryVersionsCMSServlet extends BaseCMSServlet {
 			new ObjectEntryVersionFieldValueResolver(
 				_diffHtml, _dlAppLocalService, _dlFileEntryLocalService,
 				_dlURLHelper, _language, _listTypeEntryLocalService,
-				_objectEntryVersionService);
+				_objectEntryLocalService, _objectEntryVersionService,
+				_objectRelationshipLocalService);
 	}
 
 	@Override
@@ -147,6 +152,13 @@ public class CompareObjectEntryVersionsCMSServlet extends BaseCMSServlet {
 						targetFieldValues.get(fieldName));
 
 				if (sourceDisplayValue.equals(targetDisplayValue)) {
+					if (_isShownUnchanged(sourceDisplayValue, objectField)) {
+						sourceDiffsJSONObject.put(
+							fieldName, sourceDisplayValue);
+						targetDiffsJSONObject.put(
+							fieldName, targetDisplayValue);
+					}
+
 					continue;
 				}
 
@@ -190,6 +202,23 @@ public class CompareObjectEntryVersionsCMSServlet extends BaseCMSServlet {
 		}
 	}
 
+	private boolean _isShownUnchanged(
+		String displayValue, ObjectField objectField) {
+
+		if (objectField == null) {
+			return false;
+		}
+
+		if (ObjectFieldConstants.BUSINESS_TYPE_ATTACHMENT.equals(
+				objectField.getBusinessType())) {
+
+			return Validator.isNotNull(displayValue);
+		}
+
+		return ObjectFieldConstants.BUSINESS_TYPE_BOOLEAN.equals(
+			objectField.getBusinessType());
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		CompareObjectEntryVersionsCMSServlet.class);
 
@@ -215,6 +244,9 @@ public class CompareObjectEntryVersionsCMSServlet extends BaseCMSServlet {
 	private ListTypeEntryLocalService _listTypeEntryLocalService;
 
 	@Reference
+	private ObjectEntryLocalService _objectEntryLocalService;
+
+	@Reference
 	private ObjectEntryService _objectEntryService;
 
 	private ObjectEntryVersionFieldValueResolver
@@ -225,5 +257,8 @@ public class CompareObjectEntryVersionsCMSServlet extends BaseCMSServlet {
 
 	@Reference
 	private ObjectFieldLocalService _objectFieldLocalService;
+
+	@Reference
+	private ObjectRelationshipLocalService _objectRelationshipLocalService;
 
 }

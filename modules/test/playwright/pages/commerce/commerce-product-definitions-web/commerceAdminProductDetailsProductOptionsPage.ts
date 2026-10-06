@@ -11,7 +11,7 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 	readonly addOptionsSearch: Locator;
 	readonly createNewOptionsButton: Locator;
 	readonly deleteMenuItem: Locator;
-	readonly optionActionsButton: Locator;
+	readonly optionActionsButton: (optionName: string) => Locator;
 	readonly optionLink: (optionName: string) => Locator;
 	readonly optionSidePanelCancelButton: Locator;
 	readonly optionSidePanelFrame: FrameLocator;
@@ -20,6 +20,7 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 	readonly optionValueQuantityInput: Locator;
 	readonly optionValueRow: (optionValueName: string) => Locator;
 	readonly optionValueSaveButton: Locator;
+	readonly optionValueSidePanel: Locator;
 	readonly optionValueSidePanelCloseButton: Locator;
 	readonly optionValueSidePanelFrame: FrameLocator;
 	readonly optionValueSkuDropdownItem: (label: string) => Locator;
@@ -47,9 +48,13 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 			exact: true,
 			name: 'Delete',
 		});
-		this.optionActionsButton = page
-			.locator('[data-testid="visualization-mode-table"]')
-			.getByRole('button', {exact: true, name: 'Actions'});
+		this.optionActionsButton = (optionName: string) =>
+			page
+				.locator('[data-testid="visualization-mode-table"]')
+				.getByRole('button', {
+					exact: true,
+					name: `${optionName} Actions`,
+				});
 		this.optionLink = (optionName: string) =>
 			page.getByRole('link', {exact: true, name: optionName});
 		this.optionSidePanelFrame = page.frameLocator(sidePanelIframe);
@@ -83,8 +88,10 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 				name: 'Save',
 			}
 		);
+		this.optionValueSidePanel =
+			this.optionSidePanelFrame.locator('.fds-side-panel');
 		this.optionValueSidePanelCloseButton =
-			this.optionSidePanelFrame.locator('.side-panel-iframe-close');
+			this.optionValueSidePanelFrame.locator('.side-panel-iframe-close');
 		this.optionValueSkuDropdownItem = (label: string) =>
 			this.optionValueSidePanelFrame
 				.locator('.autocomplete-dropdown-menu')
@@ -107,9 +114,11 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 	}
 
 	async closeOptionValue() {
-		await this.optionValueSidePanelCloseButton.click();
+		if (await this.optionValueSidePanel.isVisible()) {
+			await this.optionValueSidePanelCloseButton.click();
+		}
 
-		await expect(this.optionValueSkuInput).toBeHidden();
+		await expect(this.optionValueSidePanel).toBeHidden();
 	}
 
 	async editOptionValue(

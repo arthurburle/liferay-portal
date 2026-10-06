@@ -5,14 +5,18 @@
 
 package com.liferay.mcp.server.rest.internal.model.listener;
 
+import com.liferay.batch.engine.unit.BatchEngineUnitThreadLocal;
+import com.liferay.mcp.server.rest.internal.cache.MCPServerCacheManager;
 import com.liferay.mcp.server.rest.internal.constants.MCPServerConstants;
-import com.liferay.mcp.server.rest.internal.servlet.MCPServerServlet;
+import com.liferay.mcp.server.rest.internal.util.MCPServerProfileUtil;
 import com.liferay.object.constants.ObjectEntryFolderConstants;
+import com.liferay.object.exception.ObjectEntryValuesException;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.model.listener.RelevantObjectEntryModelListener;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
+import com.liferay.object.service.ObjectRelationshipLocalService;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.ModelListenerException;
@@ -23,8 +27,6 @@ import com.liferay.portal.kernel.model.BaseModelListener;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.MapUtil;
-
-import jakarta.servlet.Servlet;
 
 import java.io.Serializable;
 
@@ -51,8 +53,7 @@ public class MCPServerProfileObjectEntryModelListener
 	public void onAfterCreate(ObjectEntry objectEntry)
 		throws ModelListenerException {
 
-		_invalidateServlet(
-			objectEntry, MapUtil.getString(objectEntry.getValues(), "name"));
+		_clearServletCache(objectEntry);
 
 		_addMCPServerProfileDataMasks(objectEntry);
 	}
@@ -61,8 +62,7 @@ public class MCPServerProfileObjectEntryModelListener
 	public void onAfterRemove(ObjectEntry objectEntry)
 		throws ModelListenerException {
 
-		_invalidateServlet(
-			objectEntry, MapUtil.getString(objectEntry.getValues(), "name"));
+		_clearServletCache(objectEntry);
 	}
 
 	@Override
@@ -70,9 +70,14 @@ public class MCPServerProfileObjectEntryModelListener
 			ObjectEntry originalObjectEntry, ObjectEntry objectEntry)
 		throws ModelListenerException {
 
-		_invalidateServlet(
-			objectEntry,
-			MapUtil.getString(originalObjectEntry.getValues(), "name"));
+		_clearServletCache(originalObjectEntry);
+	}
+
+	@Override
+	public void onBeforeCreate(ObjectEntry objectEntry)
+		throws ModelListenerException {
+
+		_validateTools(objectEntry);
 	}
 
 	@Override
@@ -139,6 +144,18 @@ public class MCPServerProfileObjectEntryModelListener
 				}
 			}
 		}
+	}
+
+	@Override
+	public void onBeforeUpdate(
+			ObjectEntry originalObjectEntry, ObjectEntry objectEntry)
+		throws ModelListenerException {
+
+		if (MCPServerProfileUtil.isActive(originalObjectEntry)) {
+			return;
+		}
+
+		_validateTools(objectEntry);
 	}
 
 	private void _addMCPServerProfileDataMasks(ObjectEntry objectEntry) {
@@ -211,16 +228,53 @@ public class MCPServerProfileObjectEntryModelListener
 		}
 	}
 
-	private void _invalidateServlet(
-		ObjectEntry objectEntry, String profileName) {
+	private void _clearServletCache(ObjectEntry objectEntry) {
+		_mcpServerCacheManager.clearServletCache(
+			objectEntry.getCompanyId(),
+			MapUtil.getString(objectEntry.getValues(), "name"));
+	}
 
-		MCPServerServlet mcpServerServlet = (MCPServerServlet)_servlet;
+	private boolean _isBatchEngineBundle() {
+		String fileName = BatchEngineUnitThreadLocal.getFileName();
 
-		mcpServerServlet.invalidate(objectEntry.getCompanyId(), profileName);
+		return fileName.startsWith("com.liferay.mcp.server.rest.impl_");
+	}
+
+	private void _validateTools(ObjectEntry objectEntry)
+		throws ModelListenerException {
+
+		if (_isBatchEngineBundle() ||
+			!MCPServerProfileUtil.isActive(objectEntry)) {
+
+			return;
+		}
+
+		int toolsCount = 0;
+
+		try {
+			toolsCount = MCPServerProfileUtil.getToolsCount(
+				objectEntry, _objectEntryLocalService,
+				_objectRelationshipLocalService);
+		}
+		catch (PortalException portalException) {
+			throw new ModelListenerException(portalException);
+		}
+
+		if (toolsCount > 0) {
+			return;
+		}
+
+		throw new ModelListenerException(
+			new ObjectEntryValuesException.InvalidObjectField(
+				null, "MCP server profile has no associated tools",
+				"this-profile-has-no-associated-tools"));
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		MCPServerProfileObjectEntryModelListener.class);
+
+	@Reference
+	private MCPServerCacheManager _mcpServerCacheManager;
 
 	@Reference
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
@@ -228,9 +282,7 @@ public class MCPServerProfileObjectEntryModelListener
 	@Reference
 	private ObjectEntryLocalService _objectEntryLocalService;
 
-	@Reference(
-		target = "(osgi.http.whiteboard.servlet.name=com.liferay.mcp.server.rest.internal.servlet.MCPServerServlet)"
-	)
-	private Servlet _servlet;
+	@Reference
+	private ObjectRelationshipLocalService _objectRelationshipLocalService;
 
 }

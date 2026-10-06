@@ -31,7 +31,7 @@ public class MonitorRunnerTest extends com.liferay.jenkins.results.parser.Test {
 		try {
 			new MonitorRunner(0);
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 		}
@@ -44,7 +44,7 @@ public class MonitorRunnerTest extends com.liferay.jenkins.results.parser.Test {
 		try {
 			new MonitorRunner(1, 0);
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 		}

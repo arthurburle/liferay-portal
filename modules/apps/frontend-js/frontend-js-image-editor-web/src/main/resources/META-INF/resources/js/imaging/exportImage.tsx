@@ -7,8 +7,75 @@ import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 
 import {EditState} from '../state/types';
+import {FilterDefs, isIdentityFilter} from './FilterDefs';
+import {FrameShape} from './frameShapes';
 import {imageTransform} from './geometry';
 import {LoadedImage} from './loadImage';
+import {OverlayShape, overlayTransform, redactSourceFor} from './overlayShapes';
+
+export function editedImageMarkup(
+	state: EditState,
+	dataUrl: string,
+	pixelUrls: LoadedImage['pixelUrls']
+): string {
+	const {crop} = state;
+
+	// The same data URL the picture itself uses: the rasteriser runs in
+	// secure static mode and cannot fetch a `blob:` subresource.
+
+	const redactSource = redactSourceFor(state, {
+		filterId: 'export-filter',
+		imageUrl: dataUrl,
+		pixelUrls,
+	});
+
+	return renderToStaticMarkup(
+		<svg
+			height={crop.height}
+			viewBox={`${crop.x} ${crop.y} ${crop.width} ${crop.height}`}
+			width={crop.width}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<defs>
+				<FilterDefs
+					adjustments={state.adjustments}
+					filter={state.filter}
+					id="export-filter"
+				/>
+			</defs>
+
+			<g transform={imageTransform(state)}>
+				<image
+					filter={
+						isIdentityFilter(state.adjustments, state.filter)
+							? undefined
+							: 'url(#export-filter)'
+					}
+					height={state.sourceHeight}
+					href={dataUrl}
+					width={state.sourceWidth}
+				/>
+			</g>
+
+			{!state.frame.overAnnotations && (
+				<FrameShape crop={crop} frame={state.frame} />
+			)}
+
+			{state.overlays.map((overlay) => (
+				<g key={overlay.id} transform={overlayTransform(overlay)}>
+					<OverlayShape
+						overlay={overlay}
+						redactSource={redactSource}
+					/>
+				</g>
+			))}
+
+			{state.frame.overAnnotations && (
+				<FrameShape crop={crop} frame={state.frame} />
+			)}
+		</svg>
+	);
+}
 
 export async function exportEditedImage(
 	image: LoadedImage,
@@ -18,22 +85,7 @@ export async function exportEditedImage(
 
 	const {crop} = state;
 
-	const markup = renderToStaticMarkup(
-		<svg
-			height={crop.height}
-			viewBox={`${crop.x} ${crop.y} ${crop.width} ${crop.height}`}
-			width={crop.width}
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<g transform={imageTransform(state)}>
-				<image
-					height={state.sourceHeight}
-					href={dataUrl}
-					width={state.sourceWidth}
-				/>
-			</g>
-		</svg>
-	);
+	const markup = editedImageMarkup(state, dataUrl, image.pixelUrls);
 
 	const rendered = await loadIntoImage(
 		`data:image/svg+xml;charset=utf-8,${encodeURIComponent(markup)}`

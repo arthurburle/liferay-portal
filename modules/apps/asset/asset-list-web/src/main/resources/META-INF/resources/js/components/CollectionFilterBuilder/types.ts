@@ -11,6 +11,7 @@ export type PropertyType =
 	| 'date-time'
 	| 'decimal'
 	| 'integer'
+	| 'keyword'
 	| 'numeric'
 	| 'picklist'
 	| 'text';
@@ -48,6 +49,14 @@ export interface FilterCondition {
 	propertyName?: string;
 	quantifier?: string;
 	value?: string | Array<string | object>;
+}
+
+export function getCombinationKey(
+	propertyKey: string,
+	operatorName: string | undefined,
+	quantifier: string | undefined
+): string {
+	return `${propertyKey}|${operatorName ?? ''}|${quantifier ?? ''}`;
 }
 
 export function getPropertyKey(

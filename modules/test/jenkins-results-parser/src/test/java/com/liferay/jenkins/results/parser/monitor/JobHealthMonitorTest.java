@@ -918,7 +918,7 @@ public class JobHealthMonitorTest
 		try {
 			_newJobHealthMonitor(monitorProperties);
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 		}

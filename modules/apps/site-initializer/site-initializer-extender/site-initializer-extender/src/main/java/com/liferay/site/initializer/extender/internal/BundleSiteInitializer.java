@@ -42,12 +42,12 @@ import com.liferay.depot.constants.DepotConstants;
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryGroupRelLocalService;
 import com.liferay.depot.service.DepotEntryLocalService;
+import com.liferay.document.library.helper.DLURLHelper;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileEntryType;
 import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalService;
-import com.liferay.document.library.util.DLURLHelper;
 import com.liferay.dynamic.data.lists.model.DDLRecord;
 import com.liferay.dynamic.data.mapping.constants.DDMTemplateConstants;
 import com.liferay.dynamic.data.mapping.exception.NoSuchStructureException;
@@ -217,6 +217,7 @@ import com.liferay.portal.vulcan.multipart.BinaryFile;
 import com.liferay.portal.vulcan.multipart.MultipartBody;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
+import com.liferay.segments.constants.SegmentsEntryConstants;
 import com.liferay.segments.model.SegmentsEntry;
 import com.liferay.segments.model.SegmentsExperience;
 import com.liferay.segments.service.SegmentsEntryLocalService;
@@ -1421,28 +1422,6 @@ public class BundleSiteInitializer implements SiteInitializer {
 		}
 	}
 
-	private void _addOrganizationUser(
-			JSONArray jsonArray, ServiceContext serviceContext, long userId)
-		throws Exception {
-
-		if (JSONUtil.isEmpty(jsonArray)) {
-			return;
-		}
-
-		for (int i = 0; i < jsonArray.length(); i++) {
-			JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-			long organizationId = _organizationLocalService.getOrganizationId(
-				serviceContext.getCompanyId(), jsonObject.getString("name"));
-
-			if (organizationId <= 0) {
-				continue;
-			}
-
-			_userLocalService.addOrganizationUser(organizationId, userId);
-		}
-	}
-
 	private void _addOrKnowledgeBaseObjects(
 			boolean folder, long parentKnowledgeBaseObjectId,
 			String parentResourcePath, ServiceContext serviceContext)
@@ -1915,74 +1894,6 @@ public class BundleSiteInitializer implements SiteInitializer {
 		}
 	}
 
-	private void _addOrUpdateDataDefinitions(
-			ServiceContext serviceContext,
-			Map<String, String> stringUtilReplaceValues)
-		throws Exception {
-
-		List<DDMStructure> ddmStructures =
-			_ddmStructureLocalService.getStructures(
-				serviceContext.getScopeGroupId());
-
-		for (DDMStructure ddmStructure : ddmStructures) {
-			stringUtilReplaceValues.put(
-				"DDM_STRUCTURE_ID:" + ddmStructure.getStructureKey(),
-				String.valueOf(ddmStructure.getStructureId()));
-		}
-
-		Set<String> resourcePaths = _servletContext.getResourcePaths(
-			"/site-initializer/data-definitions");
-
-		if (SetUtil.isEmpty(resourcePaths)) {
-			return;
-		}
-
-		DataDefinitionResource.Builder dataDefinitionResourceBuilder =
-			_dataDefinitionResourceFactory.create();
-
-		DataDefinitionResource dataDefinitionResource =
-			dataDefinitionResourceBuilder.user(
-				serviceContext.fetchUser()
-			).build();
-
-		for (String resourcePath : resourcePaths) {
-			String json = _replace(
-				SiteInitializerUtil.read(resourcePath, _servletContext),
-				stringUtilReplaceValues);
-
-			DataDefinition dataDefinition = DataDefinition.toDTO(json);
-
-			if (dataDefinition == null) {
-				_log.error(
-					"Unable to transform data definition from JSON: " + json);
-
-				continue;
-			}
-
-			try {
-				DataDefinition existingDataDefinition =
-					dataDefinitionResource.
-						getSiteDataDefinitionByContentTypeByDataDefinitionKey(
-							serviceContext.getScopeGroupId(),
-							dataDefinition.getContentType(),
-							dataDefinition.getDataDefinitionKey());
-
-				dataDefinition = dataDefinitionResource.putDataDefinition(
-					existingDataDefinition.getId(), dataDefinition);
-			}
-			catch (NoSuchStructureException noSuchStructureException) {
-				dataDefinition =
-					dataDefinitionResource.postSiteDataDefinitionByContentType(
-						serviceContext.getScopeGroupId(),
-						dataDefinition.getContentType(), dataDefinition);
-			}
-
-			stringUtilReplaceValues.put(
-				"DATA_DEFINITION_ID:" + dataDefinition.getDataDefinitionKey(),
-				String.valueOf(dataDefinition.getId()));
-		}
-	}
-
 	private void _addOrUpdateDDMStructures(
 			ServiceContext serviceContext,
 			Map<String, String> stringUtilReplaceValues)
@@ -2138,6 +2049,74 @@ public class BundleSiteInitializer implements SiteInitializer {
 				"DDM_TEMPLATE_ID:" +
 					ddmTemplate.getName(LocaleUtil.getSiteDefault()),
 				String.valueOf(ddmTemplate.getTemplateId()));
+		}
+	}
+
+	private void _addOrUpdateDataDefinitions(
+			ServiceContext serviceContext,
+			Map<String, String> stringUtilReplaceValues)
+		throws Exception {
+
+		List<DDMStructure> ddmStructures =
+			_ddmStructureLocalService.getStructures(
+				serviceContext.getScopeGroupId());
+
+		for (DDMStructure ddmStructure : ddmStructures) {
+			stringUtilReplaceValues.put(
+				"DDM_STRUCTURE_ID:" + ddmStructure.getStructureKey(),
+				String.valueOf(ddmStructure.getStructureId()));
+		}
+
+		Set<String> resourcePaths = _servletContext.getResourcePaths(
+			"/site-initializer/data-definitions");
+
+		if (SetUtil.isEmpty(resourcePaths)) {
+			return;
+		}
+
+		DataDefinitionResource.Builder dataDefinitionResourceBuilder =
+			_dataDefinitionResourceFactory.create();
+
+		DataDefinitionResource dataDefinitionResource =
+			dataDefinitionResourceBuilder.user(
+				serviceContext.fetchUser()
+			).build();
+
+		for (String resourcePath : resourcePaths) {
+			String json = _replace(
+				SiteInitializerUtil.read(resourcePath, _servletContext),
+				stringUtilReplaceValues);
+
+			DataDefinition dataDefinition = DataDefinition.toDTO(json);
+
+			if (dataDefinition == null) {
+				_log.error(
+					"Unable to transform data definition from JSON: " + json);
+
+				continue;
+			}
+
+			try {
+				DataDefinition existingDataDefinition =
+					dataDefinitionResource.
+						getSiteDataDefinitionByContentTypeByDataDefinitionKey(
+							serviceContext.getScopeGroupId(),
+							dataDefinition.getContentType(),
+							dataDefinition.getDataDefinitionKey());
+
+				dataDefinition = dataDefinitionResource.putDataDefinition(
+					existingDataDefinition.getId(), dataDefinition);
+			}
+			catch (NoSuchStructureException noSuchStructureException) {
+				dataDefinition =
+					dataDefinitionResource.postSiteDataDefinitionByContentType(
+						serviceContext.getScopeGroupId(),
+						dataDefinition.getContentType(), dataDefinition);
+			}
+
+			stringUtilReplaceValues.put(
+				"DATA_DEFINITION_ID:" + dataDefinition.getDataDefinitionKey(),
+				String.valueOf(dataDefinition.getId()));
 		}
 	}
 
@@ -3335,23 +3314,11 @@ public class BundleSiteInitializer implements SiteInitializer {
 				serviceContext.fetchUser()
 			).build();
 
-		NotificationTemplate existingNotificationTemplate =
+		notificationTemplate =
 			notificationTemplateResource.
-				getNotificationTemplateByExternalReferenceCode(
-					notificationTemplate.getExternalReferenceCode());
-
-		if (existingNotificationTemplate == null) {
-			notificationTemplate =
-				notificationTemplateResource.postNotificationTemplate(
+				putNotificationTemplateByExternalReferenceCode(
+					notificationTemplate.getExternalReferenceCode(),
 					notificationTemplate);
-		}
-		else {
-			notificationTemplate =
-				notificationTemplateResource.
-					putNotificationTemplateByExternalReferenceCode(
-						notificationTemplate.getExternalReferenceCode(),
-						notificationTemplate);
-		}
 
 		json = SiteInitializerUtil.read(
 			resourcePath + "notification-template.object-actions.json",
@@ -3378,7 +3345,7 @@ public class BundleSiteInitializer implements SiteInitializer {
 				jsonObject.getLong("objectDefinitionId"),
 				jsonObject.getBoolean("active"),
 				jsonObject.getString("conditionExpression"),
-				jsonObject.getString("description"),
+				SiteInitializerUtil.toMap(jsonObject.getString("description")),
 				SiteInitializerUtil.toMap(jsonObject.getString("errorMessage")),
 				SiteInitializerUtil.toMap(jsonObject.getString("label")),
 				jsonObject.getString("name"),
@@ -3449,7 +3416,8 @@ public class BundleSiteInitializer implements SiteInitializer {
 					jsonObject.getLong("objectDefinitionId"),
 					objectActionJSONObject.getBoolean("active"),
 					objectActionJSONObject.getString("conditionExpression"),
-					objectActionJSONObject.getString("description"),
+					SiteInitializerUtil.toMap(
+						objectActionJSONObject.getString("description")),
 					SiteInitializerUtil.toMap(
 						objectActionJSONObject.getString("errorMessage")),
 					SiteInitializerUtil.toMap(
@@ -3827,7 +3795,9 @@ public class BundleSiteInitializer implements SiteInitializer {
 					jsonObject.getString("resourceName")),
 				ResourceAction -> ResourceAction.getActionId(), String.class);
 
-			if (!ArrayUtil.containsAll(resourceActionIds, actionIds)) {
+			if (ArrayUtil.isNotEmpty(actionIds) &&
+				!ArrayUtil.containsAll(resourceActionIds, actionIds)) {
+
 				if (_log.isWarnEnabled()) {
 					_log.warn(
 						StringBundler.concat(
@@ -4037,6 +4007,24 @@ public class BundleSiteInitializer implements SiteInitializer {
 		}
 	}
 
+	private void _addOrUpdateSXPBlueprint(
+			ServiceContext serviceContext,
+			Map<String, String> stringUtilReplaceValues)
+		throws Exception {
+
+		OSBSiteInitializer osbSiteInitializer =
+			_osbSiteInitializerSnapshot.get();
+
+		if (osbSiteInitializer == null) {
+			return;
+		}
+
+		osbSiteInitializer.addOrUpdateSXPBlueprint(
+			_getClassNameIdStringUtilReplaceValues(),
+			_releaseInfoStringUtilReplaceValues, serviceContext,
+			_servletContext, stringUtilReplaceValues);
+	}
+
 	private void _addOrUpdateSegmentsEntries(
 			ServiceContext serviceContext,
 			Map<String, String> stringUtilReplaceValues)
@@ -4069,7 +4057,7 @@ public class BundleSiteInitializer implements SiteInitializer {
 					jsonObject.get(
 						"criteria"
 					).toString(),
-					null, serviceContext);
+					null, SegmentsEntryConstants.TYPE_DEFAULT, serviceContext);
 			}
 			else {
 				segmentsEntry = _segmentsEntryLocalService.updateSegmentsEntry(
@@ -4082,7 +4070,7 @@ public class BundleSiteInitializer implements SiteInitializer {
 					jsonObject.get(
 						"criteria"
 					).toString(),
-					serviceContext);
+					segmentsEntry.getType(), serviceContext);
 			}
 
 			stringUtilReplaceValues.put(
@@ -4373,24 +4361,6 @@ public class BundleSiteInitializer implements SiteInitializer {
 		return structuredContentFolder.getId();
 	}
 
-	private void _addOrUpdateSXPBlueprint(
-			ServiceContext serviceContext,
-			Map<String, String> stringUtilReplaceValues)
-		throws Exception {
-
-		OSBSiteInitializer osbSiteInitializer =
-			_osbSiteInitializerSnapshot.get();
-
-		if (osbSiteInitializer == null) {
-			return;
-		}
-
-		osbSiteInitializer.addOrUpdateSXPBlueprint(
-			_getClassNameIdStringUtilReplaceValues(),
-			_releaseInfoStringUtilReplaceValues, serviceContext,
-			_servletContext, stringUtilReplaceValues);
-	}
-
 	private TaxonomyCategory _addOrUpdateTaxonomyCategoryTaxonomyCategory(
 			String parentTaxonomyCategoryId, ServiceContext serviceContext,
 			TaxonomyCategory taxonomyCategory)
@@ -4609,6 +4579,28 @@ public class BundleSiteInitializer implements SiteInitializer {
 
 			_userGroupLocalService.addGroupUserGroup(
 				serviceContext.getScopeGroupId(), userGroup);
+		}
+	}
+
+	private void _addOrganizationUser(
+			JSONArray jsonArray, ServiceContext serviceContext, long userId)
+		throws Exception {
+
+		if (JSONUtil.isEmpty(jsonArray)) {
+			return;
+		}
+
+		for (int i = 0; i < jsonArray.length(); i++) {
+			JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+			long organizationId = _organizationLocalService.getOrganizationId(
+				serviceContext.getCompanyId(), jsonObject.getString("name"));
+
+			if (organizationId <= 0) {
+				continue;
+			}
+
+			_userLocalService.addOrganizationUser(organizationId, userId);
 		}
 	}
 
@@ -6560,9 +6552,9 @@ public class BundleSiteInitializer implements SiteInitializer {
 	private final LayoutPageTemplateStructureRelLocalService
 		_layoutPageTemplateStructureRelLocalService;
 	private final LayoutSetLocalService _layoutSetLocalService;
-	private final LayoutsImporter _layoutsImporter;
 	private final LayoutUtilityPageEntryLocalService
 		_layoutUtilityPageEntryLocalService;
+	private final LayoutsImporter _layoutsImporter;
 	private final ListTypeDefinitionResource _listTypeDefinitionResource;
 	private final ListTypeDefinitionResource.Factory
 		_listTypeDefinitionResourceFactory;

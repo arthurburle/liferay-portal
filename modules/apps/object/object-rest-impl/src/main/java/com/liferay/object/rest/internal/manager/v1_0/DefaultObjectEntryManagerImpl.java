@@ -45,6 +45,7 @@ import com.liferay.object.model.ObjectField;
 import com.liferay.object.model.ObjectFolder;
 import com.liferay.object.model.ObjectRelationship;
 import com.liferay.object.model.ObjectRelationshipModel;
+import com.liferay.object.model.bag.ObjectFieldBag;
 import com.liferay.object.related.models.ObjectRelatedModelsProvider;
 import com.liferay.object.related.models.ObjectRelatedModelsProviderRegistry;
 import com.liferay.object.relationship.util.ObjectRelationshipUtil;
@@ -228,10 +229,6 @@ public class DefaultObjectEntryManagerImpl
 					dtoConverterContext.getUser());
 			}
 		}
-
-		validateReadOnlyObjectFields(
-			null, getGroupId(objectDefinition, scopeKey), objectDefinition,
-			objectEntry);
 
 		ServiceContext serviceContext = _createServiceContext(
 			dtoConverterContext, objectDefinition, objectEntry, scopeKey);
@@ -3336,7 +3333,7 @@ public class DefaultObjectEntryManagerImpl
 			ServiceContext serviceContext)
 		throws Exception {
 
-		if (propertyValue == null) {
+		if (!(propertyValue instanceof Map<?, ?>)) {
 			return 0;
 		}
 
@@ -3648,6 +3645,17 @@ public class DefaultObjectEntryManagerImpl
 		}
 	}
 
+	private Object _toDTO(
+			BaseModel<?> baseModel,
+			com.liferay.object.model.ObjectEntry serviceBuilderObjectEntry,
+			SystemObjectDefinitionManager systemObjectDefinitionManager)
+		throws Exception {
+
+		return ObjectEntryDTOConverterUtil.toDTO(
+			baseModel, _dtoConverterRegistry, systemObjectDefinitionManager,
+			_userLocalService.getUser(serviceBuilderObjectEntry.getUserId()));
+	}
+
 	private Date _toDate(Locale locale, String valueString) {
 		if (Validator.isNull(valueString)) {
 			return null;
@@ -3671,17 +3679,6 @@ public class DefaultObjectEntryManagerImpl
 					parseException2);
 			}
 		}
-	}
-
-	private Object _toDTO(
-			BaseModel<?> baseModel,
-			com.liferay.object.model.ObjectEntry serviceBuilderObjectEntry,
-			SystemObjectDefinitionManager systemObjectDefinitionManager)
-		throws Exception {
-
-		return ObjectEntryDTOConverterUtil.toDTO(
-			baseModel, _dtoConverterRegistry, systemObjectDefinitionManager,
-			_userLocalService.getUser(serviceBuilderObjectEntry.getUserId()));
 	}
 
 	private List<ObjectEntry> _toObjectEntries(
@@ -3950,10 +3947,9 @@ public class DefaultObjectEntryManagerImpl
 
 		relationshipObjectFieldIds.remove(allowedRelationshipObjectFieldId);
 
-		for (ObjectField objectField :
-				objectFieldLocalService.getObjectFields(
-					objectDefinition.getObjectDefinitionId())) {
+		ObjectFieldBag objectFieldBag = objectDefinition.getObjectFieldBag();
 
+		for (ObjectField objectField : objectFieldBag.getObjectFields()) {
 			if (relationshipObjectFieldIds.contains(
 					objectField.getObjectFieldId())) {
 
@@ -3976,7 +3972,8 @@ public class DefaultObjectEntryManagerImpl
 
 				Map<String, Object> localizedValues =
 					objectFieldBusinessType.getLocalizedValues(
-						objectField, serviceContext.getUserId(), properties);
+						getGroupId(objectDefinition, scopeKey), objectField,
+						serviceContext.getUserId(), properties);
 
 				if (localizedValues != null) {
 					values.put(

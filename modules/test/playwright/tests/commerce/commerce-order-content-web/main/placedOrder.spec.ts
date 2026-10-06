@@ -16,19 +16,28 @@ import {pageEditorPagesTest} from '../../../../fixtures/pageEditorPagesTest';
 import {pageViewModePagesTest} from '../../../../fixtures/pageViewModePagesTest';
 import {systemSettingsPageTest} from '../../../../fixtures/systemSettingsPageTest';
 import {usersAndOrganizationsPagesTest} from '../../../../fixtures/usersAndOrganizationsPagesTest';
+import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
+import {TProduct} from '../../../../helpers/HeadlessCommerceAdminCatalogApiHelper';
 import {liferayConfig} from '../../../../liferay.config';
+import {CommerceAdminChannelsPage} from '../../../../pages/commerce/commerce-channel-web/commerceAdminChannelsPage';
+import {VIRTUAL_ORDER_ITEM_CONTENT_PORTLET_ID} from '../../../../pages/commerce/commerce-product-type-virtual-order-content-web/virtualOrderItemContentPage';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import performLogin, {
 	performLoginViaApi,
 	performLogout,
+	performUserSwitchViaApi,
 	userData,
 } from '../../../../utils/performLogin';
+import getBasicWebContentStructureId from '../../../../utils/structured-content/getBasicWebContentStructureId';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
+import {templatesPageTest} from '../../../template-web/main/fixtures/templatesPageTest';
 import {
 	createAccountWithBuyerUser,
+	createProductWithOptions,
+	findSkuByOptionValueKeys,
 	miniumSetUp,
 	selectCurrentAccount,
 } from '../../utils/commerce';
@@ -54,8 +63,86 @@ export const test = mergeTests(
 	pageEditorPagesTest,
 	pageViewModePagesTest,
 	systemSettingsPageTest,
+	templatesPageTest,
 	usersAndOrganizationsPagesTest
 );
+
+async function setUpVirtualOrderItemWithTermsOfUse({
+	apiHelpers,
+	commerceAdminChannelsPage,
+	productVirtualSettings,
+	site,
+}: {
+	apiHelpers: DataApiHelpers;
+	commerceAdminChannelsPage: CommerceAdminChannelsPage;
+	productVirtualSettings: TProduct['productVirtualSettings'];
+	site: Site;
+}) {
+	const layout = await apiHelpers.headlessDelivery.createSitePage({
+		pageDefinition: getPageDefinition([
+			getWidgetDefinition({
+				id: getRandomString(),
+				widgetName: VIRTUAL_ORDER_ITEM_CONTENT_PORTLET_ID,
+			}),
+		]),
+		siteId: site.id,
+		title: getRandomString(),
+	});
+
+	const channel = await apiHelpers.headlessCommerceAdminChannel.postChannel({
+		siteGroupId: site.id,
+	});
+
+	await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+		channel.name,
+		'B2B'
+	);
+
+	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+	const product = await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+		catalogId: catalog.id,
+		productType: 'virtual',
+		productVirtualSettings: {
+			activationStatus: 1,
+			termsOfUseRequired: true,
+			url: 'https://www.liferay.com',
+			...productVirtualSettings,
+		},
+	});
+
+	const productSkus = await apiHelpers.headlessCommerceAdminCatalog
+		.getProduct(product.productId)
+		.then((product) => {
+			return product.skus;
+		});
+
+	const {account, buyerUser} = await createAccountWithBuyerUser(
+		apiHelpers,
+		site.id
+	);
+
+	const order = await apiHelpers.headlessCommerceAdminOrder.postOrder({
+		accountId: account.id,
+		channelId: channel.id,
+		orderItems: [
+			{
+				quantity: 1,
+				skuId: productSkus[0].id,
+			},
+		],
+		orderStatus: '1',
+	});
+
+	await apiHelpers.headlessCommerceAdminOrder.patchOrder(order.id, {
+		paymentStatus: '0',
+	});
+
+	return {
+		buyerUser,
+		layoutURL: `/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`,
+	};
+}
 
 test(
 	'Placed orders widget configuration to display full addresses and phone number',
@@ -2068,5 +2155,483 @@ test(
 		await expect(placedOrdersPage.orderDetailsValue('ERC')).toHaveText(
 			externalReferenceCode
 		);
+	}
+);
+
+test(
+	'A display template selected in the Placed Orders widget configuration survives reopening it',
+	{tag: ['@COMMERCE-12266', '@LPD-106723']},
+	async ({
+		apiHelpers,
+		page,
+		placedOrdersPage,
+		site,
+		templatesPage,
+		widgetPagePage,
+	}) => {
+		const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
+			groupId: site.id,
+			title: getRandomString(),
+		});
+
+		await apiHelpers.headlessCommerceAdminChannel.postChannel({
+			siteGroupId: site.id,
+		});
+
+		const displayTemplateName = `Placed Orders ${getRandomString()}`;
+
+		await templatesPage.gotoWidgetTemplates(site.friendlyUrlPath);
+
+		await templatesPage.createWidgetTemplate(
+			displayTemplateName,
+			'Placed Orders Template'
+		);
+
+		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyURL}`, {
+			waitUntil: 'networkidle',
+		});
+
+		await widgetPagePage.addPortlet('Placed Orders');
+
+		await placedOrdersPage.goToConfiguration();
+
+		await placedOrdersPage.selectDisplayTemplate(displayTemplateName);
+
+		await page.reload();
+
+		await placedOrdersPage.goToConfiguration();
+
+		await expect(
+			placedOrdersPage.configurationIFrameDisplayTemplateSelector
+		).toHaveText(displayTemplateName);
+	}
+);
+
+test(
+	'A placed order does not offer to edit the options of any of its order items',
+	{tag: ['@COMMERCE-12744', '@LPD-106905']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceAdminProductPage,
+		page,
+		placedOrdersPage,
+		site,
+	}) => {
+		test.setTimeout(300000);
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const simpleProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: `SimpleProduct${getRandomInt()}`},
+			});
+
+		const linkedProducts = [];
+
+		for (const price of [20, 30]) {
+			linkedProducts.push(
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: `LinkedProduct${getRandomInt()}`},
+					skus: [
+						{
+							cost: price,
+							price,
+							published: true,
+							purchasable: true,
+							sku: `LINKED-${getRandomString()}`,
+						},
+					],
+				})
+			);
+		}
+
+		const {product: optionsProduct} = await createProductWithOptions(
+			apiHelpers,
+			commerceAdminProductPage,
+			{
+				catalogId: catalog.id,
+				name: `OptionsProduct${getRandomInt()}`,
+				optionSpecs: [
+					{
+						fieldType: 'select',
+						name: 'Package Quantity',
+						skuContributor: true,
+						values: [
+							{key: 'small', name: '12'},
+							{key: 'large', name: '48'},
+						],
+					},
+				],
+			}
+		);
+
+		const {product: bundleProduct} = await createProductWithOptions(
+			apiHelpers,
+			commerceAdminProductPage,
+			{
+				catalogId: catalog.id,
+				optionSpecs: [
+					{
+						fieldType: 'select',
+						name: 'Color',
+						priceType: 'static',
+						skuContributor: true,
+						values: [
+							{
+								deltaPrice: 20,
+								key: 'blue',
+								name: 'Blue',
+								skuId: linkedProducts[0].skus[0].id,
+							},
+							{
+								deltaPrice: 30,
+								key: 'white',
+								name: 'White',
+								skuId: linkedProducts[1].skus[0].id,
+							},
+						],
+					},
+				],
+			}
+		);
+
+		const orderedSkus = [
+			simpleProduct.skus[0],
+			findSkuByOptionValueKeys(optionsProduct, ['small']),
+			findSkuByOptionValueKeys(bundleProduct, ['blue']),
+		];
+
+		const warehouse =
+			await apiHelpers.headlessCommerceAdminInventoryApiHelper.postWarehouses(
+				{
+					active: true,
+					latitude: getRandomInt(),
+					longitude: getRandomInt(),
+					warehouseItems: orderedSkus.map((sku) => ({
+						quantity: 100,
+						sku: sku.sku,
+					})),
+				}
+			);
+
+		await apiHelpers.headlessCommerceAdminInventoryApiHelper.postWarehousesChannels(
+			warehouse.id,
+			channel.id
+		);
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const address =
+			await apiHelpers.headlessCommerceAdminAccount.postAddress(
+				account.id,
+				{phoneNumber: '12345', regionISOCode: 'AL'}
+			);
+
+		const cart = await apiHelpers.headlessCommerceDeliveryCart.postCart(
+			{
+				accountId: account.id,
+				billingAddressId: address.id,
+				cartItems: orderedSkus.map((sku) => ({
+					quantity: 1,
+					skuId: sku.id,
+				})),
+				currencyCode: 'USD',
+				shippingAddressId: address.id,
+			},
+			channel.id
+		);
+
+		await apiHelpers.headlessCommerceDeliveryCart.checkoutCart(cart.id);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await placedOrdersPage.viewButton.click();
+
+		for (const productName of [
+			simpleProduct.name['en_US'],
+			optionsProduct.name['en_US'],
+			bundleProduct.name['en_US'],
+		]) {
+			await expect(
+				placedOrdersPage.orderItemActionsButtonFor(productName)
+			).toBeVisible();
+
+			await placedOrdersPage
+				.orderItemActionsButtonFor(productName)
+				.click();
+
+			await expect(
+				placedOrdersPage.orderItemActionsButtonEdit
+			).toHaveCount(0);
+
+			await page.keyboard.press('Escape');
+		}
+
+		await performLoginViaApi({page, screenName: 'test'});
+	}
+);
+
+test(
+	'Terms are not editable in the placed order details page',
+	{tag: ['@COMMERCE-8141', '@COMMERCE-9119']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		page,
+		placedOrdersPage,
+		site,
+	}) => {
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const deliveryTermName = `Delivery Term ${getRandomString()}`;
+
+		const deliveryTerm =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				label: {en_US: deliveryTermName},
+				name: deliveryTermName,
+				type: 'delivery-terms',
+			});
+
+		const paymentTermName = `Payment Term ${getRandomString()}`;
+
+		const paymentTerm =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				label: {en_US: paymentTermName},
+				name: paymentTermName,
+				type: 'payment-terms',
+			});
+
+		await apiHelpers.headlessCommerceAdminOrder.postOrder({
+			accountId: account.id,
+			channelId: channel.id,
+			deliveryTermId: deliveryTerm.id,
+			orderStatus: '1',
+			paymentTermId: paymentTerm.id,
+		});
+
+		await performUserSwitchViaApi(page, buyerUser.alternateName);
+
+		await page.goto(
+			`${liferayConfig.environment.baseUrl}/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await expect(placedOrdersPage.table).toBeVisible();
+
+		await placedOrdersPage.viewButton.click();
+
+		await expect(
+			placedOrdersPage.orderDetailsTermLink(
+				'Delivery Terms',
+				deliveryTermName
+			)
+		).toBeVisible();
+		await expect(
+			placedOrdersPage.orderDetailsTermLink(
+				'Payment Terms',
+				paymentTermName
+			)
+		).toBeVisible();
+
+		await expect(placedOrdersPage.portlet).not.toContainText('Edit', {
+			useInnerText: true,
+		});
+	}
+);
+
+test(
+	'Terms of use view renders only the terms of use of the virtual order item',
+	{tag: '@LPD-106886'},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		page,
+		site,
+		virtualOrderItemContentPage,
+	}) => {
+		const termsOfUseId = `termsOfUse${getRandomString()}`;
+
+		const {buyerUser, layoutURL} =
+			await setUpVirtualOrderItemWithTermsOfUse({
+				apiHelpers,
+				commerceAdminChannelsPage,
+				productVirtualSettings: {
+					termsOfUseContent: {
+						en_US: `<p><strong id="${termsOfUseId}">Terms of Use</strong></p>`,
+					},
+				},
+				site,
+			});
+
+		await performUserSwitchViaApi(page, buyerUser.alternateName);
+
+		await page.goto(layoutURL);
+
+		await virtualOrderItemContentPage.downloadButton.click();
+
+		await expect(
+			virtualOrderItemContentPage.termsOfUseModalFrame.locator(
+				`[id="${termsOfUseId}"]`
+			)
+		).toHaveText('Terms of Use');
+
+		const imageId = `image${getRandomString()}`;
+
+		await virtualOrderItemContentPage.gotoTermsOfUse(layoutURL, {
+			termsOfUseContent: `<img id="${imageId}" src="x">`,
+		});
+
+		await expect(
+			virtualOrderItemContentPage.termsOfUseContent
+		).toBeVisible();
+		await expect(page.locator(`[id="${imageId}"]`)).toHaveCount(0);
+	}
+);
+
+test(
+	'Terms of use view renders only the terms of use article of the virtual order item',
+	{tag: '@LPD-106886'},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		page,
+		site,
+		virtualOrderItemContentPage,
+	}) => {
+		const basicWebContentStructureId =
+			await getBasicWebContentStructureId(apiHelpers);
+
+		const termsOfUseId = `termsOfUse${getRandomString()}`;
+
+		const termsOfUseStructuredContent =
+			await apiHelpers.headlessDelivery.postStructuredContent({
+				contentFields: [
+					{
+						contentFieldValue: {
+							data: `<p><strong id="${termsOfUseId}">Terms of Use</strong></p>`,
+						},
+						name: 'content',
+					},
+				],
+				contentStructureId: basicWebContentStructureId,
+				datePublished: '2024-01-01T00:00:00Z',
+				siteId: site.id,
+				title: getRandomString(),
+				viewableBy: 'Anyone',
+			});
+
+		const {buyerUser, layoutURL} =
+			await setUpVirtualOrderItemWithTermsOfUse({
+				apiHelpers,
+				commerceAdminChannelsPage,
+				productVirtualSettings: {
+					termsOfUseJournalArticleId: termsOfUseStructuredContent.id,
+				},
+				site,
+			});
+
+		const unrelatedId = `unrelated${getRandomString()}`;
+
+		const unrelatedStructuredContent =
+			await apiHelpers.headlessDelivery.postStructuredContent({
+				contentFields: [
+					{
+						contentFieldValue: {
+							data: `<p id="${unrelatedId}">${getRandomString()}</p>`,
+						},
+						name: 'content',
+					},
+				],
+				contentStructureId: basicWebContentStructureId,
+				datePublished: '2024-01-01T00:00:00Z',
+				siteId: site.id,
+				title: getRandomString(),
+				viewableBy: 'Anyone',
+			});
+
+		await performUserSwitchViaApi(page, buyerUser.alternateName);
+
+		await page.goto(layoutURL);
+
+		await virtualOrderItemContentPage.downloadButton.click();
+
+		await expect(
+			virtualOrderItemContentPage.termsOfUseModalFrame.locator(
+				`[id="${termsOfUseId}"]`
+			)
+		).toHaveText('Terms of Use');
+
+		await virtualOrderItemContentPage.gotoTermsOfUse(layoutURL, {
+			articleId: unrelatedStructuredContent.key,
+			groupId: String(site.id),
+			version: '1.0',
+		});
+
+		await expect(
+			virtualOrderItemContentPage.termsOfUseContent
+		).toBeVisible();
+		await expect(page.locator(`[id="${unrelatedId}"]`)).toHaveCount(0);
 	}
 );

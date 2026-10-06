@@ -45,7 +45,7 @@ public class MonitorEngineTest extends com.liferay.jenkins.results.parser.Test {
 					new TestMonitor(_newMonitorConfig("a")),
 					new TestMonitor(_newMonitorConfig("a"))));
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 		}

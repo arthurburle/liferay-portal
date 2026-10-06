@@ -14,8 +14,8 @@ import com.liferay.data.engine.rest.resource.v2_0.DataDefinitionResource;
 import com.liferay.depot.constants.DepotConstants;
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalService;
+import com.liferay.document.library.helper.DLURLHelper;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
-import com.liferay.document.library.util.DLURLHelper;
 import com.liferay.dynamic.data.mapping.constants.DDMStructureConstants;
 import com.liferay.dynamic.data.mapping.form.field.type.constants.DDMFormFieldTypeConstants;
 import com.liferay.dynamic.data.mapping.io.DDMFormDeserializer;
@@ -2458,7 +2458,7 @@ public class EditableFragmentEntryProcessorTest {
 		return _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			objectDefinitionId, true, StringPool.BLANK,
-			RandomTestUtil.randomString(),
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			labelMap, RandomTestUtil.randomString(),
 			ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -2474,8 +2474,8 @@ public class EditableFragmentEntryProcessorTest {
 	private ObjectDefinition _addObjectDefinition() throws Exception {
 		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.addCustomObjectDefinition(
-				null, TestPropsValues.getUserId(), 0, null, true, false, true,
-				false, true, false, false, false, false, null,
+				null, TestPropsValues.getUserId(), 0, null, null, true, false,
+				true, false, true, false, false, false, false, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionTestUtil.getRandomName(), null,
 				"control_panel.sites",
@@ -2557,7 +2557,7 @@ public class EditableFragmentEntryProcessorTest {
 		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.addCustomObjectDefinition(
 				null, TestPropsValues.getUserId(),
-				objectFolder.getObjectFolderId(), null, true, false, true,
+				objectFolder.getObjectFolderId(), null, null, true, false, true,
 				false, true, false, false, false, false, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionTestUtil.getRandomName(), null, null,

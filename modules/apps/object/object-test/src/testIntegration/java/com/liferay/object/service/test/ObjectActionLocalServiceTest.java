@@ -28,6 +28,8 @@ import com.liferay.expando.kernel.model.ExpandoColumn;
 import com.liferay.expando.kernel.model.ExpandoColumnConstants;
 import com.liferay.expando.kernel.model.ExpandoTableConstants;
 import com.liferay.expando.test.util.ExpandoTestUtil;
+import com.liferay.map.geocoder.GeocoderResult;
+import com.liferay.map.test.util.GeocoderTestUtil;
 import com.liferay.notification.constants.NotificationConstants;
 import com.liferay.notification.constants.NotificationQueueEntryConstants;
 import com.liferay.notification.constants.NotificationRecipientSettingConstants;
@@ -63,7 +65,9 @@ import com.liferay.object.exception.ObjectActionSystemException;
 import com.liferay.object.exception.ObjectActionTriggerKeyException;
 import com.liferay.object.field.builder.AssigneeObjectFieldBuilder;
 import com.liferay.object.field.builder.AutoIncrementObjectFieldBuilder;
+import com.liferay.object.field.builder.LocationObjectFieldBuilder;
 import com.liferay.object.field.builder.TextObjectFieldBuilder;
+import com.liferay.object.field.business.type.ObjectFieldBusinessTypeRegistry;
 import com.liferay.object.field.setting.builder.ObjectFieldSettingBuilder;
 import com.liferay.object.field.util.ObjectFieldUtil;
 import com.liferay.object.model.ObjectAction;
@@ -86,6 +90,7 @@ import com.liferay.object.test.util.ObjectRelationshipTestUtil;
 import com.liferay.object.test.util.TreeTestUtil;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -926,7 +931,7 @@ public class ObjectActionLocalServiceTest {
 				serviceContext);
 
 			_assertWebhookObjectAction(
-				null, "John", null,
+				null, "John", StringPool.BLANK,
 				ObjectActionTriggerConstants.KEY_ON_AFTER_ADD,
 				_objectDefinition, null, null, WorkflowConstants.STATUS_DRAFT);
 
@@ -1074,13 +1079,13 @@ public class ObjectActionLocalServiceTest {
 			_objectRelationshipLocalService.updateObjectRelationship(
 				objectRelationshipA_AA.getExternalReferenceCode(),
 				objectRelationshipA_AA.getObjectRelationshipId(), 0,
-				objectRelationshipA_AA.getDeletionType(), false,
+				objectRelationshipA_AA.getDeletionType(), null, false,
 				objectRelationshipA_AA.getLabelMap(), null);
 
 			_objectRelationshipLocalService.updateObjectRelationship(
 				objectRelationshipAA_AAA.getExternalReferenceCode(),
 				objectRelationshipAA_AAA.getObjectRelationshipId(), 0,
-				objectRelationshipAA_AAA.getDeletionType(), false,
+				objectRelationshipAA_AAA.getDeletionType(), null, false,
 				objectRelationshipAA_AAA.getLabelMap(), null);
 
 			_objectDefinitionLocalService.deleteObjectDefinition(
@@ -1206,7 +1211,8 @@ public class ObjectActionLocalServiceTest {
 		ObjectAction objectAction1 = _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			commerceOrderObjectDefinition.getObjectDefinitionId(), true,
-			"oldValue(\"orderStatus\") == 1", RandomTestUtil.randomString(),
+			"oldValue(\"orderStatus\") == 1",
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(),
@@ -1235,7 +1241,8 @@ public class ObjectActionLocalServiceTest {
 		ObjectAction objectAction2 = _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			commerceOrderObjectDefinition.getObjectDefinitionId(), true,
-			"orderStatus == 10", RandomTestUtil.randomString(),
+			"orderStatus == 10",
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(),
@@ -1992,7 +1999,8 @@ public class ObjectActionLocalServiceTest {
 			_objectActionLocalService.addObjectAction(
 				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 				_objectDefinition.getObjectDefinitionId(), true,
-				"equals(firstName, \"John\")", "Able Description",
+				"equals(firstName, \"John\")",
+				LocalizedMapUtil.getLocalizedMap("Able Description"),
 				LocalizedMapUtil.getLocalizedMap("Able Error Message"),
 				LocalizedMapUtil.getLocalizedMap("Able Label"), "Able",
 				ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -2421,7 +2429,8 @@ public class ObjectActionLocalServiceTest {
 		_objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			objectDefinition.getObjectDefinitionId(), true,
-			"oldValue(\"name\") == \"Paul\"", RandomTestUtil.randomString(),
+			"oldValue(\"name\") == \"Paul\"",
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(),
@@ -2523,6 +2532,83 @@ public class ObjectActionLocalServiceTest {
 
 			_objectDefinitionLocalService.deleteObjectDefinition(
 				objectDefinition);
+		}
+	}
+
+	@FeatureFlag("LPD-11388")
+	@Test
+	public void testExecuteObjectActionWithLocationObjectField()
+		throws Exception {
+
+		GeocoderResult geocoderResult = new GeocoderResult(
+			RandomTestUtil.randomString(), RandomTestUtil.randomDouble(),
+			RandomTestUtil.randomDouble());
+
+		try (SafeCloseable safeCloseable =
+				GeocoderTestUtil.swapWithSafeCloseable(
+					geocoderResult,
+					_objectFieldBusinessTypeRegistry.getObjectFieldBusinessType(
+						ObjectFieldConstants.BUSINESS_TYPE_LOCATION))) {
+
+			ObjectFieldUtil.addCustomObjectField(
+				new LocationObjectFieldBuilder(
+				).labelMap(
+					RandomTestUtil.randomLocaleStringMap()
+				).name(
+					"location"
+				).objectDefinitionId(
+					_objectDefinition.getObjectDefinitionId()
+				).userId(
+					TestPropsValues.getUserId()
+				).build());
+
+			_objectDefinition = _publishCustomObjectDefinition();
+
+			String address = RandomTestUtil.randomString();
+
+			ObjectAction objectAction = _addObjectAction(
+				StringPool.BLANK,
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				RandomTestUtil.randomString(),
+				ObjectActionExecutorConstants.KEY_UPDATE_OBJECT_ENTRY,
+				ObjectActionTriggerConstants.KEY_ON_AFTER_ADD,
+				UnicodePropertiesBuilder.put(
+					"objectDefinitionId",
+					_objectDefinition.getObjectDefinitionId()
+				).put(
+					"predefinedValues",
+					JSONUtil.putAll(
+						JSONUtil.put(
+							"inputAsValue", true
+						).put(
+							"name", "location"
+						).put(
+							"value", address
+						)
+					).toString()
+				).build(),
+				false);
+
+			ObjectEntry objectEntry = _objectEntryLocalService.addObjectEntry(
+				0, TestPropsValues.getUserId(),
+				_objectDefinition.getObjectDefinitionId(),
+				ObjectEntryFolderConstants.
+					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+				null,
+				HashMapBuilder.<String, Serializable>put(
+					"firstName", RandomTestUtil.randomString()
+				).build(),
+				ServiceContextTestUtil.getServiceContext());
+
+			Map<String, Serializable> values = objectEntry.getValues();
+
+			Assert.assertEquals(
+				address,
+				MapUtil.getString(
+					(Map<String, Serializable>)values.get("location"),
+					"address"));
+
+			_objectActionLocalService.deleteObjectAction(objectAction);
 		}
 	}
 
@@ -2717,7 +2803,8 @@ public class ObjectActionLocalServiceTest {
 		_objectActionLocalService.updateObjectAction(
 			objectAction.getExternalReferenceCode(),
 			objectAction.getObjectActionId(), true,
-			objectAction.getConditionExpression(), StringPool.BLANK,
+			objectAction.getConditionExpression(),
+			LocalizedMapUtil.getLocalizedMap(StringPool.BLANK),
 			objectAction.getErrorMessageMap(), objectAction.getLabelMap(),
 			objectAction.getName(), objectAction.getObjectActionExecutorKey(),
 			objectAction.getObjectActionTriggerKey(), unicodeProperties);
@@ -3161,7 +3248,8 @@ public class ObjectActionLocalServiceTest {
 		ObjectAction objectAction = _objectActionLocalService.addObjectAction(
 			externalReferenceCode1, TestPropsValues.getUserId(),
 			_objectDefinition.getObjectDefinitionId(), true,
-			"equals(firstName, \"John\")", "Able Description",
+			"equals(firstName, \"John\")",
+			LocalizedMapUtil.getLocalizedMap("Able Description"),
 			LocalizedMapUtil.getLocalizedMap("Able Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Able Label"), "Able",
 			ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3174,7 +3262,8 @@ public class ObjectActionLocalServiceTest {
 			false);
 
 		_assertObjectAction(
-			true, "equals(firstName, \"John\")", "Able Description",
+			true, "equals(firstName, \"John\")",
+			LocalizedMapUtil.getLocalizedMap("Able Description"),
 			LocalizedMapUtil.getLocalizedMap("Able Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Able Label"), "Able",
 			objectAction, ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3188,7 +3277,8 @@ public class ObjectActionLocalServiceTest {
 
 		objectAction = _objectActionLocalService.updateObjectAction(
 			externalReferenceCode1, objectAction.getObjectActionId(), false,
-			"equals(firstName, \"João\")", "Baker Description",
+			"equals(firstName, \"João\")",
+			LocalizedMapUtil.getLocalizedMap("Baker Description"),
 			LocalizedMapUtil.getLocalizedMap("Baker Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Baker Label"), "Baker",
 			ObjectActionExecutorConstants.KEY_GROOVY,
@@ -3200,7 +3290,8 @@ public class ObjectActionLocalServiceTest {
 			).build());
 
 		_assertObjectAction(
-			false, "equals(firstName, \"João\")", "Baker Description",
+			false, "equals(firstName, \"João\")",
+			LocalizedMapUtil.getLocalizedMap("Baker Description"),
 			LocalizedMapUtil.getLocalizedMap("Baker Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Baker Label"), "Baker",
 			objectAction, ObjectActionExecutorConstants.KEY_GROOVY,
@@ -3216,7 +3307,8 @@ public class ObjectActionLocalServiceTest {
 
 		objectAction = _objectActionLocalService.updateObjectAction(
 			externalReferenceCode1, objectAction.getObjectActionId(), true,
-			"equals(firstName, \"John\")", "Charlie Description",
+			"equals(firstName, \"John\")",
+			LocalizedMapUtil.getLocalizedMap("Charlie Description"),
 			LocalizedMapUtil.getLocalizedMap("Charlie Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Charlie Label"), "Charlie",
 			ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3228,7 +3320,8 @@ public class ObjectActionLocalServiceTest {
 			).build());
 
 		_assertObjectAction(
-			true, "equals(firstName, \"John\")", "Charlie Description",
+			true, "equals(firstName, \"John\")",
+			LocalizedMapUtil.getLocalizedMap("Charlie Description"),
 			LocalizedMapUtil.getLocalizedMap("Charlie Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Charlie Label"), "Baker",
 			objectAction, ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3246,7 +3339,8 @@ public class ObjectActionLocalServiceTest {
 			_objectActionLocalService.addObjectAction(
 				externalReferenceCode2, TestPropsValues.getUserId(),
 				_objectDefinition.getObjectDefinitionId(), true,
-				"equals(firstName, \"John\")", "Able Description",
+				"equals(firstName, \"John\")",
+				LocalizedMapUtil.getLocalizedMap("Able Description"),
 				LocalizedMapUtil.getLocalizedMap("Able Error Message"),
 				LocalizedMapUtil.getLocalizedMap("Able Label"), "Able",
 				ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3260,7 +3354,8 @@ public class ObjectActionLocalServiceTest {
 
 		systemObjectAction = _objectActionLocalService.updateObjectAction(
 			externalReferenceCode2, systemObjectAction.getObjectActionId(),
-			false, "equals(firstName, \"João\")", "Baker Description",
+			false, "equals(firstName, \"João\")",
+			LocalizedMapUtil.getLocalizedMap("Baker Description"),
 			LocalizedMapUtil.getLocalizedMap("Baker Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Baker Label"), "Baker",
 			ObjectActionExecutorConstants.KEY_GROOVY,
@@ -3272,7 +3367,8 @@ public class ObjectActionLocalServiceTest {
 			).build());
 
 		_assertObjectAction(
-			false, "equals(firstName, \"João\")", "Baker Description",
+			false, "equals(firstName, \"João\")",
+			LocalizedMapUtil.getLocalizedMap("Baker Description"),
 			LocalizedMapUtil.getLocalizedMap("Baker Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Baker Label"), "Able",
 			systemObjectAction, ObjectActionExecutorConstants.KEY_GROOVY,
@@ -3293,7 +3389,8 @@ public class ObjectActionLocalServiceTest {
 		try {
 			systemObjectAction = _objectActionLocalService.updateObjectAction(
 				externalReferenceCode2, systemObjectAction.getObjectActionId(),
-				false, "equals(firstName, \"John\")", "Charlie Description",
+				false, "equals(firstName, \"John\")",
+				LocalizedMapUtil.getLocalizedMap("Charlie Description"),
 				LocalizedMapUtil.getLocalizedMap("Charlie Error Message"),
 				LocalizedMapUtil.getLocalizedMap("Charlie Label"), "Able",
 				ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3309,7 +3406,8 @@ public class ObjectActionLocalServiceTest {
 		}
 
 		_assertObjectAction(
-			false, "equals(firstName, \"João\")", "Baker Description",
+			false, "equals(firstName, \"João\")",
+			LocalizedMapUtil.getLocalizedMap("Baker Description"),
 			LocalizedMapUtil.getLocalizedMap("Baker Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Charlie Label"), "Able",
 			systemObjectAction, ObjectActionExecutorConstants.KEY_GROOVY,
@@ -3323,6 +3421,37 @@ public class ObjectActionLocalServiceTest {
 
 		_objectActionLocalService.deleteObjectAction(objectAction);
 		_objectActionLocalService.deleteObjectAction(systemObjectAction);
+	}
+
+	@Test
+	public void testUpdateObjectActionWithEmptyDescriptionMap()
+		throws Exception {
+
+		ObjectAction objectAction = _addObjectAction(
+			RandomTestUtil.randomString(),
+			ObjectActionExecutorConstants.KEY_WEBHOOK,
+			ObjectActionTriggerConstants.KEY_ON_AFTER_ADD,
+			UnicodePropertiesBuilder.put(
+				"secret", "0123456789"
+			).put(
+				"url", "https://onafteradd.com"
+			).build(),
+			false);
+
+		Map<Locale, String> descriptionMap = objectAction.getDescriptionMap();
+
+		objectAction = _objectActionLocalService.updateObjectAction(
+			objectAction.getExternalReferenceCode(),
+			objectAction.getObjectActionId(), objectAction.isActive(),
+			objectAction.getConditionExpression(), Collections.emptyMap(),
+			objectAction.getErrorMessageMap(), objectAction.getLabelMap(),
+			objectAction.getName(), objectAction.getObjectActionExecutorKey(),
+			objectAction.getObjectActionTriggerKey(),
+			objectAction.getParametersUnicodeProperties());
+
+		Assert.assertEquals(descriptionMap, objectAction.getDescriptionMap());
+
+		_objectActionLocalService.deleteObjectAction(objectAction);
 	}
 
 	@Rule
@@ -3433,7 +3562,7 @@ public class ObjectActionLocalServiceTest {
 		return _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			objectDefinitionId, true, StringPool.BLANK,
-			RandomTestUtil.randomString(),
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(), objectActionExecutorKey,
@@ -3450,7 +3579,8 @@ public class ObjectActionLocalServiceTest {
 		return _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			_objectDefinition.getObjectDefinitionId(), true,
-			conditionExpression, RandomTestUtil.randomString(),
+			conditionExpression,
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			labelMap, name, objectActionExecutorKey, objectActionTriggerKey,
 			unicodeProperties, system);
@@ -3464,7 +3594,7 @@ public class ObjectActionLocalServiceTest {
 		_objectActionLocalService.addObjectAction(
 			externalReferenceCode, TestPropsValues.getUserId(),
 			_objectDefinition.getObjectDefinitionId(), true, StringPool.BLANK,
-			RandomTestUtil.randomString(),
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(errorMessage),
 			LocalizedMapUtil.getLocalizedMap(label), name,
 			ObjectActionExecutorConstants.KEY_GROOVY, objectActionTriggerKey,
@@ -3579,23 +3709,16 @@ public class ObjectActionLocalServiceTest {
 	}
 
 	private void _assertObjectAction(
-		boolean active, String name, ObjectAction objectAction) {
-
-		Assert.assertEquals(active, objectAction.isActive());
-		Assert.assertEquals(name, objectAction.getName());
-	}
-
-	private void _assertObjectAction(
-		boolean active, String conditionExpression, String description,
-		Map<Locale, String> errorMessageMap, Map<Locale, String> labelMap,
-		String name, ObjectAction objectAction, String objectActionExecutorKey,
-		String objectActionTriggerKey,
+		boolean active, String conditionExpression,
+		Map<Locale, String> descriptionMap, Map<Locale, String> errorMessageMap,
+		Map<Locale, String> labelMap, String name, ObjectAction objectAction,
+		String objectActionExecutorKey, String objectActionTriggerKey,
 		UnicodeProperties parametersUnicodeProperties, int status) {
 
 		Assert.assertEquals(active, objectAction.isActive());
 		Assert.assertEquals(
 			conditionExpression, objectAction.getConditionExpression());
-		Assert.assertEquals(description, objectAction.getDescription());
+		Assert.assertEquals(descriptionMap, objectAction.getDescriptionMap());
 		Assert.assertEquals(errorMessageMap, objectAction.getErrorMessageMap());
 		Assert.assertEquals(labelMap, objectAction.getLabelMap());
 		Assert.assertEquals(name, objectAction.getName());
@@ -3607,6 +3730,13 @@ public class ObjectActionLocalServiceTest {
 			parametersUnicodeProperties,
 			objectAction.getParametersUnicodeProperties());
 		Assert.assertEquals(status, objectAction.getStatus());
+	}
+
+	private void _assertObjectAction(
+		boolean active, String name, ObjectAction objectAction) {
+
+		Assert.assertEquals(active, objectAction.isActive());
+		Assert.assertEquals(name, objectAction.getName());
 	}
 
 	private void _assertObjectAction(
@@ -4293,6 +4423,9 @@ public class ObjectActionLocalServiceTest {
 
 	@Inject
 	private ObjectEntryLocalService _objectEntryLocalService;
+
+	@Inject
+	private ObjectFieldBusinessTypeRegistry _objectFieldBusinessTypeRegistry;
 
 	@Inject
 	private ObjectFieldLocalService _objectFieldLocalService;

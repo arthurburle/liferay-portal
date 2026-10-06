@@ -1,3 +1,6 @@
+accessControl:
+    allowedCIDRs: []
+    enabled: false
 argocd:
     gateway:
         enabled: false
@@ -93,7 +96,7 @@ observability:
     namespace: observability
     parameters: []
     repoURL: oci://us-central1-docker.pkg.dev/external-assets-prd/liferay-helm-chart/observability
-    targetRevision: 1.1.1
+    targetRevision: 1.1.2
 operatorApplications:
     ackPrometheusService:
         enabled: false
@@ -186,7 +189,7 @@ operatorApplications:
                         cpu: 15m
                         memory: 128Mi
             function-tag-manager:
-                package: xpkg.upbound.io/crossplane-contrib/function-tag-manager:v0.6.0
+                package: xpkg.upbound.io/crossplane-contrib/function-tag-manager:v0.8.2
                 resources:
                     limits:
                         memory: 256Mi

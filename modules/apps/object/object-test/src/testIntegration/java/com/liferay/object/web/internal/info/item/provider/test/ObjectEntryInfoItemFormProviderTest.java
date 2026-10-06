@@ -288,7 +288,7 @@ public class ObjectEntryInfoItemFormProviderTest {
 		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.addCustomObjectDefinition(
 				null, TestPropsValues.getUserId(),
-				objectFolder.getObjectFolderId(), null, true, false, true,
+				objectFolder.getObjectFolderId(), null, null, true, false, true,
 				false, true, false, false, false, false, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionTestUtil.getRandomName(), null, null,
@@ -332,8 +332,9 @@ public class ObjectEntryInfoItemFormProviderTest {
 		throws Exception {
 
 		return _objectDefinitionLocalService.addCustomObjectDefinition(
-			null, TestPropsValues.getUserId(), 0, null, enableCategorization,
-			false, true, false, true, false, false, false, false, null,
+			null, TestPropsValues.getUserId(), 0, null, null,
+			enableCategorization, false, true, false, true, false, false, false,
+			false, null,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			ObjectDefinitionTestUtil.getRandomName(), null, null,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
@@ -601,26 +602,6 @@ public class ObjectEntryInfoItemFormProviderTest {
 				"picklistObjectFieldName"));
 	}
 
-	private void _testGetInfoFormWithoutCategorization() throws Exception {
-		_objectDefinition = _addObjectDefinition(
-			false,
-			new TextObjectFieldBuilder(
-			).labelMap(
-				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString())
-			).name(
-				"a" + RandomTestUtil.randomString()
-			).build());
-
-		_objectDefinition =
-			_objectDefinitionLocalService.publishCustomObjectDefinition(
-				TestPropsValues.getUserId(),
-				_objectDefinition.getObjectDefinitionId());
-
-		InfoForm infoForm = _getInfoForm(_objectDefinition);
-
-		Assert.assertNull(infoForm.getInfoFieldSetEntry("categorization"));
-	}
-
 	private void _testGetInfoFormWithPicklistObjectField() throws Exception {
 		_assertOptionInfoFieldTypes(
 			_childInfoForm, _listTypeEntry1.getKey(), _listTypeEntry2.getKey());
@@ -732,6 +713,26 @@ public class ObjectEntryInfoItemFormProviderTest {
 			_objectRelationship.getObjectFieldId2());
 
 		Assert.assertNull(_childInfoForm.getInfoField(objectField.getName()));
+	}
+
+	private void _testGetInfoFormWithoutCategorization() throws Exception {
+		_objectDefinition = _addObjectDefinition(
+			false,
+			new TextObjectFieldBuilder(
+			).labelMap(
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString())
+			).name(
+				"a" + RandomTestUtil.randomString()
+			).build());
+
+		_objectDefinition =
+			_objectDefinitionLocalService.publishCustomObjectDefinition(
+				TestPropsValues.getUserId(),
+				_objectDefinition.getObjectDefinitionId());
+
+		InfoForm infoForm = _getInfoForm(_objectDefinition);
+
+		Assert.assertNull(infoForm.getInfoFieldSetEntry("categorization"));
 	}
 
 	private ServiceContext _updateServiceContext(

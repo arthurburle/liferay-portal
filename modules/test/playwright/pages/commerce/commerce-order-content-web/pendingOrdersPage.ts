@@ -29,6 +29,8 @@ export class PendingOrdersPage extends CommerceDNDTablePage {
 	readonly orderItemActionsButtonEdit: Locator;
 	readonly orderItemExpandButton: (productName: string) => Locator;
 	readonly orderItemsTable: Locator;
+	readonly orderItemsTableRows: Locator;
+	readonly orderItemsTableRowWith: (text: string) => Locator;
 	readonly orderItemsTableRow: (
 		colPosition: number,
 		value: number | string,
@@ -49,6 +51,7 @@ export class PendingOrdersPage extends CommerceDNDTablePage {
 	readonly saveButton: Locator;
 	readonly skuLink: (sku: string) => Locator;
 	readonly viewButton: Locator;
+	readonly viewMenuItem: Locator;
 
 	constructor(page: Page) {
 		super(
@@ -103,6 +106,9 @@ export class PendingOrdersPage extends CommerceDNDTablePage {
 		this.orderItemsTable = page.locator(
 			'#portlet_com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet .fds table'
 		);
+		this.orderItemsTableRows = this.orderItemsTable.locator('tbody tr');
+		this.orderItemsTableRowWith = (text: string) =>
+			this.orderItemsTableRows.filter({hasText: text});
 		this.orderItemsTableRow = async (
 			colPosition: number,
 			value: number | string,
@@ -171,6 +177,10 @@ export class PendingOrdersPage extends CommerceDNDTablePage {
 		this.saveButton = page.getByRole('button', {name: 'Save'});
 		this.skuLink = (sku) => page.getByRole('link', {name: sku});
 		this.viewButton = page.getByLabel('View');
+		this.viewMenuItem = page.getByRole('menuitem', {
+			exact: true,
+			name: 'View',
+		});
 	}
 
 	async gotoOrder(siteFriendlyUrlPath: string, orderId: number) {

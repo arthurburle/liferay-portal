@@ -65,7 +65,7 @@ public class BaseMonitorTest extends com.liferay.jenkins.results.parser.Test {
 				"parameter", true, "expected.green",
 				Collections.singletonMap("expected.green", "yes"));
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 		}
@@ -150,7 +150,7 @@ public class BaseMonitorTest extends com.liferay.jenkins.results.parser.Test {
 		try {
 			_getRequiredURLParameter(url, urlPrefixes);
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 			return illegalArgumentException.getMessage();

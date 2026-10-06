@@ -13,6 +13,8 @@ AuditConfigurationDisplayContext auditConfigurationDisplayContext = (AuditConfig
 
 <aui:input disabled="<%= auditConfigurationDisplayContext.isEnabledOverridden() %>" helpMessage="<%= auditConfigurationDisplayContext.getEnabledHelpMessage() %>" name="enabled" type="checkbox" value="<%= auditConfigurationDisplayContext.isEnabled() %>" />
 
+<aui:input disabled="<%= auditConfigurationDisplayContext.isPseudonymizationEnabledOverridden() %>" helpMessage="<%= auditConfigurationDisplayContext.getPseudonymizationEnabledHelpMessage() %>" label="pseudonymization-enabled" name="pseudonymizationEnabled" type="checkbox" value="<%= auditConfigurationDisplayContext.isPseudonymizationEnabled() %>" />
+
 <h3 class="sheet-subtitle"><liferay-ui:message key="database-processor" /></h3>
 
 <aui:input disabled="<%= auditConfigurationDisplayContext.isPersistentAuditMessageProcessorEnabledOverridden() %>" helpMessage="<%= auditConfigurationDisplayContext.getPersistentAuditMessageProcessorEnabledHelpMessage() %>" label="enable-database-processor" name="persistentAuditMessageProcessorEnabled" type="checkbox" value="<%= auditConfigurationDisplayContext.isPersistentAuditMessageProcessorEnabled() %>" />
@@ -33,3 +35,34 @@ AuditConfigurationDisplayContext auditConfigurationDisplayContext = (AuditConfig
 	<aui:option label="NDJSON" selected='<%= "NDJSON".equals(auditConfigurationDisplayContext.getFileSystemAuditMessageProcessorOutputFormat()) %>' value="NDJSON" />
 	<aui:option label="CSV" selected='<%= "CSV".equals(auditConfigurationDisplayContext.getFileSystemAuditMessageProcessorOutputFormat()) %>' value="CSV" />
 </aui:select>
+
+<aui:script>
+	(function () {
+		const form = document.getElementById('<portlet:namespace />fm');
+
+		const pseudonymizationEnabledCheckbox = document.getElementById(
+			'<portlet:namespace />pseudonymizationEnabled'
+		);
+
+		form.addEventListener('submit', (event) => {
+			if (
+				pseudonymizationEnabledCheckbox &&
+				!pseudonymizationEnabledCheckbox.checked &&
+				pseudonymizationEnabledCheckbox.defaultChecked
+			) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+
+				Liferay.Util.openConfirmModal({
+					message:
+						'<%= UnicodeLanguageUtil.get(request, "disable-pseudonymization-warning") %>',
+					onConfirm: (isConfirmed) => {
+						if (isConfirmed) {
+							submitForm(form);
+						}
+					},
+				});
+			}
+		});
+	})();
+</aui:script>

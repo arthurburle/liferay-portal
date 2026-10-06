@@ -48,12 +48,23 @@ export class RecycleBinPage {
 	}
 
 	async delete(assetName: string) {
+		const rows = this._row(assetName);
+
+		const rowCount = await rows.count();
+
 		await this._openRowAction(assetName, 'Delete');
 
 		await this.page
 			.getByRole('dialog')
 			.getByRole('button', {exact: true, name: 'Delete'})
 			.click();
+
+		// Wait for the deletion to complete before returning, otherwise a
+		// following row action opens its menu against a list that is still
+		// re-rendering. Rows are matched on a substring, so wait for one
+		// fewer match rather than for none
+
+		await expect(rows).toHaveCount(rowCount - 1);
 	}
 
 	async goto(siteUrl?: Site['friendlyUrlPath']) {
@@ -183,6 +194,6 @@ export class RecycleBinPage {
 			await expect(menuItem).toBeVisible({timeout: 2000});
 		}).toPass();
 
-		await menuItem.click();
+		await menuItem.click({timeout: 2000});
 	}
 }

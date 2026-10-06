@@ -53,6 +53,7 @@ EqualClauseIfStatementsCheck | [Styling](styling_checks.md#styling-checks) | Fin
 [ExceptionMessageCheck](check/message_check.md#messagecheck) | [Styling](styling_checks.md#styling-checks) | Validates messages that are passed to exceptions. |
 ExceptionPrintStackTraceCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Avoid using printStackTrace. |
 ExceptionVariableNameCheck | [Naming Conventions](naming_conventions_checks.md#naming-conventions-checks) | Validates variable names that have type `*Exception`. |
+FIPSTLSVerificationCheck | [Security](security_checks.md#security-checks) | Finds outbound TLS verification bypasses that are not guarded by `PropsValues.FIPS_ENABLED`, see LPD-93649. |
 FactoryCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds cases where `*Factory` should be used when creating new instances of an object. |
 [FetchContractCatchCheck](check/fetch_contract_catch_check.md#fetchcontractcatchcheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds code blocks that use `try-catch` to handle `NoSuch*Exception` or `PortalException` during entity lookups, which should be replaced by `fetch*` methods. |
 FilterStringWhitespaceCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds missing and unnecessary whitespace in the value of the filter string in `ServiceTrackerFactory.open` or `WaiterUtil.waitForFilter`. |
@@ -287,6 +288,7 @@ ResourceTestInjectionCheck | [Bug Prevention](bug_prevention_checks.md#bug-preve
 ReturnVariableDeclarationAsUsedCheck | [Miscellaneous](miscellaneous_checks.md#miscellaneous-checks) | Finds cases where a variable declaration should be moved. |
 SafeCloseableMissingCloseCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds missing `close()` calls for `SafeCloseable` instances. |
 SealedAndNonsealedModifierCheck | [Performance](performance_checks.md#performance-checks) | Finds usage of `sealed` and `non-sealed`. |
+SecretComparisonCheck | [Security](security_checks.md#security-checks) | Finds secrets compared with a method that returns at the first differing byte. |
 SelfReferenceCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds cases of unnecessary reference to its own class. |
 SemiColonCheck | [Styling](styling_checks.md#styling-checks) | Finds cases of unnecessary semicolon. |
 [ServiceComponentRuntimeCheck](check/service_component_runtime_check.md#servicecomponentruntimecheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Checks `ServiceComponentRuntime` usage in test classes. |
@@ -311,6 +313,7 @@ TestClassCheck | [Naming Conventions](naming_conventions_checks.md#naming-conven
 TestClassDBConnectionCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds cases of incorrect use of database connection. |
 TestClassHardcodedPortCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Checks usages of `PortalUtil.getPortalServerPort()` in test classes. |
 TestClassMissingLiferayUnitTestRuleCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Finds missing LiferayUnitTestRule. |
+[TestClassStaticInitializerCheck](check/test_class_static_initializer_check.md#testclassstaticinitializercheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Checks that static initializers of Arquillian tests do not call portal test utilities and service methods. |
 TestClassStaticVariableCheck | [Performance](performance_checks.md#performance-checks) | Finds unnecessary static modifiers in test classes. |
 TextBlockCheck | [Styling](styling_checks.md#styling-checks) | Finds usage of text block. |
 [ThreadContextClassLoaderCheck](check/thread_context_class_loader_check.md#threadcontextclassloadercheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | Checks usage of `Thread.setContextClassLoader`. |

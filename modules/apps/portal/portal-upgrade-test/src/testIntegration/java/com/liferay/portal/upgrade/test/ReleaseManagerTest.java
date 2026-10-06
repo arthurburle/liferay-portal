@@ -6,11 +6,13 @@
 package com.liferay.portal.upgrade.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.model.ReleaseConstants;
 import com.liferay.portal.kernel.service.ReleaseLocalService;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.util.PropsValuesTestUtil;
 import com.liferay.portal.kernel.upgrade.ReleaseManager;
 import com.liferay.portal.kernel.upgrade.UpgradeException;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -18,6 +20,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.version.Version;
 import com.liferay.portal.test.log.LogCapture;
+import com.liferay.portal.test.log.LogEntry;
 import com.liferay.portal.test.log.LoggerTestUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -26,6 +29,8 @@ import com.liferay.portal.upgrade.registry.UpgradeStepRegistrator;
 import com.liferay.portal.upgrade.release.SchemaCreator;
 
 import java.sql.Connection;
+
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -141,21 +146,49 @@ public class ReleaseManagerTest {
 
 		Bundle bundle = FrameworkUtil.getBundle(ReleaseManagerTest.class);
 
-		BundleContext bundleContext = bundle.getBundleContext();
+		String bundleSymbolicName = bundle.getSymbolicName();
 
-		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+		_registerFailingUpgradeStepRegistrator(bundle);
+
+		_assertFailedStatus(bundleSymbolicName, _releaseManager);
+
+		Release release = _releaseLocalService.addRelease(
+			bundleSymbolicName, "1.0.0");
+
+		try (SafeCloseable safeCloseable =
+				PropsValuesTestUtil.swapWithSafeCloseable(
+					"UPGRADE_DATABASE_AUTO_RUN", false, false);
+			LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
 				"com.liferay.portal.upgrade.internal.executor.UpgradeExecutor",
-				LoggerTestUtil.OFF)) {
+				LoggerTestUtil.ERROR)) {
 
-			_serviceRegistration = bundleContext.registerService(
-				UpgradeStepRegistrator.class,
-				registry -> {
-					throw new IllegalStateException();
-				},
-				null);
+			_registerFailingUpgradeStepRegistrator(bundle);
+
+			Assert.assertFalse(
+				Validator.isBlank(_releaseManager.getShortStatusMessage(true)));
+
+			_registerFailingUpgradeStepRegistrator(bundle);
+
+			Assert.assertEquals("failure", _releaseManager.getStatus());
+
+			_registerFailingUpgradeStepRegistrator(bundle);
+
+			String statusMessage = _releaseManager.getStatusMessage(false);
+
+			Assert.assertTrue(
+				statusMessage,
+				statusMessage.contains(
+					"The upgrade of module " + bundleSymbolicName + " failed"));
+
+			Assert.assertEquals("failure", _releaseManager.getStatus());
+
+			List<LogEntry> logEntries = logCapture.getLogEntries();
+
+			Assert.assertEquals(logEntries.toString(), 3, logEntries.size());
 		}
-
-		_assertFailedStatus(bundle.getSymbolicName(), _releaseManager);
+		finally {
+			_releaseLocalService.deleteRelease(release);
+		}
 	}
 
 	@Test
@@ -358,6 +391,26 @@ public class ReleaseManagerTest {
 						return "1.0.0";
 					}
 
+				},
+				null);
+		}
+	}
+
+	private void _registerFailingUpgradeStepRegistrator(Bundle bundle) {
+		if (_serviceRegistration != null) {
+			_serviceRegistration.unregister();
+		}
+
+		BundleContext bundleContext = bundle.getBundleContext();
+
+		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+				"com.liferay.portal.upgrade.internal.executor.UpgradeExecutor",
+				LoggerTestUtil.OFF)) {
+
+			_serviceRegistration = bundleContext.registerService(
+				UpgradeStepRegistrator.class,
+				upgradeStepRegistry -> {
+					throw new IllegalStateException();
 				},
 				null);
 		}

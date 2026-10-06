@@ -10,7 +10,7 @@
  */
 
 module.exports = {
-	hash: '66e03a0a77fd73172db309bb2a59b183ced2ff83850c339a5a9a4750fef881e5',
+	hash: '5ab01b2e0a33ddeeafb12cd3a7a371b58f6d39edfbbe2b3f90ba96c87d9c74c1',
 	imports: {
 		'@liferay/accessibility-menu-web': [],
 		'@liferay/accessibility-settings-state-web': [],
@@ -64,6 +64,7 @@ module.exports = {
 		'@liferay/configuration-admin-web': [],
 		'@liferay/content-dashboard-document-library-impl': [],
 		'@liferay/content-dashboard-web': [],
+		'@liferay/content-marketing-platform-web': [],
 		'@liferay/content-site-generator-web': [],
 		'@liferay/cookies-banner-web': [],
 		'@liferay/cookies-sample-web': [],
@@ -97,6 +98,7 @@ module.exports = {
 		'@liferay/frontend-editor-ckeditor5-sample-web': [],
 		'@liferay/frontend-icons-web': [],
 		'@liferay/frontend-js-audiences-web': ['./custom-attributes'],
+		'@liferay/frontend-js-aui-sample-web': [],
 		'@liferay/frontend-js-bootstrap-support-web': [],
 		'@liferay/frontend-js-charts-sample-web': [],
 		'@liferay/frontend-js-charts-web': [],
@@ -272,7 +274,6 @@ module.exports = {
 		'@liferay/saved-content-web': [],
 		'@liferay/scim-configuration-web': [],
 		'@liferay/search-experiences-web': [],
-		'@liferay/site-cmp-site-initializer': [],
 		'@liferay/site-cms-site-initializer': [],
 		'@liferay/site-cms-standalone-site-initializer': [],
 		'@liferay/site-dsr-site-initializer': [],
@@ -434,7 +435,7 @@ module.exports = {
 		'frontend-js-spa-web': [],
 		'frontend-js-svg4everybody-web': [],
 		'frontend-js-tooltip-support-web': [],
-		'frontend-js-web': ['./legacy'],
+		'frontend-js-web': ['./auto_fields', './legacy'],
 		'frontend-taglib-clay': [],
 		'frontend-taglib-clay-sample-web': [],
 		'frontend-taglib-clay-test-alert-toast-sample-web': [],

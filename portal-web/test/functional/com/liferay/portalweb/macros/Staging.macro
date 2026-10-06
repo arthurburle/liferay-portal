@@ -819,8 +819,7 @@ definition {
 
 	@summary = "Default summary"
 	macro enableDeleteApplicationDataBeforeImport(navigate = null) {
-		ApplicationsMenu.gotoPortlet(
-			category = "Configuration",
+		ApplicationsMenu.gotoRootPortlet(
 			panel = "Control Panel",
 			portlet = "Instance Settings");
 
@@ -854,6 +853,11 @@ definition {
 		PagesAdmin.viewPageItemPresent(
 			pageName = ${pageName},
 			privacy = ${privacy});
+	}
+
+	@summary = "Default summary"
+	macro enablePageVariationsFeatureFlag() {
+		PagesAdmin.enableDeprecationFeatureFlag(featureFlagName = "Staging Page Variations");
 	}
 
 	@summary = "Default summary"

@@ -31,6 +31,7 @@ import com.liferay.jenkins.results.parser.WorkspaceGitRepository;
 import com.liferay.jenkins.results.parser.job.property.JobProperty;
 import com.liferay.jenkins.results.parser.job.property.JobPropertyFactory;
 import com.liferay.jenkins.results.parser.persistent.resource.PersistentResource;
+import com.liferay.jenkins.results.parser.test.clazz.JSUnitJUnitTestClass;
 import com.liferay.jenkins.results.parser.test.clazz.TestClass;
 import com.liferay.jenkins.results.parser.test.clazz.TestClassMethod;
 import com.liferay.jenkins.results.parser.test.clazz.group.AxisTestClassGroup;
@@ -39,6 +40,7 @@ import com.liferay.jenkins.results.parser.test.clazz.group.JSUnitAxisTestClassGr
 import com.liferay.jenkins.results.parser.test.clazz.group.JUnitAxisTestClassGroup;
 import com.liferay.jenkins.results.parser.test.clazz.group.ModulesAxisTestClassGroup;
 import com.liferay.jenkins.results.parser.test.clazz.group.PlaywrightAxisTestClassGroup;
+import com.liferay.jenkins.results.parser.test.clazz.group.WorkspacesCompileAxisTestClassGroup;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,6 +58,7 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1032,6 +1035,26 @@ public class TestrayImporter {
 			throw new RuntimeException(timeoutException);
 		}
 
+		int failedTaskCount = parallelExecutor.getFailedTaskCount();
+
+		if (failedTaskCount > 0) {
+			System.out.println(
+				JenkinsResultsParserUtil.combine(
+					"Unable to record ", String.valueOf(failedTaskCount),
+					" of ", String.valueOf(callables.size()), " Testray axes"));
+		}
+
+		int uncreatedTestrayCaseResultsCount =
+			_uncreatedTestrayCaseResultsCount.get();
+
+		if (uncreatedTestrayCaseResultsCount > 0) {
+			System.out.println(
+				JenkinsResultsParserUtil.combine(
+					"Unable to create ",
+					String.valueOf(uncreatedTestrayCaseResultsCount), " of ",
+					String.valueOf(callables.size()), " Testray case results"));
+		}
+
 		List<Long> testrayBuildIds = new ArrayList<>();
 
 		for (TestrayBuild testrayBuild : _testrayBuilds.values()) {
@@ -1552,6 +1575,21 @@ public class TestrayImporter {
 		return null;
 	}
 
+	private boolean _isTestClassFileReported(TestClass testClass) {
+		if (!(testClass instanceof JSUnitJUnitTestClass)) {
+			return false;
+		}
+
+		JSUnitJUnitTestClass jsUnitJUnitTestClass =
+			(JSUnitJUnitTestClass)testClass;
+
+		if (!jsUnitJUnitTestClass.isTestClassFileReported()) {
+			return false;
+		}
+
+		return testClass.hasTestClassMethods();
+	}
+
 	private TestrayCaseResult _recordAppServerTestrayCaseResult(
 		Job job, PersistentResource.Type persistentResourceType,
 		File testBaseDir, TestrayCaseResult topLevelTestrayCaseResult) {
@@ -1650,12 +1688,17 @@ public class TestrayImporter {
 
 		buildTestrayCaseResult.cacheTestrayCaseResultURL();
 
+		if (buildTestrayCaseResult.getTestrayCaseResultURL() == null) {
+			_uncreatedTestrayCaseResultsCount.incrementAndGet();
+		}
+
 		testrayCaseResults.add(buildTestrayCaseResult);
 
 		if (axisTestClassGroup instanceof FunctionalAxisTestClassGroup ||
 			axisTestClassGroup instanceof JSUnitAxisTestClassGroup ||
 			axisTestClassGroup instanceof JUnitAxisTestClassGroup ||
-			axisTestClassGroup instanceof ModulesAxisTestClassGroup) {
+			axisTestClassGroup instanceof ModulesAxisTestClassGroup ||
+			axisTestClassGroup instanceof WorkspacesCompileAxisTestClassGroup) {
 
 			PortalLogBatchBuildTestrayCaseResult
 				portalLogBatchBuildTestrayCaseResult =
@@ -1673,6 +1716,28 @@ public class TestrayImporter {
 			}
 
 			for (TestClass testClass : axisTestClassGroup.getTestClasses()) {
+				if (_isTestClassFileReported(testClass)) {
+					for (TestClassMethod testClassMethod :
+							testClass.getTestClassMethods()) {
+
+						TestrayCaseResult testClassMethodTestrayCaseResult =
+							TestrayFactory.newBuildTestrayCaseResult(
+								axisTestClassGroup, testClass, testClassMethod,
+								testrayBuild, _topLevelBuildReport);
+
+						testClassMethodTestrayCaseResult.
+							setParentTestrayCaseResult(buildTestrayCaseResult);
+
+						testClassMethodTestrayCaseResult.setTestrayRun(
+							testrayRun);
+
+						testrayCaseResults.add(
+							testClassMethodTestrayCaseResult);
+					}
+
+					continue;
+				}
+
 				TestrayCaseResult testClassTestrayCaseResult =
 					TestrayFactory.newBuildTestrayCaseResult(
 						axisTestClassGroup, testClass, testrayBuild,
@@ -1751,6 +1816,15 @@ public class TestrayImporter {
 					getTestrayBuild(testBaseDir), _topLevelBuildReport);
 
 		topLevelStandaloneBuildTestrayCaseResult.recordTestrayCaseResult(job);
+
+		topLevelStandaloneBuildTestrayCaseResult.cacheTestrayCaseResultURL();
+
+		URL testrayCaseResultURL =
+			topLevelStandaloneBuildTestrayCaseResult.getTestrayCaseResultURL();
+
+		if (testrayCaseResultURL == null) {
+			_uncreatedTestrayCaseResultsCount.incrementAndGet();
+		}
 
 		return topLevelStandaloneBuildTestrayCaseResult;
 	}
@@ -2240,6 +2314,8 @@ public class TestrayImporter {
 	private final Map<File, TestrayServer> _testrayServers =
 		Collections.synchronizedMap(new HashMap<File, TestrayServer>());
 	private final TopLevelBuildReport _topLevelBuildReport;
+	private final AtomicInteger _uncreatedTestrayCaseResultsCount =
+		new AtomicInteger();
 	private final List<Workspace> _workspaces;
 
 }

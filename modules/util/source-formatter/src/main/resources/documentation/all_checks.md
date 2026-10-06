@@ -95,6 +95,7 @@ EqualClauseIfStatementsCheck | [Styling](styling_checks.md#styling-checks) | .ja
 [ExceptionMessageCheck](check/message_check.md#messagecheck) | [Styling](styling_checks.md#styling-checks) | .java, .jsp, .jspf, .jspx, .tag, .tpl, or .vm | Validates messages that are passed to exceptions. |
 ExceptionPrintStackTraceCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Avoid using printStackTrace. |
 ExceptionVariableNameCheck | [Naming Conventions](naming_conventions_checks.md#naming-conventions-checks) | .java | Validates variable names that have type `*Exception`. |
+FIPSTLSVerificationCheck | [Security](security_checks.md#security-checks) | .java | Finds outbound TLS verification bypasses that are not guarded by `PropsValues.FIPS_ENABLED`, see LPD-93649. |
 FTLEmptyLinesCheck | [Styling](styling_checks.md#styling-checks) | .ftl | Finds missing and unnecessary empty lines. |
 [FTLIfStatementCheck](check/if_statement_check.md#ifstatementcheck) | [Styling](styling_checks.md#styling-checks) | .ftl | Finds incorrect use of parentheses in statement. |
 FTLImportsCheck | [Styling](styling_checks.md#styling-checks) | .ftl | Sorts and groups imports in `.ftl` files. |
@@ -511,6 +512,7 @@ SQLEmptyLinesCheck | [Styling](styling_checks.md#styling-checks) | .sql | Finds 
 SQLStylingCheck | [Styling](styling_checks.md#styling-checks) | .sql | Applies rules to enforce consistency in code style. |
 SafeCloseableMissingCloseCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Finds missing `close()` calls for `SafeCloseable` instances. |
 SealedAndNonsealedModifierCheck | [Performance](performance_checks.md#performance-checks) | .java | Finds usage of `sealed` and `non-sealed`. |
+SecretComparisonCheck | [Security](security_checks.md#security-checks) | .java | Finds secrets compared with a method that returns at the first differing byte. |
 SelfReferenceCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Finds cases of unnecessary reference to its own class. |
 SemiColonCheck | [Styling](styling_checks.md#styling-checks) | .java, .jsp, .jspf, .jspx, .tag, .tpl, or .vm | Finds cases of unnecessary semicolon. |
 [ServiceComponentRuntimeCheck](check/service_component_runtime_check.md#servicecomponentruntimecheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Checks `ServiceComponentRuntime` usage in test classes. |
@@ -546,6 +548,7 @@ TestClassCheck | [Naming Conventions](naming_conventions_checks.md#naming-conven
 TestClassDBConnectionCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Finds cases of incorrect use of database connection. |
 TestClassHardcodedPortCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Checks usages of `PortalUtil.getPortalServerPort()` in test classes. |
 TestClassMissingLiferayUnitTestRuleCheck | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Finds missing LiferayUnitTestRule. |
+[TestClassStaticInitializerCheck](check/test_class_static_initializer_check.md#testclassstaticinitializercheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Checks that static initializers of Arquillian tests do not call portal test utilities and service methods. |
 TestClassStaticVariableCheck | [Performance](performance_checks.md#performance-checks) | .java | Finds unnecessary static modifiers in test classes. |
 TextBlockCheck | [Styling](styling_checks.md#styling-checks) | .java | Finds usage of text block. |
 [ThreadContextClassLoaderCheck](check/thread_context_class_loader_check.md#threadcontextclassloadercheck) | [Bug Prevention](bug_prevention_checks.md#bug-prevention-checks) | .java | Checks usage of `Thread.setContextClassLoader`. |

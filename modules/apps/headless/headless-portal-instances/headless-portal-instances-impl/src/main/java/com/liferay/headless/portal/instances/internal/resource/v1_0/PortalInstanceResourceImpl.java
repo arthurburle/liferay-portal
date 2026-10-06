@@ -7,16 +7,13 @@ package com.liferay.headless.portal.instances.internal.resource.v1_0;
 
 import com.liferay.headless.portal.instances.dto.v1_0.Admin;
 import com.liferay.headless.portal.instances.dto.v1_0.PortalInstance;
-import com.liferay.headless.portal.instances.dto.v1_0.PortalInstanceCopy;
-import com.liferay.headless.portal.instances.dto.v1_0.PortalInstanceExport;
-import com.liferay.headless.portal.instances.dto.v1_0.PortalInstanceImport;
+import com.liferay.headless.portal.instances.internal.notifications.PortalInstanceNotificationUtil;
 import com.liferay.headless.portal.instances.resource.v1_0.PortalInstanceResource;
-import com.liferay.portal.instances.exporter.PortalInstanceExporter;
+import com.liferay.portal.instances.constants.PortalInstancesNotificationConstants;
+import com.liferay.portal.kernel.exception.ContactNameException;
 import com.liferay.portal.kernel.exception.UserEmailAddressException;
-import com.liferay.portal.kernel.exception.UserScreenNameException;
 import com.liferay.portal.kernel.instance.PortalInstancePool;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.security.auth.EmailAddressValidator;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
@@ -28,8 +25,6 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.auth.EmailAddressValidatorFactory;
 import com.liferay.portal.util.PortalInstances;
 import com.liferay.portal.vulcan.pagination.Page;
-
-import jakarta.ws.rs.BadRequestException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +49,10 @@ public class PortalInstanceResourceImpl extends BasePortalInstanceResourceImpl {
 		Company company = _companyService.getCompanyByWebId(portalInstanceId);
 
 		_companyService.deleteCompany(company.getCompanyId());
+
+		_sendUserNotificationEvent(
+			PortalInstancesNotificationConstants.OPERATION_TYPE_DELETE,
+			portalInstanceId);
 	}
 
 	@Override
@@ -115,152 +114,13 @@ public class PortalInstanceResourceImpl extends BasePortalInstanceResourceImpl {
 
 		_checkPermission();
 
-		Admin admin = portalInstance.getAdmin();
+		PortalInstance addedPortalInstance = _addPortalInstance(portalInstance);
 
-		Long companyId = portalInstance.getCompanyId();
+		_sendUserNotificationEvent(
+			PortalInstancesNotificationConstants.OPERATION_TYPE_ADD,
+			portalInstance.getPortalInstanceId());
 
-		if (companyId == null) {
-			companyId = 0L;
-		}
-
-		long finalCompanyId = companyId;
-
-		if (admin != null) {
-			_validateAdmin(admin);
-
-			return _toPortalInstance(
-				PortalInstances.addCompany(
-					portalInstance.getSiteInitializerKey(),
-					() -> _companyService.addCompany(
-						finalCompanyId, portalInstance.getPortalInstanceId(),
-						portalInstance.getVirtualHost(),
-						portalInstance.getDomain(), 0, true, null, null,
-						admin.getEmailAddress(), admin.getGivenName(), null,
-						admin.getFamilyName())));
-		}
-
-		return _toPortalInstance(
-			PortalInstances.addCompany(
-				portalInstance.getSiteInitializerKey(),
-				() -> _companyService.addCompany(
-					finalCompanyId, portalInstance.getPortalInstanceId(),
-					portalInstance.getVirtualHost(), portalInstance.getDomain(),
-					0, true)));
-	}
-
-	@Override
-	public PortalInstance postPortalInstanceCopy(
-			String portalInstanceId, PortalInstanceCopy portalInstanceCopy)
-		throws Exception {
-
-		_checkPermission();
-
-		if (portalInstanceCopy == null) {
-			throw new BadRequestException("Copy configuration is required");
-		}
-
-		if (Validator.isNull(portalInstanceCopy.getName())) {
-			throw new BadRequestException("Name is required");
-		}
-
-		if (Validator.isNull(portalInstanceCopy.getVirtualHost())) {
-			throw new BadRequestException("Virtual host is required");
-		}
-
-		if (Validator.isNull(portalInstanceCopy.getWebId())) {
-			throw new BadRequestException("Web ID is required");
-		}
-
-		Company fromCompany = _companyService.getCompanyByWebId(
-			portalInstanceId);
-
-		Long toCompanyId = portalInstanceCopy.getDestinationCompanyId();
-
-		if ((toCompanyId != null) && (toCompanyId <= 0)) {
-			toCompanyId = null;
-		}
-
-		try {
-			return _toPortalInstance(
-				_companyService.copyDBPartitionCompany(
-					fromCompany.getCompanyId(), toCompanyId,
-					portalInstanceCopy.getName(),
-					portalInstanceCopy.getVirtualHost(),
-					portalInstanceCopy.getWebId()));
-		}
-		catch (Exception exception) {
-			_log.error(
-				"Unable to copy portal instance " + portalInstanceId,
-				exception);
-
-			throw exception;
-		}
-	}
-
-	@Override
-	public PortalInstanceExport postPortalInstanceExport(
-			String portalInstanceId)
-		throws Exception {
-
-		_checkPermission();
-
-		try {
-			PortalInstanceExport portalInstanceExport =
-				new PortalInstanceExport();
-
-			Company company = _companyService.getCompanyByWebId(
-				portalInstanceId);
-
-			String exportedPartitionName =
-				_portalInstanceExporter.exportPortalInstance(
-					company.getCompanyId());
-
-			portalInstanceExport.setExportedPartitionName(
-				() -> exportedPartitionName);
-
-			portalInstanceExport.setSourceCompanyId(company::getCompanyId);
-
-			return portalInstanceExport;
-		}
-		catch (Exception exception) {
-			_log.error(
-				"Unable to export portal instance " + portalInstanceId,
-				exception);
-
-			throw exception;
-		}
-	}
-
-	@Override
-	public PortalInstance postPortalInstanceImport(
-			PortalInstanceImport portalInstanceImport)
-		throws Exception {
-
-		_checkPermission();
-
-		if (portalInstanceImport == null) {
-			throw new BadRequestException("Import configuration is required");
-		}
-
-		String schemaName = portalInstanceImport.getSchemaName();
-
-		if (Validator.isNull(schemaName)) {
-			throw new BadRequestException("Schema name is required");
-		}
-
-		try {
-			return _toPortalInstance(
-				_companyService.addDBPartitionCompany(
-					schemaName, portalInstanceImport.getName(),
-					portalInstanceImport.getVirtualHost(),
-					portalInstanceImport.getWebId()));
-		}
-		catch (Exception exception) {
-			_log.error(
-				"Unable to import portal instance " + schemaName, exception);
-
-			throw exception;
-		}
+		return addedPortalInstance;
 	}
 
 	@Override
@@ -289,6 +149,47 @@ public class PortalInstanceResourceImpl extends BasePortalInstanceResourceImpl {
 			company.getMx(), company.getMaxUsers(), false);
 	}
 
+	private PortalInstance _addPortalInstance(PortalInstance portalInstance)
+		throws Exception {
+
+		Admin admin = portalInstance.getAdmin();
+
+		Long companyId = portalInstance.getCompanyId();
+
+		if (companyId == null) {
+			companyId = 0L;
+		}
+
+		long finalCompanyId = companyId;
+
+		boolean active = GetterUtil.getBoolean(
+			portalInstance.getActive(), true);
+		int maxUsers = GetterUtil.getInteger(portalInstance.getMaxUsers());
+
+		if (admin != null) {
+			_validateAdmin(admin);
+
+			return _toPortalInstance(
+				PortalInstances.addCompany(
+					portalInstance.getSiteInitializerKey(),
+					() -> _companyService.addCompany(
+						finalCompanyId, portalInstance.getPortalInstanceId(),
+						portalInstance.getVirtualHost(),
+						portalInstance.getDomain(), maxUsers, active,
+						admin.getPassword(), admin.getScreenName(),
+						admin.getEmailAddress(), admin.getGivenName(),
+						admin.getMiddleName(), admin.getFamilyName())));
+		}
+
+		return _toPortalInstance(
+			PortalInstances.addCompany(
+				portalInstance.getSiteInitializerKey(),
+				() -> _companyService.addCompany(
+					finalCompanyId, portalInstance.getPortalInstanceId(),
+					portalInstance.getVirtualHost(), portalInstance.getDomain(),
+					maxUsers, active)));
+	}
+
 	private void _checkPermission() throws Exception {
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
@@ -298,12 +199,27 @@ public class PortalInstanceResourceImpl extends BasePortalInstanceResourceImpl {
 		}
 	}
 
+	private void _sendUserNotificationEvent(
+		String operationType, String portalInstanceId) {
+
+		PortalInstanceNotificationUtil.sendUserNotificationEvent(
+			contextUser.getUserId(),
+			JSONUtil.put(
+				"operationType", operationType
+			).put(
+				"portalInstanceId", portalInstanceId
+			).put(
+				"status", PortalInstancesNotificationConstants.STATUS_SUCCESS
+			));
+	}
+
 	private PortalInstance _toPortalInstance(Company company) {
 		return new PortalInstance() {
 			{
 				setActive(company::isActive);
 				setCompanyId(company::getCompanyId);
 				setDomain(company::getMx);
+				setMaxUsers(company::getMaxUsers);
 				setPortalInstanceId(company::getWebId);
 				setVirtualHost(company::getVirtualHostname);
 			}
@@ -311,11 +227,16 @@ public class PortalInstanceResourceImpl extends BasePortalInstanceResourceImpl {
 	}
 
 	private void _validateAdmin(Admin admin) throws Exception {
-		if (Validator.isNull(admin.getEmailAddress()) ||
-			Validator.isNull(admin.getFamilyName()) ||
-			Validator.isNull(admin.getGivenName())) {
+		if (Validator.isNull(admin.getEmailAddress())) {
+			throw new UserEmailAddressException.MustNotBeNull();
+		}
 
-			throw new UserScreenNameException.MustNotBeNull();
+		if (Validator.isNull(admin.getFamilyName())) {
+			throw new ContactNameException.MustHaveLastName();
+		}
+
+		if (Validator.isNull(admin.getGivenName())) {
+			throw new ContactNameException.MustHaveFirstName();
 		}
 
 		EmailAddressValidator emailAddressValidator =
@@ -327,13 +248,7 @@ public class PortalInstanceResourceImpl extends BasePortalInstanceResourceImpl {
 		}
 	}
 
-	private static final Log _log = LogFactoryUtil.getLog(
-		PortalInstanceResourceImpl.class);
-
 	@Reference
 	private CompanyService _companyService;
-
-	@Reference
-	private PortalInstanceExporter _portalInstanceExporter;
 
 }

@@ -336,6 +336,32 @@ public class JournalTransformerTest {
 	}
 
 	@Test
+	public void testLocalTransformerWithPartialTranslation() throws Exception {
+		Assert.assertEquals(
+			"2022-11-26",
+			_transformMethod.invoke(
+				_journalTransformer, _journalArticle, null, _journalHelper,
+				LocaleUtil.toLanguageId(LocaleUtil.BRAZIL),
+				_layoutDisplayPageProviderRegistry,
+				ListUtil.filter(
+					_serviceTrackerList.toList(),
+					TransformerListener::isEnabled),
+				null, false, "${FieldsGroup19507604.birthday.getData()}", null,
+				Constants.VIEW));
+		Assert.assertEquals(
+			"English",
+			_transformMethod.invoke(
+				_journalTransformer, _journalArticle, null, _journalHelper,
+				LocaleUtil.toLanguageId(LocaleUtil.BRAZIL),
+				_layoutDisplayPageProviderRegistry,
+				ListUtil.filter(
+					_serviceTrackerList.toList(),
+					TransformerListener::isEnabled),
+				null, false, "${FieldsGroup19507604.language.getData()}", null,
+				Constants.VIEW));
+	}
+
+	@Test
 	public void testLocaleTransformerListener() throws Exception {
 		Assert.assertEquals(
 			"Joe Bloggs",
@@ -397,32 +423,6 @@ public class JournalTransformerTest {
 					_serviceTrackerList.toList(),
 					TransformerListener::isEnabled),
 				null, false, "${FieldsGroup19507604.birthday.getData()}", null,
-				Constants.VIEW));
-	}
-
-	@Test
-	public void testLocalTransformerWithPartialTranslation() throws Exception {
-		Assert.assertEquals(
-			"2022-11-26",
-			_transformMethod.invoke(
-				_journalTransformer, _journalArticle, null, _journalHelper,
-				LocaleUtil.toLanguageId(LocaleUtil.BRAZIL),
-				_layoutDisplayPageProviderRegistry,
-				ListUtil.filter(
-					_serviceTrackerList.toList(),
-					TransformerListener::isEnabled),
-				null, false, "${FieldsGroup19507604.birthday.getData()}", null,
-				Constants.VIEW));
-		Assert.assertEquals(
-			"English",
-			_transformMethod.invoke(
-				_journalTransformer, _journalArticle, null, _journalHelper,
-				LocaleUtil.toLanguageId(LocaleUtil.BRAZIL),
-				_layoutDisplayPageProviderRegistry,
-				ListUtil.filter(
-					_serviceTrackerList.toList(),
-					TransformerListener::isEnabled),
-				null, false, "${FieldsGroup19507604.language.getData()}", null,
 				Constants.VIEW));
 	}
 
@@ -719,7 +719,8 @@ public class JournalTransformerTest {
 		Assert.assertEquals(
 			StringBundler.concat(
 				"Article ", articleId,
-				" cannot include itself with DDM template ", ddmTemplateKey),
+				" cannot include itself with dynamic data mapping template ",
+				ddmTemplateKey),
 			logEntry.getMessage());
 	}
 

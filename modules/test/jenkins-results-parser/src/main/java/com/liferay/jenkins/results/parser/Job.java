@@ -69,6 +69,8 @@ public interface Job {
 
 	public DistType getDistType();
 
+	public JSONObject getJSONObject();
+
 	public Set<JenkinsCohort> getJenkinsCohorts();
 
 	public JobHistory getJobHistory();
@@ -83,8 +85,6 @@ public interface Job {
 
 	public String getJobURL(JenkinsMaster jenkinsMaster);
 
-	public JSONObject getJSONObject();
-
 	public Set<String> getNetworkNames();
 
 	public Set<String> getSegmentNames();
@@ -98,6 +98,8 @@ public interface Job {
 	public String getTestPropertiesContent();
 
 	public int getTimeoutMinutes(JenkinsMaster jenkinsMaster);
+
+	public Set<String> getWorkspaceNames();
 
 	public boolean isBuildCachingEnabled();
 

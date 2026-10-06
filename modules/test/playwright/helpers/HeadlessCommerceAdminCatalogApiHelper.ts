@@ -80,6 +80,12 @@ export type TProduct = {
 	expirationDate?: string;
 	externalReferenceCode?: string;
 	id?: number;
+	images?: Array<{
+		attachment?: string;
+		title?: {
+			[key: string]: string;
+		};
+	}>;
 	name?: {
 		[key: string]: string;
 	};
@@ -108,6 +114,9 @@ export type TProduct = {
 	};
 	skus?: TSku[];
 	tags?: [string];
+	urls?: {
+		[key: string]: string;
+	};
 	version?: number;
 };
 
@@ -158,6 +167,14 @@ type TProductSpecifications = {
 	visible?: boolean;
 };
 
+export type TProductSubscriptionConfiguration = {
+	enable?: boolean;
+	length?: number;
+	numberOfLength?: number;
+	subscriptionType?: string;
+	subscriptionTypeSettings?: {[key: string]: number};
+};
+
 export type TProductTaxConfiguration = {
 	id?: number;
 	taxCategory?: string;
@@ -173,6 +190,8 @@ type TProductVirtualSettings = {
 	termsOfUseContent?: {
 		[key: string]: string;
 	};
+	termsOfUseJournalArticleId?: number;
+	termsOfUseRequired?: boolean;
 	url?: string;
 	useSample?: boolean;
 };
@@ -193,6 +212,7 @@ type TRelatedProduct = {
 type TSku = {
 	cost: number;
 	discontinued?: boolean;
+	discontinuedDate?: string;
 	expirationDate?: string;
 	gtin?: string;
 	id?: number;
@@ -385,11 +405,19 @@ export class HeadlessCommerceAdminCatalogApiHelper {
 		);
 	}
 
-	async getProductByName(name: string) {
+	async getProductByName(
+		name: string,
+		{
+			catalogId,
+			nestedFields = 'skus',
+		}: {catalogId?: number; nestedFields?: string} = {}
+	) {
 		const {items} = await this.getProducts(
 			new URLSearchParams({
-				filter: `name eq '${name}'`,
-				nestedFields: 'skus',
+				filter: catalogId
+					? `catalogId eq ${catalogId} and name eq '${name}'`
+					: `name eq '${name}'`,
+				nestedFields,
 			})
 		);
 
@@ -491,6 +519,18 @@ export class HeadlessCommerceAdminCatalogApiHelper {
 		return this.apiHelpers.patch(
 			`${this.apiHelpers.baseUrl}${this.basePath}/productSpecifications/${id}`,
 			productSpecifications
+		);
+	}
+
+	async patchProductSubscriptionConfiguration(
+		productId: number,
+		productSubscriptionConfiguration: TProductSubscriptionConfiguration
+	) {
+		return this.apiHelpers.patch(
+			`${this.apiHelpers.baseUrl}${this.basePath}/products/${productId}/subscriptionConfiguration`,
+			{
+				...(productSubscriptionConfiguration || {}),
+			}
 		);
 	}
 

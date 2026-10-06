@@ -77,6 +77,7 @@ public class StyleBookEntryUtilTest {
 	@Test
 	public void testGetFrontendTokensValues() throws Exception {
 		_testGetFrontendTokensValuesWithCustomDefinition();
+		_testGetFrontendTokensValuesWithCustomTokenValue();
 		_testGetFrontendTokensValuesWithDefaultDefinition();
 	}
 
@@ -478,6 +479,50 @@ public class StyleBookEntryUtilTest {
 		}
 	}
 
+	private void _testGetFrontendTokensValuesWithCustomTokenValue()
+		throws Exception {
+
+		FrontendTokenDefinition frontendTokenDefinition =
+			_mockFrontendTokenDefinition(_THEME_ID);
+
+		Locale locale = LocaleUtil.getDefault();
+
+		Assert.assertEquals(
+			"#CUSTOM",
+			_getFrontendTokenValue(
+				StyleBookEntryUtil.getFrontendTokensValues(
+					frontendTokenDefinition, locale,
+					_mockStyleBookEntry(
+						JSONUtil.put(
+							"custom:" + _SUCCESS_COLOR_TOKEN_NAME,
+							JSONUtil.put("value", "#CUSTOM")))),
+				_SUCCESS_COLOR_TOKEN_NAME));
+		Assert.assertEquals(
+			"#CUSTOM",
+			_getFrontendTokenValue(
+				StyleBookEntryUtil.getFrontendTokensValues(
+					frontendTokenDefinition, locale,
+					_mockStyleBookEntry(
+						JSONUtil.put(
+							_THEME_ID + ":" + _SUCCESS_COLOR_TOKEN_NAME,
+							JSONUtil.put("value", RandomTestUtil.randomString())
+						).put(
+							"custom:" + _SUCCESS_COLOR_TOKEN_NAME,
+							JSONUtil.put("value", "#CUSTOM")
+						))),
+				_SUCCESS_COLOR_TOKEN_NAME));
+		Assert.assertEquals(
+			"#THEME",
+			_getFrontendTokenValue(
+				StyleBookEntryUtil.getFrontendTokensValues(
+					frontendTokenDefinition, locale,
+					_mockStyleBookEntry(
+						JSONUtil.put(
+							_THEME_ID + ":" + _SUCCESS_COLOR_TOKEN_NAME,
+							JSONUtil.put("value", "#THEME")))),
+				_SUCCESS_COLOR_TOKEN_NAME));
+	}
+
 	private void _testGetFrontendTokensValuesWithDefaultDefinition()
 		throws Exception {
 
@@ -492,14 +537,15 @@ public class StyleBookEntryUtilTest {
 			_SUCCESS_COLOR_TOKEN_NAME,
 			_mockStyleBookEntry(JSONFactoryUtil.createJSONObject()));
 		_assertFrontendTokenValue(
-			"#34F787", frontendTokenDefinition, _SUCCESS_COLOR_TOKEN_NAME,
+			_SUCCESS_COLOR_DEFAULT_VALUE, frontendTokenDefinition,
+			_SUCCESS_COLOR_TOKEN_NAME,
 			_mockStyleBookEntry(
 				JSONUtil.put(
 					_SUCCESS_COLOR_TOKEN_NAME,
 					JSONUtil.put("value", "#34F787"))));
 
 		_assertFrontendTokenValue(
-			"#34F787", _mockFrontendTokenDefinition(null),
+			_SUCCESS_COLOR_DEFAULT_VALUE, _mockFrontendTokenDefinition(null),
 			_SUCCESS_COLOR_TOKEN_NAME,
 			_mockStyleBookEntry(
 				JSONUtil.put(

@@ -11,11 +11,9 @@ type TDiscount = {
 	couponCode?: string;
 	discountCategories?: string;
 	discountProductGroups?: string;
-	discountProducts?: [
-		{
-			productId: number | string;
-		},
-	];
+	discountProducts?: Array<{
+		productId: number | string;
+	}>;
 	id?: number;
 	level?: string;
 	limitationTimes?: number;
@@ -171,6 +169,12 @@ export class HeadlessCommerceAdminPricingApiHelper {
 		);
 	}
 
+	async getPriceListChannels(priceListId: number) {
+		return this.apiHelpers.get(
+			`${this.apiHelpers.baseUrl}${this.basePath}/price-lists/${priceListId}/price-list-channels`
+		);
+	}
+
 	async getPriceListEntries(
 		priceListId: number,
 		{pageSize = 200}: {pageSize?: number} = {}
@@ -186,6 +190,12 @@ export class HeadlessCommerceAdminPricingApiHelper {
 	) {
 		return this.apiHelpers.get(
 			`${this.apiHelpers.baseUrl}${this.basePath}/price-lists/${priceListId}/price-modifiers?pageSize=${pageSize}`
+		);
+	}
+
+	async getPriceListOrderTypes(priceListId: number) {
+		return this.apiHelpers.get(
+			`${this.apiHelpers.baseUrl}${this.basePath}/price-lists/${priceListId}/price-list-order-types`
 		);
 	}
 
@@ -220,6 +230,31 @@ export class HeadlessCommerceAdminPricingApiHelper {
 		);
 	}
 
+	async patchDiscount(discountId: number, discount: Partial<TDiscount>) {
+		return this.apiHelpers.patch(
+			`${this.apiHelpers.baseUrl}${this.basePath}/discounts/${discountId}`,
+			discount
+		);
+	}
+
+	async patchPriceModifier(
+		priceModifierId: number,
+		priceModifier: {
+			active?: boolean;
+			modifierAmount?: number;
+			modifierType?: string;
+			priceListId?: number;
+			priority?: number;
+			target?: string;
+			title?: string;
+		}
+	) {
+		return this.apiHelpers.patch(
+			`${this.apiHelpers.baseUrl}${this.basePath}/price-modifiers/${priceModifierId}`,
+			priceModifier
+		);
+	}
+
 	async patchPriceEntry(
 		priceEntryId: number,
 		priceEntry: Partial<TPriceEntry>
@@ -235,6 +270,20 @@ export class HeadlessCommerceAdminPricingApiHelper {
 			`${this.apiHelpers.baseUrl}${this.basePath}/tier-prices/${tierPriceId}`,
 			tierPrice
 		);
+	}
+
+	async postBasePriceEntries(
+		catalogId: number,
+		priceEntries: Array<{price: number; skuId: number}>
+	) {
+		const basePriceLists = await this.getBasePriceListId(catalogId);
+
+		for (const priceEntry of priceEntries) {
+			await this.postPriceEntry({
+				...priceEntry,
+				priceListId: basePriceLists.items[0].id,
+			});
+		}
 	}
 
 	async postDiscount(discount?: TDiscount) {
@@ -373,6 +422,13 @@ export class HeadlessCommerceAdminPricingApiHelper {
 		);
 	}
 
+	async postDiscountCategory(discountId: number, categoryId: number) {
+		return this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/discounts/${discountId}/discount-categories`,
+			{data: {categoryId}}
+		);
+	}
+
 	async postDiscountProductGroup(discountId: number, productGroupId: number) {
 		return this.apiHelpers.post(
 			`${this.apiHelpers.baseUrl}${this.basePath}/discounts/${discountId}/discount-product-groups`,
@@ -398,6 +454,19 @@ export class HeadlessCommerceAdminPricingApiHelper {
 			`${this.apiHelpers.baseUrl}${this.basePath}/price-lists/${priceListId}/price-modifiers`,
 			{
 				data: {active: true, ...priceModifier},
+				failOnStatusCode: true,
+			}
+		);
+	}
+
+	async postPriceModifierCategory(
+		priceModifierId: number,
+		categoryId: number
+	) {
+		return this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/price-modifiers/${priceModifierId}/price-modifier-categories`,
+			{
+				data: {categoryId, priceModifierId},
 				failOnStatusCode: true,
 			}
 		);

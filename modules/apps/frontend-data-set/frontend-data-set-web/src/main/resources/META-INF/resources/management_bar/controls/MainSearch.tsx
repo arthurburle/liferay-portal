@@ -25,6 +25,8 @@ function MainSearch({onClear}: {onClear: () => void}) {
 	const [inputValue, setInputValue] = useState(searchParam || '');
 	const [searchSuggestionsActive, setSearchSuggestionsActive] =
 		useState(false);
+	const [searchSuggestionsOpenCount, setSearchSuggestionsOpenCount] =
+		useState(0);
 
 	const inputGroupItemRef = useRef<HTMLDivElement>(null);
 
@@ -53,6 +55,12 @@ function MainSearch({onClear}: {onClear: () => void}) {
 		onSearch({query});
 	};
 
+	const doSuggestedSearch = (query: string) => {
+		cancelDebounce(debouncedSearch);
+
+		onSearch({query});
+	};
+
 	// Clicking counts as well as focusing, because an input that already holds
 	// the focus fires no focus event, and it does hold it after a search or
 	// after Escape closed the dropdown
@@ -61,6 +69,13 @@ function MainSearch({onClear}: {onClear: () => void}) {
 		if (!searchSuggestionsEnabled) {
 			return;
 		}
+
+		// The menu reads the history as it mounts, so counting the requests to
+		// open it buys each one a mount of its own and a reading of its own. The
+		// box is clickable while the menu is already open, and an item visited in
+		// between has to show up when it is.
+
+		setSearchSuggestionsOpenCount((count) => count + 1);
 
 		setSearchSuggestionsActive(true);
 	};
@@ -85,12 +100,7 @@ function MainSearch({onClear}: {onClear: () => void}) {
 						}
 
 						if (uncontrolledItems) {
-							if (query) {
-								debouncedSearch(query);
-							}
-							else {
-								cancelDebounce(debouncedSearch);
-							}
+							debouncedSearch(query);
 						}
 						else {
 							onSearch({query});
@@ -134,14 +144,18 @@ function MainSearch({onClear}: {onClear: () => void}) {
 				{searchSuggestionsActive && (
 					<SearchSuggestionsMenu
 						alignElementRef={inputGroupItemRef}
+						key={searchSuggestionsOpenCount}
 						onActiveChange={setSearchSuggestionsActive}
 						onQueryClick={(query) => {
 							setSearchSuggestionsActive(false);
 
 							setInputValue(query);
 
-							doSearch(query);
+							doSuggestedSearch(query);
 						}}
+						onVisitedItemClick={() =>
+							setSearchSuggestionsActive(false)
+						}
 						value={inputValue}
 					/>
 				)}

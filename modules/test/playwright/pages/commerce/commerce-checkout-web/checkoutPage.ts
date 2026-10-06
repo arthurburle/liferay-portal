@@ -28,6 +28,7 @@ type TAddress = {
 
 export class CheckoutPage extends CommerceDNDTablePage {
 	readonly activeCheckoutStep: Locator;
+	readonly checkoutStepLabels: Locator;
 	readonly assertDataDeliveryGroupModal: (data: string) => Locator;
 	readonly addressInput: Locator;
 	readonly cityInput: Locator;
@@ -60,13 +61,24 @@ export class CheckoutPage extends CommerceDNDTablePage {
 	readonly orderItemsTableLocator: Locator;
 	readonly orderSuccessMessage: Locator;
 	readonly noDefaultBillingAddressError: Locator;
+	readonly orderSummaryDelivery: Locator;
+	readonly orderSummaryItemCell: (
+		productName: string,
+		columnName: string
+	) => Locator;
+	readonly orderSummaryItemListPrice: (productName: string) => Locator;
+	readonly orderSummaryItemPromoPrice: (productName: string) => Locator;
+	readonly orderSummaryItemRow: (productName: string) => Locator;
+	readonly orderSummarySubtotal: Locator;
+	readonly orderSummaryPaymentMethod: Locator;
+	readonly orderSummaryTotal: Locator;
 	readonly orderSummaryTableRow: (
 		colPosition: number,
 		value: number | string,
 		strictEqual?: boolean
 	) => Promise<{column: Locator; row: Locator}>;
 	readonly page: Page;
-	readonly paymentMethodRadio: (name: string) => Locator;
+	readonly paymentMethodRadio: (name: string, exact?: boolean) => Locator;
 	readonly paymentMethodRadios: Locator;
 	readonly paymentTermLink: (label: string) => Locator;
 	readonly paymentTermOption: (label: string) => Locator;
@@ -101,6 +113,7 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		this.activeCheckoutStep = page.locator(
 			'.multi-step-item.active .multi-step-indicator-label'
 		);
+		this.checkoutStepLabels = page.locator('.multi-step-indicator-label');
 		this.addressInput = page.getByPlaceholder('Address', {exact: true});
 		this.cityInput = page.getByPlaceholder('City', {exact: true});
 		this.commerceAddressSelect = page.locator(
@@ -184,6 +197,34 @@ export class CheckoutPage extends CommerceDNDTablePage {
 			'No default billing address has been created for this account',
 			{exact: false}
 		);
+		this.orderSummaryDelivery = page.locator(
+			'.commerce-delivery .commerce-value'
+		);
+		this.orderSummaryItemRow = (productName: string) =>
+			this.orderItemsTableLocator.locator('tr').filter({
+				has: page.locator('td.lfr-product-column', {
+					hasText: productName,
+				}),
+			});
+		this.orderSummaryItemCell = (productName: string, columnName: string) =>
+			this.orderSummaryItemRow(productName).locator(
+				`td.lfr-${columnName}-column`
+			);
+		this.orderSummaryItemListPrice = (productName: string) =>
+			this.orderSummaryItemCell(productName, 'price').locator(
+				'.price-value:not(.price-value-promo)'
+			);
+		this.orderSummaryItemPromoPrice = (productName: string) =>
+			this.orderSummaryItemCell(productName, 'price').locator(
+				'.price-value-promo'
+			);
+		this.orderSummarySubtotal = page.locator(
+			'.commerce-subtotal .commerce-value'
+		);
+		this.orderSummaryPaymentMethod = page.locator('div.payment-method');
+		this.orderSummaryTotal = page.locator(
+			'.commerce-total .commerce-value'
+		);
 		this.orderSummaryTableRow = async (
 			colPosition: number,
 			value: number | string,
@@ -197,8 +238,8 @@ export class CheckoutPage extends CommerceDNDTablePage {
 			);
 		};
 		this.page = page;
-		this.paymentMethodRadio = (name: string) =>
-			page.getByRole('radio', {name});
+		this.paymentMethodRadio = (name: string, exact: boolean = false) =>
+			page.getByRole('radio', {exact, name});
 		this.paymentMethodRadios = page.locator(
 			'input[name$="commercePaymentMethodKey"]'
 		);

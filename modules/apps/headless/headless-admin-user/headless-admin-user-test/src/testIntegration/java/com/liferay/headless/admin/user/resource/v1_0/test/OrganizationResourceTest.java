@@ -22,6 +22,7 @@ import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.asset.kernel.service.AssetTagLocalService;
 import com.liferay.asset.kernel.service.AssetVocabularyLocalService;
 import com.liferay.asset.test.util.AssetTestUtil;
+import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.expando.kernel.model.ExpandoColumn;
 import com.liferay.expando.kernel.model.ExpandoColumnConstants;
@@ -43,6 +44,7 @@ import com.liferay.headless.admin.user.client.dto.v1_0.RoleBrief;
 import com.liferay.headless.admin.user.client.dto.v1_0.TaxonomyCategoryBrief;
 import com.liferay.headless.admin.user.client.dto.v1_0.TaxonomyCategoryReference;
 import com.liferay.headless.admin.user.client.dto.v1_0.WebUrl;
+import com.liferay.headless.admin.user.client.http.HttpInvoker;
 import com.liferay.headless.admin.user.client.pagination.Page;
 import com.liferay.headless.admin.user.client.pagination.Pagination;
 import com.liferay.headless.admin.user.client.permission.Permission;
@@ -91,6 +93,7 @@ import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
@@ -99,6 +102,8 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.SynchronousMailTestRule;
 import com.liferay.portal.vulcan.permission.PermissionUtil;
+
+import jakarta.ws.rs.core.Response;
 
 import java.io.InputStream;
 
@@ -431,10 +436,10 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 		super.testPostOrganization();
 
 		_testPostOrganizationBatch();
-		_testPostOrganizationWithCustomFields();
 		_testPostOrganizationWithCommentOverMaximumLength();
+		_testPostOrganizationWithCustomFields();
+		_testPostOrganizationWithImage();
 		_testPostOrganizationWithNameOverMaximumLength();
-		_testPostOrganizationWithImageExternalReferenceCode();
 	}
 
 	@Override
@@ -949,14 +954,23 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 			randomOrganization());
 	}
 
-	private FileEntry _addImageFileEntry() throws Exception {
+	private FileEntry _addImageFileEntry(boolean addPermissions)
+		throws Exception {
+
 		Company company = _companyLocalService.getCompany(
 			TestPropsValues.getCompanyId());
 
 		Group group = company.getGroup();
 
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(group.getGroupId());
+
+		serviceContext.setAddGroupPermissions(addPermissions);
+		serviceContext.setAddGuestPermissions(addPermissions);
+
 		LocalRepository localRepository =
-			RepositoryProviderUtil.getLocalRepository(group.getGroupId());
+			RepositoryProviderUtil.getLocalRepository(
+				serviceContext.getScopeGroupId());
 
 		byte[] bytes = FileUtil.getBytes(getClass(), "/images/liferay.png");
 
@@ -968,8 +982,7 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 			RandomTestUtil.randomString(), ContentTypes.IMAGE_PNG,
 			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 			StringPool.BLANK, StringPool.BLANK, inputStream, bytes.length, null,
-			null, null,
-			ServiceContextTestUtil.getServiceContext(group.getGroupId()));
+			null, null, serviceContext);
 	}
 
 	private Organization _addOrganization(
@@ -1132,79 +1145,6 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 			String.valueOf(serviceBuilderOrganization.getOrganizationId()));
 	}
 
-	private void _testGetOrganizationsPageWithFilter() throws Exception {
-		Page<Organization> page = organizationResource.getOrganizationsPage(
-			null, null, null, Pagination.of(1, 10), null);
-
-		long totalCount = page.getTotalCount();
-
-		// Sleep for 1 second to ensure that organization 1 and existing
-		// organizations are created 1 second apart
-
-		Thread.sleep(1000);
-
-		Organization organization1 = testGetOrganizationsPage_addOrganization(
-			randomOrganization());
-
-		// Sleep for 1 second to ensure that organization 1 and organization 2
-		// are created 1 second apart
-
-		Thread.sleep(1000);
-
-		Organization organization2 = testGetOrganizationsPage_addOrganization(
-			randomOrganization());
-
-		DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-		page = organizationResource.getOrganizationsPage(
-			null, null,
-			"dateCreated lt " +
-				dateFormat.format(organization1.getDateCreated()),
-			Pagination.of(1, 2), null);
-
-		Assert.assertEquals(totalCount, page.getTotalCount());
-
-		page = organizationResource.getOrganizationsPage(
-			null, null,
-			"dateCreated ge " +
-				dateFormat.format(organization1.getDateModified()),
-			Pagination.of(1, 2), null);
-
-		Assert.assertEquals(2, page.getTotalCount());
-
-		// Sleep for 1 second to ensure that organization 1 and organization 2
-		// are modified 1 second apart
-
-		Thread.sleep(1000);
-
-		organization1.setName(
-			StringUtil.toLowerCase(RandomTestUtil.randomString()));
-
-		organization1 = organizationResource.patchOrganization(
-			organization1.getId(), organization1);
-
-		page = organizationResource.getOrganizationsPage(
-			null, null,
-			"dateModified ge " +
-				dateFormat.format(organization1.getDateModified()),
-			Pagination.of(1, 2), null);
-
-		Assert.assertEquals(1, page.getTotalCount());
-
-		assertContains(organization1, (List<Organization>)page.getItems());
-
-		page = organizationResource.getOrganizationsPage(
-			null, null,
-			"dateModified lt " +
-				dateFormat.format(organization1.getDateModified()),
-			Pagination.of(1, 2), null);
-
-		Assert.assertEquals(totalCount + 1, page.getTotalCount());
-
-		assertContains(organization2, (List<Organization>)page.getItems());
-	}
-
 	private void _testGetOrganizationWithNestedFields() throws Exception {
 		Organization postOrganization = randomOrganization();
 
@@ -1286,6 +1226,9 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 			OrganizationResource.builder(
 			).authentication(
 				"test@liferay.com", PropsValues.DEFAULT_ADMIN_PASSWORD
+			).endpoint(
+				testCompany.getVirtualHostname(),
+				PortalUtil.getPortalServerPort(false), "http"
 			).locale(
 				LocaleUtil.getDefault()
 			).parameters(
@@ -1360,6 +1303,79 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 					userAccountBrief.getId() == user2.getUserId()));
 	}
 
+	private void _testGetOrganizationsPageWithFilter() throws Exception {
+		Page<Organization> page = organizationResource.getOrganizationsPage(
+			null, null, null, Pagination.of(1, 10), null);
+
+		long totalCount = page.getTotalCount();
+
+		// Sleep for 1 second to ensure that organization 1 and existing
+		// organizations are created 1 second apart
+
+		Thread.sleep(1000);
+
+		Organization organization1 = testGetOrganizationsPage_addOrganization(
+			randomOrganization());
+
+		// Sleep for 1 second to ensure that organization 1 and organization 2
+		// are created 1 second apart
+
+		Thread.sleep(1000);
+
+		Organization organization2 = testGetOrganizationsPage_addOrganization(
+			randomOrganization());
+
+		DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(
+			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+		page = organizationResource.getOrganizationsPage(
+			null, null,
+			"dateCreated lt " +
+				dateFormat.format(organization1.getDateCreated()),
+			Pagination.of(1, 2), null);
+
+		Assert.assertEquals(totalCount, page.getTotalCount());
+
+		page = organizationResource.getOrganizationsPage(
+			null, null,
+			"dateCreated ge " +
+				dateFormat.format(organization1.getDateModified()),
+			Pagination.of(1, 2), null);
+
+		Assert.assertEquals(2, page.getTotalCount());
+
+		// Sleep for 1 second to ensure that organization 1 and organization 2
+		// are modified 1 second apart
+
+		Thread.sleep(1000);
+
+		organization1.setName(
+			StringUtil.toLowerCase(RandomTestUtil.randomString()));
+
+		organization1 = organizationResource.patchOrganization(
+			organization1.getId(), organization1);
+
+		page = organizationResource.getOrganizationsPage(
+			null, null,
+			"dateModified ge " +
+				dateFormat.format(organization1.getDateModified()),
+			Pagination.of(1, 2), null);
+
+		Assert.assertEquals(1, page.getTotalCount());
+
+		assertContains(organization1, (List<Organization>)page.getItems());
+
+		page = organizationResource.getOrganizationsPage(
+			null, null,
+			"dateModified lt " +
+				dateFormat.format(organization1.getDateModified()),
+			Pagination.of(1, 2), null);
+
+		Assert.assertEquals(totalCount + 1, page.getTotalCount());
+
+		assertContains(organization2, (List<Organization>)page.getItems());
+	}
+
 	private void _testPatchOrganizationByExternalReferenceCodeWithImageExternalReferenceCode()
 		throws Exception {
 
@@ -1368,7 +1384,7 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 
 		Organization randomPatchOrganization = randomPatchOrganization();
 
-		FileEntry fileEntry = _addImageFileEntry();
+		FileEntry fileEntry = _addImageFileEntry(true);
 
 		randomPatchOrganization.setImageExternalReferenceCode(
 			fileEntry.getExternalReferenceCode());
@@ -1390,7 +1406,7 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 
 		Organization randomPatchOrganization = randomPatchOrganization();
 
-		FileEntry fileEntry = _addImageFileEntry();
+		FileEntry fileEntry = _addImageFileEntry(true);
 
 		randomPatchOrganization.setImageExternalReferenceCode(
 			fileEntry.getExternalReferenceCode());
@@ -1857,22 +1873,71 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 			expandoColumn.getName(), postOrganizationCustomField.getName());
 	}
 
-	private void _testPostOrganizationWithImageExternalReferenceCode()
-		throws Exception {
+	private void _testPostOrganizationWithImage() throws Exception {
+		Role role = RoleTestUtil.addRole(RoleConstants.TYPE_REGULAR);
 
-		Organization randomOrganization = randomOrganization();
+		_resourcePermissionLocalService.setResourcePermissions(
+			TestPropsValues.getCompanyId(), PortletKeys.PORTAL,
+			ResourceConstants.SCOPE_COMPANY,
+			String.valueOf(TestPropsValues.getCompanyId()), role.getRoleId(),
+			new String[] {ActionKeys.ADD_ORGANIZATION});
 
-		FileEntry fileEntry = _addImageFileEntry();
+		User user = _addUser();
 
-		randomOrganization.setImageExternalReferenceCode(
+		_userLocalService.addRoleUsers(
+			role.getRoleId(), new long[] {user.getUserId()});
+
+		OrganizationResource organizationResource = _getOrganizationResource(
+			_PASSWORD, user);
+
+		FileEntry fileEntry = _addImageFileEntry(false);
+
+		Organization organization = randomOrganization();
+
+		organization.setImageExternalReferenceCode(
 			fileEntry.getExternalReferenceCode());
 
-		randomOrganization.setImageId(0L);
+		HttpInvoker.HttpResponse httpResponse =
+			organizationResource.postOrganizationHttpResponse(organization);
 
-		Organization postOrganization = organizationResource.postOrganization(
-			randomOrganization);
+		Assert.assertEquals(
+			Response.Status.FORBIDDEN.getStatusCode(),
+			httpResponse.getStatusCode());
 
-		Assert.assertTrue(postOrganization.getImageId() > 0);
+		organization = randomOrganization();
+
+		organization.setImageId(fileEntry.getFileEntryId());
+
+		httpResponse = organizationResource.postOrganizationHttpResponse(
+			organization);
+
+		Assert.assertEquals(
+			Response.Status.FORBIDDEN.getStatusCode(),
+			httpResponse.getStatusCode());
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			TestPropsValues.getCompanyId(), DLFileEntry.class.getName(),
+			ResourceConstants.SCOPE_INDIVIDUAL,
+			String.valueOf(fileEntry.getFileEntryId()), role.getRoleId(),
+			new String[] {ActionKeys.VIEW});
+
+		organization = randomOrganization();
+
+		organization.setImageExternalReferenceCode(
+			fileEntry.getExternalReferenceCode());
+		organization.setImageId(0L);
+
+		organization = organizationResource.postOrganization(organization);
+
+		Assert.assertTrue(organization.getImageId() > 0);
+
+		organization = randomOrganization();
+
+		organization.setImageId(fileEntry.getFileEntryId());
+
+		organization = organizationResource.postOrganization(organization);
+
+		Assert.assertTrue(organization.getImageId() > 0);
 	}
 
 	private void _testPostOrganizationWithNameOverMaximumLength()
@@ -1913,7 +1978,7 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 
 		Organization randomPutOrganization = randomOrganization();
 
-		FileEntry fileEntry = _addImageFileEntry();
+		FileEntry fileEntry = _addImageFileEntry(true);
 
 		randomPutOrganization.setImageExternalReferenceCode(
 			fileEntry.getExternalReferenceCode());
@@ -1935,7 +2000,7 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 
 		Organization randomPutOrganization = randomOrganization();
 
-		FileEntry fileEntry = _addImageFileEntry();
+		FileEntry fileEntry = _addImageFileEntry(true);
 
 		randomPutOrganization.setImageExternalReferenceCode(
 			fileEntry.getExternalReferenceCode());

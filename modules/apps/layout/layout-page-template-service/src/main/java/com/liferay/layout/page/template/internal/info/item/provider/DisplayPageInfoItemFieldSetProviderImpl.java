@@ -281,7 +281,7 @@ public class DisplayPageInfoItemFieldSetProviderImpl
 							layoutPageTemplateEntry.
 								getLayoutPageTemplateEntryId()))
 				).name(
-					layoutPageTemplateEntry.getName()
+					_getName(layoutPageTemplateEntry, scopeGroupId)
 				).externalUniqueId(
 					_getExternalUniqueId(
 						layoutPageTemplateEntry.getExternalReferenceCode())
@@ -329,7 +329,8 @@ public class DisplayPageInfoItemFieldSetProviderImpl
 							layoutPageTemplateEntry.
 								getLayoutPageTemplateEntryId()))
 				).name(
-					layoutPageTemplateEntry.getName()
+					_getName(
+						layoutPageTemplateEntry, themeDisplay.getScopeGroupId())
 				).attribute(
 					URLInfoFieldType.NOFOLLOW, Boolean.TRUE
 				).externalUniqueId(
@@ -348,7 +349,8 @@ public class DisplayPageInfoItemFieldSetProviderImpl
 					_getUniqueId(
 						layoutPageTemplateEntry.getLayoutPageTemplateEntryKey())
 				).name(
-					layoutPageTemplateEntry.getName()
+					_getName(
+						layoutPageTemplateEntry, themeDisplay.getScopeGroupId())
 				).attribute(
 					URLInfoFieldType.NOFOLLOW, Boolean.TRUE
 				).externalUniqueId(
@@ -402,9 +404,16 @@ public class DisplayPageInfoItemFieldSetProviderImpl
 			layoutPageTemplateEntry.getName());
 	}
 
-	private String _getUniqueId(String id) {
-		return LayoutPageTemplateEntry.class.getSimpleName() +
-			StringPool.UNDERLINE + id;
+	private String _getName(
+		LayoutPageTemplateEntry layoutPageTemplateEntry, long scopeGroupId) {
+
+		if (layoutPageTemplateEntry.getGroupId() == scopeGroupId) {
+			return layoutPageTemplateEntry.getName();
+		}
+
+		return _getUniqueId(
+			String.valueOf(
+				layoutPageTemplateEntry.getLayoutPageTemplateEntryId()));
 	}
 
 	private String _getURLSeparator() {
@@ -420,6 +429,11 @@ public class DisplayPageInfoItemFieldSetProviderImpl
 		}
 
 		return FriendlyURLResolverConstants.URL_SEPARATOR_X_CUSTOM_ASSET;
+	}
+
+	private String _getUniqueId(String id) {
+		return LayoutPageTemplateEntry.class.getSimpleName() +
+			StringPool.UNDERLINE + id;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

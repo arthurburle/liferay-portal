@@ -259,6 +259,61 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 	}
 
 	@Test
+	public void testFIPSTLSVerification() throws Exception {
+		test(
+			SourceProcessorTestParameters.create(
+				"FIPSTLSVerification1.testjava"
+			).addExpectedMessage(
+				"Missing check \"PropsValues.FIPS_ENABLED\" in if-statement " +
+					"condition in the same method as \"ALLOW_ALL_HOSTNAME_" +
+						"VERIFIER\", see LPD-93649",
+				29
+			).addExpectedMessage(
+				"Missing check \"PropsValues.FIPS_ENABLED\" in if-statement " +
+					"condition in the same method as \"AllowAllHostname" +
+						"Verifier\", see LPD-93649",
+				36
+			).addExpectedMessage(
+				"Missing check \"PropsValues.FIPS_ENABLED\" in if-statement " +
+					"condition in the same method as \"new HostnameVerifier()" +
+						"\", see LPD-93649",
+				41
+			).addExpectedMessage(
+				StringBundler.concat(
+					"Missing check \"PropsValues.FIPS_ENABLED\" in if-",
+					"statement condition in the same method as \"setEndpoint",
+					"IdentificationAlgorithm(\"\")\", see LPD-93649"),
+				54
+			).addExpectedMessage(
+				StringBundler.concat(
+					"Missing check \"PropsValues.FIPS_ENABLED\" in if-",
+					"statement condition in the same method as \"setEndpoint",
+					"IdentificationAlgorithm(null)\", see LPD-93649"),
+				58
+			).addExpectedMessage(
+				"Missing check \"PropsValues.FIPS_ENABLED\" in if-statement " +
+					"condition in the same method as \"setSSLHostnameVerifier" +
+						"\", see LPD-93649",
+				72
+			).addExpectedMessage(
+				"Missing check \"PropsValues.FIPS_ENABLED\" in if-statement " +
+					"condition in the same method as \"NoopHostnameVerifier\"" +
+						", see LPD-93649",
+				76
+			).addExpectedMessage(
+				"Missing check \"PropsValues.FIPS_ENABLED\" in if-statement " +
+					"condition in the same method as \"NoopHostnameVerifier\"" +
+						", see LPD-93649",
+				83
+			));
+		test(
+			"FIPSTLSVerification2.testjava",
+			"Missing check \"PropsValues.FIPS_ENABLED\" in if-statement " +
+				"condition in the same class as a trust manager, see LPD-93649",
+			17);
+	}
+
+	@Test
 	public void testFeatureFlagsAnnotationTest() throws Exception {
 		test(
 			SourceProcessorTestParameters.create(
@@ -965,6 +1020,32 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 	}
 
 	@Test
+	public void testSQLBooleanValues() throws Exception {
+		test(
+			SourceProcessorTestParameters.create(
+				"SQLBooleanValues.testjava"
+			).addExpectedMessage(
+				"Use \"[$TRUE$]\" instead of \"true\" in SQL statements", 21
+			).addExpectedMessage(
+				"Use \"[$TRUE$]\" instead of \"true\" in SQL statements", 28
+			).addExpectedMessage(
+				"Use \"[$TRUE$]\" instead of \"true\" in SQL statements", 42
+			).addExpectedMessage(
+				"Use \"[$FALSE$]\" instead of \"false\" in SQL statements", 53
+			).addExpectedMessage(
+				"Use \"SQLTransformer.transform\" to wrap SQL statement if " +
+					"it contains \"[$FALSE$]\" or \"[$TRUE$]\"",
+				63
+			).addExpectedMessage(
+				"Use \"[$FALSE$]\" instead of \"false\" in SQL statements", 72
+			).addExpectedMessage(
+				"Use \"SQLTransformer.transform\" to wrap SQL statement if " +
+					"it contains \"[$FALSE$]\" or \"[$TRUE$]\"",
+				83
+			));
+	}
+
+	@Test
 	public void testSafeCloseableMissingClose() throws Exception {
 		test(
 			SourceProcessorTestParameters.create(
@@ -989,6 +1070,26 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 		test(
 			"SealedModifierUsage.testjava",
 			"Do not use modifier \"sealed\" and \"non-sealed\"", 11);
+	}
+
+	@Test
+	public void testSecretComparison() throws Exception {
+		test(
+			SourceProcessorTestParameters.create(
+				"SecretComparison.testjava"
+			).addExpectedMessage(
+				"Use \"MessageDigest.isEqual\" to compare secrets, see " +
+					"LPD-93281",
+				18
+			).addExpectedMessage(
+				"Use \"MessageDigest.isEqual\" to compare secrets, see " +
+					"LPD-93281",
+				26
+			).addExpectedMessage(
+				"Use \"MessageDigest.isEqual\" to compare secrets, see " +
+					"LPD-93281",
+				32
+			));
 	}
 
 	@Test
@@ -1076,32 +1177,6 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 	}
 
 	@Test
-	public void testSQLBooleanValues() throws Exception {
-		test(
-			SourceProcessorTestParameters.create(
-				"SQLBooleanValues.testjava"
-			).addExpectedMessage(
-				"Use \"[$TRUE$]\" instead of \"true\" in SQL statements", 21
-			).addExpectedMessage(
-				"Use \"[$TRUE$]\" instead of \"true\" in SQL statements", 28
-			).addExpectedMessage(
-				"Use \"[$TRUE$]\" instead of \"true\" in SQL statements", 42
-			).addExpectedMessage(
-				"Use \"[$FALSE$]\" instead of \"false\" in SQL statements", 53
-			).addExpectedMessage(
-				"Use \"SQLTransformer.transform\" to wrap SQL statement if " +
-					"it contains \"[$FALSE$]\" or \"[$TRUE$]\"",
-				63
-			).addExpectedMessage(
-				"Use \"[$FALSE$]\" instead of \"false\" in SQL statements", 72
-			).addExpectedMessage(
-				"Use \"SQLTransformer.transform\" to wrap SQL statement if " +
-					"it contains \"[$FALSE$]\" or \"[$TRUE$]\"",
-				83
-			));
-	}
-
-	@Test
 	public void testStaticFinalLog() throws Exception {
 		test("StaticFinalLog.testjava");
 	}
@@ -1134,6 +1209,54 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 	}
 
 	@Test
+	public void testTestClassStaticInitializer() throws Exception {
+		test(
+			SourceProcessorTestParameters.create(
+				"TestClassStaticInitializer.testjava"
+			).addExpectedMessage(
+				StringBundler.concat(
+					"Do not use class \"PortalUtil\" in a static initializer ",
+					"of an Arquillian test, since it needs the portal but ",
+					"static initializers also run in the client JVM. ",
+					"Initialize it in a @Before or @BeforeClass method or ",
+					"where it is used"),
+				82
+			).addExpectedMessage(
+				StringBundler.concat(
+					"Do not use \"DLTestUtil.randomTextFileBytes\" in a ",
+					"static initializer of an Arquillian test, since it needs ",
+					"the portal but static initializers also run in the ",
+					"client JVM. Initialize it in a @Before or @BeforeClass ",
+					"method or where it is used"),
+				91
+			).addExpectedMessage(
+				StringBundler.concat(
+					"Use \"RandomTestUtil.randomInt\" instead of ",
+					"\"RandomTestUtil.nextInt\" in a static initializer of an ",
+					"Arquillian test, since \"RandomTestUtil.nextInt\" needs ",
+					"the portal but static initializers also run in the ",
+					"client JVM"),
+				97
+			).addExpectedMessage(
+				StringBundler.concat(
+					"Do not use \"RandomTestUtil.randomString\" with ",
+					"\"TikaRandomizerBumper\" in a static initializer of an ",
+					"Arquillian test, since it needs the portal but static ",
+					"initializers also run in the client JVM. Initialize it ",
+					"in a @Before or @BeforeClass method or where it is used"),
+				99
+			).addExpectedMessage(
+				StringBundler.concat(
+					"Do not use class \"TestPropsValues\" in a static ",
+					"initializer of an Arquillian test, since it needs the ",
+					"portal but static initializers also run in the client ",
+					"JVM. Initialize it in a @Before or @BeforeClass method ",
+					"or where it is used"),
+				109
+			));
+	}
+
+	@Test
 	public void testTextBlock() throws Exception {
 		test(
 			SourceProcessorTestParameters.create(
@@ -1144,6 +1267,8 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 				"Do not use text block", 23
 			).addExpectedMessage(
 				"Do not use text block", 29
+			).addExpectedMessage(
+				"Do not use text block", 42
 			));
 	}
 

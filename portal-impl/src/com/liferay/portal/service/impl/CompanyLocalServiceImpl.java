@@ -32,6 +32,7 @@ import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.db.partition.DBPartition;
+import com.liferay.portal.kernel.encryptor.CompanyKeyResolverUtil;
 import com.liferay.portal.kernel.encryptor.EncryptorException;
 import com.liferay.portal.kernel.encryptor.EncryptorUtil;
 import com.liferay.portal.kernel.exception.CompanyMaxUsersException;
@@ -226,10 +227,7 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 		String lowerCaseVirtualHostname = StringUtil.toLowerCase(
 			StringUtil.trim(virtualHostname));
 
-		validateWebId(webId);
-		validateVirtualHost(webId, lowerCaseVirtualHostname);
-		validateMx(-1, mx);
-		validateMaxUsers(maxUsers);
+		validateCompany(webId, lowerCaseVirtualHostname, mx, maxUsers);
 
 		if ((companyId == null) || (companyId == 0)) {
 			companyId = _getNextCompanyId();
@@ -246,6 +244,7 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 			DBPartitionUtil.setDefaultCompanyId(company.getCompanyId());
 		}
 
+		String keyString = _generateKey(companyId);
 		boolean newDBPartitionAdded = DBPartitionUtil.addDBPartition(companyId);
 
 		Callable<Company> callable = () -> {
@@ -278,13 +277,7 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 
 			// Company info
 
-			try {
-				updatedCompany.setKey(
-					EncryptorUtil.serializeKey(EncryptorUtil.generateKey()));
-			}
-			catch (EncryptorException encryptorException) {
-				throw new SystemException(encryptorException);
-			}
+			updatedCompany.setKey(keyString);
 
 			_companyInfoPersistence.update(updatedCompany.getCompanyInfo());
 
@@ -383,11 +376,24 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 				"Company ID " + companyId + " is the default company ID");
 		}
 
+		String lowerCaseVirtualHostname = StringUtil.toLowerCase(
+			StringUtil.trim(virtualHostname));
+
+		if (Validator.isNotNull(webId)) {
+			validateWebId(webId);
+		}
+
+		if (Validator.isNotNull(lowerCaseVirtualHostname)) {
+			validateVirtualHost(
+				GetterUtil.getString(webId), lowerCaseVirtualHostname);
+		}
+
 		try (SafeCloseable safeCloseable1 =
 				PortalInstances.setImportInProcessCompanyIdWithSafeCloseable(
 					companyId)) {
 
-			DBPartitionUtil.importDBPartition(companyId);
+			DBPartitionUtil.importDBPartition(
+				companyId, lowerCaseVirtualHostname, webId);
 
 			try (SafeCloseable safeCloseable2 =
 					CompanyThreadLocal.setCompanyIdWithSafeCloseable(
@@ -416,30 +422,13 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 							_companyInfoPersistence.update(companyInfo);
 						}
 
-						String lowerCaseVirtualHostname =
-							StringUtil.toLowerCase(
-								StringUtil.trim(virtualHostname));
-
 						if (Validator.isNotNull(lowerCaseVirtualHostname) &&
 							!StringUtil.equals(
 								company.getVirtualHostname(),
 								lowerCaseVirtualHostname)) {
 
-							validateVirtualHost(
-								company.getWebId(), lowerCaseVirtualHostname);
-
 							company = updateVirtualHostname(
 								companyId, lowerCaseVirtualHostname);
-						}
-
-						if (Validator.isNotNull(webId) &&
-							!StringUtil.equals(company.getWebId(), webId)) {
-
-							validateWebId(webId);
-
-							company.setWebId(webId);
-
-							company = companyPersistence.update(company);
 						}
 
 						return _addDBPartitionCompany(company);
@@ -565,13 +554,14 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 	public void checkCompanyKey(long companyId) throws PortalException {
 		Company company = companyPersistence.findByPrimaryKey(companyId);
 
-		if (company.getKeyObj() != null) {
+		if (Validator.isNotNull(company.getKey())) {
 			return;
 		}
 
 		try {
 			company.setKey(
-				EncryptorUtil.serializeKey(EncryptorUtil.generateKey()));
+				CompanyKeyResolverUtil.wrapKey(
+					companyId, EncryptorUtil.generateKey()));
 		}
 		catch (EncryptorException encryptorException) {
 			throw new SystemException(encryptorException);
@@ -1602,6 +1592,20 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 		}
 	}
 
+	@Override
+	public void validateCompany(
+			String webId, String virtualHostname, String mx, int maxUsers)
+		throws PortalException {
+
+		String lowerCaseVirtualHostname = StringUtil.toLowerCase(
+			StringUtil.trim(virtualHostname));
+
+		validateWebId(webId);
+		validateVirtualHost(webId, lowerCaseVirtualHostname);
+		validateMx(-1, mx);
+		validateMaxUsers(maxUsers);
+	}
+
 	protected Company checkLogo(long companyId) throws PortalException {
 		Company company = companyPersistence.findByPrimaryKey(companyId);
 
@@ -2491,6 +2495,16 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 
 				return null;
 			});
+	}
+
+	private String _generateKey(long companyId) {
+		try {
+			return CompanyKeyResolverUtil.wrapKey(
+				companyId, EncryptorUtil.generateKey());
+		}
+		catch (EncryptorException encryptorException) {
+			throw new SystemException(encryptorException);
+		}
 	}
 
 	private long _getNextCompanyId() {

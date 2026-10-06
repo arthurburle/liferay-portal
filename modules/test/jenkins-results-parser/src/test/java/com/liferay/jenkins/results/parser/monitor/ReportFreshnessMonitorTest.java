@@ -352,7 +352,7 @@ public class ReportFreshnessMonitorTest
 		try {
 			_newReportFreshnessMonitor(monitorProperties);
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 			String message = illegalArgumentException.getMessage();
@@ -430,7 +430,7 @@ public class ReportFreshnessMonitorTest
 		try {
 			_newReportFreshnessMonitor(monitorProperties);
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 		}
@@ -444,7 +444,7 @@ public class ReportFreshnessMonitorTest
 		try {
 			_newReportFreshnessMonitor(monitorProperties);
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 		}

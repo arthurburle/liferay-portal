@@ -313,7 +313,7 @@ public class UpstreamJobHealthMonitorTest
 		try {
 			_newUpstreamJobHealthMonitor(monitorProperties);
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 		}
@@ -327,7 +327,7 @@ public class UpstreamJobHealthMonitorTest
 		try {
 			_newUpstreamJobHealthMonitor(monitorProperties);
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 		}

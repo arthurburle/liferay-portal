@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.test.TestInfo;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
@@ -74,7 +75,10 @@ public class AudiencesDefinitionProviderTest {
 			"audiences",
 			JSONUtil.putAll(
 				audiencesEntryJSONObject.put(
-					"id", audiencesEntry.getExternalReferenceCode())));
+					"id", audiencesEntry.getExternalReferenceCode()
+				).put(
+					"scope", JSONFactoryUtil.createJSONArray()
+				)));
 
 		ObjectMapper objectMapper = new ObjectMapper();
 
@@ -123,6 +127,40 @@ public class AudiencesDefinitionProviderTest {
 
 	@FeatureFlags(featureFlags = @FeatureFlag(value = "LPD-85746"))
 	@Test
+	@TestInfo("LPD-105965")
+	public void testGetAudiencesDefinitionAfterGroupRemoval() throws Exception {
+		AudiencesEntry audiencesEntry =
+			_audiencesEntryLocalService.addAudiencesEntry(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				_getCriteriaJSON(_REGISTERED_CUSTOM_ATTRIBUTE),
+				RandomTestUtil.randomString(), null);
+
+		Group group = GroupTestUtil.addGroup();
+
+		_addAudiencesEntryGroupRel(audiencesEntry, group);
+
+		audiencesEntry = _audiencesEntryLocalService.updateAudiencesEntry(
+			audiencesEntry);
+
+		JSONObject jsonObject = _getAudienceJSONObject(audiencesEntry);
+
+		JSONArray scopeJSONArray = jsonObject.getJSONArray("scope");
+
+		Assert.assertEquals(
+			scopeJSONArray.toString(), 1, scopeJSONArray.length());
+
+		_groupLocalService.deleteGroup(group);
+
+		jsonObject = _getAudienceJSONObject(audiencesEntry);
+
+		scopeJSONArray = jsonObject.getJSONArray("scope");
+
+		Assert.assertEquals(
+			scopeJSONArray.toString(), 0, scopeJSONArray.length());
+	}
+
+	@FeatureFlags(featureFlags = @FeatureFlag(value = "LPD-85746"))
+	@Test
 	@TestInfo("LPD-105673")
 	public void testGetAudiencesDefinitionWithScope() throws Exception {
 		AudiencesEntry audiencesEntry1 =
@@ -140,6 +178,7 @@ public class AudiencesDefinitionProviderTest {
 				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 				_getCriteriaJSON(_REGISTERED_CUSTOM_ATTRIBUTE),
 				RandomTestUtil.randomString(), null);
+
 		Group group2 = GroupTestUtil.addGroup();
 
 		_addAudiencesEntryGroupRel(audiencesEntry1, group2);
@@ -154,16 +193,21 @@ public class AudiencesDefinitionProviderTest {
 		Assert.assertEquals(
 			scopeJSONArray.toString(), 2, scopeJSONArray.length());
 
-		Set<Long> groupIds = JSONUtil.toLongSet(scopeJSONArray);
+		Set<String> groupIds = JSONUtil.toStringSet(scopeJSONArray);
 
 		Assert.assertTrue(
-			groupIds.toString(), groupIds.contains(group1.getGroupId()));
+			groupIds.toString(),
+			groupIds.contains(String.valueOf(group1.getGroupId())));
 		Assert.assertTrue(
-			groupIds.toString(), groupIds.contains(group2.getGroupId()));
+			groupIds.toString(),
+			groupIds.contains(String.valueOf(group2.getGroupId())));
 
 		JSONObject jsonObject2 = _getAudienceJSONObject(audiencesEntry2);
 
-		Assert.assertFalse(jsonObject2.toString(), jsonObject2.has("scope"));
+		scopeJSONArray = jsonObject2.getJSONArray("scope");
+
+		Assert.assertEquals(
+			scopeJSONArray.toString(), 0, scopeJSONArray.length());
 	}
 
 	private AudiencesEntryGroupRel _addAudiencesEntryGroupRel(
@@ -250,5 +294,8 @@ public class AudiencesDefinitionProviderTest {
 
 	@Inject
 	private CounterLocalService _counterLocalService;
+
+	@Inject
+	private GroupLocalService _groupLocalService;
 
 }

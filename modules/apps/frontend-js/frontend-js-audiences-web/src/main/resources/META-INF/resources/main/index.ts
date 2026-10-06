@@ -7,10 +7,11 @@ import {
 	clear,
 	clearHandlers,
 	get,
-	getPriority,
+	getAudienceIndex,
 	on,
 	runDetection,
 	runHandlers,
+	set,
 	setLogEnabled,
 } from './implementation';
 
@@ -24,6 +25,7 @@ export interface Audience {
 	conjunction: Conjunction;
 	id: AudienceId;
 	rules: Rule[];
+	scope: string[];
 }
 
 export type AudienceId = string;
@@ -44,6 +46,7 @@ export interface RuleGroup {
 }
 
 export type Attribute =
+	| 'batch_segments'
 	| 'browser_name'
 	| 'browser_version'
 	| 'cookies'
@@ -54,9 +57,9 @@ export type Attribute =
 	| 'local_date'
 	| 'local_hour'
 	| 'pathname'
+	| 'real_time_segments'
 	| 'referrer'
 	| `request_parameters`
-	| 'segments'
 	| 'timezone'
 	| 'url'
 	| 'user_agent';
@@ -91,7 +94,16 @@ export interface AudiencesAPI {
 	clear(): void;
 	clearHandlers(): void;
 	get(): Set<AudienceId>;
-	getPriority(audienceId: AudienceId): number;
+
+	/**
+	 * Returns the audience position in the -possibly filtered
+	 * ({@see RunDetectionOptions#filterAudiences})- audiences declaration. This
+	 * position can be used as a precedence value, for example.
+	 * @param audienceId
+	 * @returns the audience index or `undefined` if it was not declared or the filter function discarded it
+	 */
+	getAudienceIndex(audienceId: AudienceId): number | undefined;
+
 	on(audienceId: AudienceId, handler: Handler): void;
 
 	/**
@@ -124,6 +136,16 @@ export interface AudiencesAPI {
 	 */
 	runHandlers(): Promise<void>;
 
+	/**
+	 * Set the detected audiences without running any detection, replacing the
+	 * previously detected ones.
+	 *
+	 * The order of the given audiences sets their priority, the same way the
+	 * order of an audiences definition does.
+	 * @param audienceIds
+	 */
+	set(audienceIds: AudienceId[]): void;
+
 	setLogEnabled(enabled: boolean): void;
 }
 
@@ -131,9 +153,10 @@ export const audiences: AudiencesAPI = {
 	clear,
 	clearHandlers,
 	get,
-	getPriority,
+	getAudienceIndex,
 	on,
 	runDetection,
 	runHandlers,
+	set,
 	setLogEnabled,
 };

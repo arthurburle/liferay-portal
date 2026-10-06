@@ -50,10 +50,10 @@ export type ActionContext = {
 	loadData: () => void;
 };
 
-export type PromptStatusKey = 'active' | 'inactive';
+export type MCPStatusKey = 'active' | 'inactive';
 
-export type PromptStatusPicklistValue = {
-	key: PromptStatusKey;
+export type MCPStatusPicklistValue = {
+	key: MCPStatusKey;
 	name: string;
 };
 
@@ -64,6 +64,7 @@ export type Profile = {
 	friendlyUrlPath?: string;
 	id?: number;
 	name: string;
+	profileStatus?: MCPStatusPicklistValue;
 };
 
 export type ProfileActionContext = {
@@ -91,6 +92,7 @@ export type ProfileDataMaskRow = {
 };
 
 export type ProfileFormValues = {
+	active: boolean;
 	description: string;
 	name: string;
 };
@@ -98,12 +100,14 @@ export type ProfileFormValues = {
 export type ProfilePayload = {
 	description: string;
 	name: string;
+	profileStatus: {key: MCPStatusKey};
 };
 
 export type ProfileTool = {
-	externalReferenceCode?: string;
+	externalReferenceCode: string;
 	id?: number;
 	r_mcpServerProfileToTools_l_mcpServerProfileId?: number;
+	restrictFields?: string;
 	toolName: string;
 	toolSetName: string;
 };
@@ -119,6 +123,22 @@ export type ProfileToolPayload = {
 	toolSetName: string;
 };
 
+export type JSONSchema = {
+	additionalProperties?: JSONSchema | boolean;
+	items?: JSONSchema;
+	properties?: Record<string, JSONSchema>;
+	readOnly?: boolean;
+	type?: string;
+	writeOnly?: boolean;
+};
+
+export type Tool = {
+	description?: string;
+	inputSchema?: JSONSchema;
+	name: string;
+	outputSchema?: JSONSchema;
+};
+
 export type ToolSet = {
 	description?: string;
 	name: string;
@@ -130,7 +150,6 @@ export type ToolSummary = {
 };
 
 export type ToolTreeItem = {
-	assigned?: boolean;
 	children?: ToolTreeItem[];
 	id: string;
 	name: string;
@@ -144,7 +163,7 @@ export type Prompt = {
 	identifier: string;
 	name: string;
 	prompt: string;
-	promptStatus: PromptStatusPicklistValue;
+	promptStatus?: MCPStatusPicklistValue;
 };
 
 export type PromptPayload = {
@@ -152,7 +171,7 @@ export type PromptPayload = {
 	identifier: string;
 	name: string;
 	prompt: string;
-	promptStatus: {key: PromptStatusKey};
+	promptStatus: {key: MCPStatusKey};
 };
 
 export type PromptActionContext = {

@@ -268,7 +268,7 @@ public class HTTPEndpointMonitorTest
 		try {
 			_newHTTPEndpointMonitor(monitorProperties);
 
-			Assert.fail("Expected IllegalArgumentException");
+			Assert.fail();
 		}
 		catch (IllegalArgumentException illegalArgumentException) {
 			return illegalArgumentException.getMessage();

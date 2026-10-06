@@ -6,7 +6,9 @@
 package com.liferay.mcp.server.rest.internal.upgrade.registry;
 
 import com.liferay.list.type.service.ListTypeDefinitionLocalService;
+import com.liferay.mcp.server.rest.internal.constants.MCPServerConstants;
 import com.liferay.mcp.server.rest.internal.upgrade.MCPProfileDataMaskUpgradeProcess;
+import com.liferay.mcp.server.rest.internal.upgrade.MCPProfileStatusUpgradeProcess;
 import com.liferay.mcp.server.rest.internal.upgrade.MCPProfileToolUpgradeProcess;
 import com.liferay.mcp.server.rest.internal.upgrade.MCPProfileUpgradeProcess;
 import com.liferay.mcp.server.rest.internal.upgrade.MCPPromptUpgradeProcess;
@@ -20,7 +22,9 @@ import com.liferay.object.service.ObjectFolderLocalService;
 import com.liferay.object.service.ObjectRelationshipLocalService;
 import com.liferay.object.service.ObjectValidationRuleLocalService;
 import com.liferay.petra.sql.dsl.expression.Predicate;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.upgrade.UpgradeProcessFactory;
 import com.liferay.portal.upgrade.registry.UpgradeStepRegistrator;
 
 import org.osgi.service.component.annotations.Component;
@@ -64,6 +68,31 @@ public class MCPServerRestUpgradeStepRegistrator
 			new MCPProfileToolUpgradeProcess(
 				_companyLocalService, _objectDefinitionLocalService,
 				_objectFieldLocalService));
+
+		registry.register(
+			"1.3.0", "1.4.0",
+			new MCPProfileStatusUpgradeProcess(
+				_companyLocalService, _objectDefinitionLocalService,
+				_objectEntryLocalService, _objectRelationshipLocalService));
+
+		registry.register(
+			"1.4.0", "1.5.0",
+			UpgradeProcessFactory.runSQL(
+				StringBundler.concat(
+					"update ObjectDefinition set panelCategoryKey = null ",
+					"where externalReferenceCode in ('",
+					MCPServerConstants.
+						EXTERNAL_REFERENCE_CODE_MCP_SERVER_PROFILE,
+					"', '",
+					MCPServerConstants.
+						EXTERNAL_REFERENCE_CODE_MCP_SERVER_PROFILE_DATA_MASK,
+					"', '",
+					MCPServerConstants.
+						EXTERNAL_REFERENCE_CODE_MCP_SERVER_PROFILE_TOOL,
+					"', '",
+					MCPServerConstants.
+						EXTERNAL_REFERENCE_CODE_MCP_SERVER_PROMPT,
+					"')")));
 	}
 
 	@Reference

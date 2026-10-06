@@ -140,6 +140,7 @@ customInitContainers:
                                 /temp/liferay/reports \
                                 /temp/liferay/routes \
                                 /temp/liferay/work \
+                                /temp/mnt/liferay/patching \
                                 /temp/osgi/client-extensions \
                                 /temp/osgi/configs \
                                 /temp/osgi/modules \
@@ -172,6 +173,11 @@ customInitContainers:
                                 cp --force --recursive --verbose /opt/liferay/osgi/marketplace/. /temp/osgi/marketplace
                             fi
 
+                            if [ -z "$(ls --almost-all /temp/osgi/modules)" ]
+                            then
+                                cp --force --recursive --verbose /opt/liferay/osgi/modules/. /temp/osgi/modules
+                            fi
+
                             mkdir --parents /temp/tomcat/conf
 
                             sed '/<Manager/d' /opt/liferay/tomcat/conf/context.xml > /temp/tomcat/conf/context.xml
@@ -181,6 +187,11 @@ customInitContainers:
                             echo -e "\norg.apache.catalina.ha.level=INFO\norg.apache.catalina.tribes.membership.cloud.level=SEVERE" >> /temp/tomcat/conf/logging.properties
 
                             cat /opt/liferay/tomcat/conf/server.xml | sed '/<!--.*-->/d' | sed '/<!--/,/-->/d' > /temp/tomcat/conf/server.xml
+
+                            {{- with .tomcat.maxThreads }}
+
+                            sed --in-place 's/maxThreads="[0-9]*"/maxThreads="{{ . }}"/' /temp/tomcat/conf/server.xml
+                            {{- end }}
 
                             IFS='' read -r -d '' SERVER_XML_CLUSTER <<EOF
                             <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster">
@@ -425,8 +436,15 @@ licensing:
     offlineActivationBundle: ""
     onlineActivationWorkflow:
         clusterRoleName: online-activation-cluster-role
+        clusterWorkflowTemplateName: online-activation-cluster-workflow-template
         enabled: true
         serviceAccountName: online-activation-service-account
+        ttlSecondsAfterCompletion: 3600
+        userAccess:
+            roleName: online-activation-user-role
+            serviceAccountName: online-activation-user-service-account
+            tokenSecretName: online-activation-user-token
+        workflowTemplateName: online-activation-workflow-template
     secretName: ""
     syncInterval: 60
 livenessProbe:
@@ -547,6 +565,10 @@ service:
             port: 7800
             protocol: TCP
             targetPort: cluster
+        -   name: cluster-tx
+            port: 7801
+            protocol: TCP
+            targetPort: cluster-tx
         -   name: http
             port: 8080
             protocol: TCP
@@ -561,6 +583,8 @@ startupProbe:
     periodSeconds: 10
     timeoutSeconds: 5
 tolerations: []
+tomcat:
+    maxThreads: ""
 updateStrategy:
     type: RollingUpdate
 volumeClaimTemplates:
@@ -573,6 +597,9 @@ volumeClaimTemplates:
                 requests:
                     storage: 1Gi
 volumeMounts:
+    -   mountPath: /mnt/liferay/patching
+        name: liferay-persistent-volume
+        subPath: mnt/liferay/patching
     -   mountPath: /opt/liferay/data
         name: liferay-persistent-volume
         subPath: liferay/data

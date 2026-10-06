@@ -19,8 +19,22 @@ gradle.allprojects {
 			testModules group: "com.liferay.portal", name: "com.liferay.portal.test.integration"
 		}
 
+		List<String> disabledTaskNames = []
+
 		if (project.name.endsWith("-test")) {
-			deploy.enabled = false
+			disabledTaskNames.addAll(["deploy", "dockerCopy", "dockerDeploy"])
+		}
+
+		if (integrationTestTarget == "container") {
+			disabledTaskNames.addAll(["copyTestModules", "setUpTestableTomcat", "startTestableTomcat", "stopTestableTomcat"])
+		}
+
+		tasks.configureEach {
+			Task task ->
+
+			if (disabledTaskNames.contains(task.name)) {
+				task.enabled = false
+			}
 		}
 
 		if (integrationTestTarget == "bundle") {
@@ -40,22 +54,15 @@ gradle.allprojects {
 				}
 			}
 		}
-
-		if (integrationTestTarget == "container") {
-			copyTestModules.enabled = false
-			setUpTestableTomcat.enabled = false
-			startTestableTomcat.enabled = false
-			stopTestableTomcat.enabled = false
-		}
 	}
 }
 
 gradle.projectsEvaluated {
-	gradle.rootProject.subprojects.each {
+	gradle.rootProject.subprojects {
 		Project project ->
 
-		pluginManager.withPlugin("com.liferay.test.integration") {
-			configurations.testModules.dependencies.each {
+		project.pluginManager.withPlugin("com.liferay.test.integration") {
+			project.configurations.testModules.dependencies.each {
 				Dependency dependency ->
 
 				project.rootProject.dependencies.add("providedModules", dependency.copy())

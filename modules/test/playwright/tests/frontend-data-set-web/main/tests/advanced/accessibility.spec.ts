@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {mergeTests} from '@playwright/test';
+import {expect, mergeTests} from '@playwright/test';
 
 import {featureFlagsTest} from '../../../../../fixtures/featureFlagsTest';
 import {isolatedSiteTest} from '../../../../../fixtures/isolatedSiteTest';
@@ -125,10 +125,19 @@ test('Advanced FDS is accessible during search interactions', async ({
 		await checkAccessibility({page, selectors: [FDS_WRAPPER_SELECTOR]});
 	});
 
-	await test.step('Recent searches dropdown open', async () => {
+	await test.step('Search history dropdown open', async () => {
+		const firstRow = fdsSamplePage.table.bodyRows.first();
+
+		const title = (
+			await firstRow.locator('.cell-title').innerText()
+		).trim();
+
+		await firstRow.locator('.cell-id a').click();
+
 		await fdsSamplePage.managementToolbar.searchInput.click();
 
-		await fdsSamplePage.searchSuggestionEntry('Sample1').waitFor();
+		await fdsSamplePage.recentSearchEntry('Sample1').waitFor();
+		await fdsSamplePage.recentlyVisitedEntry(title).waitFor();
 
 		await checkAccessibility({
 			page,
@@ -332,6 +341,11 @@ test('Advanced FDS is accessible across user views', async ({
 			.click();
 
 		await fdsSamplePage.userViewsSaveModal.waitFor();
+
+		await expect(page.locator(OPEN_MODAL_SELECTOR)).toHaveCSS(
+			'opacity',
+			'1'
+		);
 
 		await checkAccessibility({
 			page,

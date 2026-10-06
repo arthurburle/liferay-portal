@@ -3,11 +3,29 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
+import {RedactLevel} from '../state/types';
+
 export const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
 
 export const MAX_IMAGE_PIXELS = 36_000_000;
 
+export const OVERLAY_IMAGE_MAX_SIZE = 1600;
+
 const PREVIEW_MAX_SIZE = 2048;
+
+/**
+ * Longest side, in pixels, of the downsampled copies behind each redaction
+ * level. Scaling these back up with nearest-neighbor is what produces the
+ * mosaic, so a smaller source means coarser blocks.
+ */
+export const REDACT_SIZES: Record<RedactLevel, number> = {
+	coarse: 24,
+	fine: 96,
+	medium: 48,
+	tiny: 192,
+};
+
+const THUMB_MAX_SIZE = 160;
 
 export class ImageEditorLoadError extends Error {
 	readonly reason: ImageLoadErrorReason;
@@ -36,12 +54,27 @@ export interface LoadedImage {
 	height: number;
 
 	/**
+	 * Downsampled copies of the picture, one per redaction level, that a
+	 * pixelated redaction reveals through its clip. Data URLs, not blob
+	 * URLs: the export SVG rasterizes through an img that cannot fetch
+	 * blob: subresources.
+	 */
+	pixelUrls: Record<RedactLevel, string>;
+
+	/**
 	 * Object URL of the downscaled preview bitmap the SVG workspace
 	 * displays. Never larger than PREVIEW_MAX_SIZE on its longest side.
 	 * A successful load transfers ownership to the host: release it with
 	 * `disposeLoadedImage` once the image leaves the editor for good.
 	 */
 	previewUrl: string;
+
+	/**
+	 * Tiny copy used by the filter gallery: running a colour pipeline per
+	 * preset over the full preview bitmap would mean dozens of filtered
+	 * draws of a multi-megapixel image just to paint 64x40 cards.
+	 */
+	thumbUrl: string;
 
 	type: string;
 	width: number;
@@ -81,7 +114,14 @@ export async function loadImage(
 			blob,
 			fileName,
 			height: bitmap.height,
+			pixelUrls: {
+				coarse: downsampleToDataURL(bitmap, REDACT_SIZES.coarse),
+				fine: downsampleToDataURL(bitmap, REDACT_SIZES.fine),
+				medium: downsampleToDataURL(bitmap, REDACT_SIZES.medium),
+				tiny: downsampleToDataURL(bitmap, REDACT_SIZES.tiny),
+			},
 			previewUrl,
+			thumbUrl: downsampleToDataURL(bitmap, THUMB_MAX_SIZE, 'image/jpeg'),
 			type: blob.type || 'image/jpeg',
 			width: bitmap.width,
 		};
@@ -96,6 +136,65 @@ export async function loadImage(
 	finally {
 		bitmap.close();
 	}
+}
+
+/**
+ * Reads a picture the user picked for an image annotation. PNG out, so
+ * transparency survives, and a data URL rather than an object URL because
+ * the export SVG cannot fetch `blob:`.
+ */
+export async function loadOverlayImage(
+	blob: Blob
+): Promise<{height: number; src: string; width: number}> {
+	const bitmap = await decodeWithinLimits(blob);
+
+	const {height, width} = bitmap;
+
+	let src: string;
+
+	try {
+		const longestSide = Math.max(width, height);
+
+		const scale = Math.min(1, OVERLAY_IMAGE_MAX_SIZE / longestSide);
+
+		src = downsampleToDataURL(
+			bitmap,
+			Math.round(longestSide * scale),
+			'image/png'
+		);
+	}
+	finally {
+		bitmap.close();
+	}
+
+	if (!src) {
+		throw new Error('Could not read the picture');
+	}
+
+	return {height, src, width};
+}
+
+function downsampleToDataURL(
+	bitmap: ImageBitmap,
+	longestSide: number,
+	type = 'image/png'
+): string {
+	const scale = longestSide / Math.max(bitmap.width, bitmap.height);
+
+	const canvas = document.createElement('canvas');
+
+	canvas.width = Math.max(Math.round(bitmap.width * scale), 1);
+	canvas.height = Math.max(Math.round(bitmap.height * scale), 1);
+
+	const context = canvas.getContext('2d');
+
+	if (!context) {
+		return '';
+	}
+
+	context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+	return canvas.toDataURL(type, 0.8);
 }
 
 async function createPreviewUrl(

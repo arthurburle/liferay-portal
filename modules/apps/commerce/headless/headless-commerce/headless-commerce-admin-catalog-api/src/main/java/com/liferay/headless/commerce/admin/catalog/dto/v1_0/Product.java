@@ -250,6 +250,103 @@ public class Product implements Serializable {
 	private Supplier<Catalog> _catalogSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "ISO 4217 code of the default currency of the parent catalog. A catalog cannot exist without a currency, so the currency must travel with the catalog reference whenever the product is imported before the catalog.",
+		example = "USD"
+	)
+	public String getCatalogCurrencyCode() {
+		if (_catalogCurrencyCodeSupplier != null) {
+			catalogCurrencyCode = _catalogCurrencyCodeSupplier.get();
+
+			_catalogCurrencyCodeSupplier = null;
+		}
+
+		return catalogCurrencyCode;
+	}
+
+	public void setCatalogCurrencyCode(String catalogCurrencyCode) {
+		this.catalogCurrencyCode = catalogCurrencyCode;
+
+		_catalogCurrencyCodeSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setCatalogCurrencyCode(
+		UnsafeSupplier<String, Exception> catalogCurrencyCodeUnsafeSupplier) {
+
+		_catalogCurrencyCodeSupplier = () -> {
+			try {
+				return catalogCurrencyCodeUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(
+		description = "ISO 4217 code of the default currency of the parent catalog. A catalog cannot exist without a currency, so the currency must travel with the catalog reference whenever the product is imported before the catalog."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected String catalogCurrencyCode;
+
+	@JsonIgnore
+	private Supplier<String> _catalogCurrencyCodeSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "External reference code of the default currency of the parent catalog; resolved after `catalogCurrencyCode` and used to create the currency when neither identifier matches an existing one.",
+		example = "AB-34098-789-N"
+	)
+	public String getCatalogCurrencyExternalReferenceCode() {
+		if (_catalogCurrencyExternalReferenceCodeSupplier != null) {
+			catalogCurrencyExternalReferenceCode =
+				_catalogCurrencyExternalReferenceCodeSupplier.get();
+
+			_catalogCurrencyExternalReferenceCodeSupplier = null;
+		}
+
+		return catalogCurrencyExternalReferenceCode;
+	}
+
+	public void setCatalogCurrencyExternalReferenceCode(
+		String catalogCurrencyExternalReferenceCode) {
+
+		this.catalogCurrencyExternalReferenceCode =
+			catalogCurrencyExternalReferenceCode;
+
+		_catalogCurrencyExternalReferenceCodeSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setCatalogCurrencyExternalReferenceCode(
+		UnsafeSupplier<String, Exception>
+			catalogCurrencyExternalReferenceCodeUnsafeSupplier) {
+
+		_catalogCurrencyExternalReferenceCodeSupplier = () -> {
+			try {
+				return catalogCurrencyExternalReferenceCodeUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(
+		description = "External reference code of the default currency of the parent catalog; resolved after `catalogCurrencyCode` and used to create the currency when neither identifier matches an existing one."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected String catalogCurrencyExternalReferenceCode;
+
+	@JsonIgnore
+	private Supplier<String> _catalogCurrencyExternalReferenceCodeSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "External reference code of the parent catalog; used on create when `catalogId` is not supplied to look up the catalog within the company; the request is rejected when neither resolves.",
 		example = "AB-34098-789-N"
 	)
@@ -439,6 +536,52 @@ public class Product implements Serializable {
 	private Supplier<Date> _createDateSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "User who created the product. Read-only; embedded through the `creator` nested field."
+	)
+	@Valid
+	public Creator getCreator() {
+		if (_creatorSupplier != null) {
+			creator = _creatorSupplier.get();
+
+			_creatorSupplier = null;
+		}
+
+		return creator;
+	}
+
+	public void setCreator(Creator creator) {
+		this.creator = creator;
+
+		_creatorSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setCreator(
+		UnsafeSupplier<Creator, Exception> creatorUnsafeSupplier) {
+
+		_creatorSupplier = () -> {
+			try {
+				return creatorUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(
+		description = "User who created the product. Read-only; embedded through the `creator` nested field."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	protected Creator creator;
+
+	@JsonIgnore
+	private Supplier<Creator> _creatorSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "Custom field values stored against the product; written as expando attribute values during save."
 	)
 	@Valid
@@ -490,6 +633,98 @@ public class Product implements Serializable {
 	@JsonIgnore
 	private Supplier<com.liferay.portal.vulcan.custom.field.CustomField[]>
 		_customFieldsSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "Creation timestamp in ISO 8601 (UTC). Read-only; set when the product is first persisted. Filterable and sortable via the OData query parameter.",
+		example = "2017-07-21"
+	)
+	public Date getDateCreated() {
+		if (_dateCreatedSupplier != null) {
+			dateCreated = _dateCreatedSupplier.get();
+
+			_dateCreatedSupplier = null;
+		}
+
+		return dateCreated;
+	}
+
+	public void setDateCreated(Date dateCreated) {
+		this.dateCreated = dateCreated;
+
+		_dateCreatedSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setDateCreated(
+		UnsafeSupplier<Date, Exception> dateCreatedUnsafeSupplier) {
+
+		_dateCreatedSupplier = () -> {
+			try {
+				return dateCreatedUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(
+		description = "Creation timestamp in ISO 8601 (UTC). Read-only; set when the product is first persisted. Filterable and sortable via the OData query parameter."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	protected Date dateCreated;
+
+	@JsonIgnore
+	private Supplier<Date> _dateCreatedSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "Last modification timestamp in ISO 8601 (UTC). Read-only; updated on each save. Filterable and sortable via the OData query parameter.",
+		example = "2017-07-21"
+	)
+	public Date getDateModified() {
+		if (_dateModifiedSupplier != null) {
+			dateModified = _dateModifiedSupplier.get();
+
+			_dateModifiedSupplier = null;
+		}
+
+		return dateModified;
+	}
+
+	public void setDateModified(Date dateModified) {
+		this.dateModified = dateModified;
+
+		_dateModifiedSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setDateModified(
+		UnsafeSupplier<Date, Exception> dateModifiedUnsafeSupplier) {
+
+		_dateModifiedSupplier = () -> {
+			try {
+				return dateModifiedUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(
+		description = "Last modification timestamp in ISO 8601 (UTC). Read-only; updated on each save. Filterable and sortable via the OData query parameter."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	protected Date dateModified;
+
+	@JsonIgnore
+	private Supplier<Date> _dateModifiedSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "Optional default SKU code used during product creation to seed the initial variant.",
@@ -1560,6 +1795,53 @@ public class Product implements Serializable {
 	private Supplier<ProductConfiguration> _productConfigurationSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "Product groups the product belongs to. Each entry carries the external reference code of the product group, so the membership survives a transfer between instances."
+	)
+	@Valid
+	public ProductProductGroup[] getProductGroups() {
+		if (_productGroupsSupplier != null) {
+			productGroups = _productGroupsSupplier.get();
+
+			_productGroupsSupplier = null;
+		}
+
+		return productGroups;
+	}
+
+	public void setProductGroups(ProductProductGroup[] productGroups) {
+		this.productGroups = productGroups;
+
+		_productGroupsSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setProductGroups(
+		UnsafeSupplier<ProductProductGroup[], Exception>
+			productGroupsUnsafeSupplier) {
+
+		_productGroupsSupplier = () -> {
+			try {
+				return productGroupsUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(
+		description = "Product groups the product belongs to. Each entry carries the external reference code of the product group, so the membership survives a transfer between instances."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected ProductProductGroup[] productGroups;
+
+	@JsonIgnore
+	private Supplier<ProductProductGroup[]> _productGroupsSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "Identifier of the parent product envelope; stable across product revisions; read-only; filterable and sortable via the OData query parameter.",
 		example = "30129"
 	)
@@ -2523,6 +2805,39 @@ public class Product implements Serializable {
 			sb.append(String.valueOf(catalog));
 		}
 
+		String catalogCurrencyCode = getCatalogCurrencyCode();
+
+		if (catalogCurrencyCode != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"catalogCurrencyCode\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(catalogCurrencyCode));
+
+			sb.append("\"");
+		}
+
+		String catalogCurrencyExternalReferenceCode =
+			getCatalogCurrencyExternalReferenceCode();
+
+		if (catalogCurrencyExternalReferenceCode != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"catalogCurrencyExternalReferenceCode\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(catalogCurrencyExternalReferenceCode));
+
+			sb.append("\"");
+		}
+
 		String catalogExternalReferenceCode = getCatalogExternalReferenceCode();
 
 		if (catalogExternalReferenceCode != null) {
@@ -2589,6 +2904,18 @@ public class Product implements Serializable {
 			sb.append("\"");
 		}
 
+		Creator creator = getCreator();
+
+		if (creator != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"creator\": ");
+
+			sb.append(String.valueOf(creator));
+		}
+
 		com.liferay.portal.vulcan.custom.field.CustomField[] customFields =
 			getCustomFields();
 
@@ -2610,6 +2937,38 @@ public class Product implements Serializable {
 			}
 
 			sb.append("]");
+		}
+
+		Date dateCreated = getDateCreated();
+
+		if (dateCreated != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"dateCreated\": ");
+
+			sb.append("\"");
+
+			sb.append(liferayToJSONDateFormat.format(dateCreated));
+
+			sb.append("\"");
+		}
+
+		Date dateModified = getDateModified();
+
+		if (dateModified != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"dateModified\": ");
+
+			sb.append("\"");
+
+			sb.append(liferayToJSONDateFormat.format(dateModified));
+
+			sb.append("\"");
 		}
 
 		String defaultSku = getDefaultSku();
@@ -2966,6 +3325,28 @@ public class Product implements Serializable {
 			sb.append("\"productConfiguration\": ");
 
 			sb.append(String.valueOf(productConfiguration));
+		}
+
+		ProductProductGroup[] productGroups = getProductGroups();
+
+		if (productGroups != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"productGroups\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < productGroups.length; i++) {
+				sb.append(String.valueOf(productGroups[i]));
+
+				if ((i + 1) < productGroups.length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
 		}
 
 		Long productId = getProductId();
@@ -3392,4 +3773,4 @@ public class Product implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:1158156629
+// LIFERAY-REST-BUILDER-HASH:-1361733506

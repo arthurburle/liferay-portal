@@ -5,16 +5,15 @@
 
 package com.liferay.portal.kernel.cache.transactional;
 
-import com.liferay.petra.concurrent.ConcurrentReferenceValueHashMap;
 import com.liferay.petra.lang.CentralizedThreadLocal;
 import com.liferay.petra.lang.SafeCloseable;
-import com.liferay.petra.memory.FinalizeManager;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.cache.PortalCacheHelperUtil;
 import com.liferay.portal.kernel.cache.SkipReplicationThreadLocal;
 import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
+import com.liferay.portal.kernel.internal.cache.InvalidationSequence;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.TransactionAttribute;
@@ -151,7 +150,7 @@ public class TransactionalPortalCacheUtil {
 		PortalCacheMap portalCacheMap = _popPortalCacheMap();
 
 		for (UncommittedBuffer uncommittedBuffer : portalCacheMap.values()) {
-			uncommittedBuffer.commit(readOnly);
+			uncommittedBuffer.commit(readOnly, portalCacheMap._startSequence);
 		}
 
 		portalCacheMap.clear();
@@ -181,6 +180,29 @@ public class TransactionalPortalCacheUtil {
 		portalCacheMap.clear();
 	}
 
+	public static <K extends Serializable, V> boolean completePut(
+		PortalCache<K, V> portalCache, K key, V value) {
+
+		PendingPut pendingPut = _pendingPut.get();
+
+		if ((pendingPut == null) || (pendingPut._portalCache != portalCache) ||
+			!key.equals(pendingPut._key) || isEnabled()) {
+
+			PortalCacheHelperUtil.putWithoutReplicator(portalCache, key, value);
+
+			return true;
+		}
+
+		_pendingPut.remove();
+
+		return _invalidationSequence.publishKey(
+			_getRegionName(portalCache), key, pendingPut._sequence,
+			() -> PortalCacheHelperUtil.putWithoutReplicator(
+				portalCache, key, value),
+			() -> PortalCacheHelperUtil.removeWithoutReplicator(
+				portalCache, key));
+	}
+
 	public static <K extends Serializable, V> V get(
 		PortalCache<K, V> portalCache, K key) {
 
@@ -193,6 +215,8 @@ public class TransactionalPortalCacheUtil {
 
 		int index = portalCacheMaps.size() - 1;
 
+		V value = null;
+
 		while (true) {
 			PortalCacheMap portalCacheMap = portalCacheMaps.get(index);
 
@@ -203,15 +227,40 @@ public class TransactionalPortalCacheUtil {
 				ValueEntry valueEntry = uncommittedBuffer.get(key);
 
 				if (valueEntry != null) {
-					return (V)valueEntry._value;
+					value = (V)valueEntry._value;
+
+					break;
 				}
 			}
 
 			if (!portalCacheMap._savepoint) {
-				return null;
+				break;
 			}
 
 			index--;
+		}
+
+		if ((value == null) || (index != (portalCacheMaps.size() - 1))) {
+			boolean[] uncommittedBufferMissMarker =
+				_uncommittedBufferMissMarker.get();
+
+			if (uncommittedBufferMissMarker != null) {
+				uncommittedBufferMissMarker[0] = true;
+			}
+		}
+
+		return value;
+	}
+
+	public static <K extends Serializable, V> V get(
+		PortalCache<K, V> portalCache, K key,
+		boolean[] uncommittedBufferMissMarker) {
+
+		try (SafeCloseable safeCloseable =
+				_uncommittedBufferMissMarker.setWithSafeCloseable(
+					uncommittedBufferMissMarker)) {
+
+			return portalCache.get(key);
 		}
 	}
 
@@ -227,6 +276,24 @@ public class TransactionalPortalCacheUtil {
 		List<PortalCacheMap> portalCacheMaps = _portalCacheMaps.get();
 
 		return !portalCacheMaps.isEmpty();
+	}
+
+	public static <K extends Serializable> void preparePut(
+		PortalCache<K, ?> portalCache, K key) {
+
+		if (!_isTransactionalCacheEnabled()) {
+			return;
+		}
+
+		List<PortalCacheMap> portalCacheMaps = _portalCacheMaps.get();
+
+		if (!portalCacheMaps.isEmpty()) {
+			return;
+		}
+
+		_pendingPut.set(
+			new PendingPut(
+				portalCache, key, _invalidationSequence.getSequence()));
 	}
 
 	public static <K extends Serializable, V> void put(
@@ -264,6 +331,7 @@ public class TransactionalPortalCacheUtil {
 		}
 
 		private final boolean _savepoint;
+		private final long _startSequence = _invalidationSequence.getSequence();
 
 	}
 
@@ -271,6 +339,22 @@ public class TransactionalPortalCacheUtil {
 		List<PortalCacheMap> portalCacheMaps = _portalCacheMaps.get();
 
 		portalCacheMaps.add(new PortalCacheMap(savepoint));
+	}
+
+	private static String _getRegionName(PortalCache<?, ?> portalCache) {
+		if (portalCache.isSharded()) {
+			return _getShardedRegionName(
+				CompanyThreadLocal.getNonsystemCompanyId(), portalCache);
+		}
+
+		return portalCache.getPortalCacheName();
+	}
+
+	private static String _getShardedRegionName(
+		long companyId, PortalCache<?, ?> portalCache) {
+
+		return portalCache.getPortalCacheName() + StringPool.UNDERLINE +
+			companyId;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -299,11 +383,11 @@ public class TransactionalPortalCacheUtil {
 					uncommittedBuffer = new ShardedUncommittedBuffer(
 						(PortalCache<Serializable, Object>)portalCache,
 						(companyId, targetPortalCache) ->
-							new MarkerMVCCUncommittedBuffer(
+							new InvalidatingUncommittedBuffer(
 								companyId, targetPortalCache));
 				}
 				else {
-					uncommittedBuffer = new MarkerMVCCUncommittedBuffer(
+					uncommittedBuffer = new InvalidatingUncommittedBuffer(
 						(PortalCache<Serializable, Object>)portalCache);
 				}
 			}
@@ -345,32 +429,40 @@ public class TransactionalPortalCacheUtil {
 			TransactionalPortalCacheUtil.class.getName() +
 				"._backupPortalCacheMaps",
 			ArrayList::new, false);
+	private static final InvalidationSequence _invalidationSequence =
+		new InvalidationSequence();
+	private static final ThreadLocal<PendingPut> _pendingPut =
+		new CentralizedThreadLocal<>(
+			TransactionalPortalCacheUtil.class.getName() + "._pendingPut");
 	private static final ThreadLocal<List<PortalCacheMap>> _portalCacheMaps =
 		new CentralizedThreadLocal<>(
 			TransactionalPortalCacheUtil.class.getName() + "._portalCacheMaps",
 			ArrayList::new, false);
 	private static volatile Boolean _transactionalCacheEnabled;
+	private static final CentralizedThreadLocal<boolean[]>
+		_uncommittedBufferMissMarker = new CentralizedThreadLocal<>(
+			TransactionalPortalCacheUtil.class.getName() +
+				"._uncommittedBufferMissMarker");
 
-	private static class MarkerMVCCUncommittedBuffer
+	private static class InvalidatingUncommittedBuffer
 		extends MVCCUncommittedBuffer {
 
 		@Override
-		public void commit(boolean readOnly) {
+		public void commit(boolean readOnly, long startSequence) {
 			if (skipCommit(readOnly)) {
 				return;
 			}
 
 			if (readOnly) {
-				if (_markers.get(_portalCacheName) == _marker) {
-					doCommit();
-				}
+				_invalidationSequence.publish(
+					_regionName, startSequence, () -> doCommit(false),
+					() -> doCommit(true));
 			}
 			else {
-				if (_markers.remove(_portalCacheName) != _marker) {
-					commitByRemove = true;
-				}
-
-				doCommit();
+				doCommit(
+					_invalidationSequence.invalidate(
+						_regionName, _sequence, super._removeAll,
+						super._uncommittedMap.keySet()));
 			}
 		}
 
@@ -384,47 +476,35 @@ public class TransactionalPortalCacheUtil {
 			}
 		}
 
-		private MarkerMVCCUncommittedBuffer(
+		private InvalidatingUncommittedBuffer(
 			long companyId, PortalCache<Serializable, Object> portalCache) {
 
 			super(portalCache);
 
-			_portalCacheName =
-				portalCache.getPortalCacheName() + StringPool.UNDERLINE +
-					companyId;
-
-			_marker = _markers.computeIfAbsent(
-				_portalCacheName, key -> new Object());
+			_regionName = _getShardedRegionName(companyId, portalCache);
 		}
 
-		private MarkerMVCCUncommittedBuffer(
+		private InvalidatingUncommittedBuffer(
 			PortalCache<Serializable, Object> portalCache) {
 
 			super(portalCache);
 
-			_portalCacheName = portalCache.getPortalCacheName();
-
-			_marker = _markers.computeIfAbsent(
-				_portalCacheName, key -> new Object());
+			_regionName = portalCache.getPortalCacheName();
 		}
 
-		private static final Map<String, Object> _markers =
-			new ConcurrentReferenceValueHashMap<>(
-				FinalizeManager.WEAK_REFERENCE_FACTORY);
-
-		private final Object _marker;
-		private final String _portalCacheName;
+		private final String _regionName;
+		private final long _sequence = _invalidationSequence.getSequence();
 
 	}
 
 	private static class MVCCUncommittedBuffer implements UncommittedBuffer {
 
-		public void commit(boolean readOnly) {
+		public void commit(boolean readOnly, long startSequence) {
 			if (skipCommit(readOnly)) {
 				return;
 			}
 
-			doCommit();
+			doCommit(false);
 		}
 
 		public ValueEntry get(Serializable key) {
@@ -471,7 +551,7 @@ public class TransactionalPortalCacheUtil {
 			}
 		}
 
-		protected void doCommit() {
+		protected void doCommit(boolean byRemove) {
 			if (_removeAll) {
 				if (_skipReplicator) {
 					PortalCacheHelperUtil.removeAllWithoutReplicator(
@@ -487,7 +567,7 @@ public class TransactionalPortalCacheUtil {
 
 				ValueEntry valueEntry = entry.getValue();
 
-				if (commitByRemove) {
+				if (byRemove) {
 					valueEntry.commitToByRemove(_portalCache, entry.getKey());
 				}
 				else {
@@ -520,8 +600,6 @@ public class TransactionalPortalCacheUtil {
 			return false;
 		}
 
-		protected boolean commitByRemove;
-
 		private MVCCUncommittedBuffer(
 			PortalCache<Serializable, Object> portalCache) {
 
@@ -536,10 +614,26 @@ public class TransactionalPortalCacheUtil {
 
 	}
 
+	private static class PendingPut {
+
+		private PendingPut(
+			PortalCache<?, ?> portalCache, Serializable key, long sequence) {
+
+			_portalCache = portalCache;
+			_key = key;
+			_sequence = sequence;
+		}
+
+		private final Serializable _key;
+		private final PortalCache<?, ?> _portalCache;
+		private final long _sequence;
+
+	}
+
 	private static class ShardedUncommittedBuffer implements UncommittedBuffer {
 
 		@Override
-		public void commit(boolean readOnly) {
+		public void commit(boolean readOnly, long startSequence) {
 			for (Map.Entry<Long, UncommittedBuffer> entry :
 					_shardedUncommittedBuffers.entrySet()) {
 
@@ -549,7 +643,7 @@ public class TransactionalPortalCacheUtil {
 
 					UncommittedBuffer uncommittedBuffer = entry.getValue();
 
-					uncommittedBuffer.commit(readOnly);
+					uncommittedBuffer.commit(readOnly, startSequence);
 				}
 			}
 
@@ -606,19 +700,14 @@ public class TransactionalPortalCacheUtil {
 					shardedUncommittedBuffers.get(entry.getKey());
 
 				if (parentUncommittedBuffer == null) {
-					parentUncommittedBuffer =
-						shardedUncommittedBuffer._uncommittedBufferFunction.
-							apply(
-								entry.getKey(),
-								shardedUncommittedBuffer._portalCache);
-
 					shardedUncommittedBuffers.put(
-						entry.getKey(), parentUncommittedBuffer);
+						entry.getKey(), entry.getValue());
 				}
+				else {
+					UncommittedBuffer uncommittedBuffer2 = entry.getValue();
 
-				UncommittedBuffer uncommittedBuffer2 = entry.getValue();
-
-				uncommittedBuffer2.replay(parentUncommittedBuffer);
+					uncommittedBuffer2.replay(parentUncommittedBuffer);
+				}
 			}
 		}
 
@@ -709,7 +798,7 @@ public class TransactionalPortalCacheUtil {
 
 	private interface UncommittedBuffer {
 
-		public void commit(boolean readOnly);
+		public void commit(boolean readOnly, long startSequence);
 
 		public ValueEntry get(Serializable key);
 

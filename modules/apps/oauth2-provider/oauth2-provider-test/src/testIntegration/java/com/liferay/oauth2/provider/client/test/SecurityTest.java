@@ -146,25 +146,6 @@ public class SecurityTest extends BaseClientTestCase {
 	}
 
 	/**
-	 * OAUTH2-99
-	 */
-	@Test
-	public void testPreventClickJacking() {
-		Assert.assertEquals(
-			"SAMEORIGIN",
-			parseXFrameOptionsHeader(
-				getCodeResponse(
-					_user.getEmailAddress(), PropsValues.DEFAULT_ADMIN_PASSWORD,
-					null,
-					getCodeFunction(
-						webTarget -> webTarget.queryParam(
-							"client_id", _CLIENT_ID_CODE
-						).queryParam(
-							"response_type", "code"
-						)))));
-	}
-
-	/**
 	 * OAUTH2-96
 	 */
 	@Ignore
@@ -195,7 +176,7 @@ public class SecurityTest extends BaseClientTestCase {
 				null,
 				getCodeFunction(
 					webTarget -> webTarget.queryParam(
-						"client_id", _CLIENT_ID_CODE_PKCE
+						"client_id", _CLIENT_ID_CODE_PKCE_1
 					).queryParam(
 						"code_challenge", "correctCodeChallenge"
 					).queryParam(
@@ -207,7 +188,7 @@ public class SecurityTest extends BaseClientTestCase {
 		Assert.assertEquals(
 			"invalid_grant",
 			getToken(
-				_CLIENT_ID_CODE_PKCE, null,
+				_CLIENT_ID_CODE_PKCE_1, null,
 				getExchangeAuthorizationCodePKCEBiFunction(
 					authorizationCode, null, "wrongCodeVerifier"),
 				this::parseError));
@@ -237,6 +218,25 @@ public class SecurityTest extends BaseClientTestCase {
 	}
 
 	/**
+	 * OAUTH2-99
+	 */
+	@Test
+	public void testPreventClickJacking() {
+		Assert.assertEquals(
+			"SAMEORIGIN",
+			parseXFrameOptionsHeader(
+				getCodeResponse(
+					_user.getEmailAddress(), PropsValues.DEFAULT_ADMIN_PASSWORD,
+					null,
+					getCodeFunction(
+						webTarget -> webTarget.queryParam(
+							"client_id", _CLIENT_ID_CODE
+						).queryParam(
+							"response_type", "code"
+						)))));
+	}
+
+	/**
 	 * OAUTH2-97
 	 */
 	@Test
@@ -262,14 +262,10 @@ public class SecurityTest extends BaseClientTestCase {
 
 	@Test
 	public void testPublicApplicationIsDisclosedToGuestUser() {
-		Response response = _getApplicationResponse(
-			_EXTERNAL_REFERENCE_CODE_CODE_PKCE, null);
-
-		Assert.assertEquals(200, getStatus(response));
-
-		String bodyString = getBodyAsString(response);
-
-		Assert.assertTrue(bodyString.contains(_CLIENT_ID_CODE_PKCE));
+		_testPublicApplicationIsDisclosedToGuestUser(
+			_CLIENT_ID_CODE_PKCE_1, _EXTERNAL_REFERENCE_CODE_CODE_PKCE);
+		_testPublicApplicationIsDisclosedToGuestUser(
+			_CLIENT_ID_CODE_PKCE_2, _generatedExternalReferenceCode);
 	}
 
 	@Test
@@ -392,11 +388,10 @@ public class SecurityTest extends BaseClientTestCase {
 				_user.getEmailAddress(), PropsValues.DEFAULT_ADMIN_PASSWORD,
 				null);
 
-		Response response = getCodeFunction(
-			authorizeRequestFunction, true
-		).apply(
-			invocationBuilderFunction
-		);
+		Function<Function<WebTarget, Invocation.Builder>, Response>
+			codeFunction = getCodeFunction(authorizeRequestFunction, true);
+
+		Response response = codeFunction.apply(invocationBuilderFunction);
 
 		URI uri = response.getLocation();
 
@@ -503,6 +498,19 @@ public class SecurityTest extends BaseClientTestCase {
 		);
 	}
 
+	private void _testPublicApplicationIsDisclosedToGuestUser(
+		String clientId, String externalReferenceCode) {
+
+		Response response = _getApplicationResponse(
+			externalReferenceCode, null);
+
+		Assert.assertEquals(200, getStatus(response));
+
+		String bodyString = getBodyAsString(response);
+
+		Assert.assertTrue(bodyString.contains(clientId));
+	}
+
 	private void _testUnregisteredClientIdIsRejected(WebTarget webTarget) {
 		Response response1 = _getPublicClientResponse(
 			_CLIENT_ID_CLIENT_CREDENTIALS, webTarget);
@@ -520,7 +528,10 @@ public class SecurityTest extends BaseClientTestCase {
 
 	private static final String _CLIENT_ID_CODE = RandomTestUtil.randomString();
 
-	private static final String _CLIENT_ID_CODE_PKCE =
+	private static final String _CLIENT_ID_CODE_PKCE_1 =
+		RandomTestUtil.randomString();
+
+	private static final String _CLIENT_ID_CODE_PKCE_2 =
 		RandomTestUtil.randomString();
 
 	private static final String _CLIENT_ID_DEFAULT_USER =
@@ -547,6 +558,7 @@ public class SecurityTest extends BaseClientTestCase {
 
 	private static final String _INJECTED_SCRIPT = "<script>alert(1)</script>";
 
+	private String _generatedExternalReferenceCode;
 	private long _oAuth2ApplicationId;
 
 	@Inject
@@ -580,7 +592,7 @@ public class SecurityTest extends BaseClientTestCase {
 
 			_oAuth2ApplicationLocalService.updateExternalReferenceCode(
 				createOAuth2ApplicationWithNone(
-					companyId, _user, _CLIENT_ID_CODE_PKCE,
+					companyId, _user, _CLIENT_ID_CODE_PKCE_1,
 					Collections.singletonList(
 						GrantType.AUTHORIZATION_CODE_PKCE),
 					Collections.singletonList(
@@ -588,6 +600,19 @@ public class SecurityTest extends BaseClientTestCase {
 							PortalUtil.getPortalServerPort(false)),
 					false, Collections.singletonList("everything"), false),
 				_EXTERNAL_REFERENCE_CODE_CODE_PKCE);
+
+			OAuth2Application oAuth2Application1 =
+				createOAuth2ApplicationWithNone(
+					companyId, _user, _CLIENT_ID_CODE_PKCE_2,
+					Collections.singletonList(
+						GrantType.AUTHORIZATION_CODE_PKCE),
+					Collections.singletonList(
+						"http://redirecturi:" +
+							PortalUtil.getPortalServerPort(false)),
+					false, Collections.singletonList("everything"), false);
+
+			_generatedExternalReferenceCode =
+				oAuth2Application1.getExternalReferenceCode();
 
 			Company company = CompanyLocalServiceUtil.getCompany(companyId);
 
@@ -601,7 +626,7 @@ public class SecurityTest extends BaseClientTestCase {
 				Collections.singletonList(GrantType.AUTHORIZATION_CODE),
 				_INJECTED_SCRIPT, Collections.singletonList("everything"));
 
-			OAuth2Application oAuth2Application = createOAuth2Application(
+			OAuth2Application oAuth2Application2 = createOAuth2Application(
 				companyId, _user, _CLIENT_ID_UNESCAPED_SCOPE,
 				Collections.singletonList(GrantType.AUTHORIZATION_CODE),
 				Collections.singletonList(
@@ -609,7 +634,7 @@ public class SecurityTest extends BaseClientTestCase {
 
 			_oAuth2ScopeGrantLocalService.createOAuth2ScopeGrant(
 				companyId,
-				oAuth2Application.getOAuth2ApplicationScopeAliasesId(),
+				oAuth2Application2.getOAuth2ApplicationScopeAliasesId(),
 				"Liferay.Captcha.REST", "com.liferay.captcha.rest.impl", "GET",
 				Collections.singletonList(
 					"Liferay.Captcha.REST.everything.read"));

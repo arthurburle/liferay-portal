@@ -10,6 +10,7 @@ import com.liferay.jenkins.results.parser.JenkinsResultsParserUtil;
 import com.liferay.jenkins.results.parser.Retryable;
 import com.liferay.jenkins.results.parser.TopLevelBuildReport;
 import com.liferay.jenkins.results.parser.test.clazz.BaseAntTargetTestClass;
+import com.liferay.jenkins.results.parser.test.clazz.SemVerModulesTestClass;
 import com.liferay.jenkins.results.parser.test.clazz.TestClass;
 import com.liferay.jenkins.results.parser.test.clazz.TestClassMethod;
 import com.liferay.jenkins.results.parser.test.clazz.group.AxisTestClassGroup;
@@ -18,6 +19,7 @@ import com.liferay.jenkins.results.parser.test.clazz.group.JSUnitAxisTestClassGr
 import com.liferay.jenkins.results.parser.test.clazz.group.JUnitAxisTestClassGroup;
 import com.liferay.jenkins.results.parser.test.clazz.group.ModulesAxisTestClassGroup;
 import com.liferay.jenkins.results.parser.test.clazz.group.PlaywrightAxisTestClassGroup;
+import com.liferay.jenkins.results.parser.test.clazz.group.WorkspacesCompileAxisTestClassGroup;
 
 import java.io.IOException;
 
@@ -64,8 +66,8 @@ public class TestrayFactory {
 			}
 			else if (axisTestClassGroup instanceof JSUnitAxisTestClassGroup) {
 				return new JSUnitBatchBuildTestrayCaseResult(
-					axisTestClassGroup, testClass, testrayBuild,
-					topLevelBuildReport);
+					axisTestClassGroup, testClass, testClassMethod,
+					testrayBuild, topLevelBuildReport);
 			}
 			else if (axisTestClassGroup instanceof JUnitAxisTestClassGroup) {
 				return new JUnitBatchBuildTestrayCaseResult(
@@ -75,6 +77,12 @@ public class TestrayFactory {
 			else if (axisTestClassGroup instanceof ModulesAxisTestClassGroup) {
 				if (testClass instanceof BaseAntTargetTestClass) {
 					return new AntTargetBatchBuildTestrayCaseResult(
+						axisTestClassGroup, testClass, testrayBuild,
+						topLevelBuildReport);
+				}
+
+				if (testClass instanceof SemVerModulesTestClass) {
+					return new SemVerModulesBatchBuildTestrayCaseResult(
 						axisTestClassGroup, testClass, testrayBuild,
 						topLevelBuildReport);
 				}
@@ -89,6 +97,13 @@ public class TestrayFactory {
 				return new PlaywrightBatchBuildTestrayCaseResult(
 					axisTestClassGroup, testClass, testClassMethod,
 					testrayBuild, topLevelBuildReport);
+			}
+			else if (axisTestClassGroup instanceof
+						WorkspacesCompileAxisTestClassGroup) {
+
+				return new WorkspacesCompileBatchBuildTestrayCaseResult(
+					axisTestClassGroup, testClass, testrayBuild,
+					topLevelBuildReport);
 			}
 		}
 

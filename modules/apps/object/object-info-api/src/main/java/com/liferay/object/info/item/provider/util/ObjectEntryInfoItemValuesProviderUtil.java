@@ -5,8 +5,8 @@
 
 package com.liferay.object.info.item.provider.util;
 
+import com.liferay.document.library.helper.DLURLHelper;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
-import com.liferay.document.library.util.DLURLHelper;
 import com.liferay.friendly.url.model.FriendlyURLEntry;
 import com.liferay.friendly.url.service.FriendlyURLEntryLocalService;
 import com.liferay.info.field.InfoField;
@@ -35,6 +35,7 @@ import com.liferay.object.model.ObjectAction;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectField;
 import com.liferay.object.model.ObjectRelationship;
+import com.liferay.object.model.bag.ObjectFieldBag;
 import com.liferay.object.related.models.ObjectRelatedModelsProvider;
 import com.liferay.object.related.models.ObjectRelatedModelsProviderRegistry;
 import com.liferay.object.rest.dto.v1_0.ListEntry;
@@ -45,7 +46,6 @@ import com.liferay.object.service.ObjectActionLocalService;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectEntryService;
-import com.liferay.object.service.ObjectFieldLocalService;
 import com.liferay.object.service.ObjectRelationshipLocalService;
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.function.UnsafeSupplierValue;
@@ -127,7 +127,6 @@ public class ObjectEntryInfoItemValuesProviderUtil {
 			ObjectEntryManagerRegistry objectEntryManagerRegistry,
 			ObjectEntryService objectEntryService,
 			ObjectFieldInfoFieldConverter objectFieldInfoFieldConverter,
-			ObjectFieldLocalService objectFieldLocalService,
 			List<ObjectField> objectFields,
 			ObjectRelationshipLocalService objectRelationshipLocalService,
 			ObjectScopeProviderRegistry objectScopeProviderRegistry,
@@ -169,16 +168,22 @@ public class ObjectEntryInfoItemValuesProviderUtil {
 					fetchObjectRelationshipByObjectFieldId2(
 						objectField.getObjectFieldId());
 
-			ObjectDefinition parentObjectDefinition =
-				objectDefinitionLocalService.getObjectDefinition(
-					objectRelationship.getObjectDefinitionId1());
-
+			ObjectDefinition relatedSystemObjectDefinition = null;
 			com.liferay.object.model.ObjectEntry
+				serviceBuilderRelatedObjectEntry = null;
+
+			if (serviceBuilderObjectEntry != null) {
+				relatedSystemObjectDefinition =
+					serviceBuilderObjectEntry.getRelatedSystemObjectDefinition(
+						objectField.getName());
 				serviceBuilderRelatedObjectEntry =
 					serviceBuilderObjectEntry.getRelatedObjectEntry(
 						objectField.getName());
+			}
 
-			if (serviceBuilderRelatedObjectEntry == null) {
+			if ((relatedSystemObjectDefinition == null) &&
+				(serviceBuilderRelatedObjectEntry == null)) {
+
 				long objectEntryId = GetterUtil.getLong(
 					values.get(objectField.getName()));
 
@@ -187,6 +192,12 @@ public class ObjectEntryInfoItemValuesProviderUtil {
 						objectEntryLocalService.fetchObjectEntry(objectEntryId);
 				}
 			}
+
+			ObjectDefinition parentObjectDefinition =
+				_getParentObjectDefinition(
+					objectDefinition, objectDefinitionLocalService,
+					objectRelationship, relatedSystemObjectDefinition,
+					serviceBuilderRelatedObjectEntry);
 
 			ObjectEntry objectEntry = ObjectEntryInfoItemUtil.getObjectEntry(
 				parentObjectDefinition, objectEntryManagerRegistry,
@@ -202,9 +213,11 @@ public class ObjectEntryInfoItemValuesProviderUtil {
 					objectEntry.getDefaultLanguageId();
 			}
 
+			ObjectFieldBag objectFieldBag =
+				parentObjectDefinition.getObjectFieldBag();
+
 			for (ObjectField relatedObjectField :
-					objectFieldLocalService.getObjectFields(
-						parentObjectDefinition.getObjectDefinitionId())) {
+					objectFieldBag.getObjectFields()) {
 
 				if (relatedObjectField.isMetadata()) {
 					continue;
@@ -415,39 +428,68 @@ public class ObjectEntryInfoItemValuesProviderUtil {
 
 			try {
 				Supplier<Object> downloadURLSupplier = null;
-				Object fileNameInfoFieldValue = null;
+				Supplier<Object> fileNameInfoFieldValue = null;
 				Supplier<Object> fileURLSupplier = null;
-				Object mimeTypeInfoFieldValue = null;
+				Supplier<Object> mimeTypeInfoFieldValue = null;
 				Supplier<Object> previewURLSupplier = null;
-				Object sizeInfoFieldValue = null;
+				Supplier<Object> sizeInfoFieldValue = null;
 
-				if (infoFieldValue instanceof Long) {
-					Long fileEntryId = (Long)infoFieldValue;
-
-					FileEntry fileEntry = dlAppLocalService.getFileEntry(
-						GetterUtil.getLong(fileEntryId));
-
-					downloadURLSupplier = _toSupplier(
-						() -> _getAttachmentDownloadURL(
-							dlURLHelper, fileEntry, objectDefinition,
-							objectEntryService, objectField,
-							serviceBuilderObjectEntry, themeDisplay));
-					fileNameInfoFieldValue = fileEntry.getFileName();
-
-					String mimeType = fileEntry.getMimeType();
-
-					mimeTypeInfoFieldValue = mimeType;
+				if (infoFieldValue instanceof Long fileEntryId) {
+					UnsafeSupplierValue<FileEntry, Exception>
+						fileEntryUnsafeSupplierValue =
+							new UnsafeSupplierValue<>(
+								() -> dlAppLocalService.getFileEntry(
+									fileEntryId));
 
 					Supplier<Object> webImageSupplier = _toSupplier(
 						() -> _getWebImage(
-							dlURLHelper, fileEntry, themeDisplay));
+							dlURLHelper,
+							fileEntryUnsafeSupplierValue.getValue(),
+							themeDisplay));
 
-					if (mimeType.startsWith("image")) {
-						fileURLSupplier = webImageSupplier;
-					}
+					downloadURLSupplier = _toSupplier(
+						() -> _getAttachmentDownloadURL(
+							dlURLHelper,
+							fileEntryUnsafeSupplierValue.getValue(),
+							objectDefinition, objectEntryService, objectField,
+							serviceBuilderObjectEntry, themeDisplay));
+					fileNameInfoFieldValue = _toSupplier(
+						() -> {
+							FileEntry fileEntry =
+								fileEntryUnsafeSupplierValue.getValue();
+
+							return fileEntry.getFileName();
+						});
+					fileURLSupplier = _toSupplier(
+						() -> {
+							FileEntry fileEntry =
+								fileEntryUnsafeSupplierValue.getValue();
+
+							String mimeType = fileEntry.getMimeType();
+
+							if (!mimeType.startsWith("image")) {
+								return null;
+							}
+
+							return webImageSupplier.get();
+						});
+					mimeTypeInfoFieldValue = _toSupplier(
+						() -> {
+							FileEntry fileEntry =
+								fileEntryUnsafeSupplierValue.getValue();
+
+							return fileEntry.getMimeType();
+						});
 
 					previewURLSupplier = webImageSupplier;
-					sizeInfoFieldValue = fileEntry.getSize();
+
+					sizeInfoFieldValue = _toSupplier(
+						() -> {
+							FileEntry fileEntry =
+								fileEntryUnsafeSupplierValue.getValue();
+
+							return fileEntry.getSize();
+						});
 				}
 				else if (infoFieldValue instanceof InfoLocalizedValue) {
 					Map<Locale, FileEntry> fileEntries = new LinkedHashMap<>();
@@ -497,8 +539,8 @@ public class ObjectEntryInfoItemValuesProviderUtil {
 							dlURLHelper, fileEntries, objectDefinition,
 							objectEntryService, objectField,
 							serviceBuilderObjectEntry, themeDisplay));
-					fileNameInfoFieldValue =
-						fileNameInfoFieldValueBuilder.build();
+					fileNameInfoFieldValue = _toSupplier(
+						fileNameInfoFieldValueBuilder::build);
 
 					if (!imageFileEntries.isEmpty()) {
 						fileURLSupplier = _toSupplier(
@@ -506,12 +548,13 @@ public class ObjectEntryInfoItemValuesProviderUtil {
 								dlURLHelper, imageFileEntries, themeDisplay));
 					}
 
-					mimeTypeInfoFieldValue =
-						mimeTypeInfoFieldValueBuilder.build();
+					mimeTypeInfoFieldValue = _toSupplier(
+						mimeTypeInfoFieldValueBuilder::build);
 					previewURLSupplier = _toSupplier(
 						() -> _getWebImageInfoLocalizedValue(
 							dlURLHelper, fileEntries, themeDisplay));
-					sizeInfoFieldValue = sizeInfoFieldValueBuilder.build();
+					sizeInfoFieldValue = _toSupplier(
+						sizeInfoFieldValueBuilder::build);
 				}
 
 				if (fileURLSupplier != null) {
@@ -695,6 +738,33 @@ public class ObjectEntryInfoItemValuesProviderUtil {
 			).values(
 				listTypeEntry.getNameMap()
 			).build());
+	}
+
+	private static ObjectDefinition _getParentObjectDefinition(
+			ObjectDefinition objectDefinition,
+			ObjectDefinitionLocalService objectDefinitionLocalService,
+			ObjectRelationship objectRelationship,
+			ObjectDefinition relatedSystemObjectDefinition,
+			com.liferay.object.model.ObjectEntry
+				serviceBuilderRelatedObjectEntry)
+		throws Exception {
+
+		if (serviceBuilderRelatedObjectEntry == null) {
+			if (relatedSystemObjectDefinition != null) {
+				return relatedSystemObjectDefinition;
+			}
+
+			if (objectRelationship.getObjectDefinitionId1() ==
+					objectDefinition.getObjectDefinitionId()) {
+
+				return objectDefinition;
+			}
+
+			return objectDefinitionLocalService.getObjectDefinition(
+				objectRelationship.getObjectDefinitionId1());
+		}
+
+		return serviceBuilderRelatedObjectEntry.getObjectDefinition();
 	}
 
 	private static WebImage _getWebImage(

@@ -36,12 +36,17 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.odata.entity.EntityModel;
+import com.liferay.portal.odata.filter.FilterParser;
+import com.liferay.portal.odata.filter.FilterParserProvider;
+import com.liferay.segments.constants.SegmentsEntryConstants;
 import com.liferay.segments.context.Context;
 import com.liferay.segments.criteria.Criteria;
 import com.liferay.segments.criteria.contributor.SegmentsCriteriaContributor;
 import com.liferay.segments.criteria.contributor.SegmentsCriteriaContributorRegistry;
 import com.liferay.segments.internal.checker.UserSegmentsEntryMembershipChecker;
 import com.liferay.segments.internal.odata.entity.EntityModelFieldMapper;
+import com.liferay.segments.internal.odata.entity.UserEntityModel;
 import com.liferay.segments.model.SegmentsEntry;
 import com.liferay.segments.model.SegmentsEntryRel;
 import com.liferay.segments.odata.matcher.ODataMatcher;
@@ -160,8 +165,12 @@ public abstract class BaseSegmentsEntryProvider
 
 		if (segmentsEntries.isEmpty()) {
 			segmentsEntries = segmentsEntryLocalService.getSegmentsEntries(
-				groupId, new String[] {getSource()}, QueryUtil.ALL_POS,
-				QueryUtil.ALL_POS, null);
+				groupId, new String[] {getSource()},
+				new int[] {
+					SegmentsEntryConstants.TYPE_BATCH,
+					SegmentsEntryConstants.TYPE_DEFAULT
+				},
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 		}
 
 		if (segmentsEntries.isEmpty()) {
@@ -326,14 +335,24 @@ public abstract class BaseSegmentsEntryProvider
 		if (Validator.isNotNull(modelFilterString)) {
 			boolean matchesModel = false;
 
-			try {
-				matchesModel = UserSegmentsEntryMembershipChecker.isMember(
-					StringBundler.concat(
-						"(", modelFilterString, ") and (classPK eq CLASS_PK)"),
-					userAttributes);
+			if (_isValidModelFilterString(modelFilterString)) {
+				try {
+					matchesModel = UserSegmentsEntryMembershipChecker.isMember(
+						StringBundler.concat(
+							"(", modelFilterString,
+							") and (classPK eq CLASS_PK)"),
+						userAttributes);
+				}
+				catch (Exception exception) {
+					_log.error(exception);
+				}
 			}
-			catch (Exception exception) {
-				_log.error(exception);
+			else if (_log.isWarnEnabled()) {
+				_log.warn(
+					StringBundler.concat(
+						"Not evaluating segments entry ",
+						segmentsEntry.getSegmentsEntryId(),
+						" because its model criteria is not a valid filter"));
 			}
 
 			Criteria.Conjunction modelConjunction = getConjunction(
@@ -376,6 +395,9 @@ public abstract class BaseSegmentsEntryProvider
 	@Reference
 	protected ExpandoValueLocalService expandoValueLocalService;
 
+	@Reference
+	protected FilterParserProvider filterParserProvider;
+
 	@Reference(
 		target = "(target.class.name=com.liferay.segments.context.Context)"
 	)
@@ -393,6 +415,9 @@ public abstract class BaseSegmentsEntryProvider
 
 	@Reference
 	protected SegmentsEntryRelLocalService segmentsEntryRelLocalService;
+
+	@Reference(target = "(entity.model.name=" + UserEntityModel.NAME + ")")
+	protected EntityModel userEntityModel;
 
 	@Reference
 	protected UserLocalService userLocalService;
@@ -506,6 +531,24 @@ public abstract class BaseSegmentsEntryProvider
 				new Long[0]
 			)
 		).build();
+	}
+
+	private boolean _isValidModelFilterString(String modelFilterString) {
+		try {
+			FilterParser filterParser = filterParserProvider.provide(
+				userEntityModel);
+
+			filterParser.parse(modelFilterString);
+
+			return true;
+		}
+		catch (Exception exception) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(exception);
+			}
+
+			return false;
+		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

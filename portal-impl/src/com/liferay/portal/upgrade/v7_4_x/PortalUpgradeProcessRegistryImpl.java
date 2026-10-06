@@ -833,6 +833,20 @@ public class PortalUpgradeProcessRegistryImpl
 
 		upgradeVersionTreeMap.put(
 			new Version(39, 0, 0), new UpgradeCompanyInfo());
+
+		upgradeVersionTreeMap.put(
+			new Version(39, 0, 1),
+			UpgradeProcessFactory.alterColumnType(
+				"LayoutPrototype", "name", "TEXT null"),
+			UpgradeProcessFactory.alterColumnType(
+				"LayoutPrototype", "description", "TEXT null"),
+			UpgradeProcessFactory.alterColumnType(
+				"LayoutSetPrototype", "name", "TEXT null"),
+			UpgradeProcessFactory.alterColumnType(
+				"LayoutSetPrototype", "description", "TEXT null"));
+
+		upgradeVersionTreeMap.put(
+			new Version(39, 0, 2), new GroupGroupKeyUpgradeProcess());
 	}
 
 }

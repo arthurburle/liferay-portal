@@ -81,7 +81,6 @@ import com.liferay.portal.search.test.util.IdempotentRetryAssert;
 import com.liferay.portal.test.log.LogCapture;
 import com.liferay.portal.test.log.LoggerTestUtil;
 import com.liferay.portal.test.rule.FeatureFlag;
-import com.liferay.portal.test.rule.FeatureFlags;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -110,9 +109,7 @@ import org.junit.runner.RunWith;
 /**
  * @author Rubén Pulido
  */
-@FeatureFlags(
-	featureFlags = {@FeatureFlag("LPD-35443"), @FeatureFlag("LPD-76864")}
-)
+@FeatureFlag("LPD-76864")
 @RunWith(Arquillian.class)
 public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 
@@ -1322,6 +1319,34 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 		assertValid(getPageTemplate);
 	}
 
+	private void _testGetSitePageTemplateWithNestedFields(
+			PageTemplate pageTemplate)
+		throws Exception {
+
+		PageTemplateResource pageTemplateResource = _getPageTemplateResource();
+
+		PageTemplate postPageTemplate =
+			pageTemplateResource.postSitePageTemplate(
+				testGroup.getExternalReferenceCode(), pageTemplate);
+
+		PageTemplate getPageTemplate = pageTemplateResource.getSitePageTemplate(
+			testGroup.getExternalReferenceCode(),
+			postPageTemplate.getExternalReferenceCode());
+
+		assertEquals(postPageTemplate, getPageTemplate);
+		assertValid(getPageTemplate);
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.
+				getLayoutPageTemplateEntryByExternalReferenceCode(
+					getPageTemplate.getExternalReferenceCode(),
+					testGroup.getGroupId());
+
+		PageSpecificationsTestUtil.assertPageSpecifications(
+			_layoutLocalService.getLayout(layoutPageTemplateEntry.getPlid()),
+			getPageTemplate.getPageSpecifications());
+	}
+
 	private void _testGetSitePageTemplatesPageWithThumbnailAsNestedField()
 		throws Exception {
 
@@ -1374,34 +1399,6 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 				Assert.assertNull(pageTemplate.getThumbnailURLReference());
 			}
 		}
-	}
-
-	private void _testGetSitePageTemplateWithNestedFields(
-			PageTemplate pageTemplate)
-		throws Exception {
-
-		PageTemplateResource pageTemplateResource = _getPageTemplateResource();
-
-		PageTemplate postPageTemplate =
-			pageTemplateResource.postSitePageTemplate(
-				testGroup.getExternalReferenceCode(), pageTemplate);
-
-		PageTemplate getPageTemplate = pageTemplateResource.getSitePageTemplate(
-			testGroup.getExternalReferenceCode(),
-			postPageTemplate.getExternalReferenceCode());
-
-		assertEquals(postPageTemplate, getPageTemplate);
-		assertValid(getPageTemplate);
-
-		LayoutPageTemplateEntry layoutPageTemplateEntry =
-			_layoutPageTemplateEntryLocalService.
-				getLayoutPageTemplateEntryByExternalReferenceCode(
-					getPageTemplate.getExternalReferenceCode(),
-					testGroup.getGroupId());
-
-		PageSpecificationsTestUtil.assertPageSpecifications(
-			_layoutLocalService.getLayout(layoutPageTemplateEntry.getPlid()),
-			getPageTemplate.getPageSpecifications());
 	}
 
 	private void _testPatchSitePageTemplate(

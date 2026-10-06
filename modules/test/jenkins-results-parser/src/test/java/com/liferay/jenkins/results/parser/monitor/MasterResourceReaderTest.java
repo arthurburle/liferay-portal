@@ -96,7 +96,7 @@ public class MasterResourceReaderTest
 		try {
 			jobJSONObjects.put(RandomTestUtil.randomString(), new JSONObject());
 
-			Assert.fail("Expected UnsupportedOperationException");
+			Assert.fail();
 		}
 		catch (UnsupportedOperationException unsupportedOperationException) {
 		}
@@ -117,7 +117,7 @@ public class MasterResourceReaderTest
 		try {
 			masterResourceReader.getJobJSONObjects(_MILLIS_TIMEOUT);
 
-			Assert.fail("Expected the read to fail");
+			Assert.fail();
 		}
 		catch (Exception exception) {
 		}
@@ -145,14 +145,29 @@ public class MasterResourceReaderTest
 			MasterResourceReader.getInstance(masterName);
 
 		testSame(
-			masterResourceReader.getMemoryInfo(),
-			masterResourceReader.getMemoryInfo());
+			masterResourceReader.getMemoryInfo(_MILLIS_TIMEOUT),
+			masterResourceReader.getMemoryInfo(_MILLIS_TIMEOUT));
 	}
 
 	@Test
 	public void testGetMemoryInfoWithoutPrometheusScrape() throws Exception {
 		mockUrlReader();
 
+		String memoryInfo = MonitorTestUtil.newMemoryInfo(23791372L, 32249488L);
+
+		setShellCommandOutput("cat /proc/meminfo", mockShell(), memoryInfo);
+
+		String masterName = MonitorTestUtil.newJenkinsMasterName();
+
+		MasterResourceReader masterResourceReader =
+			MasterResourceReader.getInstance(masterName);
+
+		testEquals(
+			memoryInfo, masterResourceReader.getMemoryInfo(_MILLIS_TIMEOUT));
+	}
+
+	@Test
+	public void testGetMemoryInfoWithoutTimeout() throws Exception {
 		String memoryInfo = MonitorTestUtil.newMemoryInfo(23791372L, 32249488L);
 
 		setShellCommandOutput("cat /proc/meminfo", mockShell(), memoryInfo);
@@ -222,29 +237,6 @@ public class MasterResourceReaderTest
 	}
 
 	@Test
-	public void testGetPrometheusScrapeWithoutMemoryInfo() throws Exception {
-		mockShell();
-
-		String labelValue = RandomTestUtil.randomString();
-		String name = MonitorTestUtil.newMetricName();
-		UrlReader urlReader = mockUrlReader();
-
-		setUrlReaderOutput(
-			MonitorTestUtil.newSample("label", labelValue, name, "1.0"),
-			"/prometheus", urlReader);
-
-		String masterName = MonitorTestUtil.newJenkinsMasterName();
-
-		MasterResourceReader masterResourceReader =
-			MasterResourceReader.getInstance(masterName);
-
-		PrometheusScrape prometheusScrape =
-			masterResourceReader.getPrometheusScrape(_MILLIS_TIMEOUT);
-
-		testEquals(1.0D, prometheusScrape.getValue("label", labelValue, name));
-	}
-
-	@Test
 	public void testGetPrometheusScrapeWithReadFailure() throws Exception {
 		UrlReader urlReader = mockUrlReader();
 
@@ -260,7 +252,7 @@ public class MasterResourceReaderTest
 		try {
 			masterResourceReader.getPrometheusScrape(_MILLIS_TIMEOUT);
 
-			Assert.fail("Expected IOException");
+			Assert.fail();
 		}
 		catch (IOException ioException) {
 		}
@@ -271,6 +263,29 @@ public class MasterResourceReaderTest
 		setUrlReaderOutput(
 			MonitorTestUtil.newSample("label", labelValue, name, "1.0"),
 			"/prometheus", urlReader);
+
+		PrometheusScrape prometheusScrape =
+			masterResourceReader.getPrometheusScrape(_MILLIS_TIMEOUT);
+
+		testEquals(1.0D, prometheusScrape.getValue("label", labelValue, name));
+	}
+
+	@Test
+	public void testGetPrometheusScrapeWithoutMemoryInfo() throws Exception {
+		mockShell();
+
+		String labelValue = RandomTestUtil.randomString();
+		String name = MonitorTestUtil.newMetricName();
+		UrlReader urlReader = mockUrlReader();
+
+		setUrlReaderOutput(
+			MonitorTestUtil.newSample("label", labelValue, name, "1.0"),
+			"/prometheus", urlReader);
+
+		String masterName = MonitorTestUtil.newJenkinsMasterName();
+
+		MasterResourceReader masterResourceReader =
+			MasterResourceReader.getInstance(masterName);
 
 		PrometheusScrape prometheusScrape =
 			masterResourceReader.getPrometheusScrape(_MILLIS_TIMEOUT);

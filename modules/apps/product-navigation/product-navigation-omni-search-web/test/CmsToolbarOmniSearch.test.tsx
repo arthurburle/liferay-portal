@@ -58,6 +58,13 @@ function getOmniSearchItem() {
 }
 
 describe('CmsToolbarOmniSearch', () => {
+	beforeEach(() => {
+		global.Liferay.Browser = {
+			...(global as any).Liferay,
+			isMac: () => false,
+		};
+	});
+
 	afterEach(() => {
 		document.body.innerHTML = '';
 	});

@@ -20,8 +20,8 @@ import com.liferay.client.extension.type.manager.CETManager;
 import com.liferay.data.engine.rest.resource.v2_0.DataDefinitionResource;
 import com.liferay.depot.service.DepotEntryGroupRelLocalService;
 import com.liferay.depot.service.DepotEntryLocalService;
+import com.liferay.document.library.helper.DLURLHelper;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalService;
-import com.liferay.document.library.util.DLURLHelper;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalService;
 import com.liferay.dynamic.data.mapping.util.DefaultDDMStructureHelper;
@@ -422,9 +422,9 @@ public class SiteInitializerExtender
 	@Reference
 	private ExpandoValueLocalService _expandoValueLocalService;
 
-	private final Map<String, File> _files = new HashMap<>();
 	private final List<SiteInitializerExtension>
 		_fileSiteInitializerExtensions = new ArrayList<>();
+	private final Map<String, File> _files = new HashMap<>();
 
 	@Reference
 	private FragmentEntryLinkLocalService _fragmentEntryLinkLocalService;
@@ -474,11 +474,11 @@ public class SiteInitializerExtender
 	private LayoutSetLocalService _layoutSetLocalService;
 
 	@Reference
-	private LayoutsImporter _layoutsImporter;
-
-	@Reference
 	private LayoutUtilityPageEntryLocalService
 		_layoutUtilityPageEntryLocalService;
+
+	@Reference
+	private LayoutsImporter _layoutsImporter;
 
 	@Reference
 	private ListTypeDefinitionResource _listTypeDefinitionResource;

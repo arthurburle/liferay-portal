@@ -31,6 +31,7 @@ import com.liferay.portal.upgrade.internal.graph.ReleaseGraphManager;
 import com.liferay.portal.upgrade.internal.registry.UpgradeInfo;
 import com.liferay.portal.upgrade.internal.registry.UpgradeStepRegistry;
 import com.liferay.portal.upgrade.internal.release.ReleasePublisher;
+import com.liferay.portal.upgrade.internal.release.util.ReleaseManagerUtil;
 import com.liferay.portal.upgrade.log.UpgradeLogContext;
 import com.liferay.portal.upgrade.registry.UpgradeStepRegistrator;
 
@@ -167,7 +168,23 @@ public class UpgradeExecutor {
 		UpgradeStepRegistry upgradeStepRegistry = _serviceTrackerMap.getService(
 			bundleSymbolicName);
 
-		return upgradeStepRegistry.getUpgradeInfos();
+		if (upgradeStepRegistry == null) {
+			return null;
+		}
+
+		try {
+			return upgradeStepRegistry.getUpgradeInfos();
+		}
+		catch (Throwable throwable) {
+			if (_failedBundleSymbolicNames.add(bundleSymbolicName)) {
+				_log.error(
+					ReleaseManagerUtil.getFailedModuleMessage(
+						bundleSymbolicName),
+					throwable);
+			}
+
+			return ReflectionUtil.throwException(throwable);
+		}
 	}
 
 	@Activate
@@ -353,7 +370,7 @@ public class UpgradeExecutor {
 				_failedBundleSymbolicNames.add(bundleSymbolicName);
 
 				_log.error(
-					"Failed upgrade process for module ".concat(
+					ReleaseManagerUtil.getFailedModuleMessage(
 						bundleSymbolicName),
 					throwable);
 			}

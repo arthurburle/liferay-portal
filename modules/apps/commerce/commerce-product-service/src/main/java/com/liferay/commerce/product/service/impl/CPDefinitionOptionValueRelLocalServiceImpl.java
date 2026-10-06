@@ -54,6 +54,7 @@ import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.BaseModelSearchResult;
@@ -256,7 +257,9 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 			_cpDefinitionOptionRelPersistence.findByPrimaryKey(
 				cpDefinitionOptionRelId);
 
-		_validate(0, cpDefinitionOptionRel, 0, key, StringPool.BLANK);
+		if (!_emptyModelManager.isEmptyModel()) {
+			_validate(0, cpDefinitionOptionRel, 0, key, StringPool.BLANK);
+		}
 
 		long cpDefinitionOptionValueRelId = counterLocalService.increment();
 
@@ -676,7 +679,7 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 	@Override
 	public CPDefinitionOptionValueRel getOrAddEmptyCPDefinitionOptionValueRel(
 			String externalReferenceCode, long companyId, long userId,
-			long cpDefinitionOptionRelId)
+			long cpDefinitionOptionRelId, String key)
 		throws PortalException {
 
 		ServiceContext serviceContext = new ServiceContext();
@@ -690,7 +693,7 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 				cpDefinitionOptionValueRelLocalService.
 					addCPDefinitionOptionValueRel(
 						externalReferenceCode, cpDefinitionOptionRelId,
-						externalReferenceCode,
+						GetterUtil.get(key, externalReferenceCode),
 						Collections.singletonMap(
 							LocaleUtil.getSiteDefault(), externalReferenceCode),
 						0, serviceContext),
@@ -934,8 +937,12 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 		cpDefinitionOptionValueRel.setExpandoBridgeAttributes(serviceContext);
 
 		_validateLinkedCPDefinitionOptionValueRel(cpDefinitionOptionValueRel);
-		_validatePriceableCPDefinitionOptionValue(
-			cpDefinitionOptionValueRel, cpDefinitionOptionRel.getPriceType());
+
+		if (!LazyReferencingThreadLocal.isEnabled()) {
+			_validatePriceableCPDefinitionOptionValue(
+				cpDefinitionOptionValueRel,
+				cpDefinitionOptionRel.getPriceType());
+		}
 
 		cpDefinitionOptionValueRel =
 			cpDefinitionOptionValueRelPersistence.update(

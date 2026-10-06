@@ -9,7 +9,7 @@ import {v4 as uuidv4} from 'uuid';
 import useTypeProperties from '../../hooks/useTypeProperties';
 import {ConditionBuilder} from './ConditionBuilder';
 import {Config, initializeConfig} from './config';
-import {RELATIVE_DATE_VALUES} from './operators';
+import {ASSET_FIELDS, RELATIVE_DATE_VALUES} from './operators';
 import {getPropertyKey} from './types';
 
 import type {
@@ -112,23 +112,7 @@ export default function CollectionFilterBuilder({
 	const propertiesWithAssetFields = useMemo<FilterPropertyGroup[]>(
 		() => [
 			{
-				items: [
-					{
-						label: Liferay.Language.get('tags'),
-						name: 'assetTags',
-						type: 'asset-tags',
-					},
-					{
-						label: Liferay.Language.get('categories'),
-						name: 'assetCategories',
-						type: 'asset-categories',
-					},
-					{
-						label: Liferay.Language.get('keywords'),
-						name: 'keywords',
-						type: 'text',
-					},
-				],
+				items: ASSET_FIELDS,
 				label: '',
 			},
 			...properties,
@@ -189,22 +173,11 @@ export default function CollectionFilterBuilder({
 
 	useEffect(() => {
 
-		// An item type that uses the asset filter builder instead displays none
-		// of this, and the type settings are merged rather than replaced on save,
-		// so drop everything and let the empty value clear what was stored.
-		// Otherwise keep the conditions the new item type can still offer rather
-		// than making the user build them again.
+		// Keep the conditions the new item type can still offer rather than
+		// making the user build them again.
 
-		const handleFilterVisibilityChange = ({
-			showCollection,
-		}: {
-			showCollection: boolean;
-		}) =>
+		const handleSourceChange = () =>
 			setConditions((conditions) => {
-				if (!showCollection) {
-					return createEmptyConditions();
-				}
-
 				const keptConditions = conditions.filter(
 					(condition) => !isTypeSpecificCondition(condition)
 				);
@@ -214,16 +187,10 @@ export default function CollectionFilterBuilder({
 					: createEmptyConditions();
 			});
 
-		Liferay.on(
-			`${namespace}filterVisibilityChange`,
-			handleFilterVisibilityChange
-		);
+		Liferay.on(`${namespace}sourceChange`, handleSourceChange);
 
 		return () => {
-			Liferay.detach(
-				`${namespace}filterVisibilityChange`,
-				handleFilterVisibilityChange
-			);
+			Liferay.detach(`${namespace}sourceChange`, handleSourceChange);
 		};
 	}, [namespace]);
 

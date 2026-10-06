@@ -14,6 +14,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.search.web.internal.result.display.context.SearchResultSummaryDisplayContext;
 import com.liferay.portal.search.web.internal.search.results.configuration.SearchResultsPortletInstanceConfiguration;
+import com.liferay.portal.search.web.internal.util.DisplayContextHelperUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -32,32 +33,19 @@ public class SearchResultsPortletDisplayContext implements Serializable {
 			HttpServletRequest httpServletRequest)
 		throws ConfigurationException {
 
-		_httpServletRequest = httpServletRequest;
+		_themeDisplay = (ThemeDisplay)httpServletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
 		_searchResultsPortletInstanceConfiguration =
 			ConfigurationProviderUtil.getPortletInstanceConfiguration(
-				SearchResultsPortletInstanceConfiguration.class,
-				(ThemeDisplay)httpServletRequest.getAttribute(
-					WebKeys.THEME_DISPLAY));
+				SearchResultsPortletInstanceConfiguration.class, _themeDisplay);
 	}
 
 	public long getDisplayStyleGroupId() {
-		if (_displayStyleGroupId != 0) {
-			return _displayStyleGroupId;
-		}
-
-		_displayStyleGroupId =
-			_searchResultsPortletInstanceConfiguration.displayStyleGroupId();
-
-		if (_displayStyleGroupId <= 0) {
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)_httpServletRequest.getAttribute(
-					WebKeys.THEME_DISPLAY);
-
-			_displayStyleGroupId = themeDisplay.getScopeGroupId();
-		}
-
-		return _displayStyleGroupId;
+		return DisplayContextHelperUtil.getDisplayStyleGroupId(
+			_searchResultsPortletInstanceConfiguration.
+				displayStyleGroupExternalReferenceCode(),
+			_themeDisplay);
 	}
 
 	public List<Document> getDocuments() {
@@ -70,12 +58,6 @@ public class SearchResultsPortletDisplayContext implements Serializable {
 
 	public SearchContainer<Document> getSearchContainer() {
 		return _searchContainer;
-	}
-
-	public SearchResultsPortletInstanceConfiguration
-		getSearchResultsPortletInstanceConfiguration() {
-
-		return _searchResultsPortletInstanceConfiguration;
 	}
 
 	public SearchResultSummaryDisplayContext
@@ -92,6 +74,12 @@ public class SearchResultsPortletDisplayContext implements Serializable {
 		}
 
 		return new ArrayList<>();
+	}
+
+	public SearchResultsPortletInstanceConfiguration
+		getSearchResultsPortletInstanceConfiguration() {
+
+		return _searchResultsPortletInstanceConfiguration;
 	}
 
 	public int getTotalHits() {
@@ -126,18 +114,18 @@ public class SearchResultsPortletDisplayContext implements Serializable {
 		_searchContainer = searchContainer;
 	}
 
-	public void setSearchResultsSummariesHolder(
-		SearchResultsSummariesHolder searchResultsSummariesHolder) {
-
-		_searchResultsSummariesHolder = searchResultsSummariesHolder;
-	}
-
 	public void setSearchResultSummaryDisplayContexts(
 		List<SearchResultSummaryDisplayContext>
 			searchResultSummaryDisplayContexts) {
 
 		_searchResultSummaryDisplayContexts =
 			searchResultSummaryDisplayContexts;
+	}
+
+	public void setSearchResultsSummariesHolder(
+		SearchResultsSummariesHolder searchResultsSummariesHolder) {
+
+		_searchResultsSummariesHolder = searchResultsSummariesHolder;
 	}
 
 	public void setShowEmptyResultMessage(boolean showEmptyResultMessage) {
@@ -161,19 +149,18 @@ public class SearchResultsPortletDisplayContext implements Serializable {
 				getSearchResultSummaryDisplayContext(document)));
 	}
 
-	private long _displayStyleGroupId;
 	private List<Document> _documents;
-	private final HttpServletRequest _httpServletRequest;
 	private String _keywords;
 	private boolean _renderNothing;
 	private SearchContainer<Document> _searchContainer;
+	private List<SearchResultSummaryDisplayContext>
+		_searchResultSummaryDisplayContexts;
 	private final SearchResultsPortletInstanceConfiguration
 		_searchResultsPortletInstanceConfiguration;
 	private SearchResultsSummariesHolder _searchResultsSummariesHolder;
-	private List<SearchResultSummaryDisplayContext>
-		_searchResultSummaryDisplayContexts;
 	private boolean _showEmptyResultMessage;
 	private boolean _showPagination;
+	private final ThemeDisplay _themeDisplay;
 	private int _totalHits;
 
 }

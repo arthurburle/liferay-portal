@@ -48,7 +48,7 @@ public class MonitorResultTest extends com.liferay.jenkins.results.parser.Test {
 		try {
 			returnedMetrics.put("cpu", "50");
 
-			Assert.fail("Expected UnsupportedOperationException");
+			Assert.fail();
 		}
 		catch (UnsupportedOperationException unsupportedOperationException) {
 		}

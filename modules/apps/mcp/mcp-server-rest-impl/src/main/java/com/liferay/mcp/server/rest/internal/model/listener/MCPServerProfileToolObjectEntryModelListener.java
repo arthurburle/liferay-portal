@@ -5,8 +5,9 @@
 
 package com.liferay.mcp.server.rest.internal.model.listener;
 
+import com.liferay.mcp.server.rest.internal.cache.MCPServerCacheManager;
 import com.liferay.mcp.server.rest.internal.constants.MCPServerConstants;
-import com.liferay.mcp.server.rest.internal.servlet.MCPServerServlet;
+import com.liferay.mcp.server.rest.internal.util.MCPServerProfileUtil;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.model.ObjectRelationship;
@@ -20,11 +21,10 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.ModelListenerException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.BaseModelListener;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-
-import jakarta.servlet.Servlet;
 
 import jakarta.validation.ValidationException;
 
@@ -58,7 +58,7 @@ public class MCPServerProfileToolObjectEntryModelListener
 	public void onAfterCreate(ObjectEntry objectEntry)
 		throws ModelListenerException {
 
-		_invalidateServlet(objectEntry);
+		_clearServletCache(objectEntry);
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class MCPServerProfileToolObjectEntryModelListener
 			ObjectEntry originalObjectEntry, ObjectEntry objectEntry)
 		throws ModelListenerException {
 
-		_invalidateServlet(objectEntry);
+		_clearServletCache(objectEntry);
 	}
 
 	@Override
@@ -81,7 +81,34 @@ public class MCPServerProfileToolObjectEntryModelListener
 	public void onBeforeRemove(ObjectEntry objectEntry)
 		throws ModelListenerException {
 
-		_invalidateServlet(objectEntry);
+		_clearServletCache(objectEntry);
+
+		ObjectEntry mcpServerProfileObjectEntry =
+			_objectEntryLocalService.fetchObjectEntry(
+				MapUtil.getLong(
+					objectEntry.getValues(),
+					"r_mcpServerProfileToTools_l_mcpServerProfileId"));
+
+		if ((mcpServerProfileObjectEntry == null) ||
+			!MCPServerProfileUtil.isActive(mcpServerProfileObjectEntry)) {
+
+			return;
+		}
+
+		try {
+			int toolsCount = MCPServerProfileUtil.getToolsCount(
+				mcpServerProfileObjectEntry, _objectEntryLocalService,
+				_objectRelationshipLocalService);
+
+			if (toolsCount > 1) {
+				return;
+			}
+
+			_deactivateMCPServerProfile(mcpServerProfileObjectEntry);
+		}
+		catch (PortalException portalException) {
+			throw new ModelListenerException(portalException);
+		}
 	}
 
 	@Override
@@ -93,7 +120,7 @@ public class MCPServerProfileToolObjectEntryModelListener
 		_validateTool(objectEntry);
 	}
 
-	private void _invalidateServlet(ObjectEntry objectEntry) {
+	private void _clearServletCache(ObjectEntry objectEntry) {
 		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
@@ -116,11 +143,25 @@ public class MCPServerProfileToolObjectEntryModelListener
 			return;
 		}
 
-		MCPServerServlet mcpServerServlet = (MCPServerServlet)_servlet;
-
-		mcpServerServlet.invalidate(
+		_mcpServerCacheManager.clearServletCache(
 			objectEntry.getCompanyId(),
 			MapUtil.getString(mcpServerProfileObjectEntry.getValues(), "name"));
+	}
+
+	private void _deactivateMCPServerProfile(
+			ObjectEntry mcpServerProfileObjectEntry)
+		throws PortalException {
+
+		Map<String, Serializable> values = _objectEntryLocalService.getValues(
+			mcpServerProfileObjectEntry);
+
+		values.put("profileStatus", "inactive");
+
+		_objectEntryLocalService.updateObjectEntry(
+			mcpServerProfileObjectEntry.getUserId(),
+			mcpServerProfileObjectEntry.getObjectEntryId(),
+			mcpServerProfileObjectEntry.getObjectEntryFolderId(), values,
+			new ServiceContext());
 	}
 
 	private void _validateRestrictFields(ObjectEntry objectEntry)
@@ -261,6 +302,9 @@ public class MCPServerProfileToolObjectEntryModelListener
 		"[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*");
 
 	@Reference
+	private MCPServerCacheManager _mcpServerCacheManager;
+
+	@Reference
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
 
 	@Reference
@@ -268,10 +312,5 @@ public class MCPServerProfileToolObjectEntryModelListener
 
 	@Reference
 	private ObjectRelationshipLocalService _objectRelationshipLocalService;
-
-	@Reference(
-		target = "(osgi.http.whiteboard.servlet.name=com.liferay.mcp.server.rest.internal.servlet.MCPServerServlet)"
-	)
-	private Servlet _servlet;
 
 }

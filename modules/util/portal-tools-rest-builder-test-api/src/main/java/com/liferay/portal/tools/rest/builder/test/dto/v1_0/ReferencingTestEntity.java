@@ -13,7 +13,10 @@ import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.tools.rest.builder.test.external.dto.v1_0.ExternalScopedTestEntity;
+import com.liferay.portal.tools.rest.builder.test.external1.dto.v1_0.ExternalScopedTestEntity;
+import com.liferay.portal.tools.rest.builder.test.external1.dto.v1_0.ExternalTestEntity1;
+import com.liferay.portal.tools.rest.builder.test.external1.dto.v1_0.ExternalTestEntity2;
+import com.liferay.portal.tools.rest.builder.test.external2.dto.v1_0.ExternalTestEntity3;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
 import com.liferay.portal.vulcan.util.ObjectMapperUtil;
@@ -99,6 +102,141 @@ public class ReferencingTestEntity implements Serializable {
 	private Supplier<ExternalScopedTestEntity>
 		_externalScopedTestEntitySupplier;
 
+	@io.swagger.v3.oas.annotations.media.Schema
+	@Valid
+	public ExternalTestEntity1 getExternalTestEntity1() {
+		if (_externalTestEntity1Supplier != null) {
+			externalTestEntity1 = _externalTestEntity1Supplier.get();
+
+			_externalTestEntity1Supplier = null;
+		}
+
+		return externalTestEntity1;
+	}
+
+	public void setExternalTestEntity1(
+		ExternalTestEntity1 externalTestEntity1) {
+
+		this.externalTestEntity1 = externalTestEntity1;
+
+		_externalTestEntity1Supplier = null;
+	}
+
+	@JsonIgnore
+	public void setExternalTestEntity1(
+		UnsafeSupplier<ExternalTestEntity1, Exception>
+			externalTestEntity1UnsafeSupplier) {
+
+		_externalTestEntity1Supplier = () -> {
+			try {
+				return externalTestEntity1UnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected ExternalTestEntity1 externalTestEntity1;
+
+	@JsonIgnore
+	private Supplier<ExternalTestEntity1> _externalTestEntity1Supplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema
+	@Valid
+	public ExternalTestEntity2 getExternalTestEntity2() {
+		if (_externalTestEntity2Supplier != null) {
+			externalTestEntity2 = _externalTestEntity2Supplier.get();
+
+			_externalTestEntity2Supplier = null;
+		}
+
+		return externalTestEntity2;
+	}
+
+	public void setExternalTestEntity2(
+		ExternalTestEntity2 externalTestEntity2) {
+
+		this.externalTestEntity2 = externalTestEntity2;
+
+		_externalTestEntity2Supplier = null;
+	}
+
+	@JsonIgnore
+	public void setExternalTestEntity2(
+		UnsafeSupplier<ExternalTestEntity2, Exception>
+			externalTestEntity2UnsafeSupplier) {
+
+		_externalTestEntity2Supplier = () -> {
+			try {
+				return externalTestEntity2UnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected ExternalTestEntity2 externalTestEntity2;
+
+	@JsonIgnore
+	private Supplier<ExternalTestEntity2> _externalTestEntity2Supplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema
+	@Valid
+	public ExternalTestEntity3 getExternalTestEntity3() {
+		if (_externalTestEntity3Supplier != null) {
+			externalTestEntity3 = _externalTestEntity3Supplier.get();
+
+			_externalTestEntity3Supplier = null;
+		}
+
+		return externalTestEntity3;
+	}
+
+	public void setExternalTestEntity3(
+		ExternalTestEntity3 externalTestEntity3) {
+
+		this.externalTestEntity3 = externalTestEntity3;
+
+		_externalTestEntity3Supplier = null;
+	}
+
+	@JsonIgnore
+	public void setExternalTestEntity3(
+		UnsafeSupplier<ExternalTestEntity3, Exception>
+			externalTestEntity3UnsafeSupplier) {
+
+		_externalTestEntity3Supplier = () -> {
+			try {
+				return externalTestEntity3UnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected ExternalTestEntity3 externalTestEntity3;
+
+	@JsonIgnore
+	private Supplier<ExternalTestEntity3> _externalTestEntity3Supplier;
+
 	@Override
 	public boolean equals(Object object) {
 		if (this == object) {
@@ -138,6 +276,42 @@ public class ReferencingTestEntity implements Serializable {
 			sb.append("\"externalScopedTestEntity\": ");
 
 			sb.append(externalScopedTestEntity);
+		}
+
+		ExternalTestEntity1 externalTestEntity1 = getExternalTestEntity1();
+
+		if (externalTestEntity1 != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"externalTestEntity1\": ");
+
+			sb.append(externalTestEntity1);
+		}
+
+		ExternalTestEntity2 externalTestEntity2 = getExternalTestEntity2();
+
+		if (externalTestEntity2 != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"externalTestEntity2\": ");
+
+			sb.append(externalTestEntity2);
+		}
+
+		ExternalTestEntity3 externalTestEntity3 = getExternalTestEntity3();
+
+		if (externalTestEntity3 != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"externalTestEntity3\": ");
+
+			sb.append(externalTestEntity3);
 		}
 
 		sb.append("}");
@@ -262,4 +436,4 @@ public class ReferencingTestEntity implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:828159189
+// LIFERAY-REST-BUILDER-HASH:1582231236

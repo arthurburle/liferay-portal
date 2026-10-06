@@ -762,7 +762,8 @@ public class CPDefinitionOptionRelLocalServiceImpl
 	@Override
 	public CPDefinitionOptionRel getOrAddEmptyCPDefinitionOptionRel(
 			String externalReferenceCode, long companyId, long userId,
-			long cpDefinitionId, long cpOptionId, String commerceOptionTypeKey)
+			long cpDefinitionId, long cpOptionId, String commerceOptionTypeKey,
+			boolean skuContributor)
 		throws PortalException {
 
 		CPDefinition cpDefinition =
@@ -781,8 +782,8 @@ public class CPDefinitionOptionRelLocalServiceImpl
 				externalReferenceCode, cpDefinitionId, cpOptionId,
 				Collections.singletonMap(
 					LocaleUtil.getSiteDefault(), externalReferenceCode),
-				null, commerceOptionTypeKey, 0, false, false, false, false,
-				null, serviceContext),
+				null, commerceOptionTypeKey, 0, false, false, skuContributor,
+				false, null, serviceContext),
 			externalReferenceCode,
 			this::fetchCPDefinitionOptionRelByExternalReferenceCode,
 			this::getCPDefinitionOptionRelByExternalReferenceCode,
@@ -1210,6 +1211,17 @@ public class CPDefinitionOptionRelLocalServiceImpl
 		}
 	}
 
+	private void _validateCPDefinitionOptionKey(long cpDefinitionId, String key)
+		throws PortalException {
+
+		CPDefinitionOptionRel cpDefinitionOptionRel =
+			cpDefinitionOptionRelPersistence.fetchByC_K(cpDefinitionId, key);
+
+		if (cpDefinitionOptionRel != null) {
+			throw new DuplicateCPDefinitionOptionRelKeyException();
+		}
+	}
+
 	private void _validateCommerceOptionTypeKey(
 			String commerceOptionTypeKey, boolean skuContributor)
 		throws PortalException {
@@ -1236,17 +1248,6 @@ public class CPDefinitionOptionRelLocalServiceImpl
 		}
 
 		throw new CPDefinitionOptionSKUContributorException();
-	}
-
-	private void _validateCPDefinitionOptionKey(long cpDefinitionId, String key)
-		throws PortalException {
-
-		CPDefinitionOptionRel cpDefinitionOptionRel =
-			cpDefinitionOptionRelPersistence.fetchByC_K(cpDefinitionId, key);
-
-		if (cpDefinitionOptionRel != null) {
-			throw new DuplicateCPDefinitionOptionRelKeyException();
-		}
 	}
 
 	private void _validatePriceType(

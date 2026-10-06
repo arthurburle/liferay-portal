@@ -33,7 +33,6 @@ export class CommerceAdminPriceListDetailsPage extends CommerceDNDTablePage {
 	readonly eligibilityRowSelectButton: (entryName: string) => Locator;
 	readonly eligibilityTab: Locator;
 	readonly entriesTab: Locator;
-	readonly errorAlert: (text: string) => Locator;
 	readonly findSkuInput: Locator;
 	readonly itemFinderRows: Locator;
 	readonly nameInput: Locator;
@@ -69,6 +68,7 @@ export class CommerceAdminPriceListDetailsPage extends CommerceDNDTablePage {
 	readonly specificAccountsRadio: Locator;
 	readonly specificChannelsRadio: Locator;
 	readonly specificOrderTypesRadio: Locator;
+	readonly tieredPricingRadio: Locator;
 
 	constructor(page: Page) {
 		super(
@@ -149,8 +149,6 @@ export class CommerceAdminPriceListDetailsPage extends CommerceDNDTablePage {
 			name: 'Eligibility',
 		});
 		this.entriesTab = page.getByRole('link', {name: 'Entries'});
-		this.errorAlert = (text: string) =>
-			page.locator('.alert-danger', {hasText: text});
 		this.findSkuInput = page.getByPlaceholder('Find a SKU');
 		this.itemFinderRows = page.locator('.add-or-create tbody tr');
 		this.nameInput = page.locator('input[name$="_name"]').first();
@@ -240,6 +238,9 @@ export class CommerceAdminPriceListDetailsPage extends CommerceDNDTablePage {
 		this.specificOrderTypesRadio = page.getByRole('radio', {
 			name: 'Specific Order Types',
 		});
+		this.tieredPricingRadio = page
+			.frameLocator('iframe')
+			.getByRole('radio', {name: 'Tiered Pricing'});
 	}
 
 	async assertUOMSelectedInSidePanel({

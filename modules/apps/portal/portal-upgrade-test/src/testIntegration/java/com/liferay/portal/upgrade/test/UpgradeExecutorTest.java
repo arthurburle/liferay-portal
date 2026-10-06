@@ -6,10 +6,12 @@
 package com.liferay.portal.upgrade.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.service.ReleaseLocalService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.util.PropsValuesTestUtil;
 import com.liferay.portal.kernel.upgrade.DummyUpgradeStep;
 import com.liferay.portal.test.log.LogCapture;
 import com.liferay.portal.test.log.LoggerTestUtil;
@@ -128,6 +130,39 @@ public class UpgradeExecutorTest {
 		Assert.assertFalse(
 			failedBundleSymbolicNames.toString(),
 			failedBundleSymbolicNames.contains(bundleSymbolicName));
+
+		Release release = _releaseLocalService.addRelease(
+			bundleSymbolicName, "1.0.0");
+
+		Class<?> clazz = _upgradeExecutor.getClass();
+
+		try (SafeCloseable safeCloseable =
+				PropsValuesTestUtil.swapWithSafeCloseable(
+					"UPGRADE_DATABASE_AUTO_RUN", false, false);
+			LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+				clazz.getName(), LoggerTestUtil.OFF)) {
+
+			_registerUpgradeStepRegistrator(bundle);
+
+			try {
+				_getUpgradeInfos(bundleSymbolicName);
+
+				Assert.fail();
+			}
+			catch (IllegalStateException illegalStateException) {
+			}
+
+			failedBundleSymbolicNames = ReflectionTestUtil.invoke(
+				_upgradeExecutor, "getFailedBundleSymbolicNames",
+				new Class<?>[0]);
+
+			Assert.assertTrue(
+				failedBundleSymbolicNames.toString(),
+				failedBundleSymbolicNames.contains(bundleSymbolicName));
+		}
+		finally {
+			_releaseLocalService.deleteRelease(release);
+		}
 	}
 
 	private List<?> _getUpgradeInfos(String bundleSymbolicName) {
@@ -148,8 +183,9 @@ public class UpgradeExecutorTest {
 
 			_serviceRegistration = bundleContext.registerService(
 				UpgradeStepRegistrator.class,
-				registry -> {
-					registry.register("0.0.0", "1.0.0", new DummyUpgradeStep());
+				upgradeStepRegistry -> {
+					upgradeStepRegistry.register(
+						"0.0.0", "1.0.0", new DummyUpgradeStep());
 
 					if (registerCount.incrementAndGet() == 1) {
 						throw new IllegalStateException();
