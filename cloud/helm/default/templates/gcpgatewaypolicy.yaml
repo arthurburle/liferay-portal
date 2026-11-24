@@ -1,3 +1,13 @@
+{{- /*
+LCI-ROLLOUT: SCOPE=ENV_SCOPED_MEDIUM
+Introduced by LCI-5246 review. Attaches a Google-managed SSL policy to
+the Gateway. The named policy must already exist in the GCP project or
+the resource is Rejected and the Gateway stays OutOfSync.
+Rollout: enable in dev first after confirming the SSL policy exists in
+the env's GCP project; on uat/prd the SSL policy must be provisioned
+by terraform in that project before the chart is bumped. Inert while
+network.gke.sslPolicy is unset (opt-in).
+*/ -}}
 {{- $sslPolicy := dig "sslPolicy" "" .Values.network.gke -}}
 {{- if and .Values.network.gke.enabled .Values.network.gatewayName $sslPolicy }}
 apiVersion: networking.gke.io/v1

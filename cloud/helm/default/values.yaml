@@ -460,6 +460,13 @@ network:
     extraRules: []
     forceHttpsRedirect: false
     gatewayName: ""
+    # LCI-ROLLOUT: SCOPE=ENV_SCOPED_LOW
+    # LCI-5246. Opt-in flag for GKE L7 integration on the Liferay chart.
+    # When true the chart emits GCPBackendPolicy, HealthCheckPolicy, the
+    # GCP LB healthcheck source range in the ingress NetworkPolicy, and
+    # suppresses the HTTPRoute `timeouts:` block (timeouts are driven by
+    # GCPBackendPolicy.backendConfig.timeoutSec on this path). Inert
+    # (default false) so stock envoy-gateway installs are unaffected.
     gke:
         enabled: false
     hostnames: []
