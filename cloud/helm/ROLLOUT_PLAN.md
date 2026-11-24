@@ -199,6 +199,51 @@ The env-scoped rollout order in the earlier section still holds (**liferay → c
 
 Only after the above completes clean on dev (full 72h soak) should the same sequence run on uat, then on prd.
 
+## OAuth2 factory + ai-hub CD repo change list
+
+The rebase on the chart side is only half the migration. The `dxpcloud-dev/ai-hub` CD repo also carries state tied to the shape of the deployed chart and needs its own patch series before any env can safely flip to the new chart version.
+
+### The Liferay-side OAuth2 init artefacts — which stay, which go
+
+- **The OSGi config JSON** (`overlay/files/<env>/liferay/osgi/configs/devai/liferay-aihub-etc-spring-boot.client-extension-config.json` and friends) is **still required**. It is the authoritative description the Liferay OAuth2 factory reads to create the OAuth2Application rows (headless-server + user-agent) and the scope grants. Nothing on the upstream side removes the factory flow. **What can change** is where this JSON lives: it can stay in the overlay bucket (current design) or move into the chart's `clientExtension.configs` values field (new upstream shape). Recommendation: leave it in the overlay bucket for the dev migration — one less thing to refactor at the same time.
+
+- **`docs/scripts/springboot-oauth-manual-sync.sh`** is a workaround that reads clientId/clientSecret from the Liferay DB via `jshell` + JDBC and populates the `springboot-oauth-manual` Secret in the extension namespace by hand. It exists because our old fork shape (`grantLiferayAccess` in LCI-5580) was the only way the Liferay SA could project credentials into the ext namespace, and that flow was never fully validated end to end — hence the file header says "STATUS: draft, not tested end-to-end." Upstream now ships that flow natively: `dxp-operator/templates/client-extension-delivery-rbac.yaml` emits a `client-extension-delivery-cluster-role` with `configmaps: create, delete, patch, update`, and `client-extension/templates/rolebinding.yaml` binds it to the `operatorServiceAccount` subject. If an end-to-end test in dev confirms the dxp-operator projects clientId/clientSecret automatically into the right ConfigMap, the manual script becomes dead code and can be removed. This test is cluster-scoped validation item #6 above.
+
+### CD repo change set (`dxpcloud-dev/ai-hub`)
+
+Four layers to patch before any env is flipped:
+
+**1. Values files** (`envs/<env>/*.yaml`, `cloud/base.yaml`)
+
+`liferay.yaml` (consumed by the `default` chart release):
+- Rename `cluster.sessionReplication.*` → `tomcat.sessionReplication.*`.
+- Rename `network.remoteIp.enabled / internalProxies / protocolHeader / remoteIpHeader` → `tomcat.remoteIP.enabled / internalProxies / protocolHeader / remoteIPHeader`. Note the capitalisation: upstream chose `remoteIP` (with uppercase IP) and `remoteIPHeader`.
+- Set `network.hsts.enabled: true` + `network.hsts.value: "max-age=31536000; includeSubDomains; preload"` explicitly if the aggressive HSTS default is desired (upstream default is conservative).
+- For prd only: replace explicit `database.edition: ENTERPRISE_PLUS` + `database.availabilityType: REGIONAL` with `database.highAvailability: true` + `database.instanceType: db-perf-optimized-*` — upstream derives both edition and availabilityType from these.
+- Remove any `global:` top-level inside the `gcp` sub-chart values block (key dropped upstream).
+
+`client-extension.yaml` (consumed by the `liferay-client-extension` chart release): **full rewrite**. The `extensions: [...]` array no longer exists. Each extension becomes its own chart release. Each release's values file needs the new shape: `clientExtension.{serviceId,domain,configs,version,virtualInstanceId}`, `workload.{kind,schedule,containerPort,replicas,env,livenessProbe,readinessProbe,startupProbe,resources}`, `image.{repository,tag,pullPolicy}`, `service.{enabled,port,type}`, `network.{enabled,gatewayName,hostnames,gke.enabled,endpointRef}`, `operatorServiceAccount.{name,namespace}`, `descriptor.{descriptorVersion,type,configs,image,oauthApplicationHeadlessServerERC}`. The mapping table between old `extensions[]` fields and new keys is in the "Env-scoped delta" section above.
+
+**2. ApplicationSet manifests** (`_local/argo-lci5346/*.yaml`)
+
+`liferay-lci5346-applicationset.yaml` (default chart): bump the OCI `targetRevision` to the new chart tag published post-rebase; trim any helm `parameters:` entries that point at knobs the new chart no longer accepts (diff against the target `values.yaml` schema); keep `liferay-default.statefulset.network.gke.enabled: 'true'` since we keep L7.
+
+`liferay-lci5346-client-extension-applicationset.yaml`: **the heaviest refactor** on the CD side. Today a single Application renders all extensions of an env from one chart. Upstream expects one chart release per extension. Refactor into a matrix of cluster-generator × list-generator where each list element is one extension — Application names become `{customer}-lci5346-{env}-ext-{serviceId}`. Values files split along the same axis.
+
+`liferay-lci5346-infrastructure-applicationset.yaml`: bump `repoURL` from `.../liferay-gcp-infrastructure` to `.../liferay-infrastructure` (chart renamed upstream); re-tune helm `parameters:` against the new `infrastructure/values.yaml` schema (database, overlay, snapshots, ES subsections may have different key names).
+
+**3. Runbooks + scripts**
+
+- Publish new chart OCI tags via `~/liferay/charts/scripts/publish-helm-charts.sh` after the PR on this fork is merged. Snapshot the current (pre-rebase) tags with suffix `pre-cne-rebase-20261124`.
+- New runbook: pre-apply the two `dxp-operator` CRDs by env (`kubectl apply --server-side -f cloud/helm/dxp-operator/crds/<name>.yaml`) before any chart bump — Helm does not reapply CRDs on upgrade.
+- New runbook: pre-apply the two `ValidatingAdmissionPolicy` resources with `failurePolicy: Ignore` patched in, observe for 24h, flip to `Fail` once confident no admission is being silently rejected.
+- New runbook: pause Crossplane reconciler on the live `LiferayInfrastructure` XR before the infrastructure chart bump (`kubectl annotate ... crossplane.io/paused=true`) and unpause after the new chart is Synced + Healthy.
+- Decide fate of `docs/scripts/springboot-oauth-manual-sync.sh` after cluster-scoped item #6 validation. If the automatic projection works, remove.
+
+**4. Overlay bucket** (`overlay/files/<env>/liferay/osgi/configs/devai/*.json`)
+
+Leave as-is for the dev migration (recommendation). A later refactor can migrate the OAuth2 OSGi configs into the chart's `clientExtension.configs` values field, which would eliminate the overlay-sync dependency for that configuration — but that is a separate project scope.
+
 ## Validation checklist per env (dev → uat → prd)
 
 For each ApplicationSet × env tuple:
