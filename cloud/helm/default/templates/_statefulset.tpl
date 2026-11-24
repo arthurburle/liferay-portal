@@ -325,7 +325,7 @@ spec:
                     responseHeaderModifier:
                         set:
                             -   name: Strict-Transport-Security
-                                value: "max-age=31536000; includeSubDomains; preload"
+                                value: {{ $ctx.statefulset.network.hsts.value | quote }}
             {{- end }}
             matches:
                 -   path:
@@ -392,7 +392,7 @@ spec:
                     responseHeaderModifier:
                         set:
                             -   name: Strict-Transport-Security
-                                value: "max-age=31536000; includeSubDomains; preload"
+                                value: {{ .statefulset.network.hsts.value | quote }}
             {{- end }}
             matches:
                 -   path:
