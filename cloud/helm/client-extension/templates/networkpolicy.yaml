@@ -1,0 +1,30 @@
+{{- /*
+LCI-ROLLOUT: SCOPE=ENV_SCOPED_LOW
+LCI-5403. When gke.enabled=true, the GKE L7 LB healthchecker reaches the
+extension pod directly; without this NP it is denied and the LB marks
+the service Unhealthy. Inert when network.enabled is false or
+network.gke.enabled is false. Safe per env, no dependency on other
+charts (except the Service it targets — part of this same chart).
+Rollout: dev first with gke.enabled flipped true, verify LB marks the
+extension backend Healthy. uat/prd follow only after dev soak confirms.
+*/ -}}
+{{- if and .Values.network.enabled .Values.network.gke.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+    labels:
+        {{- include "liferay-client-extension.labels" . | nindent 8 }}
+    name: {{ printf "%s-lb-ingress" (include "liferay-client-extension.fullname" .) }}
+spec:
+    ingress:
+        -   from:
+                {{- include "liferay-client-extension.gkeLoadBalancerSourceRanges" . | nindent 16 }}
+            ports:
+                -   port: {{ .Values.service.port }}
+                    protocol: TCP
+    podSelector:
+        matchLabels:
+            {{- include "liferay-client-extension.selectorLabels" . | nindent 12 }}
+    policyTypes:
+        -   Ingress
+{{- end }}

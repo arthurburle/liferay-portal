@@ -1,3 +1,20 @@
+{{- /*
+LCI-ROLLOUT: SCOPE=ENV_SCOPED_LOW
+LCI-5403. Google Cloud L7 LB health-check source ranges. Constants
+published by Google — the loadbalancer sends healthchecks from these
+subnets regardless of the cluster's CIDR allocation. Required as NP
+ingress source whenever network.gke.enabled is true, otherwise the LB
+marks backends Unhealthy and serves 502s.
+Rollout: safe per env; the helper is inert unless gke.enabled=true.
+Ref: https://cloud.google.com/load-balancing/docs/health-check-concepts#ip-ranges
+*/ -}}
+{{- define "liferay.gkeLoadBalancerSourceRanges" -}}
+-   ipBlock:
+        cidr: 130.211.0.0/22
+-   ipBlock:
+        cidr: 35.191.0.0/16
+{{- end }}
+
 {{- define "liferay.activationCodeSecretName" -}}
 {{- .Values.licensing.activationCodeSecretName | default (printf "%s-activation" (include "liferay.name" .)) }}
 {{- end }}

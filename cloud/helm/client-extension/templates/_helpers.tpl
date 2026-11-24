@@ -1,3 +1,16 @@
+{{- /*
+LCI-ROLLOUT: SCOPE=ENV_SCOPED_LOW
+LCI-5403. GKE L7 LB healthcheck source ranges — same rationale and
+contract as the twin helper in default/_helpers.tpl. Required by
+networkpolicy.yaml in this chart when network.gke.enabled is true.
+*/ -}}
+{{- define "liferay-client-extension.gkeLoadBalancerSourceRanges" -}}
+-   ipBlock:
+        cidr: 130.211.0.0/22
+-   ipBlock:
+        cidr: 35.191.0.0/16
+{{- end }}
+
 {{- define "liferay-client-extension.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}

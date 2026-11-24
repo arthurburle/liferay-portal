@@ -555,6 +555,19 @@ spec:
                 -   port: http
                     protocol: TCP
         {{- end }}
+        # LCI-ROLLOUT: SCOPE=ENV_SCOPED_LOW
+        # LCI-5403. When GKE L7 is the chosen gateway (gke.enabled=true), the
+        # LB healthchecker reaches the pod directly (not via a gateway pod),
+        # so its source ranges must be allowed on the ingress NetworkPolicy
+        # or healthchecks fail and backends drop out. Inert when gke.enabled
+        # is false. Safe per env.
+        {{- if and .statefulset.network .statefulset.network.gke.enabled }}
+        -   from:
+                {{- include "liferay.gkeLoadBalancerSourceRanges" . | nindent 16 }}
+            ports:
+                -   port: http
+                    protocol: TCP
+        {{- end }}
         -   from:
                 -   podSelector:
                         matchLabels:

@@ -19,6 +19,13 @@ network:
     endpointRef: http
     gatewayName: ""
     gatewayNamespace: ""
+    # LCI-ROLLOUT: SCOPE=ENV_SCOPED_LOW
+    # LCI-5403. Opt-in flag for GKE L7 integration. When true, this chart
+    # emits an NP ingress rule that whitelists the GKE LB healthcheck
+    # source ranges on the Service port. Leave false when the install
+    # does not front client-extension workloads with the GKE L7 LB.
+    gke:
+        enabled: false
     hostnames: []
 operatorServiceAccount:
     name: dxp-operator
